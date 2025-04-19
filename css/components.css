@@ -1,0 +1,444 @@
+
+.ry-btn-primary-flat {
+  /* --ry-btn-padding-vertical:; */
+  /* --ry-btn-padding-horizontal:; */
+
+  --ry-btn-text-color: var(--color-white);
+  /* --ry-btn-text-size:; */
+  /* --ry-btn-text-family:; */
+  /* --ry-btn-text-line-height:; */
+
+  /* --ry-btn-border-width:; */
+  /* --ry-btn-border-style:; */
+  --ry-btn-border-color: var(--color-primary-500);
+  /* --ry-btn-border-radius:; */
+
+  --ry-btn-bg: var(--color-primary-500);
+
+  /* --ry-btn-small-padding-vertical:; */
+  /* --ry-btn-small-padding-horizontal:; */
+
+  /* --ry-btn-large-padding-vertical:; */
+  /* --ry-btn-large-padding-horizontal:; */
+  /* --ry-btn-large-text-size:; */
+
+  --ry-btn-hover-bg: var(--color-primary-400);
+  --ry-btn-hover-border-color: var(--color-primary-400);
+
+  --ry-btn-active-bg: var(--color-primary-600);
+  --ry-btn-active-border-color: var(--color-primary-600);
+
+  /* --ry-btn-focus-shadow-width: ; */
+  --ry-btn-focus-shadow-color: var(--color-focus);
+
+  /*  --ry-btn-spinner-color:; */
+
+  /* --ry-btn-a11y-bg-position:; */
+  /* --ry-btn-a11y-bg-size:; */
+  --ry-btn-a11y-text-shadow: 0 0 0.25rem oklch(var(--color-black) / 0.4);
+  --ry-btn-a11y-bg-image: linear-gradient(
+      oklch(var(--color-primary-400) / 0.4) 0.125rem,
+      transparent 0.125rem
+    ),
+    linear-gradient(
+      to right,
+      oklch(var(--color-primary-400) / 0.4) 0.125rem,
+      oklch(var(--color-primary-500)) 0.125rem
+    );
+  --ry-btn-a11y-hover-bg-image: linear-gradient(
+      oklch(var(--color-primary-300) / 0.4) 0.125rem,
+      transparent 0.125rem
+    ),
+    linear-gradient(
+      to right,
+      oklch(var(--color-primary-300) / 0.4) 0.125rem,
+      oklch(var(--color-primary-400)) 0.125rem
+    );
+  --ry-btn-a11y-active-bg-image: linear-gradient(
+      oklch(var(--color-primary-500) / 0.4) 0.125rem,
+      transparent 0.125rem
+    ),
+    linear-gradient(
+      to right,
+      oklch(var(--color-primary-500) / 0.4) 0.125rem,
+      oklch(var(--color-primary-600)) 0.125rem
+    );
+}
+
+.ry-btn-primary-outline {
+  /* --ry-btn-padding-vertical:; */
+  /* --ry-btn-padding-horizontal:; */
+
+  --ry-btn-text-color: var(--color-primary-600);
+  /* --ry-btn-text-size:; */
+  /* --ry-btn-text-family:; */
+  /* --ry-btn-text-line-height:; */
+
+  /* --ry-btn-border-width:; */
+  /* --ry-btn-border-style:; */
+  --ry-btn-border-color: var(--color-primary-600);
+  /* --ry-btn-border-radius:; */
+
+  --ry-btn-bg: var(--color-white);
+
+  /* --ry-btn-small-padding-vertical:; */
+  /* --ry-btn-small-padding-horizontal:; */
+
+  /* --ry-btn-large-padding-vertical:; */
+  /* --ry-btn-large-padding-horizontal:; */
+  /* --ry-btn-large-text-size:; */
+
+  --ry-btn-hover-bg: var(--color-primary-100);
+  --ry-btn-hover-border-color: var(--color-primary-600);
+
+  --ry-btn-active-bg: var(--color-primary-200);
+  --ry-btn-active-border-color: var(--color-primary-600);
+
+  /* --ry-btn-focus-shadow-width: ; */
+  --ry-btn-focus-shadow-color: var(--color-focus);
+
+  /*  --ry-btn-spinner-color:; */
+
+  /* --ry-btn-a11y-bg-position:; */
+  /* --ry-btn-a11y-bg-size:; */
+  /* --ry-btn-a11y-text-shadow:; */
+  --ry-btn-a11y-bg-image: linear-gradient(
+      oklch(var(--color-primary-100) / 0.3) 0.125rem,
+      transparent 0.125rem
+    ),
+    linear-gradient(
+      to right,
+      oklch(var(--color-primary-100) / 0.3) 0.125rem,
+      oklch(var(--color-white)) 0.125rem
+    );
+  --ry-btn-a11y-hover-bg-image: linear-gradient(
+      oklch(var(--color-primary-200) / 0.4) 0.125rem,
+      transparent 0.125rem
+    ),
+    linear-gradient(
+      to right,
+      oklch(var(--color-primary-200) / 0.4) 0.125rem,
+     transparent  0.125rem
+    );
+  --ry-btn-a11y-active-bg-image: linear-gradient(
+      oklch(var(--color-primary-300) / 0.4) 0.125rem,
+      transparent 0.125rem
+    ),
+    linear-gradient(
+      to right,
+      oklch(var(--color-primary-300) / 0.4) 0.125rem,
+     transparent  0.125rem
+    );
+}
+
+.ry-btn-success-flat {
+  /* --ry-btn-padding-vertical:; */
+  /* --ry-btn-padding-horizontal:; */
+
+  --ry-btn-text-color: var(--color-white);
+  /* --ry-btn-text-size:; */
+  /* --ry-btn-text-family:; */
+  /* --ry-btn-text-line-height:; */
+
+  /* --ry-btn-border-width:; */
+  /* --ry-btn-border-style:; */
+  --ry-btn-border-color: var(--color-success-500);
+  /* --ry-btn-border-radius:; */
+
+  --ry-btn-bg: var(--color-success-500);
+
+  /* --ry-btn-small-padding-vertical:; */
+  /* --ry-btn-small-padding-horizontal:; */
+
+  /* --ry-btn-large-padding-vertical:; */
+  /* --ry-btn-large-padding-horizontal:; */
+  /* --ry-btn-large-text-size:; */
+
+  --ry-btn-hover-bg: var(--color-success-400);
+  --ry-btn-hover-border-color: var(--color-success-400);
+
+  --ry-btn-active-bg: var(--color-success-600);
+  --ry-btn-active-border-color: var(--color-success-600);
+
+  /* --ry-btn-focus-shadow-width: ; */
+  --ry-btn-focus-shadow-color: var(--color-focus);
+
+  /*  --ry-btn-spinner-color:; */
+
+  --ry-btn-a11y-bg-position: 0 0;
+  --ry-btn-a11y-bg-size: auto;
+  --ry-btn-a11y-text-shadow: 0 0 0.25rem oklch(var(--color-black) / 0.4);
+  --ry-btn-a11y-bg-image: repeating-linear-gradient(
+    45deg,
+    oklch(var(--color-white) / 0.1),
+    oklch(var(--color-white) / 0.1) 0.25rem,
+    oklch(var(--color-success-500)) 0.25rem,
+    oklch(var(--color-success-500)) 1.25rem
+  );
+  --ry-btn-a11y-hover-bg-image: repeating-linear-gradient(
+    45deg,
+    oklch(var(--color-white) / 0.1),
+    oklch(var(--color-white) / 0.1) 0.25rem,
+    oklch(var(--color-success-400)) 0.25rem,
+    oklch(var(--color-success-400)) 1.25rem
+  );
+  --ry-btn-a11y-active-bg-image: repeating-linear-gradient(
+    45deg,
+    oklch(var(--color-white) / 0.1),
+    oklch(var(--color-white) / 0.1) 0.25rem,
+    oklch(var(--color-success-600)) 0.25rem,
+    oklch(var(--color-success-600)) 1.25rem
+  );
+}
+
+.ry-btn-success-outline {
+  /* --ry-btn-padding-vertical:; */
+  /* --ry-btn-padding-horizontal:; */
+
+  --ry-btn-text-color: var(--color-success-600);
+  /* --ry-btn-text-size:; */
+  /* --ry-btn-text-family:; */
+  /* --ry-btn-text-line-height:; */
+
+  /* --ry-btn-border-width:; */
+  /* --ry-btn-border-style:; */
+  --ry-btn-border-color: var(--color-success-600);
+  /* --ry-btn-border-radius:; */
+
+  --ry-btn-bg: var(--color-white);
+
+  /* --ry-btn-small-padding-vertical:; */
+  /* --ry-btn-small-padding-horizontal:; */
+
+  /* --ry-btn-large-padding-vertical:; */
+  /* --ry-btn-large-padding-horizontal:; */
+  /* --ry-btn-large-text-size:; */
+
+  --ry-btn-hover-bg: var(--color-success-100);
+  --ry-btn-hover-border-color: var(--color-success-400);
+
+  --ry-btn-active-bg: var(--color-success-200);
+  --ry-btn-active-border-color: var(--color-success-600);
+
+  /* --ry-btn-focus-shadow-width: ; */
+  --ry-btn-focus-shadow-color: var(--color-focus);
+
+  /*  --ry-btn-spinner-color:; */
+
+  --ry-btn-a11y-bg-position: 0 0;
+  --ry-btn-a11y-bg-size: auto;
+  /* --ry-btn-a11y-text-shadow:; */
+  --ry-btn-a11y-bg-image: repeating-linear-gradient(
+    45deg,
+    oklch(var(--color-success-500) / 0.1),
+    oklch(var(--color-success-500) / 0.1) 0.25rem,
+    oklch(var(--color-white)) 0.25rem,
+    oklch(var(--color-white)) 1.25rem
+  );
+  --ry-btn-a11y-hover-bg-image: repeating-linear-gradient(
+    45deg,
+    oklch(var(--color-white) / 0.3),
+    oklch(var(--color-white) / 0.3) 0.25rem,
+    oklch(var(--color-success-100)) 0.25rem,
+    oklch(var(--color-success-100)) 1.25rem
+  );
+  --ry-btn-a11y-active-bg-image: repeating-linear-gradient(
+    45deg,
+    oklch(var(--color-white) / 0.3),
+    oklch(var(--color-white) / 0.3) 0.25rem,
+    oklch(var(--color-success-200)) 0.25rem,
+    oklch(var(--color-success-200)) 1.25rem
+  );
+}
+
+.ry-breadcrumbs {
+  --ry-breadcrumbs-bg: var(--color-gray-100);
+  /* --ry-breadcrumbs-link-padding-vertical:; */
+  /* --ry-breadcrumbs-link-padding-horizontal:; */
+  --ry-breadcrumbs-text-size: 1.25rem;
+  --ry-breadcrumbs-text-deco: underline;
+  --ry-breadcrumbs-link-color: var(--color-warning-600);
+  --ry-breadcrumbs-link-visited-color:var(--color-visited);
+  --ry-breadcrumbs-focus-shadow-width: 5px; 
+  --ry-breadcrumbs-focus-shadow-color: var(--color-danger-600);
+  --ry-breadcrumbs-link-currentpage-color: var(--color-danger-600);
+}
+
+.f-l-ry-accordion {
+  max-width: 800px;
+  --ry-accordion-item-margin-bottom: 0;
+  ry-accordion-item {
+    &::part(button) {
+      border-bottom: 0;
+    }
+    &::part(region) {
+      border-bottom: 0;
+    }
+    &:first-child {
+      &::part(button){
+        border-radius: 0.25rem 0.25rem 0 0;
+      }
+    }
+    &:last-child {
+      &::part(button){
+        border-bottom: 1px solid oklch(78.94% 0 0);
+        border-radius: 0 0 0.25rem 0.25rem;
+      }
+      &::part(region){
+        border-radius: 0 0 0.25rem 0.25rem;
+      }
+    }
+    &[open] {
+      &:last-child {
+        &::part(button) {
+          border-bottom: 0;
+          border-radius: 0;
+        }
+        &::part(region) {
+          border-bottom: 1px solid oklch(78.94% 0 0);
+        }
+      }
+    }
+  }
+}
+
+.custom-ry-accordion {
+  display: block;
+  max-width: 800px;
+  /* --ry-accordion-heading-padding-vertical:; */
+  /* --ry-accordion-heading-padding-horizontal:; */
+  --ry-accordion-heading-text-color: var(--color-white);
+  /* --ry-accordion-heading-text-size:; */
+  /* --ry-accordion-heading-text-family:; */
+  /* --ry-accordion-heading-text-line-height:; */
+  /* --ry-accordion-heading-border-radius:; */
+  /* --ry-accordion-heading-border-width:; */
+  /* --ry-accordion-heading-border-style:; */
+  --ry-accordion-heading-border-color: var(--color-primary-500);
+  --ry-accordion-heading-bg: var(--color-primary-500);
+  --ry-accordion-heading-hover-bg: var(--color-primary-400);
+  --ry-accordion-heading-hover-border-color: var(--color-primary-400);
+  --ry-accordion-heading-active-bg: var(--color-primary-600);
+  --ry-accordion-heading-active-border-color: var(--color-primary-600);
+  /* --ry-accordion-heading-focus-shadow-width:; */
+  /* --ry-accordion-heading-focus-shadow-color:; */
+  --ry-accordion-content-bg: var(--color-blue-50);
+  --ry-accordion-content-text-color: var(--color-blue-600);
+  /* --ry-accordion-content-padding-top:; */
+  /* --ry-accordion-content-padding-right:; */
+  /* --ry-accordion-content-padding-bottom:; */
+  /* --ry-accordion-content-padding-left:; */
+  --ry-accordion-content-overscroll-behavior: contain;
+  --ry-accordion-content-max-height: 200px;
+}
+
+.custom-ry-card {
+  display: block;
+  max-width: 300px;
+  border: 1px solid oklch(var(--color-border));
+  border-radius: var(--radius);
+  overflow: hidden;
+  &::part(ry-card-container) {
+    display: flex;
+    flex-direction: column;
+  }
+  .heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-m);
+    order: 2;
+    h3 {
+      font-size: 1.5rem;
+      margin: 0;
+      word-break: brea-word;
+      flex: 1;
+    }
+    ry-btn {
+      flex: 0 1 auto;
+    }
+  }
+  .media {
+    order: 1;
+    img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      vertical-align: middle;
+    }
+  }
+  .content {
+    order: 3;
+    padding: var(--spacing-m);
+  }
+  .footer {
+    order: 4;
+    border-top: 1px solid oklch(var(--color-border));
+    padding: var(--spacing-m);
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+  }
+}
+
+.custom-ry-checkbox {
+  /* --ry-checkbox-padding:; */
+  /* --ry-checkbox-content-gap:; */
+  /* --ry-checkbox-input-width:; */
+  /* --ry-checkbox-input-height:; */
+  /* --ry-checkbox-input-border-width:; */
+  /* --ry-checkbox-input-border-style:; */
+  /* --ry-checkbox-input-border-color:; */
+  /* --ry-checkbox-input-border-radius:; */
+  /* --ry-checkbox-input-bg:; */
+  /* --ry-checkbox-input-focus-shadow-width:; */
+  /* --ry-checkbox-input-focus-shadow-color:; */
+  --ry-checkbox-input-checked-bg: var(--color-primary-600);
+  /* --ry-checkbox-input-checked-symbol:; */
+  /* --ry-checkbox-input-checked-text-color:; */
+  /* --ry-checkbox-input-checked-text-size:; */
+  /* --ry-checkbox-label-text-color:; */
+  /* --ry-checkbox-label-text-size:; */
+  /* --ry-checkbox-label-hover-text-deco:; */
+  /* --ry-checkbox-label-active-text-color:; */
+  /* --ry-checkbox-label-disabled-text-color:; */
+}
+
+.custom-ry-switch {
+  --ry-switch-gap: 4rem;
+  /* --ry-switch-padding-top:; */
+  /* --ry-switch-padding-right:; */
+  /* --ry-switch-padding-bottom:; */
+  /* --ry-switch-padding-left:; */
+  /* --ry-switch-container-gap:; */
+  /* --ry-switch-input-border-width:; */
+  /* --ry-switch-input-border-style:; */
+  /* --ry-switch-input-border-color:; */
+  --ry-switch-input-border-radius: 0.625rem;
+  --ry-switch-inner-border-radius: 0.5rem;
+  --ry-switch-input-width: 6rem;
+  --ry-switch-inner-distance: 0.5rem;
+  --ry-switch-input-checked-bg: var(--color-primary-600);
+  /* --ry-switch-focus-shadow-color:; */
+  /* --ry-switch-focus-shadow-width:; */
+}
+
+.custom-ry-radio {
+  /* --ry-radio-content-gap:; */
+  /* --ry-radio-input-width:; */
+  /* --ry-radio-input-height:; */
+  /* --ry-radio-input-border-width:; */
+  /* --ry-radio-input-border-style:; */
+  /* --ry-radio-input-border-color:; */
+  /* --ry-radio-input-bg:; */
+  --ry-radio-input-checked-bg: var(--color-primary-500);
+  --ry-radio-input-checked-circle-color: var(--color-danger-500);
+  /* --ry-radio-label-text-color:; */
+  /* --ry-radio-label-text-size:; */
+  /* --ry-radio-label-hover-text-deco:; */
+  /* --ry-radio-label-active-text-color:; */
+  /* --ry-radio-input-focus-shadow-width:; */
+  /* --ry-radio-input-focus-shadow-color:; */
+  /* --ry-radio-label-disabled-text-color:; */
+}

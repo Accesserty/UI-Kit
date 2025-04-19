@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accesserty UI Kit Checkbox</title>
+    <link rel="stylesheet" href="../../../css/style.css" />
+    <script src="checkbox.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <h1>
+        <a
+          href="https://github.com/Neil-Lin/Accesserty UI Kit"
+          target="_blank"
+          title="open new window to Accesserty UI Kit github"
+          rel="noreferrer noopener"
+        >
+          Accesserty UI Kit
+        </a>
+        Checkbox
+      </h1>
+      <h2>How to use</h2>
+      <h3>HTML</h3>
+      <ol>
+        <li>Copy file (checkbox.js or Accesserty UI Kit.js or Accesserty UI Kit.min.js)</li>
+        <li>
+          Add the JavaScript file to HTML using the
+          <code>&lt;script src=&quot;&quot; defer&gt;</code> tag
+        </li>
+        <li>Use the <code>&lt;ry-checkbox&gt;</code> tag</li>
+      </ol>
+      <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
+      <h3>Nuxt3</h3>
+      <ol>
+        <li>Copy file (checkbox.js or Accesserty UI Kit.js or Accesserty UI Kit.min.js)</li>
+        <li>Add the JavaScript file to the Nuxt3 project.</li>
+        <li>
+          Add a `ry.client.js` file to the plugins folder with the following export:
+          <code>
+            export default defineNuxtPlugin(() => {
+              if (process.client) {
+                import('your path')
+              }
+            })   
+          </code>       
+        </li>
+        <li>Add the plugin configuration to your nuxt.config.ts (or .js):<code>plugins: ['~/plugins/ry.client.js']</code>and
+          <code>
+            vue: {
+              compilerOptions: {
+                isCustomElement: (tag) => tag.startsWith("ry-"),
+              },
+            },
+          </code>
+          Vue will check <ry-> 
+        </li>
+        <li>Use the <code>&lt;ry-checkbox&gt;</code> tag</li>
+      </ol>
+      <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
+      <h2>Attribute</h2>
+      <table>
+        <caption>
+          The Accesserty UI Kit checkbox attributes:
+        </caption>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Description</th>
+        </tr>
+        <tr>
+          <td>name</td>
+          <td>same group</td>
+        </tr>
+        <tr>
+          <td>value</td>
+          <td>checkbox value</td>
+        </tr>
+        <tr>
+          <td>checked</td>
+          <td>checkbox checked</td>
+        </tr>
+        <tr>
+          <td>disabled</td>
+          <td>checkbox disabled</td>
+        </tr>
+      </table>
+      <h2>Basic</h2>
+      <ry-checkbox 
+        name="basic-checkbox"
+        value="Checkbox_value"
+        class="basic-checkbox"
+      >
+        Checkbox1
+      </ry-checkbox> 
+      <ry-checkbox 
+        name="basic-checkbox"
+        value="Checkbox_value2"
+        checked
+        class="basic-checkbox"
+      >
+        Checkbox2(cheked)
+      </ry-checkbox> 
+      <ry-checkbox 
+        name="basic-checkbox"
+        value="Checkbox_value3"
+        class="basic-checkbox"
+        disabled
+      >
+        Checkbox3(disabled)
+      </ry-checkbox>
+      <ry-checkbox 
+        name="basic-checkbox"
+        value="Checkbox_value4"
+        class="basic-checkbox"
+        checked
+        disabled
+      >
+        Checkbox4(disabled, checked)
+      </ry-checkbox>
+      <h2>Custom</h2>
+      <ry-checkbox 
+        name="test-checkbox"
+        value="Checkbox_value"
+        class="custom-ry-checkbox"
+      >
+        Checkbox1
+      </ry-checkbox> 
+      <ry-checkbox 
+        name="test-checkbox"
+        value="Checkbox_value2"
+        checked
+        class="custom-ry-checkbox"
+      >
+        Checkbox2(cheked)
+      </ry-checkbox> 
+      <ry-checkbox 
+        name="test-checkbox"
+        value="Checkbox_value3"
+        disabled
+        class="custom-ry-checkbox"
+      >
+        Checkbox3(disabled)
+      </ry-checkbox>
+      <ry-checkbox 
+        name="test-checkbox"
+        value="Checkbox_value4"
+        disabled
+        checked
+        class="custom-ry-checkbox"
+      >
+        Checkbox4(disabled, checked)
+      </ry-checkbox>
+      <h3>CSS Variables</h3>
+      <table>
+        <tr>
+          <th scope="col">CSS Variables name</th>
+          <th scope="col">Description</th>
+          <th scope="col">Default value</th>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-padding</td>
+          <td>checkbox box padding</td>
+          <td>0.25rem</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-content-gap</td>
+          <td>checkbox inner gap</td>
+          <td>0.5rem</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-width</td>
+          <td>square width</td>
+          <td>1.5rem</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-height</td>
+          <td>square height</td>
+          <td>1.5rem</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-border-width</td>
+          <td>square border width</td>
+          <td>1px</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-border-style</td>
+          <td>square border style</td>
+          <td>solid</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-border-color</td>
+          <td>square border color</td>
+          <td>oklch(78.94% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-border-radius</td>
+          <td>square border radius</td>
+          <td>0.25rem</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-bg</td>
+          <td>square bg</td>
+          <td>oklch(99.4% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-focus-shadow-width</td>
+          <td>focus border width(actually box-shadow)</td>
+          <td>3px</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-focus-shadow-color</td>
+          <td>focus border color(actually box-shadow)</td>
+          <td>oklch(83.15% 0.15681888825079074 78.05241467152487)</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-checked-bg</td>
+          <td>square bg(checked)</td>
+          <td>oklch(13.98% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-checked-symbol</td>
+          <td>square symbol</td>
+          <td>✔︎</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-checked-text-color</td>
+          <td>square symbol text color(checked)</td>
+          <td>oklch(99.4% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-checked-text-size</td>
+          <td>square text size</td>
+          <td>1.125rem</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-label-text-color</td>
+          <td>label text color</td>
+          <td>oklch(13.98% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-label-text-size</td>
+          <td>label text size</td>
+          <td>1rem</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-label-hover-text-deco</td>
+          <td>label text decoration(hover)</td>
+          <td>underline</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-label-active-text-color</td>
+          <td>label text color(active)</td>
+          <td>oklch(53.7% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-label-disabled-text-color</td>
+          <td>label text color(disabled)</td>
+          <td>oklch(53.7% 0 0)</td>
+        </tr>
+      </table>
+      <h2>FAQ</h2>
+      <h3>How does it compare to native checkboxes?</h3>
+      <p>Using the <code>ry-checkbox</code> ensures that screen readers correctly interpret the association between the label and input, making it recommended for use.</p>
+      <p>But even so, this is still not enough. If there is a group of multiple related checkboxes, it's best to use role="group", aria-labelledby, &lt;ul&gt; and &lt;li&gt. This way, it is possible to know how many checkboxes are in the same group.</p>
+      <form id="foodForm">
+        <div role="group" aria-labelledby="checkbox-group">
+          <p id="checkbox-group">Choose at least one</p>
+          <ry-checkbox name="food" value="apple" class="basic-checkbox">Apple</ry-checkbox>
+          <ry-checkbox name="food" value="banana" class="basic-checkbox">Banana</ry-checkbox>
+          <ry-checkbox name="food" value="orange" class="basic-checkbox" checked>Orange</ry-checkbox>
+          <div id="errorMessage" class="error" style="display: none;">Please Choose one</div>
+          <button type="submit">Send</button>
+        </div>
+      </form>
+    </main>
+    <script>
+      const form = document.getElementById('foodForm');
+      const errorMessage = document.getElementById('errorMessage');
+  
+      form.addEventListener('submit', (event) => {
+        event.preventDefault(); // 阻止默认提交行为
+        const formData = new FormData(form);
+        const selectedFoods = formData.getAll('food');
+  
+        if (selectedFoods.length > 0) {
+          errorMessage.style.display = 'none';
+          alert('送出成功，您選擇了：' + selectedFoods.join(', '));
+        } else {
+          errorMessage.style.display = 'block';
+        }
+      });
+    </script>
+  </body>
+</html>

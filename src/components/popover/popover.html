@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accesserty UI Kit Popover</title>
+    <style>
+      .anchor {
+        display: block;
+        anchor-name: --anchor-popover;
+      }
+
+      .anchor-position {
+        position-anchor: --anchor-popover;
+        inset: auto;
+        top: anchor(bottom);
+        left: anchor(left);
+      }
+
+      [popover] {
+        transition: opacity 0.7s;
+      }
+
+      [popover]:popover-open {
+        @starting-style {
+          opacity: 0;
+        }
+        opacity: 1;
+      }
+
+      [popover]:not(:popover-open) {
+        animation: fade-out 0.7s;
+      }
+
+      @keyframes fade-out {
+        0% {
+          display: block;
+          opacity: 1;
+        }
+        99% {
+          opacity: 0.01;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .sr-only {
+        clip: rect(0 0 0 0); 
+        clip-path: inset(50%);
+        height: 1px;
+        overflow: hidden;
+        position: absolute;
+        white-space: nowrap; 
+        width: 1px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>
+        <a
+          href="https://github.com/Neil-Lin/Accesserty UI Kit"
+          target="_blank"
+          title="open new window to Accesserty UI Kit github"
+          rel="noreferrer noopener"
+        >
+          Accesserty UI Kit
+        </a>
+        Popover
+      </h1>
+      <h2>Key Point</h2>
+      <ul>
+        <li>Using the global HTML attribute <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/popover" title="另開視窗前往 Mozilla 查看屬性資料" target="_blank" rel="noreferrer noopener">popover</a>, you can create meaningful pop-up tooltips based on the purpose without the need to create a special component.</li>
+        <li>Use the <a href="https://developer.chrome.com/blog/anchor-positioning-api?hl=zh-tw"  title="另開視窗前往 Google 查看使用方式" target="_blank" rel="noreferrer noopener"> Anchor Positioning API </a>  to determine the position of the pop-up tooltip.</li>
+      </ul>
+      <h2>How to Use</h2>
+      <h3>HTML</h3>
+      <button popovertarget="ref_1" class="anchor">
+        <span aria-hidden="true">?</span>
+        <span class="sr-only">Hint</span>
+      </button>
+
+      <div id="ref_1" popover="manual" class="anchor-position">
+        This is a nested popover that requires manual closing and uses CSS Anchor Positioning. Please note that there is an issue in manual mode: when the first-level popover is closed, the second-level popover still remains on the screen.
+        <button popovertarget="ref_2" class="anchor2">
+          <span aria-hidden="true">?</span>
+          <span class="sr-only">nested popover</span>
+        </button>
+      </div>
+      
+      <div id="ref_2" popover class="anchor-position2">
+        The position of this popover is set by default. There is a backdrop layer behind it. Clicking outside will close the popover, and the focus will return to the button of the previous popover.
+      </div>
+    </main>
+  </body>
+</html>

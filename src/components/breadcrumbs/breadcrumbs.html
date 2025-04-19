@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accesserty UI Kit Breadcrumbs</title>
+    <link rel="stylesheet" href="../../../css/style.css" />
+    <script src="breadcrumbs.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <h1>
+        <a
+          href="https://github.com/Neil-Lin/Accesserty UI Kit"
+          target="_blank"
+          title="open new window to Accesserty UI Kit github"
+          rel="noreferrer noopener"
+        >
+          Accesserty UI Kit
+        </a>
+        Breadcrumbs
+      </h1>
+      <h2>How to use</h2>
+      <h3>HTML</h3>
+      <ol>
+        <li>Copy file (breadcrumbs.js or Accesserty UI Kit.js or Accesserty UI Kit.min.js)</li>
+        <li>
+          Add the JavaScript file to HTML using the
+          <code>&lt;script src=&quot;&quot; defer&gt;</code> tag
+        </li>
+        <li>Use the <code>&lt;ry-btn&gt;</code> tag</li>
+      </ol>
+      <h3>Nuxt3</h3>
+      <ol>
+        <li>Copy file (breadcrumbs.js or Accesserty UI Kit.js or Accesserty UI Kit.min.js)</li>
+        <li>Add the JavaScript file to the Nuxt3 project.</li>
+        <li>
+          Add a `ry.client.js` file to the plugins folder with the following export:
+          <code>
+            export default defineNuxtPlugin(() => {
+              if (process.client) {
+                import('your path')
+              }
+            })   
+          </code>       
+        </li>
+        <li>Add the plugin configuration to your nuxt.config.ts (or .js):<code>plugins: ['~/plugins/ry.client.js']</code></li>
+        <li>Use the <code>&lt;ry-btn&gt;</code> tag</li>
+      </ol>
+      <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
+      <h2>Attribute</h2>
+      <table>
+        The Accesserty UI Kit breadcrumbs inherits attributes, with some custom options available:
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Description</th>
+          <th scope="col">Type</th>
+          <th scope="col">Default value</th>
+        </tr>
+        <tr>
+          <td>id</td>
+          <td>Sets id</td>
+          <td>string</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>class</td>
+          <td>Sets classname</td>
+          <td>string</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>aria-label</td>
+          <td>Sets aria-label</td>
+          <td>string</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>separator</td>
+          <td>Sets the separator between breadcrumb items.</td>
+          <td>string</td>
+          <td>/</td>
+        </tr>
+        <tr>
+          <td>items</td>
+          <td>Sets the text and url path of breadcrumb item.</td>
+          <td>{ "text":string, "url":string }</td>
+          <td></td>
+        </tr>
+      </table>
+      <h2>Basic</h2>
+      <ry-breadcrumbs
+        items='[
+          { 
+            "text":"Home",
+            "url":"/"
+          }, 
+          {
+            "text":"About",
+            "url":"/about"
+          }, 
+          { 
+            "text":"Contact"
+          }
+        ]'
+      ></ry-breadcrumbs>
+      <h2>aria-label</h2>
+      <p>Recommend to add <code>aria-label</code></p>
+      <ry-breadcrumbs
+        aria-label="This is main navigator."
+        items='[
+          { 
+            "text":"Home",
+            "url":"/"
+          }, 
+          {
+            "text":"About",
+            "url":"/about"
+          }, 
+          { 
+            "text":"Contact"
+          }
+        ]'
+      ></ry-breadcrumbs>
+      <p>open devtool you can see <code>&lt;nav aria-label="This is main navigator."&gt;</code></p>
+      <h2>Separator</h2>
+      <ry-breadcrumbs
+        label="This is main navigator."
+        separator=">"
+        items='[
+          { 
+            "text":"Home",
+            "url":"/"
+          }, 
+          {
+            "text":"About",
+            "url":"/about"
+          }, 
+          { 
+            "text":"Contact"
+          }
+        ]'
+      ></ry-breadcrumbs>
+      <h2>Custom</h2>
+      <p>Set a classname and change CSS Variables.</p>
+      <p>If you want to add an icon in front of an item, you can use slot="icon-{count}". For example, for the second one, use `slot="icon-2"`.</p>
+      <ry-breadcrumbs
+        id="aaa"
+        class="ry-breadcrumbs"
+        aria-label="Test navigator."
+        separator=">"
+        items='[
+          { 
+            "text":"Home",
+            "url":"/"
+          }, 
+          {
+            "text":"About",
+            "url":"/about"
+          }, 
+          { 
+            "text":"Contact"
+          }
+        ]'
+      >
+        <span slot="icon-2">😃</span>  
+      </ry-breadcrumbs>
+      <h3>CSS Variables</h3>
+      <table>
+        <tr>
+          <th scope="col">CSS Variables name</th>
+          <th scope="col">Description</th>
+          <th scope="col">Default value</th>
+        </tr>
+        <tr>
+          <td>--ry-breadcrumbs-bg</td>
+          <td>navigator background color</td>
+          <td>transparent</td>
+        </tr>
+        <tr>
+          <td>--ry-breadcrumbs-link-padding-vertical</td>
+          <td>padding-top and padding-bottom of the link</td>
+          <td>0.75rem</td>
+        </tr>
+        <tr>
+          <td>--ry-breadcrumbs-link-padding-horizontal</td>
+          <td>padding-left and padding-right of the link</td>
+          <td>0.5rem</td>
+        </tr>
+        <tr>
+          <td>--ry-breadcrumbs-text-size</td>
+          <td>text size</td>
+          <td>1rem</td>
+        </tr>
+        <tr>
+          <td>--ry-breadcrumbs-text-deco</td>
+          <td>text-decoration</td>
+          <td>none</td>
+        </tr>
+        <tr>
+          <td>--ry-breadcrumbs-link-color</td>
+          <td>color of link</td>
+          <td>oklch(42.9% 0.2972777928415759 264.05202063805507)</td>
+        </tr>
+        <tr>
+          <td>--ry-breadcrumbs-link-visited-color</td>
+          <td>color of link(visited)</td>
+          <td>oklch(37.48% 0.167 303.51)</td>
+        </tr>
+        <tr>
+          <td>--ry-breadcrumbs-focus-shadow-width</td>
+          <td>border width of link(focus)</td>
+          <td>3px</td>
+        </tr>
+        <tr>
+          <td>--ry-breadcrumbs-focus-shadow-color</td>
+          <td>border color of link(focus)</td>
+          <td>oklch(83.15% 0.15681888825079074 78.05241467152487)</td>
+        </tr>
+        <tr>
+          <td>--ry-breadcrumbs-link-currentpage-color</td>
+          <td>color of link(focus)</td>
+          <td>oklch(13.98% 0 0)</td>
+        </tr>
+      </table>
+      <h2>Conclusion</h2>
+      <p>This is a simple Web Component with basic functionalities. It includes:</p>
+      <ul>
+        <li>Inheritance of id, class, and aria-label.</li>
+        <li>Addition of a separator to change the linking symbol and items for data handling.</li>
+        <li>Each item can prepend a slot to change its icon.</li>
+        <li>Indicates the current page with <code>aria-current="page"</code>.</li>
+        <li> Uses CSS Variables to adjust the main appearance.</li>
+      </ul>
+      <p>For developers, creating an accessible breadcrumbs web component is not difficult, and its application can be very convenient, making it a worthwhile feature to develop or use.</p>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accesserty UI Kit 勾選框</title>
+    <link rel="stylesheet" href="../../../css/style.css" />
+    <script src="radio.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <h1>
+        <a
+          href="https://github.com/Neil-Lin/Accesserty UI Kit"
+          target="_blank"
+          title="open new window to Accesserty UI Kit github"
+          rel="noreferrer noopener"
+        >
+          Accesserty UI Kit
+        </a>
+        單選
+      </h1>
+      <h2>如何使用</h2>
+      <h3>HTML</h3>
+      <ol>
+        <li>複製檔案 (radio.js 或 Accesserty UI Kit.js 或 Accesserty UI Kit.min.js)</li>
+        <li>
+          將 JavaScript 檔案引入至 HTML
+          <code>&lt;script src=&quot;&quot; defer&gt;</code>
+        </li>
+        <li>使用 <code>&lt;ry-radio-group&gt;</code> <code>&lt;ry-radio&gt;</code> 標籤</li>
+      </ol>
+      <h3>Nuxt3</h3>
+      <ol>
+        <li>複製檔案 (radio.js 或 Accesserty UI Kit.js 或 Accesserty UI Kit.min.js)</li>
+        <li>將 JavaScript 檔案放到 Nuxt3 專案。</li>
+        <li>
+          在 plugins 資料夾新增 `ry.client.js` 檔案，內容範例如下：
+          <code>
+            export default defineNuxtPlugin(() => {
+              if (process.client) {
+                import('your path')
+              }
+            })   
+          </code>       
+        </li>
+        <li>在 nuxt.config.ts (或 .js) 增加 plugins:<code>plugins: ['~/plugins/ry.client.js']</code></li>
+        <li>使用 <code>&lt;ry-radio-group&gt;</code> <code>&lt;ry-radio&gt;</code> 標籤</li>
+      </ol>
+      <p>如果發生錯誤，請先確保路徑以及名稱都正確。</p>
+      <h2>屬性</h2>
+      <table>
+        <caption>
+          Accesserty UI Kit 單選有以下屬性可用：
+        </caption>
+        <tr>
+          <th scope="col">名稱</th>
+          <th scope="col">說明</th>
+        </tr>
+        <tr>
+          <td>value</td>
+          <td>單選的值</td>
+        </tr>
+        <tr>
+          <td>checked</td>
+          <td>已選擇狀態</td>
+        </tr>
+        <tr>
+          <td>disabled</td>
+          <td>禁用狀態</td>
+        </tr>
+        <tr>
+          <td>direction</td>
+          <td>方向，預設橫式，加入 vertical 為直式。</td>
+        </tr>
+      </table>
+      <h2>基本使用</h2>
+      <h3>完全沒設定時</h3>
+      <ry-radio-group aria-label="完全沒設定">
+        <ry-radio>選項一</ry-radio>
+        <ry-radio>選項二</ry-radio>
+        <ry-radio>選項三</ry-radio>
+      </ry-radio-group>
+      <h3>設定預設值</h3>
+      <ry-radio-group aria-label="設定預設值">
+        <ry-radio checked>選項一</ry-radio>
+        <ry-radio>選項二</ry-radio>
+        <ry-radio>選項三</ry-radio>
+      </ry-radio-group>
+      <h3>禁用</h3>
+      <ry-radio-group aria-label="禁用">
+        <ry-radio checked>選項一</ry-radio>
+        <ry-radio disabled>選項二</ry-radio>
+        <ry-radio>選項三</ry-radio>
+      </ry-radio-group>
+      <h3>改變方向</h3>
+      <ry-radio-group aria-label="改變方向" direction="vertical">
+        <ry-radio checked>選項一</ry-radio>
+        <ry-radio>選項二</ry-radio>
+        <ry-radio>選項三</ry-radio>
+      </ry-radio-group>
+      <h2>客製化</h2>
+      <ry-radio-group aria-label="設定預設值" class="custom-ry-radio">
+        <ry-radio checked>選項一</ry-radio>
+        <ry-radio disabled>選項二</ry-radio>
+        <ry-radio>選項三</ry-radio>
+      </ry-radio-group>
+      <h3>CSS Variables</h3>
+      <table>
+        <tr>
+          <th scope="col">CSS Variables 名稱</th>
+          <th scope="col">說明</th>
+          <th scope="col">預設值</th>
+        </tr>
+        <tr>
+          <td>--ry-radio-content-gap</td>
+          <td>圓圈與文字的間距</td>
+          <td>0.5rem</td>
+        </tr>
+        <tr>
+          <td>--ry-radio-input-width</td>
+          <td>圓圈寬度</td>
+          <td>1.5rem</td>
+        </tr>
+        <tr>
+          <td>--ry-radio-input-height</td>
+          <td>圓圈高度</td>
+          <td>1.5rem</td>
+        </tr>
+        <tr>
+          <td>--ry-radio-input-border-width</td>
+          <td>圓圈邊框線寬</td>
+          <td>1px</td>
+        </tr>
+        <tr>
+          <td>--ry-radio-input-border-style</td>
+          <td>圓圈邊框樣式</td>
+          <td>solid</td>
+        </tr>
+        <tr>
+          <td>--ry-radio-input-border-color</td>
+          <td>圓圈邊框顏色</td>
+          <td>oklch(78.94% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-radio-input-bg</td>
+          <td>圓圈背景顏色</td>
+          <td>oklch(99.4% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-radio-input-checked-bg</td>
+          <td>圓圈背景顏色(checked)</td>
+          <td>oklch(13.98% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-radio-input-checked-circle-color</td>
+          <td>圓圈中心顏色(checked)</td>
+          <td>oklch(99.4% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-radio-label-text-color</td>
+          <td>文字顏色</td>
+          <td>oklch(13.98% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-radio-label-text-size</td>
+          <td>文字大小</td>
+          <td>1rem</td>
+        </tr>
+        <tr>
+          <td>--ry-radio-label-hover-text-deco</td>
+          <td>文字樣式(hover)</td>
+          <td>underline</td>
+        </tr>
+        <tr>
+          <td>--ry-radio-label-active-text-color</td>
+          <td>文字樣式(active)</td>
+          <td>53.7% 0 0</td>
+        </tr>
+        <tr>
+          <td>--ry-radio-input-focus-shadow-width</td>
+          <td>聚焦邊框寬度</td>
+          <td>3px</td>
+        </tr>
+        <tr>
+          <td>--ry-radio-input-focus-shadow-color</td>
+          <td>聚焦邊框顏色</td>
+          <td>oklch(83.15% 0.15681888825079074 78.05241467152487)</td>
+        </tr>
+        <tr>
+          <td>--ry-radio-label-disabled-text-color</td>
+          <td>禁用時文字顏色</td>
+          <td>oklch(53.7% 0 0)</td>
+        </tr>
+      </table>
+      <h2>問與答</h2>
+    </main>
+  </body>
+</html>

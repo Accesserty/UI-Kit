@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accesserty UI Kit 按鈕</title>
+    <link rel="stylesheet" href="../../../css/style.css" />
+    <script src="button.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <h1>
+        <a
+          href="https://github.com/Neil-Lin/Accesserty UI Kit"
+          target="_blank"
+          title="另開視窗到 Accesserty UI Kit github"
+          rel="noreferrer noopener"
+        >
+          Accesserty UI Kit
+        </a>
+        按鈕
+      </h1>
+      <h2>如何使用</h2>
+      <h3>HTML</h3>
+      <ol>
+        <li>複製檔案 (button.js 或 Accesserty UI Kit.js 或 Accesserty UI Kit.min.js)</li>
+        <li>
+          將 JavaScript 檔案引入至 HTML
+          <code>&lt;script src=&quot;&quot; defer&gt;</code>
+        </li>
+        <li>使用 <code>&lt;ry-btn&gt;</code> 標籤</li>
+      </ol>
+      <h3>Nuxt3</h3>
+      <ol>
+        <li>複製檔案 (button.js 或 Accesserty UI Kit.js 或 Accesserty UI Kit.min.js)</li>
+        <li>將 JavaScript 檔案放到 Nuxt3 專案。</li>
+        <li>
+          在 plugins 資料夾新增 `ry.client.js` 檔案，內容範例如下：
+          <code>
+            export default defineNuxtPlugin(() => {
+              if (process.client) {
+                import('your path')
+              }
+            })   
+          </code>       
+        </li>
+        <li>在 nuxt.config.ts (或 .js) 增加 plugins:<code>plugins: ['~/plugins/ry.client.js']</code></li>
+        <li>使用 <code>&lt;ry-btn&gt;</code> 標籤</li>
+      </ol>
+      <p>如果發生錯誤，請先確保路徑以及名稱都正確。</p>
+      <h2>屬性</h2>
+      <table>
+        <caption>
+          寫在 Accesserty UI Kit 按鈕上的屬性都會繼承，但以下屬性我們有做一點變化：
+        </caption>
+        <tr>
+          <th scope="col">屬性名稱</th>
+          <th scope="col">說明</th>
+          <th scope="col">可使用的值</th>
+        </tr>
+        <tr>
+          <td>size</td>
+          <td>設定按鈕大小。</td>
+          <td>small, large</td>
+        </tr>
+        <tr>
+          <td>disabled</td>
+          <td>設定按鈕為禁用狀態。</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>loading</td>
+          <td>設定按鈕為禁用狀態，並且有載入中的動畫提示。</td>
+          <td></td>
+        </tr>
+      </table>
+      <h2>增加 icon</h2>
+      <p>因為在 shadow dom 裡的 svg 目前有很多問題，目前使用 inline-style 的方式撰寫才會有作用。</p>
+      <p>另外，請視情況使用 aria-hidden。</p>
+      <ry-btn @click="handleRoutePush">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 1rem;position: relative; top: 0.125rem;" aria-hidden="true">
+          <title>搜尋</title>
+          <!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.!-->
+          <path
+            d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
+          />
+        </svg>
+        <span>搜尋</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 1rem;position: relative; top: 0.125rem;" aria-hidden="true">
+          <title>搜尋</title>
+          <!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.!-->
+          <path
+            d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
+          />
+        </svg>
+      </ry-btn>
+      <ry-btn @click="handleRoutePush">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 1rem;position: relative; top: 0.125rem;">
+          <title>搜尋</title>
+          <!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.!-->
+          <path
+            fill="oklch(var(--ry-btn-text-color))"
+            d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
+          />
+        </svg>
+      </ry-btn>
+      <ry-btn>
+        <span aria-hidden="true">🔍</span>
+        <span>搜尋</span>
+      </ry-btn>
+      <h2>大小</h2>
+      <ry-btn size="small">小按鈕</ry-btn>
+      <ry-btn>按鈕</ry-btn>
+      <ry-btn size="large">大按鈕</ry-btn>
+      <h2>禁用</h2>
+      <p>
+        我們較不推薦使用 disabled 和 loading，因為通常這兩種狀態在視覺上的設計通常會比較難看清楚，鍵盤操作無法聚焦，螢幕報讀軟體也無法偵測，所以我們比較推薦實作良好使用經驗的「回饋」方式提示使用者。
+        但我們也知道有些情境，可能這兩種狀態是很好使用的，所以我們還是實作出來。
+      </p>
+      <ry-btn disabled>禁用按鈕</ry-btn>
+      <h2>載入中</h2>
+      <ry-btn loading></ry-btn>
+      <ry-btn loading>載入中</ry-btn>
+      <h2>客製化</h2>
+      <p>定義 classnames ，並撰寫 CSS 客製化您的主題色</p>
+      <ol>
+        <li>在按鈕上設定 classname</li>
+        <li>定義這個 classname，改變已經設定在按鈕裡的 CSS Variables</li>
+        <li>在畫面上查看是否有變化</li>
+      </ol>
+      <h3>推薦</h3>
+      <p>我們推薦您設定自己的Basic CSS Variables 與 Tokens Variables，會更方便地使用。</p>
+      <ry-btn class="ry-btn-primary-flat">第一主題色</ry-btn>
+      <ry-btn class="ry-btn-success-flat">第二主題色</ry-btn>
+      <br><br>
+      <ry-btn class="ry-btn-primary-flat a11y">第一主題色</ry-btn>
+      <ry-btn class="ry-btn-success-flat a11y">第二主題色</ry-btn>
+      <br><br>
+      <ry-btn class="ry-btn-primary-outline">第一主題色</ry-btn>
+      <ry-btn class="ry-btn-success-outline">第二主題色</ry-btn>
+      <br><br>
+      <ry-btn class="ry-btn-primary-outline a11y">第一主題色</ry-btn>
+      <ry-btn class="ry-btn-success-outline a11y">第二主題色</ry-btn>
+      <h3>CSS Variables</h3>
+      <table>
+        <tr>
+          <th scope="col">CSS Variables 名稱</th>
+          <th scope="col">說明</th>
+          <th scope="col">預設值</th>
+        </tr>
+        <tr>
+          <td>--ry-btn-padding-vertical</td>
+          <td>上下內距</td>
+          <td>0.75rem</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-padding-horizontal</td>
+          <td>左右內距</td>
+          <td>1rem</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-text-color</td>
+          <td>文字顏色</td>
+          <td>oklch(13.98% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-text-size</td>
+          <td>文字大小</td>
+          <td>1rem</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-text-family</td>
+          <td>字體字型</td>
+          <td>'Helvetica, Arial, sans-serif, system-ui'</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-text-line-height</td>
+          <td>文字行高</td>
+          <td>1.5</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-border-width</td>
+          <td>邊框寬度</td>
+          <td>1px</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-border-style</td>
+          <td>邊框風格</td>
+          <td>solid</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-border-color</td>
+          <td>邊框顏色</td>
+          <td>oklch(78.94% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-border-radius</td>
+          <td>邊框圓角大小</td>
+          <td>0.25rem</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-bg</td>
+          <td>按鈕背景</td>
+          <td>oklch(99.4% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-small-padding-vertical</td>
+          <td>小按鈕時的上下內距</td>
+          <td>0.25rem</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-small-padding-horizontal</td>
+          <td>小按鈕時的左右內距</td>
+          <td>0.5rem</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-large-padding-vertical</td>
+          <td>大按鈕時的上下內距</td>
+          <td>1rem</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-large-padding-horizontal</td>
+          <td>大按鈕時的左右內距</td>
+          <td>2rem</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-large-text-size</td>
+          <td>大按鈕時的文字大小</td>
+          <td>1.25rem</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-hover-bg</td>
+          <td>背景顏色 (hover)</td>
+          <td>oklch(94.66% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-hover-border-color</td>
+          <td>邊框顏色 (hover)</td>
+          <td>oklch(78.94% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-active-bg</td>
+          <td>背景顏色 (active)</td>
+          <td>oklch(86.89% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-active-border-color</td>
+          <td>邊框顏色 (active)</td>
+          <td>oklch(78.94% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-focus-shadow-width</td>
+          <td>聚焦時的線寬(實際上是用 box-shadow 製作的)</td>
+          <td>3px</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-focus-shadow-color</td>
+          <td>聚焦時的線顏色(實際上是用 box-shadow 製作的)</td>
+          <td>oklch(83.15% 0.15681888825079074 78.05241467152487)</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-a11y-text-shadow</td>
+          <td>設定加強顯示效果的文字陰影效果</td>
+          <td>none</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-a11y-bg-image</td>
+          <td>設定加強顯示效果的背景圖案</td>
+          <td>none</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-a11y-bg-size</td>
+          <td>設定加強顯示效果的背景圖案呈現方式</td>
+          <td>1.5rem 1.5rem</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-a11y-bg-position</td>
+          <td>設定加強顯示效果的背景圖案位置</td>
+          <td>center center</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-a11y-hover-bg-image</td>
+          <td>設定加強顯示效果的背景圖案(hover)</td>
+          <td>none</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-a11y-active-bg-image</td>
+          <td>設定加強顯示效果的背景圖案(active)</td>
+          <td>none</td>
+        </tr>
+        <tr>
+          <td>--ry-btn-spinner-color</td>
+          <td>載入中的圖示顏色</td>
+          <td>oklch(78.94% 0 0)</td>
+        </tr>
+      </table>
+      <h2>按鈕事件</h2>
+      <form action="index.html" method="get">
+        範例輸入框: <label for="demo-form"><input type="text" name="fname" id="demo-form"/></label>
+        <ry-btn id="testButton">Type是Button</ry-btn>
+        <ry-btn type="submit">Type是Submit</ry-btn>
+        <ry-btn type="reset">Type是Reset</ry-btn>
+      </form>
+      <h2>問與答</h2>
+      <h3>如果不需要使用 loading，那就不需要使用這個 web component 了？</h3>
+      <p>沒錯，如果不需要使用到 loading 狀態，那就不需要用了。如果您覺得我們的 button CSS variables 好用的話，可以複製使用。</p>
+      <h2>心得</h2>
+      <p>製作一個按鈕的 web component 我發現並沒有太好的效益，按鈕絕大部分在做外觀的變化處理，也就是 CSS 就可以解決的事，而且特地做成 Web component 還需要注意 callback 、屬性繼承以及按鈕裡增加圖案的問題，還需要寫 unit test。除非在按鈕裡增加很多特殊的應用才值得開發。但作為一個最基礎的元件，內容又要設計很複雜的話，通常也會是基於這個元件開發另一個元件。</p>
+      <p><b>所以，我不建議開發 Web Component 按鈕，也不建議使用</b>，秉持著最大原則，原生 HTML 就能解決的事，就使用原生就好了。如果只是想提供不一樣的外觀，寫出 CSS 就可以了。</p>
+      <p>另外範例中有一種帶有背景圖案的按鈕，這是我在資料視覺化無障礙學來的，用意在於別讓按鈕只能用顏色分別，這對視覺不便者會有困擾，我自認為是對無障礙有幫助，但還沒有實測試過，如果想要使用這種方式，請自行斟酌適用性，因為花紋的深淺、形狀，也有可能造成視覺不適感。</p>
+    </main>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const button = document.getElementById("testButton");
+        button.addEventListener("click", (event) => {
+          console.log('按鈕被點擊了')
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accesserty UI Kit 折疊面板(手風琴)</title>
+    <link rel="stylesheet" href="../../../css/style.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <script src="accordion.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <h1>
+        <a
+          href="https://github.com/Neil-Lin/Accesserty UI Kit"
+          target="_blank"
+          title="另開視窗到 Accesserty UI Kit github"
+          rel="noreferrer noopener"
+        >
+          Accesserty UI Kit
+        </a>
+        折疊面板(手風琴)
+      </h1>
+      <h2>如何使用</h2>
+      <h3>HTML</h3>
+      <ol>
+        <li>複製檔案 (accordion.js 或 Accesserty UI Kit.js 或 Accesserty UI Kit.min.js)</li>
+        <li>
+          將 JavaScript 檔案引入至 HTML
+          <code>&lt;script src=&quot;&quot; defer&gt;</code>
+        </li>
+        <li>使用 <code>&lt;ry-accordion&gt;</code> <code>&lt;ry-accordion-item&gt;</code> 標籤</li>
+      </ol>
+      <h3>Nuxt3</h3>
+      <ol>
+        <li>複製檔案 (accordion.js 或 Accesserty UI Kit.js 或 Accesserty UI Kit.min.js)</li>
+        <li>將 JavaScript 檔案放到 Nuxt3 專案。</li>
+        <li>
+          在 plugins 資料夾新增 `ry.client.js` 檔案，內容範例如下：
+          <code>
+            export default defineNuxtPlugin(() => {
+              if (process.client) {
+                import('your path')
+              }
+            })   
+          </code>       
+        </li>
+        <li>在 nuxt.config.ts (或 .js) 增加 plugins:<code>plugins: ['~/plugins/ry.client.js']</code></li>
+        <li>使用 <code>&lt;ry-accordion&gt;</code> <code>&lt;ry-accordion-item&gt;</code> 標籤</li>
+      </ol>
+      <p>如果發生錯誤，請先確保路徑以及名稱都正確。</p>
+      <h2>插槽</h2>
+      <table>
+        <tr>
+          <th>名稱</th>
+          <th>描述</th>
+        </tr>
+        <tr>
+          <td>heading</td>
+          <td>標頭</td>
+        </tr>
+        <tr>
+          <td>sub</td>
+          <td>副標或次要資訊</td>
+        </tr>
+        <tr>
+          <td>icon</td>
+          <td>折疊面板按鈕右方圖示</td>
+        </tr>
+        <tr>
+          <td>content</td>
+          <td>折疊面板展開內容</td>
+        </tr>
+      </table>
+      <br>
+      <ry-accordion>
+        <ry-accordion-item>
+          <div slot="heading">Heading</div>
+          <div slot="sub">
+            sub
+          </div>
+          <div slot="icon">
+            icon
+          </div>
+          <div slot="content">Content</div>
+        </ry-accordion-item>
+        <ry-accordion-item>
+          <div slot="heading">Heading2</div>
+          <div slot="sub">
+            sub
+          </div>
+          <div slot="icon">
+            icon
+          </div>
+          <div slot="content">Content2</div>
+        </ry-accordion-item>
+      </ry-accordion>
+      <h2>預設開啟</h2>
+      <p>增加 `open` 屬性，例如： <code>&lt;ry-accordion-item open&gt;</code> </p>
+      <ry-accordion>
+        <ry-accordion-item open>
+          <div slot="heading">Heading</div>
+          <div slot="sub">
+            sub
+          </div>
+          <div slot="icon">
+            icon
+          </div>
+          <div slot="content">Content</div>
+        </ry-accordion-item>
+        <ry-accordion-item>
+          <div slot="heading">Heading2</div>
+          <div slot="sub">
+            sub
+          </div>
+          <div slot="icon">
+            icon
+          </div>
+          <div slot="content">Content2</div>
+        </ry-accordion-item>
+      </ry-accordion>
+      <h2>巢狀</h2>
+      <ry-accordion>
+        <ry-accordion-item>
+          <div slot="heading">Heading</div>
+          <div slot="sub">
+            sub
+          </div>
+          <div slot="icon">
+            icon
+          </div>
+          <div slot="content">
+            <ry-accordion>
+              <ry-accordion-item>
+                <div slot="heading">Heading</div>
+                <div slot="sub">
+                  sub
+                </div>
+                <div slot="icon">
+                  icon
+                </div>
+                <div slot="content">Content</div>
+              </ry-accordion-item>
+              <ry-accordion-item>
+                <div slot="heading">Heading2</div>
+                <div slot="sub">
+                  sub
+                </div>
+                <div slot="icon">
+                  icon
+                </div>
+                <div slot="content">Content2</div>
+              </ry-accordion-item>
+            </ry-accordion>
+          </div>
+        </ry-accordion-item>
+      </ry-accordion>
+      <h2>客製化樣式</h2>
+      <h3>選擇第一個與最後一個項目</h3>
+      <p>在外部 CSS 使用 <code>::part</code> 裝飾 `button` 和 `region`</p>
+      <p>這是因為無法在外部直接選取 shadow dom 的節點，也沒辦法裝飾，所以為了從外部影響 CSS，有先預留 ::part。</p>
+      <code style="display: block; white-space: pre-wrap;">
+        /* demo.css */
+        ry-accordion-item {
+          &::part(button) {
+            border-bottom: 0;
+          }
+          &::part(region) {
+            border-bottom: 0;
+          }
+          &:first-child {
+            &::part(button){
+              border-radius: 0.25rem 0.25rem 0 0;
+            }
+          }
+          &:last-child {
+            &::part(button){
+              border-bottom: 1px solid oklch(78.94% 0 0);
+              border-radius: 0 0 0.25rem 0.25rem;
+            }
+            &::part(region){
+              border-radius: 0 0 0.25rem 0.25rem;
+            }
+          }
+          &[open] {
+            &:last-child {
+              &::part(button) {
+                border-bottom: 0;
+                border-radius: 0;
+              }
+              &::part(region) {
+                border-bottom: 1px solid oklch(78.94% 0 0);
+              }
+            }
+          }
+        }
+      </code>
+      <br>
+      <ry-accordion class="f-l-ry-accordion">
+        <ry-accordion-item>
+          <h4 slot="heading">Heading</h4>
+          <div slot="sub">
+            sub
+          </div>
+          <div slot="icon">
+            icon
+          </div>
+          <div slot="content">Content</div>
+        </ry-accordion-item>
+        <ry-accordion-item>
+          <h4 slot="heading">Heading2</h4>
+          <div slot="sub">
+            sub
+          </div>
+          <div slot="icon">
+            icon
+          </div>
+          <div slot="content">Content2</div>
+        </ry-accordion-item>
+        <ry-accordion-item>
+          <h4 slot="heading">Heading3</h4>
+          <div slot="sub">
+            sub
+          </div>
+          <div slot="icon">
+            icon
+          </div>
+          <div slot="content">Content3</div>
+        </ry-accordion-item>
+      </ry-accordion>
+      <h3>CSS Variables</h3>
+      <table>
+        <tr>
+          <th scope="col">CSS Variables 名稱</th>
+          <th scope="col">說明</th>
+          <th scope="col">預設值</th>
+        </tr>
+        <tr>
+          <td>--ry-accordion-item-margin-bottom</td>
+          <td>accordion-item 之間的距離</td>
+          <td>1rem</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-heading-padding-vertical</td>
+          <td>標頭的上下內距</td>
+          <td>0.75rem</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-heading-padding-horizontal</td>
+          <td>標頭的左右內距</td>
+          <td>1rem</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-heading-text-color</td>
+          <td>標頭文字顏色</td>
+          <td>oklch(13.98% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-heading-text-size</td>
+          <td>標頭文字大小</td>
+          <td>1rem</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-heading-text-family</td>
+          <td>標頭文字字體</td>
+          <td>'Helvetica, Arial, sans-serif, system-ui'</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-heading-text-line-height</td>
+          <td>標頭文字行高</td>
+          <td>1.5</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-heading-border-width</td>
+          <td>標頭邊框線寬</td>
+          <td>1px</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-heading-border-style</td>
+          <td>標頭邊框樣式</td>
+          <td>solid</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-heading-border-color</td>
+          <td>標頭邊框顏色</td>
+          <td>oklch(78.94% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-heading-border-radius</td>
+          <td>標頭邊框圓角</td>
+          <td>0</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-heading-bg</td>
+          <td>標頭背景顏色</td>
+          <td>oklch(99.4% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-heading-hover-bg</td>
+          <td>標頭背景顏色 (hover)</td>
+          <td>oklch(94.66% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-heading-hover-border-color</td>
+          <td>標頭邊框顏色 (hover)</td>
+          <td>oklch(78.94% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-heading-active-bg</td>
+          <td>標頭背景顏色  (active)</td>
+          <td>oklch(86.89% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-heading-active-border-color</td>
+          <td>標頭邊框顏色 (active)</td>
+          <td>oklch(78.94% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-heading-focus-shadow-width</td>
+          <td>聚焦邊框寬度</td>
+          <td>3px</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-heading-focus-shadow-color</td>
+          <td>聚焦邊框顏色</td>
+          <td>oklch(83.15% 0.15681888825079074 78.05241467152487)</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-content-bg</td>
+          <td>內容背景</td>
+          <td>oklch(97.31% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-content-text-color</td>
+          <td>內容文字顏色</td>
+          <td>oklch(13.98% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-content-padding-left</td>
+          <td>內容左邊距</td>
+          <td>1rem</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-content-padding-right</td>
+          <td>內容右邊距</td>
+          <td>1rem</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-content-overscroll-behavior</td>
+          <td>內容捲動行為</td>
+          <td>auto</td>
+        </tr>
+        <tr>
+          <td>--ry-accordion-content-max-height</td>
+          <td>內容最大高度</td>
+          <td>auto</td>
+        </tr>
+      </table>
+      <br>
+      <ry-accordion class="custom-ry-accordion">
+        <ry-accordion-item>
+          <div slot="heading">使用 Google Font Emoji</div>
+          <div slot="sub">
+            <mark>看這邊！</mark>
+          </div>
+          <div slot="icon">
+            <span class="material-symbols-outlined" aria-hidden="true">
+              expand_more
+            </span>
+          </div>
+          <div slot="content"><p>內容</p></div>
+        </ry-accordion-item>
+        <ry-accordion-item>
+          <div slot="heading">使用 svg</div>
+          <div slot="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 1rem;position: relative; top: 0.125rem;" aria-hidden="true">
+              <!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.!-->
+              <path 
+                fill="white"
+                d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
+              />
+            </svg>
+          </div>
+          <div slot="content"><div style="height: 500px;">內容 2</div></div>
+        </ry-accordion-item>
+      </ry-accordion>
+      <h2>問與答</h2>
+      <h3>感覺直接使用 &lt;details&gt; 就好了</h3>
+      <p>&lt;details&gt; 是個好選擇，我們很推薦直接使用原生 HTML，只是可能需要注意以下幾點</p>
+      <ul>
+        <li>使用 `list-style-image` 變更 icon</li>
+        <li>斷行時，內容會在 icon 的下方，而不是對齊文字</li>
+        <li>有些瀏覽器的螢幕報讀軟體可能還沒完全支援，需要查證</li>
+        <li>在 &lt;summary&gt; 做各種標頭需要客製化</li>
+      </ul>
+      <h2>心得</h2>
+      <p>開發 Accordion 其實蠻好玩的，會需要暸解 <code>role="region"</code>, <code>aria-controls</code>, <code>aria-expanded</code>, <code>aria-hidden</code>, <code>aria-labelledby</code> 以及需要對應的 id 之間的關係，尤其是在 unit test 的時候更加明暸其規則。</p>
+      <p>這個 Web Component 就極力推薦開發者開發和應用，即便對無障礙沒有那麼熟的開發者，只要能先應用，就能對無障礙網頁有貢獻！</p>
+    </main>
+  </body>
+</html>

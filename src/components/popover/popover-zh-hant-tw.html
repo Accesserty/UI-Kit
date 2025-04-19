@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accesserty UI Kit 彈出提示框</title>
+    <style>
+      .anchor {
+        display: block;
+        anchor-name: --anchor-popover;
+      }
+
+      .anchor-position {
+        position-anchor: --anchor-popover;
+        inset: auto;
+        top: anchor(bottom);
+        left: anchor(left);
+      }
+
+      [popover] {
+        transition: opacity 0.7s;
+      }
+
+      [popover]:popover-open {
+        @starting-style {
+          opacity: 0;
+        }
+        opacity: 1;
+      }
+
+      [popover]:not(:popover-open) {
+        animation: fade-out 0.7s;
+      }
+
+      @keyframes fade-out {
+        0% {
+          display: block;
+          opacity: 1;
+        }
+        99% {
+          opacity: 0.01;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .sr-only {
+        clip: rect(0 0 0 0); 
+        clip-path: inset(50%);
+        height: 1px;
+        overflow: hidden;
+        position: absolute;
+        white-space: nowrap; 
+        width: 1px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>
+        <a
+          href="https://github.com/Neil-Lin/Accesserty UI Kit"
+          target="_blank"
+          title="open new window to Accesserty UI Kit github"
+          rel="noreferrer noopener"
+        >
+          Accesserty UI Kit
+        </a>
+        彈出提示框
+      </h1>
+      <h2>重點說明</h2>
+      <ul>
+        <li>使用 Html 全域屬性 <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/popover" title="另開視窗前往 Mozilla 查看屬性資料" target="_blank" rel="noreferrer noopener">popover</a>，可以根據目的建立符合意義的彈出提示框，不需要特別做 Component。</li>
+        <li>搭配 <a href="https://developer.chrome.com/blog/anchor-positioning-api?hl=zh-tw"  title="另開視窗前往 Google 查看使用方式" target="_blank" rel="noreferrer noopener"> Anchor Positioning API </a> 決定彈出提示框位置。</li>
+      </ul>
+      <h2>如何使用</h2>
+      <h3>HTML</h3>
+      <button popovertarget="ref_1" class="anchor">
+        <span aria-hidden="true">?</span>
+        <span class="sr-only">Hint</span>
+      </button>
+
+      <div id="ref_1" popover="manual" class="anchor-position">
+        這是巢狀且需要手動關閉的 popover，而且使用了 CSS Anchor Positioning。<br />
+        請注意有個問題，在手動模式下，關閉這個第一層 popover 時，第二層還會存在於畫面上。
+        <button popovertarget="ref_2" class="anchor2">
+          <span aria-hidden="true">?</span>
+          <span class="sr-only">這是個巢狀 popover</span>
+        </button>
+      </div>
+      
+      <div id="ref_2" popover class="anchor-position2">
+        這個 popover 的位置是預設的，背後都有一層 backdrop，點擊外面即可關閉，且注目焦點會回到上一層 popover 的按鈕。
+      </div>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accesserty UI Kit Switch</title>
+    <link rel="stylesheet" href="../../../css/style.css" />
+    <script src="switch.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <h1>
+        <a
+          href="https://github.com/Neil-Lin/Accesserty UI Kit"
+          target="_blank"
+          title="open new window to Accesserty UI Kit github"
+          rel="noreferrer noopener"
+        >
+          Accesserty UI Kit
+        </a>
+        Switch
+      </h1>
+      <h2>How to use</h2>
+      <h3>HTML</h3>
+      <ol>
+        <li>Copy file (switch.js or Accesserty UI Kit.js or Accesserty UI Kit.min.js)</li>
+        <li>
+          Add the JavaScript file to HTML using the
+          <code>&lt;script src=&quot;&quot; defer&gt;</code> tag
+        </li>
+        <li>Use the <code>&lt;ry-switch&gt;</code> tag</li>
+      </ol>
+      <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
+      <h3>Nuxt3</h3>
+      <ol>
+        <li>Copy file (switch.js or Accesserty UI Kit.js or Accesserty UI Kit.min.js)</li>
+        <li>Add the JavaScript file to the Nuxt3 project.</li>
+        <li>
+          Add a `ry.client.js` file to the plugins folder with the following export:
+          <code>
+            export default defineNuxtPlugin(() => {
+              if (process.client) {
+                import('your path')
+              }
+            })   
+          </code>       
+        </li>
+        <li>Add the plugin configuration to your nuxt.config.ts (or .js):<code>plugins: ['~/plugins/ry.client.js']</code></li>
+        <li>Use the <code>&lt;ry-switch&gt;</code> tag</li>
+      </ol>
+      <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
+      <h2>Attribute</h2>
+      <table>
+        <caption>
+          The Accesserty UI Kit switch attributes:
+        </caption>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Description</th>
+        </tr>
+        <tr>
+          <td>off</td>
+          <td>Set "off" Text</td>
+        </tr>
+        <tr>
+          <td>on</td>
+          <td>Set "on" Text</td>
+        </tr>
+      </table>
+      <h2>Basic</h2>
+      <ry-switch>
+        Default
+      </ry-switch>
+      <h2>Custom Label and Text</h2>
+      <fieldset>
+        <legend>Demo how to custom ry-switch</legend>
+        <ry-switch>
+          <mark>Custom Label</mark>
+        </ry-switch>
+        <br />
+        <ry-switch on="Subscribe!">
+          Only show "On" text
+        </ry-switch>
+        <br />
+        <ry-switch off="Cancel">
+          Only show "Off" text
+        </ry-switch>
+        <br />
+        <ry-switch class="custom-ry-switch" on="On" off="Off">
+          Using CSS Variables custom style
+        </ry-switch>
+      </fieldset>
+      <h3>CSS Variables</h3>
+      <table>
+        <tr>
+          <th scope="col">CSS Variables name</th>
+          <th scope="col">Description</th>
+          <th scope="col">Default value</th>
+        </tr>
+        <tr>
+          <td>--ry-switch-gap</td>
+          <td>Gap between label and switch group</td>
+          <td>1rem</td>
+        </tr>
+        <tr>
+          <td>--ry-switch-padding-top</td>
+          <td>padding-top</td>
+          <td>0.5rem</td>
+        </tr>
+        <tr>
+          <td>--ry-switch-padding-right</td>
+          <td>padding-right</td>
+          <td>0.25rem</td>
+        </tr>
+        <tr>
+          <td>--ry-switch-padding-bottom</td>
+          <td>padding-bottom</td>
+          <td>0.5rem</td>
+        </tr>
+        <tr>
+          <td>--ry-switch-padding-left</td>
+          <td>padding-left</td>
+          <td>0.25rem</td>
+        </tr>
+        <tr>
+          <td>--ry-switch-container-gap</td>
+          <td>Gap of switch group</td>
+          <td>0.5rem</td>
+        </tr>
+        <tr>
+          <td>--ry-switch-input-width</td>
+          <td>width of switch</td>
+          <td>4rem(height: 2rem)</td>
+        </tr>
+        <tr>
+          <td>--ry-switch-inner-distance</td>
+          <td>Gap between switch and inner</td>
+          <td>4rem(height: 2rem)</td>
+        </tr>
+        <tr>
+          <td>--ry-switch-input-border-width</td>
+          <td>border of switch</td>
+          <td>1px</td>
+        </tr>
+        <tr>
+          <td>--ry-switch-input-border-style</td>
+          <td>style of switch</td>
+          <td>solid</td>
+        </tr>
+        <tr>
+          <td>--ry-switch-input-border-color</td>
+          <td>border color of switch</td>
+          <td>oklch(78.94% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-switch-input-border-radius</td>
+          <td>border radius of switch</td>
+          <td>1rem</td>
+        </tr>
+        <tr>
+          <td>--ry-switch-inner-border-radius</td>
+          <td>border radius of inner</td>
+          <td>0.875rem</td>
+        </tr>
+        <tr>
+          <td>--ry-switch-inner-border-radius</td>
+          <td>border radius of inner</td>
+          <td>0.875rem</td>
+        </tr>
+        <tr>
+          <td>--ry-switch-input-checked-bg</td>
+          <td>background-color (checked)</td>
+          <td>oklch(13.98% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-switch-focus-shadow-color</td>
+          <td>focus color</td>
+          <td>oklch(83.15% 0.15681888825079074 78.05241467152487)</td>
+        </tr>
+        <tr>
+          <td>--ry-switch-focus-shadow-width</td>
+          <td>focus border width</td>
+          <td>3px</td>
+        </tr>
+      </table>
+      <h2>FAQ</h2>
+      <h3>Why use input[type="checkbox"] instead of creating everything with div elements?</h3>
+      <p>We don't need to use aria-checked and tabindex attributes. Whenever possible, it's best to use native HTML elements.</p>
+    </main>
+    <script>
+      const switchElements = document.querySelectorAll('ry-switch');
+      switchElements.forEach(switchElement => {
+        switchElement.addEventListener('change', (event) => {
+          console.log(`${switchElement.innerText} is now ${event.detail ? 'On' : 'Off'}`);
+        });
+      });
+    </script>
+  </body>
+</html>

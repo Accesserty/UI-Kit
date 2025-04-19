@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accesserty UI Kit 勾選框</title>
+    <link rel="stylesheet" href="../../../css/style.css" />
+    <script src="checkbox.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <h1>
+        <a
+          href="https://github.com/Neil-Lin/Accesserty UI Kit"
+          target="_blank"
+          title="open new window to Accesserty UI Kit github"
+          rel="noreferrer noopener"
+        >
+          Accesserty UI Kit
+        </a>
+        勾選框
+      </h1>
+      <h2>如何使用</h2>
+      <h3>HTML</h3>
+      <ol>
+        <li>複製檔案 (checkbox.js 或 Accesserty UI Kit.js 或 Accesserty UI Kit.min.js)</li>
+        <li>
+          將 JavaScript 檔案引入至 HTML
+          <code>&lt;script src=&quot;&quot; defer&gt;</code>
+        </li>
+        <li>使用 <code>&lt;ry-checkbox&gt;</code> 標籤</li>
+      </ol>
+      <h3>Nuxt3</h3>
+      <ol>
+        <li>複製檔案 (checkbox.js 或 Accesserty UI Kit.js 或 Accesserty UI Kit.min.js)</li>
+        <li>將 JavaScript 檔案放到 Nuxt3 專案。</li>
+        <li>
+          在 plugins 資料夾新增 `ry.client.js` 檔案，內容範例如下：
+          <code>
+            export default defineNuxtPlugin(() => {
+              if (process.client) {
+                import('your path')
+              }
+            })   
+          </code>       
+        </li>
+        <li>在 nuxt.config.ts (或 .js) 增加 plugins:<code>plugins: ['~/plugins/ry.client.js']</code>以及
+          <code>
+            vue: {
+              compilerOptions: {
+                isCustomElement: (tag) => tag.startsWith("ry-"),
+              },
+            },
+          </code>
+          確保 Vue 正確解析 ry- 開頭的 html tag
+        </li>
+        <li>使用 <code>&lt;ry-checkbox&gt;</code> 標籤</li>
+      </ol>
+      <p>如果發生錯誤，請先確保路徑以及名稱都正確。</p>
+      <h2>屬性</h2>
+      <table>
+        <caption>
+          Accesserty UI Kit 勾選框有以下屬性可用：
+        </caption>
+        <tr>
+          <th scope="col">名稱</th>
+          <th scope="col">說明</th>
+        </tr>
+        <tr>
+          <td>name</td>
+          <td>如果是在同一系列的選項，使用 name 表示</td>
+        </tr>
+        <tr>
+          <td>value</td>
+          <td>勾選框的值</td>
+        </tr>
+        <tr>
+          <td>checked</td>
+          <td>已勾選狀態</td>
+        </tr>
+        <tr>
+          <td>disabled</td>
+          <td>禁用狀態</td>
+        </tr>
+      </table>
+      <h2>基本使用</h2>
+      <ry-checkbox 
+        name="basic-checkbox"
+        value="Checkbox_value"
+        class="basic-checkbox"
+      >
+        勾選框1
+      </ry-checkbox> 
+      <ry-checkbox 
+        name="basic-checkbox"
+        value="Checkbox_value2"
+        checked
+        class="basic-checkbox"
+      >
+        勾選框2(已勾選)
+      </ry-checkbox> 
+      <ry-checkbox 
+        name="basic-checkbox"
+        value="Checkbox_value3"
+        class="basic-checkbox"
+        disabled
+      >
+        勾選框3(禁用)
+      </ry-checkbox>
+      <ry-checkbox 
+        name="basic-checkbox"
+        value="Checkbox_value4"
+        class="basic-checkbox"
+        checked
+        disabled
+      >
+        勾選框4(禁用且已勾選)
+      </ry-checkbox>
+      <h2>客製化</h2>
+      <ry-checkbox 
+        name="test-checkbox"
+        value="Checkbox_value"
+        class="custom-ry-checkbox"
+      >
+        勾選框1
+      </ry-checkbox> 
+      <ry-checkbox 
+        name="test-checkbox"
+        value="Checkbox_value2"
+        checked
+        class="custom-ry-checkbox"
+      >
+        勾選框2(已勾選)
+      </ry-checkbox> 
+      <ry-checkbox 
+        name="test-checkbox"
+        value="Checkbox_value3"
+        disabled
+        class="custom-ry-checkbox"
+      >
+        勾選框3(禁用)
+      </ry-checkbox>
+      <ry-checkbox 
+        name="test-checkbox"
+        value="Checkbox_value4"
+        disabled
+        checked
+        class="custom-ry-checkbox"
+      >
+        勾選框4(禁用且已勾選)
+      </ry-checkbox>
+      <h3>CSS Variables</h3>
+      <table>
+        <tr>
+          <th scope="col">CSS Variables 名稱</th>
+          <th scope="col">說明</th>
+          <th scope="col">預設值</th>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-padding</td>
+          <td>勾選框邊距</td>
+          <td>0.25rem</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-content-gap</td>
+          <td>勾選框內容距離</td>
+          <td>0.5rem</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-width</td>
+          <td>勾選框方框寬度</td>
+          <td>1.5rem</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-height</td>
+          <td>勾選框方框高度</td>
+          <td>1.5rem</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-border-width</td>
+          <td>勾選框方框邊線寬度</td>
+          <td>1px</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-border-style</td>
+          <td>勾選框方框邊線樣式</td>
+          <td>solid</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-border-color</td>
+          <td>勾選框方框邊線顏色</td>
+          <td>oklch(78.94% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-border-radius</td>
+          <td>勾選框方框倒圓角</td>
+          <td>0.25rem</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-bg</td>
+          <td>勾選框方框背景顏色</td>
+          <td>oklch(99.4% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-focus-shadow-width</td>
+          <td>勾選框方框聚焦時邊線寬度</td>
+          <td>3px</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-focus-shadow-color</td>
+          <td>勾選框方框聚焦時邊線顏色</td>
+          <td>oklch(83.15% 0.15681888825079074 78.05241467152487)</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-checked-bg</td>
+          <td>勾選框方框背景顏色(已選取)</td>
+          <td>oklch(13.98% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-checked-symbol</td>
+          <td>勾選框方框符號(已選取)</td>
+          <td>✔︎</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-checked-text-color</td>
+          <td>勾選框方框符號顏色(已選取)</td>
+          <td>oklch(99.4% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-input-checked-text-size</td>
+          <td>勾選框方框符號大小(已選取)</td>
+          <td>1.125rem</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-label-text-color</td>
+          <td>勾選框文字顏色</td>
+          <td>oklch(13.98% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-label-text-size</td>
+          <td>勾選框文字大小</td>
+          <td>1rem</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-label-hover-text-deco</td>
+          <td>勾選框文字裝飾(hover)</td>
+          <td>underline</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-label-active-text-color</td>
+          <td>勾選框文字顏色(active)</td>
+          <td>oklch(53.7% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--ry-checkbox-label-disabled-text-color</td>
+          <td>勾選框文字顏色(disabled)</td>
+          <td>oklch(53.7% 0 0)</td>
+        </tr>
+      </table>
+      <h2>問與答</h2>
+      <h3>相比原生如何？</h3>
+      <p>使用 <code>ry-checkbox</code> 可以確保螢幕閱讀器正確閱讀 label 與 input 之間的關聯，推薦使用。</p>
+      <p>但即便是這樣還是不夠，如果是有一組多個相關 checkbox，最好搭配使用 role="group"、aria-labelledby、&lt;ul&gt;、&lt;li&gt;，如此一來可以知道同一組裡面有多少個 checkbox。</p>
+      <form id="foodForm">
+        <div role="group" aria-labelledby="checkbox-group">
+          <p id="checkbox-group">請選擇喜歡的食物(至少選擇一項)</p>
+          <ry-checkbox name="food" value="apple" class="basic-checkbox">蘋果</ry-checkbox>
+          <ry-checkbox name="food" value="banana" class="basic-checkbox">香蕉</ry-checkbox>
+          <ry-checkbox name="food" value="orange" class="basic-checkbox" checked>柳橙</ry-checkbox>
+          <div id="errorMessage" class="error" style="display: none;">請至少選擇香其中一個</div>
+          <button type="submit">送出</button>
+        </div>
+      </form>
+    </main>
+
+    <script>
+      const form = document.getElementById('foodForm');
+      const errorMessage = document.getElementById('errorMessage');
+  
+      form.addEventListener('submit', (event) => {
+        event.preventDefault(); // 阻止默认提交行为
+        const formData = new FormData(form);
+        const selectedFoods = formData.getAll('food');
+  
+        if (selectedFoods.length > 0) {
+          errorMessage.style.display = 'none';
+          alert('送出成功，您選擇了：' + selectedFoods.join(', '));
+        } else {
+          errorMessage.style.display = 'block';
+        }
+      });
+    </script>
+  </body>
+</html>
