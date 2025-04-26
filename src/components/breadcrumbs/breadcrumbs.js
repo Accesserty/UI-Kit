@@ -1,4 +1,4 @@
-class RyBreadcrumbs extends HTMLElement {
+class AuBreadcrumbs extends HTMLElement {
   constructor() {
     super()
     this.attachShadow({ mode: 'open' })
@@ -58,7 +58,7 @@ class RyBreadcrumbs extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <style>
         nav {
-          background-color: oklch(var(--ry-breadcrumbs-bg, transparent));
+          background-color: oklch(var(--au-breadcrumbs-bg, transparent));
           overflow: auto;
           white-space: nowrap;
           ol {
@@ -76,10 +76,10 @@ class RyBreadcrumbs extends HTMLElement {
               }
               a {
                 display: inline-block;
-                padding: var(--ry-breadcrumbs-link-padding-vertical, 0.75rem) var(--ry-breadcrumbs-link-padding-horizontal, 0.5rem);
-                font-size: var(--ry-breadcrumbs-text-size, 1rem);
-                text-decoration: var(--ry-breadcrumbs-text-deco, none);
-                color: oklch(var(--ry-breadcrumbs-link-color, 42.9% 0.2972777928415759 264.05202063805507));
+                padding: var(--au-breadcrumbs-link-padding-vertical, 0.75rem) var(--au-breadcrumbs-link-padding-horizontal, 0.5rem);
+                font-size: var(--au-breadcrumbs-text-size, 1rem);
+                text-decoration: var(--au-breadcrumbs-text-deco, none);
+                color: oklch(var(--au-breadcrumbs-link-color, 42.9% 0.2972777928415759 264.05202063805507));
                 -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
                 &:hover {
                   opacity: 0.7;
@@ -88,14 +88,14 @@ class RyBreadcrumbs extends HTMLElement {
                   opacity: 1;
                 }
                 &:visited {
-                  color: oklch(var(--ry-breadcrumbs-link-visited-color, 37.48% 0.167 303.51));
+                  color: oklch(var(--au-breadcrumbs-link-visited-color, 37.48% 0.167 303.51));
                 }
                 &:focus-visible {
                   outline: none;
-                  box-shadow: inset 0 0 0 var(--ry-breadcrumbs-focus-shadow-width, 3px) oklch(var(--ry-breadcrumbs-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
+                  box-shadow: inset 0 0 0 var(--au-breadcrumbs-focus-shadow-width, 3px) oklch(var(--au-breadcrumbs-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
                 }
                 &[aria-current="page"] {
-                  color: oklch(var(--ry-breadcrumbs-link-currentpage-color, 13.98% 0 0));
+                  color: oklch(var(--au-breadcrumbs-link-currentpage-color, 13.98% 0 0));
                   pointer-events: none;
                 }
               }
@@ -128,4 +128,4 @@ class RyBreadcrumbs extends HTMLElement {
   }
 }
 
-customElements.define('ry-breadcrumbs', RyBreadcrumbs)
+customElements.define('au-breadcrumbs', AuBreadcrumbs)

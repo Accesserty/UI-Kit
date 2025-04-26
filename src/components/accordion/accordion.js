@@ -4,7 +4,7 @@ class RyAccordion extends HTMLElement {
     this.attachShadow({ mode: "open" });
 
     const container = document.createElement('div');
-    container.setAttribute('class', 'ry-accordion');
+    container.setAttribute('class', 'au-accordion');
     
     const slot = document.createElement('slot');
     container.appendChild(slot);
@@ -12,7 +12,7 @@ class RyAccordion extends HTMLElement {
   }
 }
 
-customElements.define("ry-accordion", RyAccordion);
+customElements.define("au-accordion", RyAccordion);
 
 
 class RyAccordionItem extends HTMLElement {
@@ -24,12 +24,12 @@ class RyAccordionItem extends HTMLElement {
       const titleId = this.generateId();
 
       const content = document.createElement('div');
-      content.setAttribute('class', 'ry-accordion-item');
+      content.setAttribute('class', 'au-accordion-item');
       
       content.innerHTML = `
         <style>
-          .ry-accordion-item {
-            margin-bottom: var(--ry-accordion-item-margin-bottom, 1rem);
+          .au-accordion-item {
+            margin-bottom: var(--au-accordion-item-margin-bottom, 1rem);
           }
           button {
             /* behavior */
@@ -44,20 +44,20 @@ class RyAccordionItem extends HTMLElement {
             word-break: break-word;
             width: 100%;
             text-align: left;
-            padding: var(--ry-accordion-heading-padding-vertical, 0.75rem) var(--ry-accordion-heading-padding-horizontal, 1rem);
+            padding: var(--au-accordion-heading-padding-vertical, 0.75rem) var(--au-accordion-heading-padding-horizontal, 1rem);
             
             /* text */
-            color: oklch(var(--ry-accordion-heading-text-color, 13.98% 0 0));
-            font-size: var(--ry-accordion-heading-text-size, 1rem);
-            font-family: var(--ry-accordion-heading-text-family, 'Helvetica, Arial, sans-serif, system-ui');
-            line-height: var(--ry-accordion-heading-text-line-height, 1.5);
+            color: oklch(var(--au-accordion-heading-text-color, 13.98% 0 0));
+            font-size: var(--au-accordion-heading-text-size, 1rem);
+            font-family: var(--au-accordion-heading-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+            line-height: var(--au-accordion-heading-text-line-height, 1.5);
             
             /* border */
-            border: var(--ry-accordion-heading-border-width, 1px) var(--ry-accordion-heading-border-style, solid) oklch(var(--ry-accordion-heading-border-color, 78.94% 0 0));
-            border-radius: var(--ry-accordion-heading-border-radius, 0);
+            border: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
+            border-radius: var(--au-accordion-heading-border-radius, 0);
             
             /* others decoration */
-            background-color: oklch(var(--ry-accordion-heading-bg, 99.4% 0 0));
+            background-color: oklch(var(--au-accordion-heading-bg, 99.4% 0 0));
             transition: background-color 160ms ease-in;
 
             .heading {
@@ -85,25 +85,25 @@ class RyAccordionItem extends HTMLElement {
             }
 
             &:hover {
-              background-color: oklch(var(--ry-accordion-heading-hover-bg, 94.66% 0 0));
-              border-color: oklch(var(--ry-accordion-heading-hover-border-color, 78.94% 0 0));
+              background-color: oklch(var(--au-accordion-heading-hover-bg, 94.66% 0 0));
+              border-color: oklch(var(--au-accordion-heading-hover-border-color, 78.94% 0 0));
             }
             
             &:active {
-              background-color: oklch(var(--ry-accordion-heading-active-bg, 86.89% 0 0));
-              border-color: oklch(var(--ry-accordion-heading-active-border-color, 78.94% 0 0));
+              background-color: oklch(var(--au-accordion-heading-active-bg, 86.89% 0 0));
+              border-color: oklch(var(--au-accordion-heading-active-border-color, 78.94% 0 0));
             }
             
             &:focus-visible {
               outline: none;
-              box-shadow: inset 0 0 0 var(--ry-accordion-heading-focus-shadow-width, 3px) oklch(var(--ry-accordion-heading-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
+              box-shadow: inset 0 0 0 var(--au-accordion-heading-focus-shadow-width, 3px) oklch(var(--au-accordion-heading-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
             }
           }
 
           div[role="region"] {
-            background-color: oklch(var(--ry-accordion-content-bg, 97.31% 0 0));
-            color: oklch(var(--ry-accordion-content-text-color, 13.98% 0 0));
-            padding: var(--ry-accordion-content-padding-top, 1rem)  var(--ry-accordion-content-padding-right, 1rem)  var(--ry-accordion-content-padding-bottom, 1rem)  var(--ry-accordion-content-padding-left, 1rem);
+            background-color: oklch(var(--au-accordion-content-bg, 97.31% 0 0));
+            color: oklch(var(--au-accordion-content-text-color, 13.98% 0 0));
+            padding: var(--au-accordion-content-padding-top, 1rem)  var(--au-accordion-content-padding-right, 1rem)  var(--au-accordion-content-padding-bottom, 1rem)  var(--au-accordion-content-padding-left, 1rem);
 
             &[aria-hidden="true"] {
               display: none;
@@ -111,12 +111,12 @@ class RyAccordionItem extends HTMLElement {
 
             &[aria-hidden="false"] {
               display: block;
-              overscroll-behavior: var(--ry-accordion-content-overscroll-behavior, auto);
-              max-height: var(--ry-accordion-content-max-height, 300px);
+              overscroll-behavior: var(--au-accordion-content-overscroll-behavior, auto);
+              max-height: var(--au-accordion-content-max-height, 300px);
               overflow: auto;
-              border-left: var(--ry-accordion-heading-border-width, 1px) var(--ry-accordion-heading-border-style, solid) oklch(var(--ry-accordion-heading-border-color, 78.94% 0 0));
-              border-right: var(--ry-accordion-heading-border-width, 1px) var(--ry-accordion-heading-border-style, solid) oklch(var(--ry-accordion-heading-border-color, 78.94% 0 0));
-              border-bottom: var(--ry-accordion-heading-border-width, 1px) var(--ry-accordion-heading-border-style, solid) oklch(var(--ry-accordion-heading-border-color, 78.94% 0 0));
+              border-left: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
+              border-right: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
+              border-bottom: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
             }
           }
         </style>
@@ -126,7 +126,7 @@ class RyAccordionItem extends HTMLElement {
               <div>
                 <slot name="sub"></slot>
               </div>
-              <div class="icon"">
+              <div class="icon" aria-hidden="true">
                 <slot name="icon"></slot>
               </div>
             </div>
@@ -166,7 +166,7 @@ class RyAccordionItem extends HTMLElement {
   generateId() {
     const byteArray = new Uint32Array(1);
     window.crypto.getRandomValues(byteArray);
-    return `ry-accordion-item-${byteArray[0].toString(36)}`;
+    return `au-accordion-item-${byteArray[0].toString(36)}`;
   }
 
   toggleAccordion() {
@@ -182,4 +182,4 @@ class RyAccordionItem extends HTMLElement {
   }
 }
 
-customElements.define("ry-accordion-item", RyAccordionItem);
+customElements.define("au-accordion-item", RyAccordionItem);

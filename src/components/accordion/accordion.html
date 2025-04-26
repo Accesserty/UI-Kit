@@ -4,49 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Accesserty UI Kit Accordion</title>
-    <link rel="stylesheet" href="../../../css/style.css" />
+    <link rel="stylesheet" href="../../../css/au-style.css" />
+    <link rel="stylesheet" href="../../../css/demo.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <script src="accordion.js" defer></script>
   </head>
   <body>
     <main>
       <h1>
-        <a
-          href="https://github.com/Neil-Lin/Accesserty UI Kit"
-          target="_blank"
-          title="open new window to Accesserty UI Kit github"
-          rel="noreferrer noopener"
-        >
-          Accesserty UI Kit
-        </a>
-        Accordion
+        Accesserty UI Kit Accordion
       </h1>
       <h2>How to use</h2>
       <h3>HTML</h3>
       <ol>
-        <li>Copy file (accordion.js or Accesserty UI Kit.js or Accesserty UI Kit.min.js)</li>
+        <li>Copy file (accordion.js or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
         <li>
           Add the JavaScript file to HTML using the
           <code>&lt;script src=&quot;&quot; defer&gt;</code> tag
         </li>
-        <li>Use the <code>&lt;ry-accordion&gt;</code> <code>&lt;ry-accordion-item&gt;</code>tag</li>
-      </ol>
-      <h3>Nuxt3</h3>
-      <ol>
-        <li>Copy file (accordion.js or Accesserty UI Kit.js or Accesserty UI Kit.min.js)</li>
-        <li>Add the JavaScript file to the Nuxt3 project.</li>
-        <li>
-          Add a `ry.client.js` file to the plugins folder with the following export:
-          <code>
-            export default defineNuxtPlugin(() => {
-              if (process.client) {
-                import('your path')
-              }
-            })   
-          </code>       
-        </li>
-        <li>Add the plugin configuration to your nuxt.config.ts (or .js):<code>plugins: ['~/plugins/ry.client.js']</code></li>
-        <li>Use the <code>&lt;ry-accordion&gt;</code> and <code>&lt;ry-accordion-item&gt;</code> tag</li>
+        <li>Use the <code>&lt;au-accordion&gt;</code> <code>&lt;au-accordion-item&gt;</code>tag</li>
       </ol>
       <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
       <h2>Basic &lt;slot&gt;</h2>
@@ -73,8 +49,8 @@
         </tr>
       </table>
       <br>
-      <ry-accordion>
-        <ry-accordion-item>
+      <au-accordion>
+        <au-accordion-item>
           <div slot="heading">Heading</div>
           <div slot="sub">
             sub
@@ -83,8 +59,8 @@
             icon
           </div>
           <div slot="content">Content</div>
-        </ry-accordion-item>
-        <ry-accordion-item>
+        </au-accordion-item>
+        <au-accordion-item>
           <div slot="heading">Heading2</div>
           <div slot="sub">
             sub
@@ -93,12 +69,12 @@
             icon
           </div>
           <div slot="content">Content2</div>
-        </ry-accordion-item>
-      </ry-accordion>
+        </au-accordion-item>
+      </au-accordion>
       <h2>Default Open</h2>
-      <p>Add `open` attribute <code>&lt;ry-accordion-item open&gt;</code> </p>
-      <ry-accordion>
-        <ry-accordion-item open>
+      <p>Add `open` attribute <code>&lt;au-accordion-item open&gt;</code> </p>
+      <au-accordion>
+        <au-accordion-item open>
           <div slot="heading">Heading</div>
           <div slot="sub">
             sub
@@ -107,8 +83,8 @@
             icon
           </div>
           <div slot="content">Content</div>
-        </ry-accordion-item>
-        <ry-accordion-item>
+        </au-accordion-item>
+        <au-accordion-item>
           <div slot="heading">Heading2</div>
           <div slot="sub">
             sub
@@ -117,11 +93,11 @@
             icon
           </div>
           <div slot="content">Content2</div>
-        </ry-accordion-item>
-      </ry-accordion>
+        </au-accordion-item>
+      </au-accordion>
       <h2>Nested</h2>
-      <ry-accordion>
-        <ry-accordion-item>
+      <au-accordion>
+        <au-accordion-item>
           <div slot="heading">Heading</div>
           <div slot="sub">
             sub
@@ -130,8 +106,8 @@
             icon
           </div>
           <div slot="content">
-            <ry-accordion>
-              <ry-accordion-item>
+            <au-accordion>
+              <au-accordion-item>
                 <div slot="heading">Heading</div>
                 <div slot="sub">
                   sub
@@ -140,8 +116,8 @@
                   icon
                 </div>
                 <div slot="content">Content</div>
-              </ry-accordion-item>
-              <ry-accordion-item>
+              </au-accordion-item>
+              <au-accordion-item>
                 <div slot="heading">Heading2</div>
                 <div slot="sub">
                   sub
@@ -150,18 +126,18 @@
                   icon
                 </div>
                 <div slot="content">Content2</div>
-              </ry-accordion-item>
-            </ry-accordion>
+              </au-accordion-item>
+            </au-accordion>
           </div>
-        </ry-accordion-item>
-      </ry-accordion>
+        </au-accordion-item>
+      </au-accordion>
       <h2>Custom Style</h2>
       <h3>If you want to select first-child and last-child</h3>
       <p>Set external CSS and use <code>::part</code> style `button` and `region`</p>
-      <p>Because We can't select `.ry-accordion-item` in &lt;ry-accordion&gt;.(Both are shadow dom)</p>
+      <p>Because We can't select `.au-accordion-item` in &lt;au-accordion&gt;.(Both are shadow dom)</p>
       <code style="display: block; white-space: pre-wrap;">
         /* demo.css */
-        ry-accordion-item {
+        au-accordion-item {
           &::part(button) {
             border-bottom: 0;
           }
@@ -196,8 +172,8 @@
         }
       </code>
       <br>
-      <ry-accordion class="f-l-ry-accordion">
-        <ry-accordion-item>
+      <au-accordion class="f-l-au-accordion">
+        <au-accordion-item>
           <h4 slot="heading">Heading</h4>
           <div slot="sub">
             sub
@@ -206,8 +182,8 @@
             icon
           </div>
           <div slot="content">Content</div>
-        </ry-accordion-item>
-        <ry-accordion-item>
+        </au-accordion-item>
+        <au-accordion-item>
           <h4 slot="heading">Heading2</h4>
           <div slot="sub">
             sub
@@ -216,8 +192,8 @@
             icon
           </div>
           <div slot="content">Content2</div>
-        </ry-accordion-item>
-        <ry-accordion-item>
+        </au-accordion-item>
+        <au-accordion-item>
           <h4 slot="heading">Heading3</h4>
           <div slot="sub">
             sub
@@ -226,8 +202,8 @@
             icon
           </div>
           <div slot="content">Content3</div>
-        </ry-accordion-item>
-      </ry-accordion>
+        </au-accordion-item>
+      </au-accordion>
       <h3>CSS Variables</h3>
       <table>
         <tr>
@@ -236,129 +212,129 @@
           <th scope="col">Default value</th>
         </tr>
         <tr>
-          <td>--ry-accordion-item-margin-bottom</td>
+          <td>--au-accordion-item-margin-bottom</td>
           <td>accordion-item margin-bottom</td>
           <td>1rem</td>
         </tr>
         <tr>
-          <td>--ry-accordion-heading-padding-vertical</td>
+          <td>--au-accordion-heading-padding-vertical</td>
           <td>padding-top and padding-bottom</td>
           <td>0.75rem</td>
         </tr>
         <tr>
-          <td>--ry-accordion-heading-padding-horizontal</td>
+          <td>--au-accordion-heading-padding-horizontal</td>
           <td>padding-left and padding-right</td>
           <td>1rem</td>
         </tr>
         <tr>
-          <td>--ry-accordion-heading-text-color</td>
+          <td>--au-accordion-heading-text-color</td>
           <td>text color</td>
           <td>oklch(13.98% 0 0)</td>
         </tr>
         <tr>
-          <td>--ry-accordion-heading-text-size</td>
+          <td>--au-accordion-heading-text-size</td>
           <td>font size</td>
           <td>1rem</td>
         </tr>
         <tr>
-          <td>--ry-accordion-heading-text-family</td>
+          <td>--au-accordion-heading-text-family</td>
           <td>font family</td>
           <td>'Helvetica, Arial, sans-serif, system-ui'</td>
         </tr>
         <tr>
-          <td>--ry-accordion-heading-text-line-height</td>
+          <td>--au-accordion-heading-text-line-height</td>
           <td>font line height</td>
           <td>1.5</td>
         </tr>
         <tr>
-          <td>--ry-accordion-heading-border-width</td>
+          <td>--au-accordion-heading-border-width</td>
           <td>border width</td>
           <td>1px</td>
         </tr>
         <tr>
-          <td>--ry-accordion-heading-border-style</td>
+          <td>--au-accordion-heading-border-style</td>
           <td>border style</td>
           <td>solid</td>
         </tr>
         <tr>
-          <td>--ry-accordion-heading-border-color</td>
+          <td>--au-accordion-heading-border-color</td>
           <td>border color</td>
           <td>oklch(78.94% 0 0)</td>
         </tr>
         <tr>
-          <td>--ry-accordion-heading-border-radius</td>
+          <td>--au-accordion-heading-border-radius</td>
           <td>border radius</td>
           <td>0</td>
         </tr>
         <tr>
-          <td>--ry-accordion-heading-bg</td>
+          <td>--au-accordion-heading-bg</td>
           <td>background color</td>
           <td>oklch(99.4% 0 0)</td>
         </tr>
         <tr>
-          <td>--ry-accordion-heading-hover-bg</td>
+          <td>--au-accordion-heading-hover-bg</td>
           <td>background color (hover)</td>
           <td>oklch(94.66% 0 0)</td>
         </tr>
         <tr>
-          <td>--ry-accordion-heading-hover-border-color</td>
+          <td>--au-accordion-heading-hover-border-color</td>
           <td>border color (hover)</td>
           <td>oklch(78.94% 0 0)</td>
         </tr>
         <tr>
-          <td>--ry-accordion-heading-active-bg</td>
+          <td>--au-accordion-heading-active-bg</td>
           <td>background color (active)</td>
           <td>oklch(86.89% 0 0)</td>
         </tr>
         <tr>
-          <td>--ry-accordion-heading-active-border-color</td>
+          <td>--au-accordion-heading-active-border-color</td>
           <td>border color (active)</td>
           <td>oklch(78.94% 0 0)</td>
         </tr>
         <tr>
-          <td>--ry-accordion-heading-focus-shadow-width</td>
+          <td>--au-accordion-heading-focus-shadow-width</td>
           <td>focus border width(actually box-shadow)</td>
           <td>3px</td>
         </tr>
         <tr>
-          <td>--ry-accordion-heading-focus-shadow-color</td>
+          <td>--au-accordion-heading-focus-shadow-color</td>
           <td>focus border color(actually box-shadow)</td>
           <td>3px</td>
         </tr>
         <tr>
-          <td>--ry-accordion-content-bg</td>
+          <td>--au-accordion-content-bg</td>
           <td>content background</td>
           <td>oklch(97.31% 0 0)</td>
         </tr>
         <tr>
-          <td>--ry-accordion-content-text-color</td>
+          <td>--au-accordion-content-text-color</td>
           <td>content text color</td>
           <td>oklch(13.98% 0 0)</td>
         </tr>
         <tr>
-          <td>--ry-accordion-content-padding-left</td>
+          <td>--au-accordion-content-padding-left</td>
           <td>content padding-left</td>
           <td>1rem</td>
         </tr>
         <tr>
-          <td>--ry-accordion-content-padding-right</td>
+          <td>--au-accordion-content-padding-right</td>
           <td>content padding-right</td>
           <td>1rem</td>
         </tr>
         <tr>
-          <td>--ry-accordion-content-overscroll-behavior</td>
+          <td>--au-accordion-content-overscroll-behavior</td>
           <td>content scroll behavior</td>
           <td>auto</td>
         </tr>
         <tr>
-          <td>--ry-accordion-content-max-height</td>
+          <td>--au-accordion-content-max-height</td>
           <td>content max height</td>
           <td>auto</td>
         </tr>
       </table>
       <br>
-      <ry-accordion class="custom-ry-accordion">
-        <ry-accordion-item>
+      <au-accordion class="custom-au-accordion">
+        <au-accordion-item>
           <div slot="heading">Heading icon using Google Font Emoji</div>
           <div slot="sub">
             <mark>watch this!</mark>
@@ -369,8 +345,8 @@
             </span>
           </div>
           <div slot="content"><p>Content</p></div>
-        </ry-accordion-item>
-        <ry-accordion-item>
+        </au-accordion-item>
+        <au-accordion-item>
           <div slot="heading">Heading icon using fontawesome svg</div>
           <div slot="icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 1rem;position: relative; top: 0.125rem;" aria-hidden="true">
@@ -382,8 +358,8 @@
             </svg>
           </div>
           <div slot="content"><div style="height: 500px;">Content2</div></div>
-        </ry-accordion-item>
-      </ry-accordion>
+        </au-accordion-item>
+      </au-accordion>
       <h2>FAQ</h2>
       <h3>How about HTML tag &lt;details&gt;</h3>
       <p>&lt;details&gt; is a good choice, and we highly recommend using native HTML directly. If you opt to use &lt;details&gt;:</p>
@@ -393,6 +369,10 @@
         <li>Some browsers or screen readers might not yet support &lt;details&gt;.</li>
         <li>If your title requires additional supplementary information, you will need to customize &lt;summary&gt; yourself.</li>
       </ul>
+      <details>
+        <summary>Demo Details</summary>
+        Inner text
+      </details>      
       <h3>Conclusion</h3>
       <p>Developing an accordion is quite enjoyable as it requires understanding the relationships between <code>role="region"</code>, <code>aria-controls</code>, <code>aria-expanded</code>, <code>aria-hidden</code>, <code>aria-labelledby</code> and corresponding IDs, especially when it becomes clearer during unit testing.</p>
       <p>This Web Component is highly recommended for developers to create and use. Even developers who are not very familiar with accessibility can contribute to accessible web development by simply implementing it!</p>

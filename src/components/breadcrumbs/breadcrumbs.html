@@ -4,48 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Accesserty UI Kit Breadcrumbs</title>
-    <link rel="stylesheet" href="../../../css/style.css" />
+    <link rel="stylesheet" href="../../../css/au-style.css" />
+    <link rel="stylesheet" href="../../../css/demo.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <script src="breadcrumbs.js" defer></script>
   </head>
   <body>
     <main>
-      <h1>
-        <a
-          href="https://github.com/Neil-Lin/Accesserty UI Kit"
-          target="_blank"
-          title="open new window to Accesserty UI Kit github"
-          rel="noreferrer noopener"
-        >
-          Accesserty UI Kit
-        </a>
-        Breadcrumbs
-      </h1>
+      <h1>Accesserty UI Kit  Breadcrumbs</h1>
       <h2>How to use</h2>
       <h3>HTML</h3>
       <ol>
-        <li>Copy file (breadcrumbs.js or Accesserty UI Kit.js or Accesserty UI Kit.min.js)</li>
+        <li>Copy file (breadcrumbs.js or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
         <li>
           Add the JavaScript file to HTML using the
           <code>&lt;script src=&quot;&quot; defer&gt;</code> tag
         </li>
-        <li>Use the <code>&lt;ry-btn&gt;</code> tag</li>
-      </ol>
-      <h3>Nuxt3</h3>
-      <ol>
-        <li>Copy file (breadcrumbs.js or Accesserty UI Kit.js or Accesserty UI Kit.min.js)</li>
-        <li>Add the JavaScript file to the Nuxt3 project.</li>
-        <li>
-          Add a `ry.client.js` file to the plugins folder with the following export:
-          <code>
-            export default defineNuxtPlugin(() => {
-              if (process.client) {
-                import('your path')
-              }
-            })   
-          </code>       
-        </li>
-        <li>Add the plugin configuration to your nuxt.config.ts (or .js):<code>plugins: ['~/plugins/ry.client.js']</code></li>
-        <li>Use the <code>&lt;ry-btn&gt;</code> tag</li>
+        <li>Use the <code>&lt;au-breadcrumbs&gt;</code> tag</li>
       </ol>
       <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
       <h2>Attribute</h2>
@@ -89,7 +64,7 @@
         </tr>
       </table>
       <h2>Basic</h2>
-      <ry-breadcrumbs
+      <au-breadcrumbs
         items='[
           { 
             "text":"Home",
@@ -103,10 +78,10 @@
             "text":"Contact"
           }
         ]'
-      ></ry-breadcrumbs>
+      ></au-breadcrumbs>
       <h2>aria-label</h2>
       <p>Recommend to add <code>aria-label</code></p>
-      <ry-breadcrumbs
+      <au-breadcrumbs
         aria-label="This is main navigator."
         items='[
           { 
@@ -121,10 +96,10 @@
             "text":"Contact"
           }
         ]'
-      ></ry-breadcrumbs>
+      ></au-breadcrumbs>
       <p>open devtool you can see <code>&lt;nav aria-label="This is main navigator."&gt;</code></p>
       <h2>Separator</h2>
-      <ry-breadcrumbs
+      <au-breadcrumbs
         label="This is main navigator."
         separator=">"
         items='[
@@ -140,13 +115,13 @@
             "text":"Contact"
           }
         ]'
-      ></ry-breadcrumbs>
+      ></au-breadcrumbs>
       <h2>Custom</h2>
       <p>Set a classname and change CSS Variables.</p>
       <p>If you want to add an icon in front of an item, you can use slot="icon-{count}". For example, for the second one, use `slot="icon-2"`.</p>
-      <ry-breadcrumbs
+      <au-breadcrumbs
         id="aaa"
-        class="ry-breadcrumbs"
+        class="au-breadcrumbs"
         aria-label="Test navigator."
         separator=">"
         items='[
@@ -163,8 +138,8 @@
           }
         ]'
       >
-        <span slot="icon-2">😃</span>  
-      </ry-breadcrumbs>
+        <span slot="icon-2" aria-hidden="true">😃</span>  
+      </au-breadcrumbs>
       <h3>CSS Variables</h3>
       <table>
         <tr>
@@ -173,52 +148,52 @@
           <th scope="col">Default value</th>
         </tr>
         <tr>
-          <td>--ry-breadcrumbs-bg</td>
+          <td>--au-breadcrumbs-bg</td>
           <td>navigator background color</td>
           <td>transparent</td>
         </tr>
         <tr>
-          <td>--ry-breadcrumbs-link-padding-vertical</td>
+          <td>--au-breadcrumbs-link-padding-vertical</td>
           <td>padding-top and padding-bottom of the link</td>
           <td>0.75rem</td>
         </tr>
         <tr>
-          <td>--ry-breadcrumbs-link-padding-horizontal</td>
+          <td>--au-breadcrumbs-link-padding-horizontal</td>
           <td>padding-left and padding-right of the link</td>
           <td>0.5rem</td>
         </tr>
         <tr>
-          <td>--ry-breadcrumbs-text-size</td>
+          <td>--au-breadcrumbs-text-size</td>
           <td>text size</td>
           <td>1rem</td>
         </tr>
         <tr>
-          <td>--ry-breadcrumbs-text-deco</td>
+          <td>--au-breadcrumbs-text-deco</td>
           <td>text-decoration</td>
           <td>none</td>
         </tr>
         <tr>
-          <td>--ry-breadcrumbs-link-color</td>
+          <td>--au-breadcrumbs-link-color</td>
           <td>color of link</td>
           <td>oklch(42.9% 0.2972777928415759 264.05202063805507)</td>
         </tr>
         <tr>
-          <td>--ry-breadcrumbs-link-visited-color</td>
+          <td>--au-breadcrumbs-link-visited-color</td>
           <td>color of link(visited)</td>
           <td>oklch(37.48% 0.167 303.51)</td>
         </tr>
         <tr>
-          <td>--ry-breadcrumbs-focus-shadow-width</td>
+          <td>--au-breadcrumbs-focus-shadow-width</td>
           <td>border width of link(focus)</td>
           <td>3px</td>
         </tr>
         <tr>
-          <td>--ry-breadcrumbs-focus-shadow-color</td>
+          <td>--au-breadcrumbs-focus-shadow-color</td>
           <td>border color of link(focus)</td>
           <td>oklch(83.15% 0.15681888825079074 78.05241467152487)</td>
         </tr>
         <tr>
-          <td>--ry-breadcrumbs-link-currentpage-color</td>
+          <td>--au-breadcrumbs-link-currentpage-color</td>
           <td>color of link(focus)</td>
           <td>oklch(13.98% 0 0)</td>
         </tr>

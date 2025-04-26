@@ -1,4 +1,4 @@
-class RyCheckbox extends HTMLElement {
+class AuCheckbox extends HTMLElement {
   static formAssociated = true;
 
   constructor() {
@@ -11,25 +11,25 @@ class RyCheckbox extends HTMLElement {
 
     const style = document.createElement('style');
     style.textContent = `
-      .ry-checkbox {
+      .au-checkbox {
         display: inline-block;
         vertical-align: middle;
-        padding: var(--ry-checkbox-padding, 0.25rem);
+        padding: var(--au-checkbox-padding, 0.25rem);
       }
       label {
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: var(--ry-checkbox-content-gap, 0.5rem);
+        gap: var(--au-checkbox-content-gap, 0.5rem);
         -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
         input[type="checkbox"] {
           appearance: none;
           cursor: pointer;
-          width: var(--ry-checkbox-input-width, 1.5rem);
-          height: var(--ry-checkbox-input-height, 1.5rem);
-          border: var(--ry-checkbox-input-border-width, 1px) var(--ry-checkbox-input-border-style, solid) oklch(var(--ry-checkbox-input-border-color, 78.94% 0 0));
-          border-radius: var(--ry-checkbox-input-border-radius, 0.25rem);
-          background-color: oklch(var(--ry-checkbox-input-bg, 99.4% 0 0));
+          width: var(--au-checkbox-input-width, 1.5rem);
+          height: var(--au-checkbox-input-height, 1.5rem);
+          border: var(--au-checkbox-input-border-width, 1px) var(--au-checkbox-input-border-style, solid) oklch(var(--au-checkbox-input-border-color, 78.94% 0 0));
+          border-radius: var(--au-checkbox-input-border-radius, 0.25rem);
+          background-color: oklch(var(--au-checkbox-input-bg, 99.4% 0 0));
           &:focus-visible {
             outline: none;
           }
@@ -37,33 +37,33 @@ class RyCheckbox extends HTMLElement {
             cursor: not-allowed;
           }
           &:checked {
-            background-color: oklch(var(--ry-checkbox-input-checked-bg, 13.98% 0 0));
+            background-color: oklch(var(--au-checkbox-input-checked-bg, 13.98% 0 0));
             display: grid;
             place-content: center;
             &:before {
-              content: var(--ry-checkbox-input-checked-symbol, '✔︎');
-              color: oklch(var(--ry-checkbox-input-checked-text-color, 99.4% 0 0));
-              font-size: var(--ry-checkbox-input-checked-text-size, 1.125rem);
+              content: var(--au-checkbox-input-checked-symbol, '✔︎');
+              color: oklch(var(--au-checkbox-input-checked-text-color, 99.4% 0 0));
+              font-size: var(--au-checkbox-input-checked-text-size, 1.125rem);
             }
           }
         }
         .text {
           flex: 1;
-          color: oklch(var(--ry-checkbox-label-text-color, 13.98% 0 0));
-          font-size: var(--ry-checkbox-label-text-size, 1rem);
+          color: oklch(var(--au-checkbox-label-text-color, 13.98% 0 0));
+          font-size: var(--au-checkbox-label-text-size, 1rem);
         }
         &:hover {
           .text {
-            text-decoration: var(--ry-checkbox-label-hover-text-deco, underline);
+            text-decoration: var(--au-checkbox-label-hover-text-deco, underline);
           }
         }
         &:active {
           .text {
-            color: oklch(var(--ry-checkbox-label-active-text-color, 53.7% 0 0));
+            color: oklch(var(--au-checkbox-label-active-text-color, 53.7% 0 0));
           }
         }
         &:has(input:focus-visible) {
-          box-shadow: inset 0 0 0 var(--ry-checkbox-input-focus-shadow-width, 3px) oklch(var(--ry-checkbox-input-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-checkbox-input-focus-shadow-width, 3px) oklch(var(--au-checkbox-input-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
         }
         &:has(input[type="checkbox"]:disabled) {
           cursor: not-allowed;
@@ -73,14 +73,14 @@ class RyCheckbox extends HTMLElement {
           .text {
             pointer-events: none;
             text-decoration: none;
-            color: oklch(var(--ry-checkbox-label-disabled-text-color, 53.7% 0 0));
+            color: oklch(var(--au-checkbox-label-disabled-text-color, 53.7% 0 0));
           }
         }
       }
     `;
 
     const container = document.createElement('div');
-    container.setAttribute('class', 'ry-checkbox');
+    container.setAttribute('class', 'au-checkbox');
 
     const label = document.createElement('label');
     label.setAttribute('for', inputID);
@@ -118,7 +118,7 @@ class RyCheckbox extends HTMLElement {
   generateId() {
     const byteArray = new Uint32Array(1);
     window.crypto.getRandomValues(byteArray);
-    return `ry-checkbox-${byteArray[0].toString(36)}`;
+    return `au-checkbox-${byteArray[0].toString(36)}`;
   }
 
   static get observedAttributes() {
@@ -189,5 +189,5 @@ class RyCheckbox extends HTMLElement {
   }
 }
 
-customElements.define('ry-checkbox', RyCheckbox);
+customElements.define('au-checkbox', AuCheckbox);
 

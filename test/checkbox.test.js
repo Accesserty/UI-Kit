@@ -1,9 +1,9 @@
 import { html, fixture, expect } from '@open-wc/testing';
 import '../src/components/checkbox/checkbox.js';
 
-describe('RyCheckbox', () => {
+describe('AuCheckbox', () => {
   it('renders the checkbox with default properties', async () => {
-    const el = await fixture(html`<ry-checkbox></ry-checkbox>`);
+    const el = await fixture(html`<au-checkbox></au-checkbox>`);
     const input = el.shadowRoot.querySelector('input');
 
     expect(input).to.exist;
@@ -16,12 +16,12 @@ describe('RyCheckbox', () => {
 
   it('sets the name, value, checked, and disabled properties correctly', async () => {
     const el = await fixture(html`
-      <ry-checkbox
+      <au-checkbox
         name="test-checkbox"
         value="Checkbox_value"
         checked
         disabled
-      ></ry-checkbox>
+      ></au-checkbox>
     `);
     const input = el.shadowRoot.querySelector('input');
 
@@ -33,7 +33,7 @@ describe('RyCheckbox', () => {
 
   it('renders slot content correctly', async () => {
     const el = await fixture(html`
-      <ry-checkbox>Checkbox Label</ry-checkbox>
+      <au-checkbox>Checkbox Label</au-checkbox>
     `);
     const textSlot = el.shadowRoot.querySelector('slot');
     const assignedNodes = textSlot.assignedNodes();
@@ -44,7 +44,7 @@ describe('RyCheckbox', () => {
 
   it('dispatches a change event when the checkbox is clicked', async () => {
     const el = await fixture(html`
-      <ry-checkbox></ry-checkbox>
+      <au-checkbox></au-checkbox>
     `);
     const input = el.shadowRoot.querySelector('input');
     let changeEventDetail = null;
@@ -66,7 +66,7 @@ describe('RyCheckbox', () => {
 
   it('reflects attribute changes to the checkbox element', async () => {
     const el = await fixture(html`
-      <ry-checkbox></ry-checkbox>
+      <au-checkbox></au-checkbox>
     `);
     const input = el.shadowRoot.querySelector('input');
 
@@ -88,8 +88,8 @@ describe('RyCheckbox', () => {
   });
 
   it('generates a unique ID for each checkbox instance', async () => {
-    const el1 = await fixture(html`<ry-checkbox></ry-checkbox>`);
-    const el2 = await fixture(html`<ry-checkbox></ry-checkbox>`);
+    const el1 = await fixture(html`<au-checkbox></au-checkbox>`);
+    const el2 = await fixture(html`<au-checkbox></au-checkbox>`);
     const input1 = el1.shadowRoot.querySelector('input');
     const input2 = el2.shadowRoot.querySelector('input');
 

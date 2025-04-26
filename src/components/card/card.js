@@ -1,4 +1,4 @@
-class RyCard extends HTMLElement {
+class AuCard extends HTMLElement {
   constructor() {
     super();
     this.shadow = this.attachShadow({ mode: "open" });
@@ -6,7 +6,7 @@ class RyCard extends HTMLElement {
   }
   render() {
     this.shadowRoot.innerHTML = `
-      <div class="ry-card-container" part="ry-card-container">
+      <div class="au-card-container" part="au-card-container">
         <slot name="heading" part="heading"></slot>
         <slot name="media" part="media"></slot>
         <slot name="content" part="content"></slot>
@@ -16,4 +16,4 @@ class RyCard extends HTMLElement {
   }
 }
 
-customElements.define("ry-card", RyCard);
+customElements.define("au-card", AuCard);

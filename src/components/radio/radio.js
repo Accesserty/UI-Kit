@@ -21,18 +21,18 @@ class RyRadioGroup extends HTMLElement {
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: var(--ry-radio-content-gap, 0.5rem);
+        gap: var(--au-radio-content-gap, 0.5rem);
         -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
         padding: 0.25rem;
         input[type="radio"] {
           appearance: none;
           margin: 0;
           cursor: pointer;
-          width: var(--ry-radio-input-width, 1.5rem);
-          height: var(--ry-radio-input-height, 1.5rem);
-          border: var(--ry-radio-input-border-width, 1px) var(--ry-radio-input-border-style, solid) oklch(var(--ry-radio-input-border-color, 78.94% 0 0));
+          width: var(--au-radio-input-width, 1.5rem);
+          height: var(--au-radio-input-height, 1.5rem);
+          border: var(--au-radio-input-border-width, 1px) var(--au-radio-input-border-style, solid) oklch(var(--au-radio-input-border-color, 78.94% 0 0));
           border-radius: 50%;
-          background-color: oklch(var(--ry-radio-input-bg, 99.4% 0 0));
+          background-color: oklch(var(--au-radio-input-bg, 99.4% 0 0));
           &:focus-visible {
             outline: none;
           }
@@ -40,7 +40,7 @@ class RyRadioGroup extends HTMLElement {
             cursor: not-allowed;
           }
           &:checked {
-            background-color: oklch(var(--ry-radio-input-checked-bg, 13.98% 0 0));
+            background-color: oklch(var(--au-radio-input-checked-bg, 13.98% 0 0));
             display: grid;
             place-content: center;
             &:before {
@@ -48,27 +48,27 @@ class RyRadioGroup extends HTMLElement {
               width: 0.5rem;
               height: 0.5rem;
               border-radius: 50%;
-              background-color: oklch(var(--ry-radio-input-checked-circle-color, 99.4% 0 0));
+              background-color: oklch(var(--au-radio-input-checked-circle-color, 99.4% 0 0));
             }
           }
         }
         .text {
           flex: 1;
-          color: oklch(var(--ry-radio-label-text-color, 13.98% 0 0));
-          font-size: var(--ry-radio-label-text-size, 1rem);
+          color: oklch(var(--au-radio-label-text-color, 13.98% 0 0));
+          font-size: var(--au-radio-label-text-size, 1rem);
         }
         &:hover {
           .text {
-            text-decoration: var(--ry-radio-label-hover-text-deco, underline);
+            text-decoration: var(--au-radio-label-hover-text-deco, underline);
           }
         }
         &:active {
           .text {
-            color: oklch(var(--ry-radio-label-active-text-color, 53.7% 0 0));
+            color: oklch(var(--au-radio-label-active-text-color, 53.7% 0 0));
           }
         }
         &:has(input:focus-visible) {
-          box-shadow: inset 0 0 0 var(--ry-radio-input-focus-shadow-width, 3px) oklch(var(--ry-radio-input-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-radio-input-focus-shadow-width, 3px) oklch(var(--au-radio-input-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
         }
         &:has(input[type="radio"]:disabled) {
           cursor: not-allowed;
@@ -78,7 +78,7 @@ class RyRadioGroup extends HTMLElement {
           .text {
             pointer-events: none;
             text-decoration: none;
-            color: oklch(var(--ry-radio-label-disabled-text-color, 53.7% 0 0));
+            color: oklch(var(--au-radio-label-disabled-text-color, 53.7% 0 0));
           }
         }
       }

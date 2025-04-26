@@ -1,9 +1,9 @@
 import { html, fixture, expect } from '@open-wc/testing';
 import '../src/components/card/card.js'; // Adjust the path to where your component is located
 
-describe('RyCard', () => {
+describe('AuCard', () => {
   it('has four slots for "heading", "media", "content", and "footer"', async () => {
-    const el = await fixture(html`<ry-card></ry-card>`);
+    const el = await fixture(html`<au-card></au-card>`);
     const slots = el.shadowRoot.querySelectorAll('slot');
     const slotNames = Array.from(slots).map(slot => slot.name);
     expect(slotNames).to.include.members(['heading', 'media', 'content', 'footer']);
@@ -11,12 +11,12 @@ describe('RyCard', () => {
 
   it('renders default slot content correctly', async () => {
     const el = await fixture(html`
-      <ry-card>
+      <au-card>
         <div slot="heading">Header</div>
         <div slot="media">Media Content</div>
         <div slot="content">Main Content</div>
         <div slot="footer">Footer</div>
-      </ry-card>
+      </au-card>
     `);
     
     const headingSlot = el.shadowRoot.querySelector('slot[name="heading"]');
@@ -38,12 +38,12 @@ describe('RyCard', () => {
 
   it('renders slots in a specific order regardless of the provided order', async () => {
     const el = await fixture(html`
-      <ry-card>
+      <au-card>
         <div slot="footer">Footer</div>
         <div slot="content">Main Content</div>
         <div slot="media">Media Content</div>
         <div slot="heading">Header</div>
-      </ry-card>
+      </au-card>
     `);
 
     const slots = el.shadowRoot.querySelectorAll('slot');

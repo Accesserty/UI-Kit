@@ -4,326 +4,196 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Accesserty UI Kit Button</title>
-    <link rel="stylesheet" href="../../../css/style.css" />
-    <script src="button.js" defer></script>
+    <link rel="stylesheet" href="../../../css/au-style.css" />
+    <link rel="stylesheet" href="../../../css/demo.css" />
   </head>
   <body>
     <main>
       <h1>
-        <a
-          href="https://github.com/Neil-Lin/Accesserty UI Kit"
-          target="_blank"
-          title="open new window to Accesserty UI Kit github"
-          rel="noreferrer noopener"
-        >
-          Accesserty UI Kit
-        </a>
-        Button
+        Accesserty UI Kit Button
       </h1>
-      <h2>How to use</h2>
-      <h3>HTML</h3>
-      <ol>
-        <li>Copy file (button.js or Accesserty UI Kit.js or Accesserty UI Kit.min.js)</li>
-        <li>
-          Add the JavaScript file to HTML using the
-          <code>&lt;script src=&quot;&quot; defer&gt;</code> tag
-        </li>
-        <li>Use the <code>&lt;ry-btn&gt;</code> tag</li>
-      </ol>
-      <h3>Nuxt3</h3>
-      <ol>
-        <li>Copy file (button.js or Accesserty UI Kit.js or Accesserty UI Kit.min.js)</li>
-        <li>Add the JavaScript file to the Nuxt3 project.</li>
-        <li>
-          Add a `ry.client.js` file to the plugins folder with the following export:
-          <code>
-            export default defineNuxtPlugin(() => {
-              if (process.client) {
-                import('your path')
-              }
-            })   
-          </code>       
-        </li>
-        <li>Add the plugin configuration to your nuxt.config.ts (or .js):<code>plugins: ['~/plugins/ry.client.js']</code></li>
-        <li>Use the <code>&lt;ry-btn&gt;</code> tag</li>
-      </ol>
-      <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
-      <h2>Attribute</h2>
-      <table>
-        <caption>
-          The Accesserty UI Kit button inherits attributes, with some custom options available:
-        </caption>
-        <tr>
-          <th scope="col">Name</th>
-          <th scope="col">Description</th>
-          <th scope="col">Available value</th>
-        </tr>
-        <tr>
-          <td>size</td>
-          <td>Sets the size of the button.</td>
-          <td>small, large</td>
-        </tr>
-        <tr>
-          <td>disabled</td>
-          <td>Disables the button if set.</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>loading</td>
-          <td>Disables the button and shows a loading animation when set.</td>
-          <td></td>
-        </tr>
-      </table>
-      <h2>Size</h2>
-      <ry-btn size="small">Small Button</ry-btn>
-      <ry-btn>Button</ry-btn>
-      <ry-btn size="large">Large Button</ry-btn>
-      <h2>Add a icon</h2>
-      <p>Due to numerous issues with SVGs within the shadow DOM, currently, using inline-style is the only effective method.</p>
-      <p>Additionally, please use aria-hidden as appropriate.</p>
-      <ry-btn @click="handleRoutePush">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 1rem;position: relative; top: 0.125rem;" aria-hidden="true">
-          <title>search</title>
-          <!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.!-->
-          <path
-            d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
-          />
-        </svg>
-        <span>search</span>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 1rem;position: relative; top: 0.125rem;" aria-hidden="true">
-          <title>search</title>
-          <!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.!-->
-          <path
-            d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
-          />
-        </svg>
-      </ry-btn>
-      <ry-btn @click="handleRoutePush">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 1rem;position: relative; top: 0.125rem;">
-          <title>search</title>
-          <!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.!-->
-          <path
-            fill="oklch(var(--ry-btn-text-color))"
-            d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
-          />
-        </svg>
-      </ry-btn>
-      <ry-btn>
-        <span aria-hidden="true">🔍</span>
-        <span>search</span>
-      </ry-btn>
-      <h2>Disabled</h2>
-      <p>
-        We do not recommend using the disabled and loading attributes because
-        elements marked as disabled cannot be focused by the keyboard, and
-        screen reading software will often ignore them. Additionally, the
-        disabled state is typically designed to be less visually prominent to
-        discourage attention or premature interaction. If possible, consider
-        using a method that provides error feedback after an attempt to
-        interact, rather than disabling the button. However, this concept has
-        not yet become widely accepted, and there are indeed scenarios where
-        using disabled is appropriate. Therefore, we have still designed it to
-        be usable.
-      </p>
-      <ry-btn disabled>Disabled Button</ry-btn>
-      <h2>Loading</h2>
-      <ry-btn loading></ry-btn>
-      <ry-btn loading>Loading Button</ry-btn>
-      <h2>Custom</h2>
-      <p>Create your own color scheme by using classnames.</p>
-      <ol>
-        <li>Set a Classname: Define a custom class name for styling the button.</li>
-        <li>Define CSS Variables in the Classname: Customize the button's appearance by setting CSS variables within your classname.</li>
-        <li>Experiment: Apply your custom classname to a button and see the changes.</li>
-      </ol>
-      <h3>Recommendation</h3>
-      <p>We recommend establishing a set of basic CSS variables and tokens to maintain consistency across your design.</p>
-      <ry-btn class="ry-btn-primary-flat">Primary</ry-btn>
-      <ry-btn class="ry-btn-success-flat">Success</ry-btn>
-      <br><br>
-      <ry-btn class="ry-btn-primary-flat a11y">Primary</ry-btn>
-      <ry-btn class="ry-btn-success-flat a11y">Success</ry-btn>
-      <br><br>
-      <ry-btn class="ry-btn-primary-outline">Primary</ry-btn>
-      <ry-btn class="ry-btn-success-outline">Success</ry-btn>
-      <br><br>
-      <ry-btn class="ry-btn-primary-outline a11y">Primary</ry-btn>
-      <ry-btn class="ry-btn-success-outline a11y">Success</ry-btn>
-      <h3>CSS Variables</h3>
-      <table>
-        <tr>
-          <th scope="col">CSS Variables name</th>
-          <th scope="col">Description</th>
-          <th scope="col">Default value</th>
-        </tr>
-        <tr>
-          <td>--ry-btn-padding-vertical</td>
-          <td>padding-top and padding-bottom</td>
-          <td>0.75rem</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-padding-horizontal</td>
-          <td>padding-left and padding-right</td>
-          <td>1rem</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-text-color</td>
-          <td>text color</td>
-          <td>oklch(13.98% 0 0)</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-text-size</td>
-          <td>font size</td>
-          <td>1rem</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-text-family</td>
-          <td>font family</td>
-          <td>'Helvetica, Arial, sans-serif, system-ui'</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-text-line-height</td>
-          <td>font line height</td>
-          <td>1.5</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-border-width</td>
-          <td>border width</td>
-          <td>1px</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-border-style</td>
-          <td>border style</td>
-          <td>solid</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-border-color</td>
-          <td>border color</td>
-          <td>oklch(78.94% 0 0)</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-border-radius</td>
-          <td>border radius</td>
-          <td>0.25rem</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-bg</td>
-          <td>background color</td>
-          <td>oklch(99.4% 0 0)</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-small-padding-vertical</td>
-          <td>padding-top and padding-bottom at small size</td>
-          <td>0.25rem</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-small-padding-horizontal</td>
-          <td>padding-left and padding-right at small size</td>
-          <td>0.5rem</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-large-padding-vertical</td>
-          <td>padding-top and padding-bottom at large size</td>
-          <td>1rem</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-large-padding-horizontal</td>
-          <td>padding-left and padding-right at large size</td>
-          <td>2rem</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-large-text-size</td>
-          <td>font size at large size</td>
-          <td>1.25rem</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-hover-bg</td>
-          <td>background color (hover)</td>
-          <td>oklch(94.66% 0 0)</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-hover-border-color</td>
-          <td>border color (hover)</td>
-          <td>oklch(78.94% 0 0)</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-active-bg</td>
-          <td>background color (active)</td>
-          <td>oklch(86.89% 0 0)</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-active-border-color</td>
-          <td>border color (active)</td>
-          <td>oklch(78.94% 0 0)</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-focus-shadow-width</td>
-          <td>focus border width(actually box-shadow)</td>
-          <td>3px</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-focus-shadow-color</td>
-          <td>focus border color(actually box-shadow)</td>
-          <td>oklch(83.15% 0.15681888825079074 78.05241467152487)</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-a11y-text-shadow</td>
-          <td>enhance button, using text shadow</td>
-          <td>none</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-a11y-bg-image</td>
-          <td>enhance button, using a background image</td>
-          <td>none</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-a11y-bg-size</td>
-          <td>enhance button, adjust size of background image</td>
-          <td>1.5rem 1.5rem</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-a11y-bg-position</td>
-          <td>enhance button, adjust position of background image</td>
-          <td>center center</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-a11y-hover-bg-image</td>
-          <td>enhance button, using a background image(hover)</td>
-          <td>none</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-a11y-active-bg-image</td>
-          <td>enhance button, using a background image(active)</td>
-          <td>none</td>
-        </tr>
-        <tr>
-          <td>--ry-btn-spinner-color</td>
-          <td>color of loading</td>
-          <td>oklch(78.94% 0 0)</td>
-        </tr>
-      </table>
-      <h2>Click Event</h2>
-      <form action="index.html" method="get">
-        First name: <label for="demo-form"><input type="text" name="fname" id="demo-form"/></label>
-        <ry-btn id="testButton">Type:Button</ry-btn>
-        <ry-btn type="submit">Type:Submit</ry-btn>
-        <ry-btn type="reset">Type:Reset</ry-btn>
-      </form>
-      <h2>FAQ</h2>
-      <h3>If you don't need the loading feature, then there's no need to use this web component, right?</h3>
-      <p>Correct. If you don't need to use the loading state, then there's no need to use it. If you find our button CSS variables useful, feel free to copy and use them.</p>
-      <h2>Conclusion</h2>
-      <p>Creating a button as a web component, I've found, does not offer significant benefits. The majority of changes involved with buttons concern their appearance, which can be effectively handled with CSS. Additionally, creating a web component requires attention to callbacks, attribute inheritance, and incorporating images within buttons, along with writing unit tests. It is only worthwhile to develop such components if many special functionalities are added. As a basic component, if it needs to be complex in design, it is typically used as the basis for developing another component.</p>
-      <p>Therefore, <b>I do not recommend developing or using a Web Component for buttons.</b> Adhering to the principle that what can be solved with native HTML should be handled natively is best. If you're only looking to provide a different appearance, writing CSS is sufficient.</p>
-      <p>Additionally, there is a button with a background pattern in the example, which I learned from studying data visualization accessibility. The intent is to ensure buttons are not solely distinguished by color, which can be problematic for those with visual impairments. I believe this approach aids accessibility, but it has not yet been practically tested. If you are considering using this method, please evaluate its suitability carefully, as the intensity and shape of the patterns could also cause visual discomfort.</p>
-    </main>
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const button = document.getElementById("testButton");
-        button.addEventListener("click", (event) => {
-          console.log('Button Clicked!')
-        });
-      });
-    </script>
+      <section>
+        <h2>We recommand using original button</h2>
+        <p>Creating a button as a web component, I've found, does not offer significant benefits. The majority of changes involved with buttons concern their appearance, which can be effectively handled with CSS. Additionally, creating a web component requires attention to callbacks, attribute inheritance, and incorporating images within buttons, along with writing unit tests. It is only worthwhile to develop such components if many special functionalities are added. As a basic component, if it needs to be complex in design, it is typically used as the basis for developing another component.</p>
+        <p>Therefore, <b>I do not recommend developing or using a Web Component for buttons.</b> Adhering to the principle that what can be solved with native HTML should be handled natively is best. If you're only looking to provide a different appearance, writing CSS is sufficient.</p>
+        <p>Additionally, there is a button with a background pattern in the example, which I learned from studying data visualization accessibility. The intent is to ensure buttons are not solely distinguished by color, which can be problematic for those with visual impairments. I believe this approach aids accessibility, but it has not yet been practically tested. If you are considering using this method, please evaluate its suitability carefully, as the intensity and shape of the patterns could also cause visual discomfort.</p>
+      </section>
+    
+      <section>
+        <h2>Size</h2>
+        <button size="small">Small</button>
+        <button>Medium(Default)</button>
+        <button size="large">Large</button>
+      </section>
+
+      <section>
+        <h2>Custom</h2>
+        <button size="small" class="custom-btn--primary-flat">Small</button>
+        <button class="custom-btn--primary-flat">Medium(Default)</button>
+        <button size="large" class="custom-btn--primary-flat">Large</button>
+      </section>
+
+      <section>
+        <h2>Custom A11Y</h2>
+        <button size="small" class="custom-btn--primary-flat a11y">Small</button>
+        <button class="custom-btn--primary-flat a11y">Medium(Default)</button>
+        <button size="large" class="custom-btn--primary-flat a11y">Large</button>
+      </section>
+
+      <section>
+        <h2>CSS Variables</h2>
+        <table>
+          <tr>
+            <th scope="col">CSS Variables name</th>
+            <th scope="col">Description</th>
+            <th scope="col">Default value</th>
+          </tr>
+          <tr>
+            <td>--au-btn-padding-vertical</td>
+            <td>padding-top and padding-bottom</td>
+            <td>0.75rem</td>
+          </tr>
+          <tr>
+            <td>--au-btn-padding-horizontal</td>
+            <td>padding-left and padding-right</td>
+            <td>1rem</td>
+          </tr>
+          <tr>
+            <td>--au-btn-text-color</td>
+            <td>text color</td>
+            <td>oklch(13.98% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-btn-text-size</td>
+            <td>font size</td>
+            <td>1rem</td>
+          </tr>
+          <tr>
+            <td>--au-btn-text-family</td>
+            <td>font family</td>
+            <td>'Helvetica, Arial, sans-serif, system-ui'</td>
+          </tr>
+          <tr>
+            <td>--au-btn-text-line-height</td>
+            <td>font line height</td>
+            <td>1.5</td>
+          </tr>
+          <tr>
+            <td>--au-btn-border-width</td>
+            <td>border width</td>
+            <td>1px</td>
+          </tr>
+          <tr>
+            <td>--au-btn-border-style</td>
+            <td>border style</td>
+            <td>solid</td>
+          </tr>
+          <tr>
+            <td>--au-btn-border-color</td>
+            <td>border color</td>
+            <td>oklch(78.94% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-btn-border-radius</td>
+            <td>border radius</td>
+            <td>0.25rem</td>
+          </tr>
+          <tr>
+            <td>--au-btn-bg</td>
+            <td>background color</td>
+            <td>oklch(99.4% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-btn-small-padding-vertical</td>
+            <td>padding-top and padding-bottom at small size</td>
+            <td>0.25rem</td>
+          </tr>
+          <tr>
+            <td>--au-btn-small-padding-horizontal</td>
+            <td>padding-left and padding-right at small size</td>
+            <td>0.5rem</td>
+          </tr>
+          <tr>
+            <td>--au-btn-large-padding-vertical</td>
+            <td>padding-top and padding-bottom at large size</td>
+            <td>1rem</td>
+          </tr>
+          <tr>
+            <td>--au-btn-large-padding-horizontal</td>
+            <td>padding-left and padding-right at large size</td>
+            <td>2rem</td>
+          </tr>
+          <tr>
+            <td>--au-btn-large-text-size</td>
+            <td>font size at large size</td>
+            <td>1.25rem</td>
+          </tr>
+          <tr>
+            <td>--au-btn-hover-bg</td>
+            <td>background color (hover)</td>
+            <td>oklch(94.66% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-btn-hover-border-color</td>
+            <td>border color (hover)</td>
+            <td>oklch(78.94% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-btn-active-bg</td>
+            <td>background color (active)</td>
+            <td>oklch(86.89% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-btn-active-border-color</td>
+            <td>border color (active)</td>
+            <td>oklch(78.94% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-btn-focus-shadow-width</td>
+            <td>focus border width(actually box-shadow)</td>
+            <td>3px</td>
+          </tr>
+          <tr>
+            <td>--au-btn-focus-shadow-color</td>
+            <td>focus border color(actually box-shadow)</td>
+            <td>oklch(83.15% 0.15681888825079074 78.05241467152487)</td>
+          </tr>
+          <tr>
+            <td>--au-btn-a11y-text-shadow</td>
+            <td>enhance button, using text shadow</td>
+            <td>none</td>
+          </tr>
+          <tr>
+            <td>--au-btn-a11y-bg-image</td>
+            <td>enhance button, using a background image</td>
+            <td>none</td>
+          </tr>
+          <tr>
+            <td>--au-btn-a11y-bg-size</td>
+            <td>enhance button, adjust size of background image</td>
+            <td>1.5rem 1.5rem</td>
+          </tr>
+          <tr>
+            <td>--au-btn-a11y-bg-position</td>
+            <td>enhance button, adjust position of background image</td>
+            <td>center center</td>
+          </tr>
+          <tr>
+            <td>--au-btn-a11y-hover-bg-image</td>
+            <td>enhance button, using a background image(hover)</td>
+            <td>none</td>
+          </tr>
+          <tr>
+            <td>--au-btn-a11y-active-bg-image</td>
+            <td>enhance button, using a background image(active)</td>
+            <td>none</td>
+          </tr>
+          <tr>
+            <td>--au-btn-spinner-color</td>
+            <td>color of loading</td>
+            <td>oklch(78.94% 0 0)</td>
+          </tr>
+        </table>
+      </section>
   </body>
 </html>

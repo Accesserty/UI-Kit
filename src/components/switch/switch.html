@@ -4,55 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Accesserty UI Kit Switch</title>
-    <link rel="stylesheet" href="../../../css/style.css" />
+    <link rel="stylesheet" href="../../../css/au-style.css" />
+    <link rel="stylesheet" href="../../../css/demo.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <script src="switch.js" defer></script>
   </head>
   <body>
     <main>
-      <h1>
-        <a
-          href="https://github.com/Neil-Lin/Accesserty UI Kit"
-          target="_blank"
-          title="open new window to Accesserty UI Kit github"
-          rel="noreferrer noopener"
-        >
-          Accesserty UI Kit
-        </a>
-        Switch
-      </h1>
+      <h1>Accesserty UI Kit Switch</h1>
       <h2>How to use</h2>
       <h3>HTML</h3>
       <ol>
-        <li>Copy file (switch.js or Accesserty UI Kit.js or Accesserty UI Kit.min.js)</li>
+        <li>Copy file (switch.js or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
         <li>
           Add the JavaScript file to HTML using the
           <code>&lt;script src=&quot;&quot; defer&gt;</code> tag
         </li>
-        <li>Use the <code>&lt;ry-switch&gt;</code> tag</li>
-      </ol>
-      <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
-      <h3>Nuxt3</h3>
-      <ol>
-        <li>Copy file (switch.js or Accesserty UI Kit.js or Accesserty UI Kit.min.js)</li>
-        <li>Add the JavaScript file to the Nuxt3 project.</li>
-        <li>
-          Add a `ry.client.js` file to the plugins folder with the following export:
-          <code>
-            export default defineNuxtPlugin(() => {
-              if (process.client) {
-                import('your path')
-              }
-            })   
-          </code>       
-        </li>
-        <li>Add the plugin configuration to your nuxt.config.ts (or .js):<code>plugins: ['~/plugins/ry.client.js']</code></li>
-        <li>Use the <code>&lt;ry-switch&gt;</code> tag</li>
+        <li>Use the <code>&lt;au-switch&gt;</code> tag</li>
       </ol>
       <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
       <h2>Attribute</h2>
       <table>
         <caption>
-          The Accesserty UI Kit switch attributes:
+          The Accesserty UI Kit Switch attributes:
         </caption>
         <tr>
           <th scope="col">Name</th>
@@ -68,27 +42,27 @@
         </tr>
       </table>
       <h2>Basic</h2>
-      <ry-switch>
+      <au-switch>
         Default
-      </ry-switch>
+      </au-switch>
       <h2>Custom Label and Text</h2>
       <fieldset>
-        <legend>Demo how to custom ry-switch</legend>
-        <ry-switch>
+        <legend>Demo how to custom au-switch</legend>
+        <au-switch>
           <mark>Custom Label</mark>
-        </ry-switch>
+        </au-switch>
         <br />
-        <ry-switch on="Subscribe!">
+        <au-switch on="Subscribe!">
           Only show "On" text
-        </ry-switch>
+        </au-switch>
         <br />
-        <ry-switch off="Cancel">
+        <au-switch off="Cancel">
           Only show "Off" text
-        </ry-switch>
+        </au-switch>
         <br />
-        <ry-switch class="custom-ry-switch" on="On" off="Off">
+        <au-switch class="custom-au-switch" on="On" off="Off">
           Using CSS Variables custom style
-        </ry-switch>
+        </au-switch>
       </fieldset>
       <h3>CSS Variables</h3>
       <table>
@@ -98,87 +72,87 @@
           <th scope="col">Default value</th>
         </tr>
         <tr>
-          <td>--ry-switch-gap</td>
+          <td>--au-switch-gap</td>
           <td>Gap between label and switch group</td>
           <td>1rem</td>
         </tr>
         <tr>
-          <td>--ry-switch-padding-top</td>
+          <td>--au-switch-padding-top</td>
           <td>padding-top</td>
           <td>0.5rem</td>
         </tr>
         <tr>
-          <td>--ry-switch-padding-right</td>
+          <td>--au-switch-padding-right</td>
           <td>padding-right</td>
           <td>0.25rem</td>
         </tr>
         <tr>
-          <td>--ry-switch-padding-bottom</td>
+          <td>--au-switch-padding-bottom</td>
           <td>padding-bottom</td>
           <td>0.5rem</td>
         </tr>
         <tr>
-          <td>--ry-switch-padding-left</td>
+          <td>--au-switch-padding-left</td>
           <td>padding-left</td>
           <td>0.25rem</td>
         </tr>
         <tr>
-          <td>--ry-switch-container-gap</td>
+          <td>--au-switch-container-gap</td>
           <td>Gap of switch group</td>
           <td>0.5rem</td>
         </tr>
         <tr>
-          <td>--ry-switch-input-width</td>
+          <td>--au-switch-input-width</td>
           <td>width of switch</td>
           <td>4rem(height: 2rem)</td>
         </tr>
         <tr>
-          <td>--ry-switch-inner-distance</td>
+          <td>--au-switch-inner-distance</td>
           <td>Gap between switch and inner</td>
           <td>4rem(height: 2rem)</td>
         </tr>
         <tr>
-          <td>--ry-switch-input-border-width</td>
+          <td>--au-switch-input-border-width</td>
           <td>border of switch</td>
           <td>1px</td>
         </tr>
         <tr>
-          <td>--ry-switch-input-border-style</td>
+          <td>--au-switch-input-border-style</td>
           <td>style of switch</td>
           <td>solid</td>
         </tr>
         <tr>
-          <td>--ry-switch-input-border-color</td>
+          <td>--au-switch-input-border-color</td>
           <td>border color of switch</td>
           <td>oklch(78.94% 0 0)</td>
         </tr>
         <tr>
-          <td>--ry-switch-input-border-radius</td>
+          <td>--au-switch-input-border-radius</td>
           <td>border radius of switch</td>
           <td>1rem</td>
         </tr>
         <tr>
-          <td>--ry-switch-inner-border-radius</td>
+          <td>--au-switch-inner-border-radius</td>
           <td>border radius of inner</td>
           <td>0.875rem</td>
         </tr>
         <tr>
-          <td>--ry-switch-inner-border-radius</td>
+          <td>--au-switch-inner-border-radius</td>
           <td>border radius of inner</td>
           <td>0.875rem</td>
         </tr>
         <tr>
-          <td>--ry-switch-input-checked-bg</td>
+          <td>--au-switch-input-checked-bg</td>
           <td>background-color (checked)</td>
           <td>oklch(13.98% 0 0)</td>
         </tr>
         <tr>
-          <td>--ry-switch-focus-shadow-color</td>
+          <td>--au-switch-focus-shadow-color</td>
           <td>focus color</td>
           <td>oklch(83.15% 0.15681888825079074 78.05241467152487)</td>
         </tr>
         <tr>
-          <td>--ry-switch-focus-shadow-width</td>
+          <td>--au-switch-focus-shadow-width</td>
           <td>focus border width</td>
           <td>3px</td>
         </tr>
@@ -188,7 +162,7 @@
       <p>We don't need to use aria-checked and tabindex attributes. Whenever possible, it's best to use native HTML elements.</p>
     </main>
     <script>
-      const switchElements = document.querySelectorAll('ry-switch');
+      const switchElements = document.querySelectorAll('au-switch');
       switchElements.forEach(switchElement => {
         switchElement.addEventListener('change', (event) => {
           console.log(`${switchElement.innerText} is now ${event.detail ? 'On' : 'Off'}`);

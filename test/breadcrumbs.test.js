@@ -1,21 +1,21 @@
 import { html, fixture, expect } from "@open-wc/testing";
 import "../src/components/breadcrumbs/breadcrumbs.js";
 
-describe("RyBreadcrumbs", () => {
+describe("AuBreadcrumbs", () => {
   it("renders the correct number of breadcrumb items", async () => {
     const el = await fixture(
-      html`<ry-breadcrumbs
+      html`<au-breadcrumbs
         items='[{"text":"Home","url":"/"}, {"text":"About","url":"/about"}]'
-      ></ry-breadcrumbs>`
+      ></au-breadcrumbs>`
     );
     expect(el.shadowRoot.querySelectorAll("nav>ol>li").length).to.equal(2);
   });
 
   it("displays text for each breadcrumb item", async () => {
     const el = await fixture(
-      html`<ry-breadcrumbs
+      html`<au-breadcrumbs
         items='[{"text":"Home", "url":"/"}]'
-      ></ry-breadcrumbs>`
+      ></au-breadcrumbs>`
     );
     const item = el.shadowRoot.querySelector("nav>ol>li:first-child");
     expect(item.textContent).to.include("Home");
@@ -23,9 +23,9 @@ describe("RyBreadcrumbs", () => {
 
   it("makes all but the last breadcrumb item clickable", async () => {
     const el = await fixture(
-      html`<ry-breadcrumbs
+      html`<au-breadcrumbs
         items='[{"text":"Home","url":"/"}, {"text":"About","url":"/about"}, {"text":"Contact"}]'
-      ></ry-breadcrumbs>`
+      ></au-breadcrumbs>`
     );
     const items = el.shadowRoot.querySelectorAll("nav>ol>li>a");
     expect(items.length).to.equal(3);
@@ -37,10 +37,10 @@ describe("RyBreadcrumbs", () => {
   it('should use the custom separator string in li content, except the last one', async () => {
     const separator = ">";
     const el = await fixture(html`
-      <ry-breadcrumbs
+      <au-breadcrumbs
         separator="${separator}"
         items='[{"text":"Home","url":"/"}, {"text":"About","url":"/about"}, {"text":"Contact"}]'
-      ></ry-breadcrumbs>
+      ></au-breadcrumbs>
     `);
 
     const lis = el.shadowRoot.querySelectorAll('ol li');
@@ -57,11 +57,11 @@ describe("RyBreadcrumbs", () => {
   it('Test if the attributes are inherited.', async () => {
     const separator = ">";
     const el = await fixture(html`
-      <ry-breadcrumbs
+      <au-breadcrumbs
         id="demo-id"
         class="demo-class"
         aria-label="demo-aria-label"
-      ></ry-breadcrumbs>
+      ></au-breadcrumbs>
     `);
     await el.updateComplete;
     const breadcrumbsInside = el.shadowRoot.querySelector('nav');
@@ -72,11 +72,11 @@ describe("RyBreadcrumbs", () => {
 
   it('displays content in slots correctly', async () => {
     const el = await fixture(html`
-      <ry-breadcrumbs
+      <au-breadcrumbs
         items='[{"text":"Home","url":"/"}, {"text":"About","url":"/about"}, {"text":"Contact"}]'
       >
         <span slot="icon-2">icon</span>
-      </ry-breadcrumbs>
+      </au-breadcrumbs>
     `);
 
     await el.updateComplete;

@@ -2,36 +2,36 @@
 import { html, fixture, expect } from '@open-wc/testing';
 import '../src/components/accordion/accordion.js';
 
-describe('RyAccordion and RyAccordionItem', () => {
-  it('renders the correct number of RyAccordionItem components', async () => {
+describe('AuAccordion and AuAccordionItem', () => {
+  it('renders the correct number of AuAccordionItem components', async () => {
     const el = await fixture(html`
-      <ry-accordion>
-        <ry-accordion-item open>
+      <au-accordion>
+        <au-accordion-item open>
           <span slot="heading">Accordion Title 1</span>
           <div slot="content">Accordion Content 1</div>
-        </ry-accordion-item>
-        <ry-accordion-item>
+        </au-accordion-item>
+        <au-accordion-item>
           <span slot="heading">Accordion Title 2</span>
           <div slot="content">Accordion Content 2</div>
-        </ry-accordion-item>
-      </ry-accordion>
+        </au-accordion-item>
+      </au-accordion>
     `);
 
-    const accordionItems = el.querySelectorAll('ry-accordion-item');
+    const accordionItems = el.querySelectorAll('au-accordion-item');
     expect(accordionItems.length).to.equal(2);
   });
 
   it('toggles the accordion item on click', async () => {
     const el = await fixture(html`
-      <ry-accordion>
-        <ry-accordion-item>
+      <au-accordion>
+        <au-accordion-item>
           <span slot="heading">Accordion Title</span>
           <div slot="content">Accordion Content</div>
-        </ry-accordion-item>
-      </ry-accordion>
+        </au-accordion-item>
+      </au-accordion>
     `);
 
-    const accordionItem = el.querySelector('ry-accordion-item');
+    const accordionItem = el.querySelector('au-accordion-item');
     expect(accordionItem.hasAttribute('open')).to.be.false;
     
     const button = accordionItem.shadowRoot.querySelector('button');
@@ -57,15 +57,15 @@ describe('RyAccordion and RyAccordionItem', () => {
 
   it('assigns titleID and regionID correctly and ensures proper association', async () => {
     const el = await fixture(html`
-      <ry-accordion>
-        <ry-accordion-item>
+      <au-accordion>
+        <au-accordion-item>
           <span slot="heading">Accordion Title</span>
           <div slot="content">Accordion Content</div>
-        </ry-accordion-item>
-      </ry-accordion>
+        </au-accordion-item>
+      </au-accordion>
     `);
 
-    const accordionItem = el.querySelector('ry-accordion-item');
+    const accordionItem = el.querySelector('au-accordion-item');
     const button = accordionItem.shadowRoot.querySelector('button');
     const heading = accordionItem.shadowRoot.querySelector('button .heading');
     const region = accordionItem.shadowRoot.querySelector('div[role="region"]');
@@ -83,17 +83,17 @@ describe('RyAccordion and RyAccordionItem', () => {
 
   it('displays content in slots correctly', async () => {
     const el = await fixture(html`
-      <ry-accordion>
-        <ry-accordion-item>
+      <au-accordion>
+        <au-accordion-item>
           <span slot="heading">Custom Heading</span>
           <div slot="content">Custom Content</div>
           <div slot="sub">Sub Info</div>
           <div slot="icon">Icon</div>
-        </ry-accordion-item>
-      </ry-accordion>
+        </au-accordion-item>
+      </au-accordion>
     `);
 
-    const accordionItem = el.querySelector('ry-accordion-item');
+    const accordionItem = el.querySelector('au-accordion-item');
     const headingSlot = accordionItem.shadowRoot.querySelector('slot[name="heading"]');
     const contentSlot = accordionItem.shadowRoot.querySelector('slot[name="content"]');
     const subSlot = accordionItem.shadowRoot.querySelector('slot[name="sub"]');

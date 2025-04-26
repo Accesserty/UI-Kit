@@ -1,12 +1,12 @@
 import { html, fixture, expect } from '@open-wc/testing';
 import '../src/components/switch/switch.js'; // 确保路径正确
 
-describe('RySwitch', () => {
+describe('AuSwitch', () => {
   it('renders slot content correctly', async () => {
     const el = await fixture(html`
-      <ry-switch>
+      <au-switch>
         Label Text
-      </ry-switch>
+      </au-switch>
     `);
 
     const slot = el.shadowRoot.querySelector('slot');
@@ -17,9 +17,9 @@ describe('RySwitch', () => {
 
   it('sets the off and on text from attributes', async () => {
     const el = await fixture(html`
-      <ry-switch off="Inactive" on="Active">
+      <au-switch off="Inactive" on="Active">
         Label Text
-      </ry-switch>
+      </au-switch>
     `);
 
     const offText = el.shadowRoot.querySelector('.off-text');
@@ -31,9 +31,9 @@ describe('RySwitch', () => {
 
   it('sets the default off and on text when attributes are not provided', async () => {
     const el = await fixture(html`
-      <ry-switch>
+      <au-switch>
         Label Text
-      </ry-switch>
+      </au-switch>
     `);
 
     const offText = el.shadowRoot.querySelector('.off-text');
@@ -45,9 +45,9 @@ describe('RySwitch', () => {
 
   it('toggles the checked state on click', async () => {
     const el = await fixture(html`
-      <ry-switch>
+      <au-switch>
         Label Text
-      </ry-switch>
+      </au-switch>
     `);
 
     const input = el.shadowRoot.querySelector('input');
@@ -62,9 +62,9 @@ describe('RySwitch', () => {
 
   it('dispatches change event on state change', async () => {
     const el = await fixture(html`
-      <ry-switch>
+      <au-switch>
         Label Text
-      </ry-switch>
+      </au-switch>
     `);
 
     const input = el.shadowRoot.querySelector('input');
@@ -80,9 +80,9 @@ describe('RySwitch', () => {
 
   it('sets the checked attribute correctly', async () => {
     const el = await fixture(html`
-      <ry-switch checked>
+      <au-switch checked>
         Label Text
-      </ry-switch>
+      </au-switch>
     `);
 
     const input = el.shadowRoot.querySelector('input');
@@ -91,9 +91,9 @@ describe('RySwitch', () => {
 
   it('sets the disabled attribute correctly', async () => {
     const el = await fixture(html`
-      <ry-switch disabled>
+      <au-switch disabled>
         Label Text
-      </ry-switch>
+      </au-switch>
     `);
 
     const input = el.shadowRoot.querySelector('input');
@@ -102,9 +102,9 @@ describe('RySwitch', () => {
 
   it('reflects attribute changes correctly', async () => {
     const el = await fixture(html`
-      <ry-switch>
+      <au-switch>
         Label Text
-      </ry-switch>
+      </au-switch>
     `);
 
     el.setAttribute('off', 'Inactive');

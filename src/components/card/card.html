@@ -4,50 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Accesserty UI Kit Card</title>
-    <link rel="stylesheet" href="../../../css/style.css" />
+    <link rel="stylesheet" href="../../../css/au-style.css" />
+    <link rel="stylesheet" href="../../../css/demo.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <script src="card.js" defer></script>
-    <script src="../button/button.js" defer></script>
   </head>
   <body>
     <main>
-      <h1>
-        <a
-          href="https://github.com/Neil-Lin/Accesserty UI Kit"
-          target="_blank"
-          title="open new window to Accesserty UI Kit github"
-          rel="noreferrer noopener"
-        >
-          Accesserty UI Kit
-        </a>
-        Card
-      </h1>
+      <h1>Accesserty UI Kit Card</h1>
       <h2>How to use</h2>
       <p>This card module primarily restricts the DOM order of the card content, with all other styles being customizable by the user.</p>
       <h3>HTML</h3>
       <ol>
-        <li>Copy file (card.js or Accesserty UI Kit.js or Accesserty UI Kit.min.js)</li>
+        <li>Copy file (card.js or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
         <li>
           Add the JavaScript file to HTML using the
           <code>&lt;script src=&quot;&quot; defer&gt;</code> tag
         </li>
-        <li>Use the <code>&lt;ry-card&gt;</code> tag</li>
-      </ol>
-      <h3>Nuxt3</h3>
-      <ol>
-        <li>Copy file (card.js or Accesserty UI Kit.js or Accesserty UI Kit.min.js)</li>
-        <li>Add the JavaScript file to the Nuxt3 project.</li>
-        <li>
-          Add a `ry.client.js` file to the plugins folder with the following export:
-          <code>
-            export default defineNuxtPlugin(() => {
-              if (process.client) {
-                import('your path')
-              }
-            })   
-          </code>       
-        </li>
-        <li>Add the plugin configuration to your nuxt.config.ts (or .js):<code>plugins: ['~/plugins/ry.client.js']</code></li>
-        <li>Use the <code>&lt;ry-card&gt;</code> tag</li>
+        <li>Use the <code>&lt;au-card&gt;</code> tag</li>
       </ol>
       <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
       <h2>Slot</h2>
@@ -74,9 +48,9 @@
         </tr>
       </table>
       <h2>Demo</h2>
-      <p>Be mindful of the order in which you write elements and the final DOM order. The ry-card enforces that the heading must appear first, allowing screen reading software to logically read the title before the content.</p>
-      <p>You can still use grid or flex to visually swap positions.(set <code>&::part(ry-card-container)</code> display)</p>
-      <ry-card class="custom-ry-card">
+      <p>Be mindful of the order in which you write elements and the final DOM order. The au-card enforces that the heading must appear first, allowing screen reading software to logically read the title before the content.</p>
+      <p>You can still use grid or flex to visually swap positions.(set <code>&::part(au-card-container)</code> display)</p>
+      <au-card class="custom-au-card">
         <div slot="content" class="content">
           <p>17 MINUTE READ</p>
         </div>
@@ -84,16 +58,17 @@
           <img src="demo.jpg" loading="lazy" alt="test img">
         </div>
         <div slot="footer" class="footer">
-          <ry-btn>Share Article</ry-btn><ry-btn class="ry-btn-primary-flat">Read Article</ry-btn>
+          <button>Share Article</button>
+          <button>Read Article</button>
         </div>
         <div slot="heading" class="heading">
           <h3>Brittney Griner: What I Endured in a Russian Prison</h3>
-          <ry-btn>Like!</ry-btn>
+          <button>Like!</button>
         </div>
-      </ry-card>
+      </au-card>
       <h2>Conclusion</h2>
       <p>Based on the results, I believe that cards are well-suited for development as Web Components because they can ensure that keyboard navigation follows the information structure to a considerable extent.</p>
-      <p> However, given the myriad forms of cards and the need to allow developers the freedom to be creative, we have only set up slots and the part attribute for developers to utilize here.</p>
+      <p>However, given the myriad forms of cards and the need to allow developers the freedom to be creative, we have only set up slots and the part attribute for developers to utilize here.</p>
     </main>
   </body>
 </html>

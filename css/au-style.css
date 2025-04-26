@@ -1,5 +1,4 @@
+@layer components;
 @import url(basic-variables.css);
 @import url(tokens-variables.css);
-@import url(demo.css) layer(ui);
 @import url(components.css) layer(components);
-@layer ui, components;

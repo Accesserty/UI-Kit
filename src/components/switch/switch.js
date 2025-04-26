@@ -1,4 +1,4 @@
-class RySwitch extends HTMLElement {
+class AuSwitch extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
@@ -7,22 +7,22 @@ class RySwitch extends HTMLElement {
 
     const style = document.createElement('style');
     style.textContent = `
-      .ry-switch {
+      .au-switch {
         display: inline-flex;
         flex-wrap: wrap;
         align-items: center;
-        gap: var(--ry-switch-gap, 1rem);
+        gap: var(--au-switch-gap, 1rem);
         cursor: pointer;
-        padding-top: var(--ry-switch-padding-top, 0.5rem);
-        padding-right: var(--ry-switch-padding-right, 0.25rem);
-        padding-bottom: var(--ry-switch-padding-bottom, 0.5rem);
-        padding-left: var(--ry-switch-padding-left, 0.25rem);
+        padding-top: var(--au-switch-padding-top, 0.5rem);
+        padding-right: var(--au-switch-padding-right, 0.25rem);
+        padding-bottom: var(--au-switch-padding-bottom, 0.5rem);
+        padding-left: var(--au-switch-padding-left, 0.25rem);
         -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
       }
       .container {
         display: flex;
         align-items: center;
-        gap: var(--ry-switch-container-gap, 0.5rem);
+        gap: var(--au-switch-container-gap, 0.5rem);
       }
       .input {
         position: relative;
@@ -32,10 +32,10 @@ class RySwitch extends HTMLElement {
         cursor: pointer;
         margin: 0;
         display: block;
-        width: var(--ry-switch-input-width, 4rem);
-        height: calc(var(--ry-switch-input-width, 4rem) / 2);
-        border: var(--ry-switch-input-border-width, 1px) var(--ry-switch-input-border-style, solid) oklch(var(--ry-switch-input-border-color, 78.94% 0 0));
-        border-radius: var(--ry-switch-input-border-radius, calc(var(--ry-switch-input-width, 4rem) / 4));
+        width: var(--au-switch-input-width, 4rem);
+        height: calc(var(--au-switch-input-width, 4rem) / 2);
+        border: var(--au-switch-input-border-width, 1px) var(--au-switch-input-border-style, solid) oklch(var(--au-switch-input-border-color, 78.94% 0 0));
+        border-radius: var(--au-switch-input-border-radius, calc(var(--au-switch-input-width, 4rem) / 4));
         transition: background-color 360ms ease-in;
       }
       input[type="checkbox"]:focus-visible {
@@ -44,31 +44,31 @@ class RySwitch extends HTMLElement {
       .input:before {
         content: '';
         display: block;
-        width: calc(var(--ry-switch-input-width, 4rem) / 2 - 2 * var(--ry-switch-inner-distance, 0.25rem));
-        height: calc(var(--ry-switch-input-width, 4rem) / 2 - 2 * var(--ry-switch-inner-distance, 0.25rem));
+        width: calc(var(--au-switch-input-width, 4rem) / 2 - 2 * var(--au-switch-inner-distance, 0.25rem));
+        height: calc(var(--au-switch-input-width, 4rem) / 2 - 2 * var(--au-switch-inner-distance, 0.25rem));
         background-color: gray;
         position: absolute;
-        top: var(--ry-switch-inner-distance, 0.25rem);
-        left: var(--ry-switch-inner-distance, 0.25rem);
-        border-radius: var(--ry-switch-inner-border-radius, calc((var(--ry-switch-input-width, 4rem) / 2 - var(--ry-switch-inner-distance, 0.25rem)) / 2));
+        top: var(--au-switch-inner-distance, 0.25rem);
+        left: var(--au-switch-inner-distance, 0.25rem);
+        border-radius: var(--au-switch-inner-border-radius, calc((var(--au-switch-input-width, 4rem) / 2 - var(--au-switch-inner-distance, 0.25rem)) / 2));
         transition: background-color 360ms ease-in, left 240ms ease-in;
       }
       .input:has(input[type="checkbox"]:checked) input[type="checkbox"] {
-        background-color: oklch(var(--ry-switch-input-checked-bg, 13.98% 0 0));
+        background-color: oklch(var(--au-switch-input-checked-bg, 13.98% 0 0));
       }
       .input:has(input[type="checkbox"]:checked):before {
-        background-color: oklch(var(--ry-switch-inner-checked-bg, 99.4% 0 0));
-        left: calc(100% - (var(--ry-switch-input-width, 4rem) / 2 - 2 * var(--ry-switch-inner-distance, 0.25rem)) - var(--ry-switch-inner-distance, 0.25rem));
+        background-color: oklch(var(--au-switch-inner-checked-bg, 99.4% 0 0));
+        left: calc(100% - (var(--au-switch-input-width, 4rem) / 2 - 2 * var(--au-switch-inner-distance, 0.25rem)) - var(--au-switch-inner-distance, 0.25rem));
       }
-      .ry-switch:hover,
-      .ry-switch:has(input:focus-visible) {
-        box-shadow: inset 0 0 0 var(--ry-switch-focus-shadow-width, 3px) oklch(var(--ry-switch-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
+      .au-switch:hover,
+      .au-switch:has(input:focus-visible) {
+        box-shadow: inset 0 0 0 var(--au-switch-focus-shadow-width, 3px) oklch(var(--au-switch-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
       }
     `;
 
     // HTML structure for the switch
     const switchElement = document.createElement('label');
-    switchElement.classList.add('ry-switch');
+    switchElement.classList.add('au-switch');
     switchElement.setAttribute('for', inputID);
 
     // Create switch container
@@ -114,7 +114,7 @@ class RySwitch extends HTMLElement {
   generateId() {
     const byteArray = new Uint32Array(1);
     window.crypto.getRandomValues(byteArray);
-    return `ry-switch-${byteArray[0].toString(36)}`;
+    return `au-switch-${byteArray[0].toString(36)}`;
   }
 
   static get observedAttributes() {
@@ -166,4 +166,4 @@ class RySwitch extends HTMLElement {
   }
 }
 
-customElements.define('ry-switch', RySwitch);
+customElements.define('au-switch', AuSwitch);
