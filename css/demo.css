@@ -300,22 +300,41 @@ code {
   }
 }
 
-.custom-ry-switch {
-  --ry-switch-gap: 4rem;
-  /* --ry-switch-padding-top:; */
-  /* --ry-switch-padding-right:; */
-  /* --ry-switch-padding-bottom:; */
-  /* --ry-switch-padding-left:; */
-  /* --ry-switch-container-gap:; */
-  /* --ry-switch-input-border-width:; */
-  /* --ry-switch-input-border-style:; */
-  /* --ry-switch-input-border-color:; */
-  --ry-switch-input-border-radius: 0.625rem;
-  --ry-switch-inner-border-radius: 0.5rem;
-  --ry-switch-input-width: 6rem;
-  --ry-switch-inner-distance: 0.5rem;
-  --ry-switch-input-checked-bg: var(--color-primary-600);
-  /* --ry-switch-focus-shadow-color:; */
-  /* --ry-switch-focus-shadow-width:; */
+.custom-au-switch {
+  --au-switch-gap: 4rem;
+  /* --au-switch-padding-top:; */
+  /* --au-switch-padding-right:; */
+  /* --au-switch-padding-bottom:; */
+  /* --au-switch-padding-left:; */
+  /* --au-switch-container-gap:; */
+  /* --au-switch-input-border-width:; */
+  /* --au-switch-input-border-style:; */
+  /* --au-switch-input-border-color:; */
+  --au-switch-input-border-radius: 0.625rem;
+  --au-switch-inner-border-radius: 0.5rem;
+  --au-switch-input-width: 6rem;
+  --au-switch-inner-distance: 0.5rem;
+  --au-switch-input-checked-bg: var(--color-primary-600);
+  /* --au-switch-focus-shadow-color:; */
+  /* --au-switch-focus-shadow-width:; */
+}
+
+.custom-au-radio {
+  /* --au-radio-content-gap:; */
+  /* --au-radio-input-width:; */
+  /* --au-radio-input-height:; */
+  /* --au-radio-input-border-width:; */
+  /* --au-radio-input-border-style:; */
+  /* --au-radio-input-border-color:; */
+  /* --au-radio-input-bg:; */
+  --au-radio-input-checked-bg: var(--color-primary-500);
+  --au-radio-input-checked-circle-color: var(--color-danger-500);
+  /* --au-radio-label-text-color:; */
+  /* --au-radio-label-text-size:; */
+  /* --au-radio-label-hover-text-deco:; */
+  /* --au-radio-label-active-text-color:; */
+  /* --au-radio-input-focus-shadow-width:; */
+  /* --au-radio-input-focus-shadow-color:; */
+  /* --au-radio-label-disabled-text-color:; */
 }
 

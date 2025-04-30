@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accesserty UI Kit Radio</title>
+    <link rel="stylesheet" href="../../../css/au-style.css" />
+    <link rel="stylesheet" href="../../../css/demo.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <script src="radio.js" defer></script>
+  </head>
+  <body>
+    <header><a href="/src" title="go to home page">Home</a></header>
+    <main>
+      <h1>
+        Accesserty UI Kit Radio
+      </h1>
+      <h2>How to use</h2>
+      <h3>HTML</h3>
+      <ol>
+        <li>Copy file (radio.js or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
+        <li>
+          Add the JavaScript file to HTML using the
+          <code>&lt;script src=&quot;&quot; defer&gt;</code> tag
+        </li>
+        <li>Use the <code>&lt;au-radio&gt;</code> tag</li>
+      </ol>
+      <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
+      <h2>Attribute</h2>
+      <table>
+        <caption>
+          The Accesserty UI Kit radio attributes:
+        </caption>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Description</th>
+        </tr>
+        <tr>
+          <td>value</td>
+          <td>radio value</td>
+        </tr>
+        <tr>
+          <td>checked</td>
+          <td>radio checked</td>
+        </tr>
+        <tr>
+          <td>disabled</td>
+          <td>radio disabled</td>
+        </tr>
+        <tr>
+          <td>direction</td>
+          <td>horizontal / vertical</td>
+        </tr>
+      </table>
+      <h2>Basic</h2>
+      <h3>Empty</h3>
+      <au-radio-group aria-label="Empty">
+        <au-radio>Radio 1</au-radio>
+        <au-radio>Radio 2</au-radio>
+        <au-radio>Radio 3</au-radio>
+      </au-radio-group>
+      <h3>Default Value</h3>
+      <au-radio-group aria-label="Default Value">
+        <au-radio checked>Radio 1</au-radio>
+        <au-radio>Radio 2</au-radio>
+        <au-radio>Radio 3</au-radio>
+      </au-radio-group>
+      <h3>Disabled</h3>
+      <au-radio-group aria-label="Disabled">
+        <au-radio checked>Radio 1</au-radio>
+        <au-radio disabled>Radio 2</au-radio>
+        <au-radio>Radio 3</au-radio>
+      </au-radio-group>
+      <h3>Direction</h3>
+      <au-radio-group aria-label="Change Direction" direction="vertical">
+        <au-radio checked>Radio 1</au-radio>
+        <au-radio>Radio 2</au-radio>
+        <au-radio>Radio 3</au-radio>
+      </au-radio-group>
+      <h2>Custom</h2>
+      <au-radio-group aria-label="Custom Radio" class="custom-au-radio">
+        <au-radio checked>Radio 1</au-radio>
+        <au-radio disabled>Radio 2</au-radio>
+        <au-radio>Radio 3</au-radio>
+      </au-radio-group>
+      <h3>CSS Variables</h3>
+      <table>
+        <tr>
+          <th scope="col">CSS Variables nam</th>
+          <th scope="col">Description</th>
+          <th scope="col">Default value</th>
+        </tr>
+        <tr>
+          <td>--au-radio-content-gap</td>
+          <td>space of circle and label</td>
+          <td>0.5rem</td>
+        </tr>
+        <tr>
+          <td>--au-radio-input-width</td>
+          <td>circle width</td>
+          <td>1.5rem</td>
+        </tr>
+        <tr>
+          <td>--au-radio-input-height</td>
+          <td>circle height</td>
+          <td>1.5rem</td>
+        </tr>
+        <tr>
+          <td>--au-radio-input-border-width</td>
+          <td>circle border width</td>
+          <td>1px</td>
+        </tr>
+        <tr>
+          <td>--au-radio-input-border-style</td>
+          <td>circle border style</td>
+          <td>solid</td>
+        </tr>
+        <tr>
+          <td>--au-radio-input-border-color</td>
+          <td>circle border color</td>
+          <td>oklch(78.94% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-radio-input-bg</td>
+          <td>circle background color</td>
+          <td>oklch(99.4% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-radio-input-checked-bg</td>
+          <td>circle background color(checked)</td>
+          <td>oklch(13.98% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-radio-input-checked-circle-color</td>
+          <td>circle center point(checked)</td>
+          <td>oklch(99.4% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-radio-label-text-color</td>
+          <td>label color</td>
+          <td>oklch(13.98% 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-radio-label-text-size</td>
+          <td>label size</td>
+          <td>1rem</td>
+        </tr>
+        <tr>
+          <td>--au-radio-label-hover-text-deco</td>
+          <td>label decoration(hover)</td>
+          <td>underline</td>
+        </tr>
+        <tr>
+          <td>--au-radio-label-active-text-color</td>
+          <td>label color(active)</td>
+          <td>53.7% 0 0</td>
+        </tr>
+        <tr>
+          <td>--au-radio-input-focus-shadow-width</td>
+          <td>focusd border width</td>
+          <td>3px</td>
+        </tr>
+        <tr>
+          <td>--au-radio-input-focus-shadow-color</td>
+          <td>focusd border color</td>
+          <td>oklch(83.15% 0.15681888825079074 78.05241467152487)</td>
+        </tr>
+        <tr>
+          <td>--au-radio-label-disabled-text-color</td>
+          <td>disable label color</td>
+          <td>oklch(53.7% 0 0)</td>
+        </tr>
+      </table>
+    </main>
+  </body>
+</html>

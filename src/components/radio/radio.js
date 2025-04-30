@@ -1,17 +1,17 @@
-class RyRadioGroup extends HTMLElement {
+class AuRadioGroup extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
 
     const style = document.createElement('style');
     style.textContent = `
-      .ry-radio-group {
+      .au-radio-group {
         display: flex;
         flex-wrap: wrap;
         gap: 1rem;
         margin-bottom: 0.5rem;
       }
-      .ry-radio-group--vertical {
+      .au-radio-group--vertical {
         flex-direction: column;
         label {
           width: max-content;
@@ -85,7 +85,7 @@ class RyRadioGroup extends HTMLElement {
     `;
 
     const container = document.createElement('div');
-    container.setAttribute('class', 'ry-radio-group');
+    container.setAttribute('class', 'au-radio-group');
     container.setAttribute('role', 'radiogroup');
 
     // Generate a unique name for the radio group
@@ -98,18 +98,18 @@ class RyRadioGroup extends HTMLElement {
     this.renderRadios();
     const ariaLabel = this.getAttribute('aria-label');
     if (ariaLabel) {
-      const container = this.shadowRoot.querySelector('.ry-radio-group');
+      const container = this.shadowRoot.querySelector('.au-radio-group');
       container.setAttribute('aria-label', ariaLabel);
     }
     const direction = this.getAttribute('direction');
     if (direction === 'vertical') {
-      const container = this.shadowRoot.querySelector('.ry-radio-group');
-      container.classList.add('ry-radio-group--vertical');
+      const container = this.shadowRoot.querySelector('.au-radio-group');
+      container.classList.add('au-radio-group--vertical');
     }
   }
 
   renderRadios() {
-    const container = this.shadowRoot.querySelector('.ry-radio-group');
+    const container = this.shadowRoot.querySelector('.au-radio-group');
     container.innerHTML = ''; // Clear the container before rendering
 
     const radios = Array.from(this.children);
@@ -197,4 +197,4 @@ class RyRadioGroup extends HTMLElement {
   }
 }
 
-customElements.define('ry-radio-group', RyRadioGroup);
+customElements.define('au-radio-group', AuRadioGroup);
