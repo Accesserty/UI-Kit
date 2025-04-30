@@ -20,34 +20,6 @@
         left: anchor(left);
       }
 
-      [popover] {
-        transition: opacity 0.7s;
-      }
-
-      [popover]:popover-open {
-        @starting-style {
-          opacity: 0;
-        }
-        opacity: 1;
-      }
-
-      [popover]:not(:popover-open) {
-        animation: fade-out 0.7s;
-      }
-
-      @keyframes fade-out {
-        0% {
-          display: block;
-          opacity: 1;
-        }
-        99% {
-          opacity: 0.01;
-        }
-        100% {
-          opacity: 0;
-        }
-      }
-
       .sr-only {
         clip: rect(0 0 0 0); 
         clip-path: inset(50%);
@@ -62,17 +34,7 @@
   <body>
     <header><a href="/src" title="go to home page">Home</a></header>
     <main>
-      <h1>
-        <a
-          href="https://github.com/Neil-Lin/Accesserty UI Kit"
-          target="_blank"
-          title="open new window to Accesserty UI Kit github"
-          rel="noreferrer noopener"
-        >
-          Accesserty UI Kit
-        </a>
-        Popover
-      </h1>
+      <h1>Accesserty UI Kit Popover</h1>
       <h2>Key Point</h2>
       <ul>
         <li>Using the global HTML attribute <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/popover" title="(Open new window) Go to Mozilla" target="_blank" rel="noreferrer noopener">popover</a>, you can create meaningful pop-up tooltips based on the purpose without the need to create a special component.</li>
@@ -86,7 +48,7 @@
       </button>
 
       <div id="ref_1" popover="manual" class="anchor-position">
-        This is a nested popover that requires manual closing and uses CSS Anchor Positioning. Please note that there is an issue in manual mode: when the first-level popover is closed, the second-level popover still remains on the screen.
+        <p>This is a nested popover that requires manual closing and uses CSS Anchor Positioning. Please note that there is an issue in manual mode: when the first-level popover is closed, the second-level popover still remains on the screen.</p>
         <button popovertarget="ref_2" class="anchor2">
           <span aria-hidden="true">?</span>
           <span class="sr-only">nested popover</span>
@@ -94,7 +56,7 @@
       </div>
       
       <div id="ref_2" popover class="anchor-position2">
-        The position of this popover is set by default. There is a backdrop layer behind it. Clicking outside will close the popover, and the focus will return to the button of the previous popover.
+        <p>The position of this popover is set by default. There is a backdrop layer behind it. Clicking outside will close the popover, and the focus will return to the button of the previous popover.</p>
       </div>
     </main>
   </body>

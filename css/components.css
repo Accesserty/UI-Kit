@@ -1,4 +1,8 @@
-button {
+/*************************  
+    Button & Select
+*************************/
+
+button, select {
   /* behavior */
   cursor: pointer;
   -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
@@ -65,3 +69,136 @@ button {
     }
   }
 }
+
+select {
+  appearance: base-select;
+  width: max-content;
+  &::picker(select) {
+    appearance: base-select;
+    border: var(--au-select-picker-border-width, 1px) var(--au-select-picker-border-style, solid) oklch(var(--au-select-picker-border-color, 78.94% 0 0));
+    border-radius: var(--au-select-picker-border-radius, 0.25rem);
+    background-color: oklch(var(--au-select-picker-bg, 99.4% 0 0));
+    color: oklch(var(--au-select-picker-text-color, 13.98% 0 0));
+    box-shadow: var(--box-shadow);
+    text-shadow: none;
+  }
+  selectedcontent {
+    max-width: 50dvw;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  &[size="small"] {
+    button {
+      padding: var(--au-btn-small-padding-vertical, 0.25rem) var(--au-btn-small-padding-horizontal, 0.5rem);
+    }
+  }
+  &[size="large"] {
+    button {
+      padding: var(--au-btn-large-padding-vertical, 1rem) var(--au-btn-large-padding-horizontal, 2rem);
+      font-size: var(--au-btn-large-text-size, 1.25rem);
+    }
+  }
+  [role="group"] {
+    >label {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      display: block;
+      padding: var(--au-group-label-padding-top, 0.25rem)  var(--au-group-label-padding-right, 1rem)  var(--au-group-label-padding-bottom, 0.25rem)  var(--au-group-label-padding-left, 1rem);
+      font-size: var(--au-group-label-large-text-size, 0.875rem);
+      color: oklch(var(--au-group-label-text-color, 13.98% 0 0));
+      background-color: oklch(var(--au-group-label-bg, 99.4% 0 0));
+      border-top: var(--au-group-label-border-width, 1px) var(--au-group-label-border-style, solid) oklch(var(--au-group-label-border-color, 78.94% 0 0));
+      border-bottom: var(--au-group-label-border-width, 1px) var(--au-group-label-border-style, solid) oklch(var(--au-group-label-border-color, 78.94% 0 0));
+    }
+  }
+  option {
+    position: relative;
+    display: block;
+    color: oklch(var(--au-option-text-color, 13.98% 0 0));
+    padding: var(--au-option-padding-top, 0.25rem)  var(--au-option-padding-right, 1rem)  var(--au-option-padding-bottom, 0.25rem)  var(--au-option-padding-left, 2rem);
+    transition: all 120ms ease-in;
+    outline: none;
+    word-break: break-word;
+    white-space: pre-wrap;
+    &:hover {
+      background-color: oklch(var(--au-option-hover-bg-color, 94.66% 0 0));
+      color: oklch(var(--au-option-hover-text-color, 13.98% 0 0));
+    }
+    &:active {
+      background-color: oklch(var(--au-option-active-bg-color, 86.89% 0 0));
+      color: oklch(var(--au-option-active-text-color, 13.98% 0 0));
+    }
+    &:checked {
+      background-color: oklch(var(--au-option-checked-bg-color, 94.66% 0 0));
+      color: oklch(var(--au-option-checked-text-color, 13.98% 0 0));
+    }
+    &:focus-visible {
+      box-shadow: inset 0 0 0 var(--au-option-focus-shadow-width, 3px) oklch(var(--au-option-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
+    }
+    &::checkmark {
+      position: absolute;
+      top: var(--au-group-label-padding-top, 0.25rem);
+      left: var(--au-group-label-padding-left, 1rem);
+    }
+  }
+  &:not(:open) {
+    &::picker-icon {
+      content: var(--au-select-arrow-icon, '▼');
+    }
+  }
+  &:open {
+    &::picker-icon {
+      content: var(--au-select-arrow-icon, '▲');
+    }
+  }
+}
+
+
+
+/*************************  
+    Popover
+*************************/
+
+[popover] {
+  border: var(--au-popover-border-width, 1px) var(--au-popover-border-style, solid) oklch(var(--au-popover-border-color, 78.94% 0 0));
+  border-radius: var(--au-popover-border-radius, 0.25rem);
+  padding: var(--au-popover-padding-top, 1rem)  var(--au-popover-padding-right, 1rem)  var(--au-popover-padding-bottom, 1rem)  var(--au-popover-padding-left, 1rem);
+  background-color: oklch(var(--au-popover-bg, 99.4% 0 0));
+  color: oklch(var(--au-popover-text-color, 13.98% 0 0));
+  box-shadow: var(--box-shadow);
+}
+
+[popover] {
+  transition: opacity 0.5s;
+}
+
+[popover]:popover-open {
+  @starting-style {
+    opacity: 0;
+  }
+  opacity: 1;
+}
+
+[popover]:not(:popover-open) {
+  animation: popover-fade-out 0.5s;
+}
+
+@keyframes popover-fade-out {
+  0% {
+    display: block;
+    opacity: 1;
+  }
+  99% {
+    opacity: 0.01;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+
+/*************************  
+    Selcect
+*************************/
