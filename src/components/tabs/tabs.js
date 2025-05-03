@@ -60,7 +60,16 @@ class AuTabs extends HTMLElement {
         line-height: var(--au-tabs-text-line-height, 1.5);
 
         /* background */
-        background-color: oklch(var(--au-tabs-bg, 94.66% 0 0));
+        background-color: oklch(var(--au-tabs-bg, 97.31% 0 0));
+        transition: background-color 120ms ease-in;
+
+        &:hover {
+          background-color: oklch(var(--au-tabs-hover-bg, 94.66% 0 0));
+        }
+        
+        &:active {
+          background-color: oklch(var(--au-tabs-active-bg, 86.89% 0 0));
+        }
 
         &[aria-selected="true"] {
           paint-order: stroke fill;
@@ -70,7 +79,7 @@ class AuTabs extends HTMLElement {
           color: oklch(var(--au-tabs-selected-text-color, 99.4% 0 0));
         }
 
-         /* focusd */
+        /* focusd */
         &:focus-visible {
           outline: none;
           box-shadow: inset 0 0 0 var(--au-tabs-focus-shadow-width, 3px) oklch(var(--au-tabs-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
