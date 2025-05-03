@@ -92,7 +92,14 @@ class AuTabs extends HTMLElement {
 
       .au-tab-panel {
         padding: var(--au-tab-panel-padding-vertical, 0.75rem) var(--au-tab-panel-padding-horizontal, 1rem);
-       }
+      }
+
+      .badge {
+        background-color: oklch(var(--au-tab-badge-bg, 86.89% 0 0));
+        color: oklch(var(--au-tab-badge-text-color, 13.98% 0 0));
+        padding: var(--au-tab-badge-padding-vertical, 0) var(--au-tab-badge-padding-horizontal, 0.5rem);
+        border-radius: var(--au-tab-badge-border-radius, 0.75rem);
+      }
     `;
 
 
@@ -121,9 +128,9 @@ class AuTabs extends HTMLElement {
 
     tabPanels.forEach((panel, index) => {
       const label = panel.getAttribute("label") || `Tab ${index + 1}`;
-      const prefix = panel.getAttribute("prefix") || "prefix";
-      const badge = panel.getAttribute("badge") || "new";
-      const affix = panel.getAttribute("affix") || "affix";
+      const prefix = panel.getAttribute("prefix") || "";
+      const badge = panel.getAttribute("badge") || "";
+      const affix = panel.getAttribute("affix") || "";
       const id = panel.id || this.generateId();
 
       const tabId = `tab-${index + 1}-${id}`;
@@ -143,12 +150,36 @@ class AuTabs extends HTMLElement {
       button.setAttribute("tabindex", index === 0 ? "0" : "-1");
       button.setAttribute("aria-selected", index === 0 ? "true" : "false");
 
-      button.innerHTML = `
-        <span class="prefix">${prefix}</span>
-        <span class="label">${label}</span>
-        <span class="badge" aria-label="補充資訊：${badge}">${badge}</span>
-        <span class="affix">${affix}</span>
-      `;
+      const fragments = document.createDocumentFragment();
+
+      if (prefix) {
+        const span = document.createElement('span');
+        span.className = 'prefix';
+        span.textContent = prefix;
+        fragments.appendChild(span);
+      }
+
+      const labelSpan = document.createElement('span');
+      labelSpan.className = 'label';
+      labelSpan.textContent = label;
+      fragments.appendChild(labelSpan);
+
+      if (badge !== null && badge !== undefined && badge !== '') {
+        const span = document.createElement('span');
+        span.className = 'badge';
+        span.setAttribute('aria-label', `補充資訊：${badge}`);
+        span.textContent = badge;
+        fragments.appendChild(span);
+      }
+
+      if (affix) {
+        const span = document.createElement('span');
+        span.className = 'affix';
+        span.textContent = affix;
+        fragments.appendChild(span);
+      }
+
+      button.appendChild(fragments);
 
       li.appendChild(button);
       this.tabsList.appendChild(li);

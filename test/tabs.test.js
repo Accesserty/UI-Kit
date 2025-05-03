@@ -70,24 +70,24 @@ describe('AuTabs and AuTabPanel', () => {
   });
 
   it('moves to corresponding panel on Tab key press', async () => {
-  const el = await fixture(html`
-    <au-tabs>
-      <au-tab-panel id="tab1" label="Tab 1">Content 1</au-tab-panel>
-      <au-tab-panel id="tab2" label="Tab 2">Content 2</au-tab-panel>
-    </au-tabs>
-  `);
+    const el = await fixture(html`
+      <au-tabs>
+        <au-tab-panel id="tab1" label="Tab 1">Content 1</au-tab-panel>
+        <au-tab-panel id="tab2" label="Tab 2">Content 2</au-tab-panel>
+      </au-tabs>
+    `);
 
-  const tabs = el.shadowRoot.querySelectorAll('[role="tab"]');
+    const tabs = el.shadowRoot.querySelectorAll('[role="tab"]');
 
-  tabs[0].focus();
-  tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
-  await new Promise(r => setTimeout(r, 20));
+    tabs[0].focus();
+    tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    await new Promise(r => setTimeout(r, 20));
 
-  const selectedPanel = el.shadowRoot.querySelector('.au-tab-panel--selected');
-  expect(selectedPanel).to.exist;
-  expect(selectedPanel.textContent).to.include('Content 1');
-  expect(el.shadowRoot.activeElement).to.equal(selectedPanel);
-});
+    const selectedPanel = el.shadowRoot.querySelector('.au-tab-panel--selected');
+    expect(selectedPanel).to.exist;
+    expect(selectedPanel.textContent).to.include('Content 1');
+    expect(el.shadowRoot.activeElement).to.equal(selectedPanel);
+  });
 
   it('associates tab and panel with correct ARIA attributes', async () => {
     const el = await fixture(html`
@@ -115,6 +115,26 @@ describe('AuTabs and AuTabPanel', () => {
     expect(tab.querySelector('.prefix').textContent).to.equal('Pre');
     expect(tab.querySelector('.badge').textContent).to.equal('9+');
     expect(tab.querySelector('.affix').textContent).to.equal('End');
+  });
+
+  it('does not render prefix, badge, or affix if they are empty', async () => {
+    const el = await fixture(html`
+      <au-tabs>
+        <au-tab-panel id="tab1" label="Tab 1"></au-tab-panel>
+        <au-tab-panel id="tab2" label="Tab 2" badge="0"></au-tab-panel>
+      </au-tabs>
+    `);
+
+    const tab1 = el.shadowRoot.querySelectorAll('[role="tab"]')[0];
+    const tab2 = el.shadowRoot.querySelectorAll('[role="tab"]')[1];
+
+    expect(tab1.querySelector('.prefix')).to.be.null;
+    expect(tab1.querySelector('.badge')).to.be.null;
+    expect(tab1.querySelector('.affix')).to.be.null;
+
+    const badge = tab2.querySelector('.badge');
+    expect(badge).to.exist;
+    expect(badge.textContent).to.equal('0');
   });
 
   it('preserves HTML content inside au-tab-panel', async () => {
