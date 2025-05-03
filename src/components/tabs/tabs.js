@@ -161,8 +161,9 @@ class AuTabs extends HTMLElement {
       panelDiv.setAttribute("tabindex", "0");
       panelDiv.className = "au-tab-panel" + (index === 0 ? " au-tab-panel--selected" : "");
       if (index !== 0) panelDiv.hidden = true;
-      const cloned = panel.cloneNode(true);
-      panelDiv.append(...cloned.childNodes);
+      while (panel.firstChild) {
+        panelDiv.appendChild(panel.firstChild);
+      }
       
       this._tabs.push(button);
       this._panels.push(panelDiv);
