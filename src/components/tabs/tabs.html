@@ -24,6 +24,9 @@
         <li>Use the <code>&lt;au-tabs&gt;</code> and <code>&lt;au-tab-panel&gt;</code>  tag</li>
       </ol>
       <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
+      <p>
+        This is a highly recommended Web Component. Most custom-built tabs do not address accessibility issues, but by using this component, the rendered HTML fully complies with accessibility standards—allowing you to focus solely on developing your content.
+      </p>
       <h2>Attribute</h2>
       <table>
         <caption>
@@ -65,20 +68,58 @@
         <au-tab-panel label="Tab7"><h3>Display Html</h3></au-tab-panel>
       </au-tabs>
       <h2>Custom Style</h2>
-     
-      <h3>CSS Variables</h3>
+      <au-tabs class="custom-tabs">
+        <au-tab-panel id="custom-id" label="Tab1" prefix="prefix" badge="badge" affix="affix">Content 1</au-tab-panel>
+        <au-tab-panel label="Tab2">Content 2</au-tab-panel>
+        <au-tab-panel label="Tab3">Content 3</au-tab-panel>
+        <au-tab-panel label="Tab4">Content 4</au-tab-panel>
+        <au-tab-panel label="Tab5">Content 5</au-tab-panel>
+        <au-tab-panel label="Tab6">Content 6</au-tab-panel>
+        <au-tab-panel label="Tab7"><h3>Display Html</h3></au-tab-panel>
+      </au-tabs>
+      <h2>CSS Variables</h2>
       <table>
-        <tr>
-          <th scope="col">CSS Variables name</th>
-          <th scope="col">Description</th>
-          <th scope="col">Default value</th>
-        </tr>
-        <tr>
-          <td>--au-</td>
-          <td>td</td>
-          <td>td</td>
-        </tr>
-       
+        <thead>
+          <tr>
+            <th scope="col">CSS Variable Name</th>
+            <th scope="col">Description</th>
+            <th scope="col">Default Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>--au-tabs-border-radius</td><td>Border radius for first/last tab</td><td>0</td></tr>
+          <tr><td>--au-tabs-border-width</td><td>Tab border width</td><td>1px</td></tr>
+          <tr><td>--au-tabs-border-style</td><td>Tab border style</td><td>solid</td></tr>
+          <tr><td>--au-tabs-border-color</td><td>Tab border color</td><td>oklch(78.94% 0 0)</td></tr>
+          <tr><td>--au-tabs-text-color</td><td>Tab text color</td><td>oklch(13.98% 0 0)</td></tr>
+          <tr><td>--au-tabs-text-size</td><td>Tab font size</td><td>1rem</td></tr>
+          <tr><td>--au-tabs-text-family</td><td>Tab font family</td><td>Helvetica, Arial, sans-serif, system-ui</td></tr>
+          <tr><td>--au-tabs-text-line-height</td><td>Tab line height</td><td>1.5</td></tr>
+          <tr><td>--au-tabs-bg</td><td>Tab background color</td><td>oklch(97.31% 0 0)</td></tr>
+          <tr><td>--au-tabs-hover-bg</td><td>Tab hover background color</td><td>oklch(94.66% 0 0)</td></tr>
+          <tr><td>--au-tabs-active-bg</td><td>Tab active background color</td><td>oklch(86.89% 0 0)</td></tr>
+          <tr><td>--au-tabs-selected-text-stroke-width</td><td>Stroke width for selected tab text</td><td>0.5px</td></tr>
+          <tr><td>--au-tabs-selected-text-stroke-color</td><td>Stroke color for selected tab text</td><td>oklch(99.4% 0 0)</td></tr>
+          <tr><td>--au-tabs-selected-shadow-width</td><td>Shadow width for selected tab</td><td>1px</td></tr>
+          <tr><td>--au-tabs-selected-shadow-color</td><td>Shadow color for selected tab</td><td>oklch(78.94% 0 0)</td></tr>
+          <tr><td>--au-tabs-selected-bg</td><td>Selected tab background color</td><td>oklch(13.98% 0 0)</td></tr>
+          <tr><td>--au-tabs-selected-text-color</td><td>Selected tab text color</td><td>oklch(99.4% 0 0)</td></tr>
+          <tr><td>--au-tabs-focus-shadow-width</td><td>Focus-visible shadow width</td><td>3px</td></tr>
+          <tr><td>--au-tabs-focus-shadow-color</td><td>Focus-visible shadow color</td><td>oklch(83.15% 0.1568 78.05)</td></tr>
+          <tr><td>--au-tabs-padding-vertical</td><td>Vertical padding for tab</td><td>0.75rem</td></tr>
+          <tr><td>--au-tabs-padding-horizontal</td><td>Horizontal padding for tab</td><td>1rem</td></tr>
+          <tr><td>--au-tabpanels-border-width</td><td>Tab panels container border width</td><td>1px</td></tr>
+          <tr><td>--au-tabpanels-border-style</td><td>Tab panels container border style</td><td>solid</td></tr>
+          <tr><td>--au-tabpanels-border-color</td><td>Tab panels container border color</td><td>oklch(78.94% 0 0)</td></tr>
+          <tr><td>--au-tab-panel-padding-vertical</td><td>Vertical padding for tab panel</td><td>0.75rem</td></tr>
+          <tr><td>--au-tab-panel-padding-horizontal</td><td>Horizontal padding for tab panel</td><td>1rem</td></tr>
+          <tr><td>--au-tab-badge-bg</td><td>Badge background color</td><td>oklch(86.89% 0 0)</td></tr>
+          <tr><td>--au-tab-badge-text-color</td><td>Badge text color</td><td>oklch(13.98% 0 0)</td></tr>
+          <tr><td>--au-tab-badge-padding-vertical</td><td>Badge vertical padding</td><td>0</td></tr>
+          <tr><td>--au-tab-badge-padding-horizontal</td><td>Badge horizontal padding</td><td>0.5rem</td></tr>
+          <tr><td>--au-tab-badge-border-radius</td><td>Badge border radius</td><td>0.75rem</td></tr>
+        </tbody>
+      </table>
     </main>
   </body>
 </html>

@@ -338,3 +338,36 @@ code {
   /* --au-radio-label-disabled-text-color:; */
 }
 
+.custom-tabs {
+  --au-tabs-border-radius: 0.5rem;
+  /* --au-tabs-border-width:; */
+  /* --au-tabs-border-style:; */
+  /* --au-tabs-border-color:; */
+  /* --au-tabs-text-color:; */
+  /* --au-tabs-text-size:; */
+  /* --au-tabs-text-family:; */
+  /* --au-tabs-text-line-height:; */
+  --au-tabs-bg: var(--color-white);
+  /* --au-tabs-hover-bg:; */
+  /* --au-tabs-active-bg:; */
+  /* --au-tabs-selected-text-stroke-width:; */
+  /* --au-tabs-selected-text-stroke-color:; */
+  /* --au-tabs-selected-shadow-width:; */
+  --au-tabs-selected-shadow-color: var(--color-primary-500);
+  --au-tabs-selected-bg: var(--color-primary-500);
+  /* --au-tabs-selected-text-color:; */
+  /* --au-tabs-focus-shadow-width:; */
+  /* --au-tabs-focus-shadow-color:; */
+  /* --au-tabs-padding-vertical:; */
+  /* --au-tabs-padding-horizontal:; */
+  /* --au-tabpanels-border-width:; */
+  /* --au-tabpanels-border-style:; */
+  /* --au-tabpanels-border-color:; */
+  /* --au-tab-panel-padding-vertical:; */
+  /* --au-tab-panel-padding-horizontal:; */
+  --au-tab-badge-bg: var(--color-yellow-100);
+  /* --au-tab-badge-text-color:; */
+  /* --au-tab-badge-padding-vertical:; */
+  /* --au-tab-badge-padding-horizontal:; */
+  /* --au-tab-badge-border-radius:; */
+}
