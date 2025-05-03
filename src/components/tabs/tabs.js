@@ -64,8 +64,8 @@ class AuTabs extends HTMLElement {
 
         &[aria-selected="true"] {
           paint-order: stroke fill;
-          -webkit-text-stroke: var(--au-tabs-selected-text-stroke-width, 1px) oklch(var(--au-tabs-selected-text-stroke-color, 13.98% 0 0));
-          box-shadow: inset 0 0 0 var(--au-tabs-selected-shadow-width, 3px) oklch(var(--au-tabs-selected-shadow-color, 78.94% 0 0));
+          -webkit-text-stroke: var(--au-tabs-selected-text-stroke-width, 0.5px) oklch(var(--au-tabs-selected-text-stroke-color, 99.4% 0 0));
+          box-shadow: inset 0 0 0 var(--au-tabs-selected-shadow-width, 1px) oklch(var(--au-tabs-selected-shadow-color, 78.94% 0 0));
           background-color: oklch(var(--au-tabs-selected-bg, 13.98% 0 0));
           color: oklch(var(--au-tabs-selected-text-color, 99.4% 0 0));
         }
