@@ -13,7 +13,7 @@ class AuTabs extends HTMLElement {
 
     const style = document.createElement("style");
     style.textContent = `
-      .au-tabs-list {
+      .au-tablist {
         list-style: none;
         margin: 0;
         padding: 0;
@@ -21,7 +21,7 @@ class AuTabs extends HTMLElement {
         overflow: auto;
       }
 
-      .au-tabs__item {
+      .au-tablist-item{
         &:first-of-type {
           [role="tab"] {
             border-top-left-radius: var(--au-tabs-border-radius, 0);
@@ -35,7 +35,7 @@ class AuTabs extends HTMLElement {
         }
       }
 
-      [role="tab"] {
+      button[role="tab"] {
         /* behavior */
         cursor: pointer;
         -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
@@ -52,16 +52,47 @@ class AuTabs extends HTMLElement {
         border-left: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) oklch(var(--au-tabs-border-color, 78.94% 0 0));
         border-right: 0;
         border-bottom: 0;
+
+        /* text */
+        color: oklch(var(--au-tabs-text-color, 13.98% 0 0));
+        font-size: var(--au-tabs-text-size, 1rem);
+        font-family: var(--au-tabs-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+        line-height: var(--au-tabs-text-line-height, 1.5);
+
+        /* background */
+        background-color: oklch(var(--au-tabs-bg, 94.66% 0 0));
+
+        &[aria-selected="true"] {
+          paint-order: stroke fill;
+          -webkit-text-stroke: var(--au-tabs-selected-text-stroke-width, 1px) oklch(var(--au-tabs-selected-text-stroke-color, 13.98% 0 0));
+          box-shadow: inset 0 0 0 var(--au-tabs-selected-shadow-width, 3px) oklch(var(--au-tabs-selected-shadow-color, 78.94% 0 0));
+          background-color: oklch(var(--au-tabs-selected-bg, 13.98% 0 0));
+          color: oklch(var(--au-tabs-selected-text-color, 99.4% 0 0));
+        }
+
+         /* focusd */
+        &:focus-visible {
+          outline: none;
+          box-shadow: inset 0 0 0 var(--au-tabs-focus-shadow-width, 3px) oklch(var(--au-tabs-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
+        }
       }
+
+      .au-tabpanels {
+        border: var(--au-tabpanels-border-width, 1px) var(--au-tabpanels-border-style, solid) oklch(var(--au-tabpanels-border-color, 78.94% 0 0));
+      }
+
+      .au-tab-panel {
+        padding: var(--au-tab-panel-padding-vertical, 0.75rem) var(--au-tab-panel-padding-horizontal, 1rem);
+       }
     `;
 
 
     this.tabsList = document.createElement("ul");
     this.tabsList.setAttribute("role", "tablist");
-    this.tabsList.classList.add("au-tabs-list");
+    this.tabsList.classList.add("au-tablist");
 
     this.panelsContainer = document.createElement("div");
-    this.panelsContainer.classList.add("au-tabs-panels");
+    this.panelsContainer.classList.add("au-tabpanels");
 
     this.container.append(style, this.tabsList, this.panelsContainer);
     this.shadowRoot.appendChild(this.container);
@@ -92,7 +123,7 @@ class AuTabs extends HTMLElement {
       // Create tab button
       const li = document.createElement("li");
       li.setAttribute("role", "presentation");
-      li.className = "au-tabs__item" + (index === 0 ? " au-tabs__item--selected" : "");
+      li.className = "au-tablist-item" + (index === 0 ? " au-tablist-item--selected" : "");
 
       const button = document.createElement("button");
       button.setAttribute("role", "tab");
@@ -104,10 +135,10 @@ class AuTabs extends HTMLElement {
       button.setAttribute("aria-selected", index === 0 ? "true" : "false");
 
       button.innerHTML = `
-        <span class="au-prefix">${prefix}</span>
-        <span>${label}</span>
-        <span class="au-badge" aria-label="補充資訊：${badge}">${badge}</span>
-        <span class="au-affix">${affix}</span>
+        <span class="prefix">${prefix}</span>
+        <span class="label">${label}</span>
+        <span class="badge" aria-label="補充資訊：${badge}">${badge}</span>
+        <span class="affix">${affix}</span>
       `;
 
       li.appendChild(button);
@@ -119,10 +150,11 @@ class AuTabs extends HTMLElement {
       panelDiv.setAttribute("role", "tabpanel");
       panelDiv.setAttribute("aria-labelledby", tabId);
       panelDiv.setAttribute("tabindex", "0");
-      panelDiv.className = "au-tabs-panel" + (index === 0 ? " au-tabs-panel--selected" : "");
+      panelDiv.className = "au-tab-panel" + (index === 0 ? " au-tab-panel--selected" : "");
       if (index !== 0) panelDiv.hidden = true;
-      panelDiv.textContent = panel.textContent;
-
+      const cloned = panel.cloneNode(true);
+      panelDiv.append(...cloned.childNodes);
+      
       this._tabs.push(button);
       this._panels.push(panelDiv);
 
@@ -142,9 +174,10 @@ class AuTabs extends HTMLElement {
       const selected = i === index;
       tab.setAttribute("aria-selected", selected);
       tab.setAttribute("tabindex", selected ? "0" : "-1");
-      tab.parentElement.classList.toggle("au-tabs__item--selected", selected);
+      tab.parentElement.classList.toggle("au-tablist-item--selected", selected);
       this._panels[i].hidden = !selected;
-      this._panels[i].classList.toggle("au-tabs-panel--selected", selected);
+      this._panels[i].setAttribute('aria-hidden', !selected);
+      this._panels[i].classList.toggle("au-tab-panel--selected", selected);
     });
     this._tabs[index].focus();
     this._selectedIndex = index;
