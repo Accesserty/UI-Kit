@@ -1,4 +1,4 @@
-class RyAccordion extends HTMLElement {
+class AuAccordion extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
@@ -12,10 +12,10 @@ class RyAccordion extends HTMLElement {
   }
 }
 
-customElements.define("au-accordion", RyAccordion);
+customElements.define("au-accordion", AuAccordion);
 
 
-class RyAccordionItem extends HTMLElement {
+class AuAccordionItem extends HTMLElement {
   constructor() {
       super();
       this.attachShadow({ mode: "open" });
@@ -182,4 +182,4 @@ class RyAccordionItem extends HTMLElement {
   }
 }
 
-customElements.define("au-accordion-item", RyAccordionItem);
+customElements.define("au-accordion-item", AuAccordionItem);

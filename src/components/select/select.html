@@ -15,7 +15,7 @@
       </h1>
 
       <section>
-        <h2>We recommand using original button because now we can style <code>&lt;option&gt;</code></h2>
+        <h2>We recommand using original select because now we can style <code>&lt;option&gt;</code></h2>
         <p>
           We use the same style because <code>&lt;button&gt;</code> and <code>&lt;select&gt;</code> often appear in the same area, such as for page filters or form inputs.
         </p>
@@ -75,18 +75,163 @@
       </section>
 
       <section>
-      <h2>CSS Variables</h2>
-      <table>
-        <tr>
-          <th scope="col">CSS Variables name</th>
-          <th scope="col">Description</th>
-          <th scope="col">Default value</th>
-        </tr>
-        <tr>
-          <td>1</td>
-          <td>2</td>
-          <td>3</td>
-        </tr>
+        <h2>CSS Variables</h2>
+        <table>
+          <tr>
+            <th scope="col">CSS Variables name</th>
+            <th scope="col">Description</th>
+            <th scope="col">Default value</th>
+          </tr>
+          <tr>
+            <td>--au-select-picker-border-width</td>
+            <td>option popover border width</td>
+            <td>1px</td>
+          </tr>
+          <tr>
+            <td>--au-select-picker-border-style</td>
+            <td>option popover border style</td>
+            <td>solid</td>
+          </tr>
+          <tr>
+            <td>--au-select-picker-border-color</td>
+            <td>option popover border color</td>
+            <td>oklch(78.94% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-select-picker-border-radius</td>
+            <td>option popover border radiusr</td>
+            <td>0.25rem</td>
+          </tr>
+          <tr>
+            <td>--au-select-picker-bg</td>
+            <td>option popover border background color</td>
+            <td>oklch(99.4% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-select-picker-text-color</td>
+            <td>option popover border text color</td>
+            <td>oklch(13.98% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-group-label-padding-top</td>
+            <td>group text padding top</td>
+            <td>0.25rem</td>
+          </tr>
+          <tr>
+            <td>--au-group-label-padding-bottom</td>
+            <td>group text padding bottom</td>
+            <td>0.25rem</td>
+          </tr>
+          <tr>
+            <td>--au-group-label-padding-left</td>
+            <td>group text padding left</td>
+            <td>1rem</td>
+          </tr>
+          <tr>
+            <td>--au-group-label-padding-right</td>
+            <td>group text padding right</td>
+            <td>1rem</td>
+          </tr>
+          <tr>
+            <td>--au-group-label-text-size</td>
+            <td>group text font size</td>
+            <td>0.875rem</td>
+          </tr>
+          <tr>
+            <td>--au-group-label-text-color</td>
+            <td>group text text color</td>
+            <td>oklch(13.98% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-group-label-bg</td>
+            <td>group background color</td>
+            <td>oklch(99.4% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-group-label-border-width</td>
+            <td>group border width</td>
+            <td>1px</td>
+          </tr>
+          <tr>
+            <td>--au-group-label-border-style</td>
+            <td>group border style</td>
+            <td>solid</td>
+          </tr>
+          <tr>
+            <td>--au-group-label-border-color</td>
+            <td>group border color</td>
+            <td>oklch(78.94% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-option-text-color</td>
+            <td>option text color</td>
+            <td>oklch(13.98% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-option-padding-top</td>
+            <td>option padding-top</td>
+            <td>0.25rem</td>
+          </tr>
+          <tr>
+            <td>--au-option-padding-right</td>
+            <td>option padding-right</td>
+            <td>1rem</td>
+          </tr>
+          <tr>
+            <td>--au-option-padding-bottom</td>
+            <td>option padding-bottom</td>
+            <td>0.25rem</td>
+          </tr>
+          <tr>
+            <td>--au-option-padding-left</td>
+            <td>option padding-left</td>
+            <td>2rem</td>
+          </tr>
+          <tr>
+            <td>--au-option-hover-bg-color</td>
+            <td>option bg(hover)</td>
+            <td>oklch(94.66% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-option-hover-text-color</td>
+            <td>option text color(hover)</td>
+            <td>oklch(13.98% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-option-active-bg-color</td>
+            <td>option bg(active)</td>
+            <td>oklch(86.89% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-option-active-text-color</td>
+            <td>option text color(active)</td>
+            <td>oklch(13.98% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-option-checked-bg-color</td>
+            <td>option bg(checked)</td>
+            <td>oklch(94.66% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-option-checked-text-color</td>
+            <td>option text color(checked)</td>
+            <td>oklch(13.98% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-option-focus-shadow-width</td>
+            <td>focusd border width(box-shadow)</td>
+            <td>oklch(83.15% 0.15681888825079074 78.05241467152487)</td>
+          </tr>
+          <tr>
+            <td>--au-select-arrow-down-icon</td>
+            <td>checkmark icon(not open)</td>
+            <td>▼</td>
+          </tr>
+          <tr>
+            <td>--au-select-arrow-up-icon</td>
+            <td>checkmark icon(open)</td>
+            <td>▲</td>
+          </tr>
         </table>
       </section>
   </body>

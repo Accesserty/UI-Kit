@@ -2,7 +2,7 @@
     Button & Select
 *************************/
 
-button, select {
+button, select, .btn {
   /* behavior */
   cursor: pointer;
   -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
@@ -145,12 +145,12 @@ select {
   }
   &:not(:open) {
     &::picker-icon {
-      content: var(--au-select-arrow-icon, '▼');
+      content: var(--au-select-arrow-down-icon, '▼');
     }
   }
   &:open {
     &::picker-icon {
-      content: var(--au-select-arrow-icon, '▲');
+      content: var(--au-select-arrow-up-icon, '▲');
     }
   }
 }
@@ -200,5 +200,6 @@ select {
 
 
 /*************************  
-    Selcect
+    Dialog
 *************************/
+
