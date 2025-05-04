@@ -1,11 +1,13 @@
 html, body {
   line-height: 1.5;
+  
 }
 
 main {
   padding-bottom: 4rem;
   max-width: 1440px;
   margin: 0 auto;
+  accent-color: oklch(var(--color-primary-500));
 }
 
 table {
