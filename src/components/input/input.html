@@ -25,26 +25,49 @@
       </ol>
       <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
 
+      <h2>Size</h2>
+      <au-input label="Small" au-size="small"></au-input>
+      <au-input label="Default"></au-input>
+      <au-input label="Large" au-size="large"></au-input>
+
+      <h2>Prefix, Affix (Slot)</h2>
+      <au-input label="Default">
+        <span slot="prefix">Prefix</span>
+        <button type="button" slot="affix">Affix</button>
+      </au-input>
+
+      <h2>Clearable</h2>
+      <p>
+        using attibute <code>&lt;au-clear&gt;</code> contorll and <code>&lt;au-clear-label&gt;</code> setting text.
+      </p>
+      <p>
+        For input fields with `type="search"`, the clear button is not needed as browsers typically provide a native clear button for search inputs.
+      </p>
+      <au-input label="au-clear" au-clear au-clear-label="Clear it now!"></au-input>
+      <au-input label="type=search" type="search"></au-input>
+
+      <h2>Placeholder</h2>
+      <au-input label="Default" placeholder="Please Enter Here..."></au-input>
+
+      <h2>Required</h2>
+      <au-input label="email(required, 5-10 letters)" type="email" required pattern=".{5,10}"></au-input>
+
+      <h2>Layout</h2>
+      <au-input label="Layout" type="email" au-layout="vertical" au-clear au-clear-label="Clear it now!" placeholder="Enter...">
+        <span slot="prefix">Prefix</span>
+        <button type="button" slot="affix">Affix</button>
+      </au-input>
+
       <h2>Types</h2>
       <form action="">
-        <input type="email"/>
-       
-        <au-input label="Email" name="email" type="email" required>
-          <span slot="prefix">@</span>
-          <button type="button" size="small" slot="affix" aria-label="clear">✖</button>
-        </au-input>
         <au-input label="text"></au-input>
-        <au-input label="search" type="search"></au-input>
+        <au-input label="search" type="search" required></au-input>
         <au-input label="url" type="url"></au-input>
         <au-input label="email" type="email"></au-input>
         <au-input label="tel" type="tel"></au-input>
         <au-input label="password" type="password"></au-input>
         <au-input label="number" type="number"></au-input>
-        <au-input label="date" type="date">
-          <span slot="prefix">@</span>
-          <button type="button" size="small" slot="affix" aria-label="clear">✖</button>
-        </au-input>
-        </au-input>
+        <au-input label="date" type="date"></au-input>
         <au-input label="datetime-local" type="datetime-local"></au-input>
         <au-input label="month" type="month"></au-input>
         <au-input label="week" type="week"></au-input>
@@ -61,7 +84,121 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td>--au-input</td><td>--</td><td>--</td></tr>
+          <tr>
+            <td>--au-input-padding-vertical</td>
+            <td>Vertical padding for label and input</td>
+            <td>0.75rem</td>
+          </tr>
+          <tr>
+            <td>--au-input-padding-horizontal</td>
+            <td>Horizontal padding for label and input</td>
+            <td>1rem</td>
+          </tr>
+          <tr>
+            <td>--au-input-text-color</td>
+            <td>Text color for input and label</td>
+            <td>oklch(13.98% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-input-text-size</td>
+            <td>Font size for input and label</td>
+            <td>1rem</td>
+          </tr>
+          <tr>
+            <td>--au-input-text-family</td>
+            <td>Font family for input and label</td>
+            <td>'Helvetica, Arial, sans-serif, system-ui'</td>
+          </tr>
+          <tr>
+            <td>--au-input-text-line-height</td>
+            <td>Line height for input text</td>
+            <td>1.5</td>
+          </tr>
+          <tr>
+            <td>--au-input-border-radius</td>
+            <td>Border radius for input and container</td>
+            <td>0.25rem</td>
+          </tr>
+          <tr>
+            <td>--au-input-border-width</td>
+            <td>Border width for input container</td>
+            <td>1px</td>
+          </tr>
+          <tr>
+            <td>--au-input-border-style</td>
+            <td>Border style for input container</td>
+            <td>solid</td>
+          </tr>
+          <tr>
+            <td>--au-input-border-color</td>
+            <td>Border color for input container</td>
+            <td>oklch(78.94% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-input-invalid-shadow-width</td>
+            <td>Width of box-shadow when input is invalid</td>
+            <td>3px</td>
+          </tr>
+          <tr>
+            <td>--au-input-invalid-shadow-color</td>
+            <td>Shadow color when input is invalid</td>
+            <td>oklch(57.22% 0.233 29.08)</td>
+          </tr>
+          <tr>
+            <td>--au-input-focus-shadow-width</td>
+            <td>Width of box-shadow when input is focused</td>
+            <td>3px</td>
+          </tr>
+          <tr>
+            <td>--au-input-focus-shadow-color</td>
+            <td>Shadow color when input is focused</td>
+            <td>oklch(83.15% 0.15681888825079074 78.05241467152487)</td>
+          </tr>
+          <tr>
+            <td>--au-input-bg</td>
+            <td>Background color</td>
+            <td>oklch(99.4% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-input-clear-bg</td>
+            <td>Background color (clear button)</td>
+            <td>oklch(99.4% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-input-clear-hover-bg</td>
+            <td>Background color on hover (clear button)</td>
+            <td>oklch(94.66% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-input-clear-active-bg</td>
+            <td>Background color on active (clear button)</td>
+            <td>oklch(86.89% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-input-small-padding-vertical</td>
+            <td>Vertical padding for small size</td>
+            <td>0.25rem</td>
+          </tr>
+          <tr>
+            <td>--au-input-small-padding-horizontal</td>
+            <td>Horizontal padding for small size</td>
+            <td>0.5rem</td>
+          </tr>
+          <tr>
+            <td>--au-input-large-padding-vertical</td>
+            <td>Vertical padding for large size</td>
+            <td>1rem</td>
+          </tr>
+          <tr>
+            <td>--au-input-large-padding-horizontal</td>
+            <td>Horizontal padding for large size</td>
+            <td>2rem</td>
+          </tr>
+          <tr>
+            <td>--au-input-large-text-size</td>
+            <td>Font size for large size input</td>
+            <td>1.25rem</td>
+          </tr>
         </tbody>
       </table>
     </main>

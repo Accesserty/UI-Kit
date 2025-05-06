@@ -2,7 +2,7 @@
     Button & Select
 *************************/
 
-button, select, .btn {
+:is(button, select, .btn) {
   /* behavior */
   cursor: pointer;
   -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
@@ -24,11 +24,11 @@ button, select, .btn {
   background-color: oklch(var(--au-btn-bg, 99.4% 0 0));
   transition: background-color 160ms ease-in;
 
-  &[size="small"] {
+  &[au-size="small"] {
     padding: var(--au-btn-small-padding-vertical, 0.25rem) var(--au-btn-small-padding-horizontal, 0.5rem);
   }
   
-  &[size="large"] {
+  &[au-size="large"] {
     padding: var(--au-btn-large-padding-vertical, 1rem) var(--au-btn-large-padding-horizontal, 2rem);
     font-size: var(--au-btn-large-text-size, 1.25rem);
   }
@@ -88,12 +88,12 @@ select {
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-  &[size="small"] {
+  &[au-size="small"] {
     button {
       padding: var(--au-btn-small-padding-vertical, 0.25rem) var(--au-btn-small-padding-horizontal, 0.5rem);
     }
   }
-  &[size="large"] {
+  &[au-size="large"] {
     button {
       padding: var(--au-btn-large-padding-vertical, 1rem) var(--au-btn-large-padding-horizontal, 2rem);
       font-size: var(--au-btn-large-text-size, 1.25rem);
