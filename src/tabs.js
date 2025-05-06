@@ -1,9 +1,7 @@
-// au-tabs.js
 class AuTabs extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
-
     this._tabs = [];
     this._panels = [];
     this._selectedIndex = 0;
@@ -100,17 +98,26 @@ class AuTabs extends HTMLElement {
         padding: var(--au-tab-badge-padding-vertical, 0) var(--au-tab-badge-padding-horizontal, 0.5rem);
         border-radius: var(--au-tab-badge-border-radius, 0.75rem);
       }
-    `;
 
+       ::slotted(.au-tab-panel) {
+        padding: var(--au-tab-panel-padding-vertical, 0.75rem) var(--au-tab-panel-padding-horizontal, 1rem);
+        display: none;
+        border: var(--au-tabpanels-border-width, 1px) var(--au-tabpanels-border-style, solid) oklch(var(--au-tabpanels-border-color, 78.94% 0 0));
+      }
+
+      ::slotted(.au-tab-panel[aria-hidden="false"]) {
+        display: block;
+      }
+    `;
 
     this.tabsList = document.createElement("ul");
     this.tabsList.setAttribute("role", "tablist");
     this.tabsList.classList.add("au-tablist");
 
-    this.panelsContainer = document.createElement("div");
-    this.panelsContainer.classList.add("au-tabpanels");
+    const slot = document.createElement("slot");
+    slot.name = "panel";
 
-    this.container.append(style, this.tabsList, this.panelsContainer);
+    this.container.append(style, this.tabsList, slot);
     this.shadowRoot.appendChild(this.container);
   }
 
@@ -120,11 +127,10 @@ class AuTabs extends HTMLElement {
   }
 
   _renderTabs() {
-    const tabPanels = Array.from(this.querySelectorAll("au-tab-panel"));
+    const tabPanels = Array.from(this.querySelectorAll(':scope > .au-tab-panel[slot="panel"]'));
     this._tabs = [];
     this._panels = [];
     this.tabsList.innerHTML = "";
-    this.panelsContainer.innerHTML = "";
 
     tabPanels.forEach((panel, index) => {
       const label = panel.getAttribute("label") || `Tab ${index + 1}`;
@@ -132,11 +138,14 @@ class AuTabs extends HTMLElement {
       const badge = panel.getAttribute("badge") || "";
       const affix = panel.getAttribute("affix") || "";
       const id = panel.id || this.generateId();
+      const tabId = `tab-${id}`;
+      const panelId = `panel-${id}`;
 
-      const tabId = `tab-${index + 1}-${id}`;
-      const panelId = `tab-panel-${index + 1}-${id}`;
+      panel.setAttribute("id", panelId);
+      panel.setAttribute("role", "tabpanel");
+      panel.setAttribute("aria-labelledby", tabId);
+      panel.setAttribute("aria-hidden", index === 0 ? "false" : "true");
 
-      // Create tab button
       const li = document.createElement("li");
       li.setAttribute("role", "presentation");
       li.className = "au-tablist-item" + (index === 0 ? " au-tablist-item--selected" : "");
@@ -145,61 +154,44 @@ class AuTabs extends HTMLElement {
       button.setAttribute("role", "tab");
       button.setAttribute("id", tabId);
       button.setAttribute("aria-controls", panelId);
-      button.setAttribute("aria-posinset", index + 1);
-      button.setAttribute("aria-setsize", tabPanels.length);
-      button.setAttribute("tabindex", index === 0 ? "0" : "-1");
       button.setAttribute("aria-selected", index === 0 ? "true" : "false");
+      button.setAttribute("tabindex", index === 0 ? "0" : "-1");
 
-      const fragments = document.createDocumentFragment();
+      const frag = document.createDocumentFragment();
 
       if (prefix) {
-        const span = document.createElement('span');
-        span.className = 'prefix';
+        const span = document.createElement("span");
+        span.className = "prefix";
         span.textContent = prefix;
-        fragments.appendChild(span);
+        frag.appendChild(span);
       }
 
-      const labelSpan = document.createElement('span');
-      labelSpan.className = 'label';
+      const labelSpan = document.createElement("span");
+      labelSpan.className = "label";
       labelSpan.textContent = label;
-      fragments.appendChild(labelSpan);
+      frag.appendChild(labelSpan);
 
-      if (badge !== null && badge !== undefined && badge !== '') {
-        const span = document.createElement('span');
-        span.className = 'badge';
-        span.setAttribute('aria-label', `補充資訊：${badge}`);
+      if (badge) {
+        const span = document.createElement("span");
+        span.className = "badge";
+        span.setAttribute("aria-label", `補充資訊：${badge}`);
         span.textContent = badge;
-        fragments.appendChild(span);
+        frag.appendChild(span);
       }
 
       if (affix) {
-        const span = document.createElement('span');
-        span.className = 'affix';
+        const span = document.createElement("span");
+        span.className = "affix";
         span.textContent = affix;
-        fragments.appendChild(span);
+        frag.appendChild(span);
       }
 
-      button.appendChild(fragments);
-
+      button.appendChild(frag);
       li.appendChild(button);
       this.tabsList.appendChild(li);
 
-      // Create panel
-      const panelDiv = document.createElement("div");
-      panelDiv.setAttribute("id", panelId);
-      panelDiv.setAttribute("role", "tabpanel");
-      panelDiv.setAttribute("aria-labelledby", tabId);
-      panelDiv.setAttribute("tabindex", "0");
-      panelDiv.className = "au-tab-panel" + (index === 0 ? " au-tab-panel--selected" : "");
-      if (index !== 0) panelDiv.hidden = true;
-      while (panel.firstChild) {
-        panelDiv.appendChild(panel.firstChild);
-      }
-      
       this._tabs.push(button);
-      this._panels.push(panelDiv);
-
-      this.panelsContainer.appendChild(panelDiv);
+      this._panels.push(panel);
     });
   }
 
@@ -216,51 +208,42 @@ class AuTabs extends HTMLElement {
       tab.setAttribute("aria-selected", selected);
       tab.setAttribute("tabindex", selected ? "0" : "-1");
       tab.parentElement.classList.toggle("au-tablist-item--selected", selected);
-      this._panels[i].hidden = !selected;
-      this._panels[i].setAttribute('aria-hidden', !selected);
-      this._panels[i].classList.toggle("au-tab-panel--selected", selected);
+      this._panels[i].setAttribute("aria-hidden", !selected);
     });
     this._tabs[index].focus();
     this._selectedIndex = index;
   }
 
-  generateId() {
-    const byteArray = new Uint32Array(1);
-    window.crypto.getRandomValues(byteArray);
-    return `${byteArray[0].toString(36)}`;
-  }
-
   _onKeydown(e, index) {
-    const lastIndex = this._tabs.length - 1;
-    let newIndex = index;
+    const last = this._tabs.length - 1;
+    let next = index;
     switch (e.key) {
       case "ArrowRight":
       case "ArrowDown":
-        newIndex = index === lastIndex ? 0 : index + 1;
+        next = index === last ? 0 : index + 1;
         break;
       case "ArrowLeft":
       case "ArrowUp":
-        newIndex = index === 0 ? lastIndex : index - 1;
+        next = index === 0 ? last : index - 1;
         break;
       case "Home":
-        newIndex = 0;
+        next = 0;
         break;
       case "End":
-        newIndex = lastIndex;
+        next = last;
         break;
-      case "Tab":
-        e.preventDefault();
-        this._panels[index].focus();
+      default:
         return;
     }
-    if (newIndex !== index) {
-      e.preventDefault();
-      this._selectTab(newIndex);
-    }
+    e.preventDefault();
+    this._selectTab(next);
+  }
+
+  generateId() {
+    const bytes = new Uint32Array(1);
+    window.crypto.getRandomValues(bytes);
+    return bytes[0].toString(36);
   }
 }
 
 customElements.define("au-tabs", AuTabs);
-
-class AuTabPanel extends HTMLElement {}
-customElements.define("au-tab-panel", AuTabPanel);

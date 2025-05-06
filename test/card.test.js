@@ -1,5 +1,5 @@
 import { html, fixture, expect } from '@open-wc/testing';
-import '../src/components/card/card.js'; // Adjust the path to where your component is located
+import '../src/card.js'; // Adjust the path to where your component is located
 
 describe('AuCard', () => {
   it('has four slots for "heading", "media", "content", and "footer"', async () => {

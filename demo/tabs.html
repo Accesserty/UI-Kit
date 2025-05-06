@@ -4,13 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Accesserty UI Kit Tabs</title>
-    <link rel="stylesheet" href="../../../css/au-style.css" />
-    <link rel="stylesheet" href="../../../css/demo.css" />
+    <link rel="stylesheet" href="../css/au-style.css" />
+    <link rel="stylesheet" href="../css/demo.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <script src="tabs.js" defer></script>
+    <script src="../src/tabs.js" defer></script>
   </head>
   <body>
-    <header><a href="/src" title="go to home page">Home</a></header>
+    <header><a href="../demo/index.html" title="go to home page">Home</a></header>
     <main>
       <h1>Accesserty UI Kit Tabs</h1>
       <h2>How to use</h2>
@@ -41,16 +41,16 @@
           <td>tab name</td>
         </tr>
         <tr>
-          <td>prefix</td>
+          <td>au-prefix</td>
           <td>text before label </td>
         </tr>
         <tr>
-          <td>badge</td>
+          <td>au-badge</td>
           <td>text next label</td>
         </tr>
         <tr>
-          <td>affix</td>
-          <td>text after badge</td>
+          <td>au-affix</td>
+          <td>text after au-badge</td>
         </tr>
         <tr>
           <td>id</td>
@@ -59,23 +59,33 @@
       </table>
       <h2>Basic</h2>
       <au-tabs>
-        <au-tab-panel id="custom-id" label="Tab1" prefix="prefix" badge="badge" affix="affix">Content 1</au-tab-panel>
-        <au-tab-panel label="Tab2">Content 2</au-tab-panel>
-        <au-tab-panel label="Tab3">Content 3</au-tab-panel>
-        <au-tab-panel label="Tab4">Content 4</au-tab-panel>
-        <au-tab-panel label="Tab5">Content 5</au-tab-panel>
-        <au-tab-panel label="Tab6">Content 6</au-tab-panel>
-        <au-tab-panel label="Tab7"><h3>Display Html</h3></au-tab-panel>
+        <div class="au-tab-panel" slot="panel" id="custom-id" label="Tab1" au-prefix="au-prefix" au-badge="au-badge" au-affix="au-affix"><button>123</button></div>
+        <div class="au-tab-panel" slot="panel" label="Tab2">Content 2</div>
+        <div class="au-tab-panel" slot="panel" label="Tab3">Content 3</div>
+        <div class="au-tab-panel" slot="panel" label="Tab4">Content 4</div>
+        <div class="au-tab-panel" slot="panel" label="Tab5">Content 5</div>
+        <div class="au-tab-panel" slot="panel" label="Tab6">Content 6</div>
+        <div class="au-tab-panel" slot="panel" label="Tab7"><h3>Display Html</h3></div>
+      </au-tabs>
+      <h2>Nested</h2>
+      <au-tabs>
+        <div class="au-tab-panel" slot="panel" label="Tab1"">
+          <au-tabs>
+            <div class="au-tab-panel" slot="panel" label="Tab3"">Content 3</div>
+            <div class="au-tab-panel" slot="panel" label="Tab4">Content 4</div>
+          </au-tabs>
+        </div>
+        <div class="au-tab-panel" slot="panel" label="Tab2">Content 2</div>
       </au-tabs>
       <h2>Custom Style</h2>
       <au-tabs class="custom-tabs">
-        <au-tab-panel id="custom-id" label="Tab1" prefix="prefix" badge="badge" affix="affix">Content 1</au-tab-panel>
-        <au-tab-panel label="Tab2">Content 2</au-tab-panel>
-        <au-tab-panel label="Tab3">Content 3</au-tab-panel>
-        <au-tab-panel label="Tab4">Content 4</au-tab-panel>
-        <au-tab-panel label="Tab5">Content 5</au-tab-panel>
-        <au-tab-panel label="Tab6">Content 6</au-tab-panel>
-        <au-tab-panel label="Tab7"><h3>Display Html</h3></au-tab-panel>
+        <div class="au-tab-panel" slot="panel" label="Tab1" au-prefix="au-prefix" au-badge="au-badge" au-affix="au-affix">Content 1</div>
+        <div class="au-tab-panel" slot="panel" label="Tab2">Content 2</div>
+        <div class="au-tab-panel" slot="panel" label="Tab3">Content 3</div>
+        <div class="au-tab-panel" slot="panel" label="Tab4">Content 4</div>
+        <div class="au-tab-panel" slot="panel" label="Tab5">Content 5</div>
+        <div class="au-tab-panel" slot="panel" label="Tab6">Content 6</div>
+        <div class="au-tab-panel" slot="panel" label="Tab7"><h3>Display Html</h3></div>
       </au-tabs>
       <h2>CSS Variables</h2>
       <table>
@@ -113,11 +123,11 @@
           <tr><td>--au-tabpanels-border-color</td><td>Tab panels container border color</td><td>oklch(78.94% 0 0)</td></tr>
           <tr><td>--au-tab-panel-padding-vertical</td><td>Vertical padding for tab panel</td><td>0.75rem</td></tr>
           <tr><td>--au-tab-panel-padding-horizontal</td><td>Horizontal padding for tab panel</td><td>1rem</td></tr>
-          <tr><td>--au-tab-badge-bg</td><td>Badge background color</td><td>oklch(86.89% 0 0)</td></tr>
-          <tr><td>--au-tab-badge-text-color</td><td>Badge text color</td><td>oklch(13.98% 0 0)</td></tr>
-          <tr><td>--au-tab-badge-padding-vertical</td><td>Badge vertical padding</td><td>0</td></tr>
-          <tr><td>--au-tab-badge-padding-horizontal</td><td>Badge horizontal padding</td><td>0.5rem</td></tr>
-          <tr><td>--au-tab-badge-border-radius</td><td>Badge border radius</td><td>0.75rem</td></tr>
+          <tr><td>--au-tab-au-badge-bg</td><td>Badge background color</td><td>oklch(86.89% 0 0)</td></tr>
+          <tr><td>--au-tab-au-badge-text-color</td><td>Badge text color</td><td>oklch(13.98% 0 0)</td></tr>
+          <tr><td>--au-tab-au-badge-padding-vertical</td><td>Badge vertical padding</td><td>0</td></tr>
+          <tr><td>--au-tab-au-badge-padding-horizontal</td><td>Badge horizontal padding</td><td>0.5rem</td></tr>
+          <tr><td>--au-tab-au-badge-border-radius</td><td>Badge border radius</td><td>0.75rem</td></tr>
         </tbody>
       </table>
     </main>

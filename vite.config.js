@@ -4,7 +4,7 @@ import { terser } from 'rollup-plugin-terser'; // 使用 import 而不是 requir
 export default defineConfig({
   build: {
     rollupOptions: {
-      input: './src/accesserty-ui-kit.js',
+      input: 'accesserty-ui-kit.js',
       output: [
         {
           dir: './dist',

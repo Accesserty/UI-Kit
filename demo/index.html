@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accesserty UI Kit Components</title>
+    <link rel="stylesheet" href="../css/au-style.css" />
+    <link rel="stylesheet" href="../css/demo.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <script src="../dist/accesserty-ui-kit.min.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <h1>Accesserty UI Kit Document</h1>
+      <h2>Components</h2>
+      <ul>
+        <li>
+          <a href="accordion.html" title="go to Accordion document">Accordion</a>
+        </li>
+        <li>
+          <a href="breadcrumbs.html" title="go to Breadcrumbs document">Breadcrumbs</a>
+        </li>
+        <li>
+          <a href="button.html" title="go to Button document">Button</a>
+        </li>
+        <li>
+          <a href="card.html" title="go to Card document">Card</a>
+        </li>
+        <li>
+          <a href="checkbox.html" title="go to Checkbox document">Checkbox</a>
+        </li>
+        <li>
+          <a href="input.html" title="go to Input document">Input</a>
+        </li>
+        <li>
+          <a href="dialog.html" title="go to Dialog document">Dialog</a>
+        </li>
+        <li>
+          <a href="popover.html" title="go to Popover document">Popover</a>
+        </li>
+        <li>
+          <a href="radio.html" title="go to Radio document">Radio</a>
+        </li>
+        <li>
+          <a href="select.html" title="go to Select document">Select</a>
+        </li>
+        <li>
+          <a href="switch.html" title="go to Switch document">Switch</a>
+        </li>
+        <li>
+          <a href="tabs.html" title="go to Tabs document">Tabs</a>
+        </li>
+      </ul>
+
+      <au-tabs>
+         <div class="au-tab-panel" slot="panel" label="Form Demo">
+          <form id="demo-form">
+            <au-input label="Name" name="name" au-layout="vertical" required></au-input>
+            <au-input label="Email" name="email" type="email"  au-layout="vertical"  required></au-input>
+            <div role="group" aria-labelledby="fruit-group">
+              <p id="fruit-group">Favorite Fruits</p>
+              <au-checkbox name="fruit" value="apple">Apple</au-checkbox>
+              <au-checkbox name="fruit" value="banana">Banana</au-checkbox>
+              <au-checkbox name="fruit" value="cherry" checked>Cherry</au-checkbox>
+            </div>
+            <div role="group" aria-labelledby="gender-group">
+              <p id="gender-group">Gender</p>
+              <au-radio-group name="gender">
+                <au-radio value="male" checked>Male</au-radio>
+                <au-radio value="female">Female</au-radio>
+                <au-radio value="other">Other</au-radio>
+              </au-radio-group>
+            </div>
+            <au-switch name="subscribe">
+              Subscribe to newsletter
+            </au-switch>
+            <div>
+              <button type="submit">Submit</button>
+            </div>
+          </form>
+          <script>
+            document.querySelector('#demo-form').addEventListener('submit', (e) => {
+              e.preventDefault();
+              const formData = {};
+          
+              // au-input
+              document.querySelectorAll('au-input').forEach(input => {
+                const name = input.getAttribute('name') || 'input';
+                formData[name] = input.value;
+              });
+          
+              // au-checkbox
+              formData.fruit = Array.from(document.querySelectorAll('au-checkbox'))
+                .filter(cb => cb.shadowRoot.querySelector('input')?.checked)
+                .map(cb => cb.getAttribute('value'));
+          
+              // au-radio-group
+              const radioGroup = document.querySelector('au-radio-group');
+              const selectedRadio = Array.from(radioGroup.shadowRoot.querySelectorAll('input[type="radio"]'))
+                .find(r => r.checked);
+              formData.gender = selectedRadio?.value || null;
+          
+              // au-switch
+              const auSwitch = document.querySelector('au-switch');
+              const switchInput = auSwitch.shadowRoot.querySelector('input[type="checkbox"]');
+              formData.subscribe = switchInput?.checked || false;
+          
+              console.log(formData);
+            });
+          </script>
+        </div>
+         <div class="au-tab-panel" slot="panel" label="Nested Tabs Demo">
+          <au-tabs>
+             <div class="au-tab-panel" slot="panel" label="Tab 1">
+              Nested Tab Panel 1
+            </div>
+             <div class="au-tab-panel" slot="panel" label="Tab 2">
+              Nested Tab Panel 2
+            </div>
+          </au-tabs>
+        </div>
+      </au-tabs>
+    </main>
+  </body>
+</html>

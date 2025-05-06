@@ -1,5 +1,5 @@
 import { html, fixture, expect, oneEvent } from '@open-wc/testing';
-import '../src/components/input/input.js';
+import '../src/input.js';
 
 describe('AuInput', () => {
   it('reflects label correctly', async () => {

@@ -373,3 +373,7 @@ code {
   /* --au-tab-badge-padding-horizontal:; */
   /* --au-tab-badge-border-radius:; */
 }
+
+#demo-form {
+  max-width: 800px;
+}

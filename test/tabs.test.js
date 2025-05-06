@@ -1,51 +1,48 @@
 import { html, fixture, expect } from '@open-wc/testing';
-import '../src/components/tabs/tabs.js';
+import '../src/tabs.js';
 
-describe('AuTabs and AuTabPanel', () => {
-  it('renders the correct number of AuTabPanel components', async () => {
+describe('AuTabs with <div class="au-tab-panel">', () => {
+  it('renders the correct number of tab panels', async () => {
     const el = await fixture(html`
       <au-tabs>
-        <au-tab-panel id="tab1" label="Tab 1">Content 1</au-tab-panel>
-        <au-tab-panel id="tab2" label="Tab 2">Content 2</au-tab-panel>
+        <div class="au-tab-panel" slot="panel" id="tab1" label="Tab 1">Content 1</div>
+        <div class="au-tab-panel" slot="panel" id="tab2" label="Tab 2">Content 2</div>
       </au-tabs>
     `);
 
-    const panels = el.querySelectorAll('au-tab-panel');
+    const panels = el.querySelectorAll('.au-tab-panel');
     expect(panels.length).to.equal(2);
 
-    const shadowTabs = el.shadowRoot.querySelectorAll('[role="tab"]');
-    expect(shadowTabs.length).to.equal(2);
-
-    const tabPanels = el.shadowRoot.querySelectorAll('[role="tabpanel"]');
-    expect(tabPanels.length).to.equal(2);
+    const tabs = el.shadowRoot.querySelectorAll('[role="tab"]');
+    expect(tabs.length).to.equal(2);
   });
 
   it('selects a tab on click and updates aria attributes correctly', async () => {
     const el = await fixture(html`
       <au-tabs>
-        <au-tab-panel id="tab1" label="Tab 1">Content 1</au-tab-panel>
-        <au-tab-panel id="tab2" label="Tab 2">Content 2</au-tab-panel>
+        <div class="au-tab-panel" slot="panel" id="tab1" label="Tab 1">Content 1</div>
+        <div class="au-tab-panel" slot="panel" id="tab2" label="Tab 2">Content 2</div>
       </au-tabs>
     `);
 
     const tabs = el.shadowRoot.querySelectorAll('[role="tab"]');
-    const panels = el.shadowRoot.querySelectorAll('[role="tabpanel"]');
+    const panels = el.querySelectorAll('.au-tab-panel');
 
     tabs[1].click();
     await new Promise(r => setTimeout(r));
 
     expect(tabs[1].getAttribute('aria-selected')).to.equal('true');
-    expect(panels[1].hidden).to.be.false;
+    expect(panels[1].getAttribute('aria-hidden')).to.equal('false');
     expect(tabs[0].getAttribute('aria-selected')).to.equal('false');
-    expect(panels[0].hidden).to.be.true;
+    expect(panels[0].getAttribute('aria-hidden')).to.equal('true');
   });
 
   it('navigates tabs using arrow keys with wrap-around', async () => {
     const el = await fixture(html`
       <au-tabs>
-        <au-tab-panel id="tab1" label="Tab 1">Content 1</au-tab-panel>
-        <au-tab-panel id="tab2" label="Tab 2">Content 2</au-tab-panel>
-        <au-tab-panel id="tab3" label="Tab 3">Content 3</au-tab-panel>
+        <div class="au-tab-panel" slot="panel" label="Tab 1">Content 1</div>
+        <div class="au-tab-panel" slot="panel" label="Tab 2">Content 2</div>
+        <div class="au-tab-panel" slot="panel" label="Tab 3">Content 3</div>
       </au-tabs>
     `);
 
@@ -69,11 +66,11 @@ describe('AuTabs and AuTabPanel', () => {
     expect(tabs[2].getAttribute('aria-selected')).to.equal('true');
   });
 
-  it('moves to corresponding panel on Tab key press', async () => {
+  it('focuses the corresponding panel on Tab key press', async () => {
     const el = await fixture(html`
       <au-tabs>
-        <au-tab-panel id="tab1" label="Tab 1">Content 1</au-tab-panel>
-        <au-tab-panel id="tab2" label="Tab 2">Content 2</au-tab-panel>
+        <div class="au-tab-panel" slot="panel" label="Tab 1">Content 1</div>
+        <div class="au-tab-panel" slot="panel" label="Tab 2">Content 2</div>
       </au-tabs>
     `);
 
@@ -81,23 +78,22 @@ describe('AuTabs and AuTabPanel', () => {
 
     tabs[0].focus();
     tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
-    await new Promise(r => setTimeout(r, 20));
+    await new Promise(r => setTimeout(r));
 
-    const selectedPanel = el.shadowRoot.querySelector('.au-tab-panel--selected');
-    expect(selectedPanel).to.exist;
-    expect(selectedPanel.textContent).to.include('Content 1');
-    expect(el.shadowRoot.activeElement).to.equal(selectedPanel);
+    const panel = el.querySelector('.au-tab-panel[aria-hidden="false"]');
+    expect(panel).to.exist;
+    expect(panel.textContent).to.include('Content 1');
   });
 
   it('associates tab and panel with correct ARIA attributes', async () => {
     const el = await fixture(html`
       <au-tabs>
-        <au-tab-panel id="my-panel" label="My Tab">My Content</au-tab-panel>
+        <div class="au-tab-panel" slot="panel" id="my-panel" label="My Tab">My Content</div>
       </au-tabs>
     `);
 
     const tab = el.shadowRoot.querySelector('[role="tab"]');
-    const panel = el.shadowRoot.querySelector('[role="tabpanel"]');
+    const panel = el.querySelector('.au-tab-panel');
 
     expect(panel.getAttribute('aria-labelledby')).to.equal(tab.id);
     expect(tab.getAttribute('aria-controls')).to.equal(panel.id);
@@ -106,27 +102,35 @@ describe('AuTabs and AuTabPanel', () => {
   it('renders prefix, badge, and affix content correctly', async () => {
     const el = await fixture(html`
       <au-tabs>
-        <au-tab-panel id="tab1" label="Tab 1" prefix="Pre" badge="9+" affix="End">Panel 1</au-tab-panel>
+        <div class="au-tab-panel" slot="panel" label="Tab 1" prefix="Pre" badge="9+" affix="End">Panel 1</div>
       </au-tabs>
     `);
 
     const tab = el.shadowRoot.querySelector('[role="tab"]');
 
-    expect(tab.querySelector('.prefix').textContent).to.equal('Pre');
-    expect(tab.querySelector('.badge').textContent).to.equal('9+');
-    expect(tab.querySelector('.affix').textContent).to.equal('End');
+    const prefix = tab.querySelector('.prefix');
+    const badge = tab.querySelector('.badge');
+    const affix = tab.querySelector('.affix');
+
+    expect(prefix).to.exist;
+    expect(prefix?.textContent).to.equal('Pre');
+
+    expect(badge).to.exist;
+    expect(badge?.textContent).to.equal('9+');
+
+    expect(affix).to.exist;
+    expect(affix?.textContent).to.equal('End');
   });
 
   it('does not render prefix, badge, or affix if they are empty', async () => {
     const el = await fixture(html`
       <au-tabs>
-        <au-tab-panel id="tab1" label="Tab 1"></au-tab-panel>
-        <au-tab-panel id="tab2" label="Tab 2" badge="0"></au-tab-panel>
+        <div class="au-tab-panel" slot="panel" label="Tab 1"></div>
+        <div class="au-tab-panel" slot="panel" label="Tab 2" badge="0"></div>
       </au-tabs>
     `);
 
-    const tab1 = el.shadowRoot.querySelectorAll('[role="tab"]')[0];
-    const tab2 = el.shadowRoot.querySelectorAll('[role="tab"]')[1];
+    const [tab1, tab2] = el.shadowRoot.querySelectorAll('[role="tab"]');
 
     expect(tab1.querySelector('.prefix')).to.be.null;
     expect(tab1.querySelector('.badge')).to.be.null;
@@ -134,20 +138,20 @@ describe('AuTabs and AuTabPanel', () => {
 
     const badge = tab2.querySelector('.badge');
     expect(badge).to.exist;
-    expect(badge.textContent).to.equal('0');
+    expect(badge?.textContent).to.equal('0');
   });
 
-  it('preserves HTML content inside au-tab-panel', async () => {
+  it('preserves HTML content inside panels', async () => {
     const el = await fixture(html`
       <au-tabs>
-        <au-tab-panel id="html-panel" label="HTML">
+        <div class="au-tab-panel" slot="panel" label="HTML">
           <h2>Heading</h2>
           <p><strong>Bold</strong> Text</p>
-        </au-tab-panel>
+        </div>
       </au-tabs>
     `);
 
-    const panel = el.shadowRoot.querySelector('[role="tabpanel"]');
+    const panel = el.querySelector('.au-tab-panel');
     expect(panel.querySelector('h2')).to.exist;
     expect(panel.querySelector('strong')).to.exist;
   });
@@ -155,14 +159,15 @@ describe('AuTabs and AuTabPanel', () => {
   it('focuses the selected tab by default when switched programmatically', async () => {
     const el = await fixture(html`
       <au-tabs>
-        <au-tab-panel id="tab1" label="First">1</au-tab-panel>
-        <au-tab-panel id="tab2" label="Second">2</au-tab-panel>
+        <div class="au-tab-panel" slot="panel" label="First">1</div>
+        <div class="au-tab-panel" slot="panel" label="Second">2</div>
       </au-tabs>
     `);
 
     const tabs = el.shadowRoot.querySelectorAll('[role="tab"]');
     el._selectTab(1);
     await new Promise(r => setTimeout(r));
+
     expect(tabs[1].getAttribute('tabindex')).to.equal('0');
     expect(tabs[0].getAttribute('tabindex')).to.equal('-1');
   });

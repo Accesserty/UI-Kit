@@ -1,5 +1,5 @@
 import { html, fixture, expect } from '@open-wc/testing';
-import '../src/components/radio/radio.js';
+import '../src/radio.js';
 
 describe('AuRadioGroup', () => {
   it('renders correct number of radios based on children', async () => {
