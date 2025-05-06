@@ -66,12 +66,10 @@ class AuSwitch extends HTMLElement {
       }
     `;
 
-    // HTML structure for the switch
     const switchElement = document.createElement('label');
     switchElement.classList.add('au-switch');
     switchElement.setAttribute('for', inputID);
 
-    // Create switch container
     const container = document.createElement('div');
     container.classList.add('container');
 
@@ -81,36 +79,31 @@ class AuSwitch extends HTMLElement {
 
     const inputDiv = document.createElement('div');
     inputDiv.classList.add('input');
-    const inputElement = document.createElement('input');
-    inputElement.id = inputID;
-    inputElement.type = 'checkbox';
-    inputElement.setAttribute('role', 'switch');
-    inputDiv.appendChild(inputElement);
+    this.inputElement = document.createElement('input');
+    this.inputElement.id = inputID;
+    this.inputElement.type = 'checkbox';
+    this.inputElement.setAttribute('role', 'switch');
+    this.inputElement.setAttribute('aria-checked', 'false');
+    inputDiv.appendChild(this.inputElement);
 
     const onTextSpan = document.createElement('span');
     onTextSpan.classList.add('on-text');
     onTextSpan.setAttribute('aria-hidden', 'true');
 
     container.append(offTextSpan, inputDiv, onTextSpan);
-
     switchElement.append(container);
-
-    // Append elements to the shadow root
     this.shadowRoot.append(style, switchElement);
 
-    // Add label text slot
     const slot = document.createElement('slot');
     switchElement.prepend(slot);
 
-    // Event listener for switch change
-    inputElement.addEventListener('change', (event) => {
-      if (event.target === inputElement) {
-        this.dispatchEvent(new CustomEvent('change', { detail: inputElement.checked }));
-      }
+    this.inputElement.addEventListener('change', (event) => {
+      const checked = event.target.checked;
+      this.inputElement.setAttribute('aria-checked', checked.toString());
+      this.dispatchEvent(new CustomEvent('change', { detail: checked }));
     });
   }
 
-  // Method to generate a unique ID
   generateId() {
     const byteArray = new Uint32Array(1);
     window.crypto.getRandomValues(byteArray);
@@ -125,12 +118,13 @@ class AuSwitch extends HTMLElement {
     const input = this.shadowRoot.querySelector('input');
     const offText = this.shadowRoot.querySelector('.off-text');
     const onText = this.shadowRoot.querySelector('.on-text');
-    
+
     if (!input || !offText || !onText) return;
-  
+
     switch (name) {
       case 'checked':
         input.checked = newValue !== null;
+        input.setAttribute('aria-checked', input.checked.toString());
         break;
       case 'disabled':
         input.disabled = newValue !== null;
@@ -146,11 +140,13 @@ class AuSwitch extends HTMLElement {
         break;
     }
   }
-  
 
   connectedCallback() {
+    const input = this.shadowRoot.querySelector('input');
     const offText = this.shadowRoot.querySelector('.off-text');
     const onText = this.shadowRoot.querySelector('.on-text');
+
+    input.setAttribute('aria-checked', input.checked.toString());
 
     if (this.hasAttribute('off')) {
       offText.textContent = this.getAttribute('off');

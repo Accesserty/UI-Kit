@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Accesserty UI Kit Components</title>
+    <link rel="stylesheet" href="../../../css/au-style.css" />
+    <link rel="stylesheet" href="../../../css/demo.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <script src="../dist/accesserty-ui-kit.min.js" defer></script>
   </head>
   <body>
     <main>
@@ -48,6 +51,24 @@
           <a href="components/tabs/tabs.html" title="go to Tabs document">Tabs</a>
         </li>
       </ul>
+      <form action="">
+        <au-input label="Default"></au-input>
+        <div role="group" aria-labelledby="checkbox-group">
+          <p id="checkbox-group">Choose at least one</p>
+          <au-checkbox name="food" value="apple" class="basic-checkbox">Apple</au-checkbox>
+          <au-checkbox name="food" value="banana" class="basic-checkbox">Banana</au-checkbox>
+          <au-checkbox name="food" value="orange" class="basic-checkbox" checked>Orange</au-checkbox>
+        </div>
+        <au-radio-group aria-label="Custom Radio" class="custom-au-radio">
+          <au-radio checked>Radio 1</au-radio>
+          <au-radio disabled>Radio 2</au-radio>
+          <au-radio>Radio 3</au-radio>
+        </au-radio-group>
+        <au-switch on="Subscribe!">
+          Only show "On" text
+        </au-switch>
+        <button>Submit</button>
+      </form>
     </main>
   </body>
 </html>
