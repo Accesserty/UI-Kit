@@ -57,7 +57,7 @@
           <p id="checkbox-group">Choose at least one</p>
           <au-checkbox name="food" value="apple" class="basic-checkbox">Apple</au-checkbox>
           <au-checkbox name="food" value="banana" class="basic-checkbox">Banana</au-checkbox>
-          <au-checkbox name="food" value="orange" class="basic-checkbox" checked>Orange</au-checkbox>
+          <au-checkbox name="food" value="orange" class="basic-checkbox">Orange</au-checkbox>
         </div>
         <au-radio-group aria-label="Custom Radio" class="custom-au-radio">
           <au-radio checked>Radio 1</au-radio>
@@ -70,5 +70,36 @@
         <button>Submit</button>
       </form>
     </main>
+    <script>
+      document.querySelector('form').addEventListener('submit', (e) => {
+      e.preventDefault(); // 避免表單送出
+
+      const result = {};
+
+      // AuInput
+      const input = document.querySelector('au-input');
+      result[input.getAttribute('name') || 'input'] = input.value;
+
+      // AuCheckboxes
+      const checkboxes = document.querySelectorAll('au-checkbox');
+      result.food = Array.from(checkboxes)
+        .filter(cb => cb.hasAttribute('checked') || cb.shadowRoot.querySelector('input')?.checked)
+        .map(cb => cb.getAttribute('value'));
+
+      // AuRadioGroup
+      const radioGroup = document.querySelector('au-radio-group');
+      const selectedRadio = Array.from(radioGroup.shadowRoot.querySelectorAll('input[type="radio"]'))
+        .find(radio => radio.checked);
+      result.radio = selectedRadio?.value || null;
+
+      // AuSwitch
+      const switchEl = document.querySelector('au-switch');
+      const switchInput = switchEl.shadowRoot.querySelector('input[type="checkbox"]');
+      result.switch = switchInput?.checked;
+
+      console.log(result);
+    });
+
+    </script>
   </body>
 </html>
