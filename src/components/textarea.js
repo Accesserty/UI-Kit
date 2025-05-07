@@ -18,11 +18,11 @@ class AuTextarea extends HTMLElement {
 
       label {
         word-break: break-word;
-        margin: 0;
+        margin: var(--au-textarea-label-margin-vertical, 0) var(--au-textarea-label-margin-horizontal, 0);
         padding: var(--au-textarea-label-padding-vertical, 0.75rem) var(--au-textarea-label-padding-horizontal, 0);
-        color: oklch(var(--au-textarea-text-color, 13.98% 0 0));
-        font-size: var(--au-textarea-text-size, 1rem);
-        font-family: var(--au-textarea-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+        color: oklch(var(--au-textarea-label-text-color, 13.98% 0 0));
+        font-size: var(--au-textarea-label-text-size, 1rem);
+        font-family: var(--au-textarea-label-text-family, 'Helvetica, Arial, sans-serif, system-ui');
       }
 
       textarea {
