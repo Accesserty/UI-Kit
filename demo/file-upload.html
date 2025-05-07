@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accesserty UI Kit File Upload</title>
+    <link rel="stylesheet" href="../src/css/au-style.css" />
+    <link rel="stylesheet" href="demo.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <script src="../src/components/file-upload.js" defer></script>
+  </head>
+  <body>
+    <header><a href="../demo/index.html" title="go to home page">Home</a></header>
+    <main>
+      <h1>Accesserty UI Kit File Upload</h1>
+      <h2>How to use</h2>
+      <h3>HTML</h3>
+      <ol>
+        <li>Copy file (file-upload.js or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
+        <li>
+          Add the JavaScript file to HTML using the
+          <code>&lt;script src=&quot;&quot; defer&gt;</code> tag
+        </li>
+        <li>Use the <code>&lt;au-file-upload&gt;</code> tag</li>
+      </ol>
+      <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
+      
+      <au-file-upload
+        name="documents"
+        label="Upload your documents"
+        accept=".pdf,.jpg,image/*"
+        multiple
+        required
+        max-files="3"
+        max-size-mb="2"
+
+        msg-button-text="Choose files"
+        msg-drop-text="Drag & drop files here"
+        msg-remove-text="Delete"
+        msg-required="You must upload at least one document."
+        msg-type-error="is not a supported file format"
+        msg-size-error="is too large. Limit is"
+        msg-count-error="You can only attach up to"
+        max-total-size-mb="1"
+        msg-total-size-error="總檔案容量不能超過"
+      ></au-file-upload>
+
+      <h2>CSS Variables</h2>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">CSS Variable Name</th>
+            <th scope="col">Description</th>
+            <th scope="col">Default Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>--au-tabs-border-radius</td>
+            <td>Border radius for first/last tab</td>
+            <td>0</td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+  </body>
+</html>
