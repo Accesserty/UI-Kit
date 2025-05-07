@@ -8,6 +8,11 @@ export default defineConfig({
       output: [
         {
           dir: './dist',
+          entryFileNames: '[name].js',
+          format: 'es'
+        },
+        {
+          dir: './dist',
           entryFileNames: '[name].min.js',
           format: 'es',
           plugins: [terser()]
