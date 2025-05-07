@@ -25,6 +25,14 @@ class AuTextarea extends HTMLElement {
         font-family: var(--au-textarea-label-text-family, 'Helvetica, Arial, sans-serif, system-ui');
       }
 
+      .textarea-container {
+        display: flex;
+        align-items: center;
+        border: var(--au-textarea-border-width, 1px) var(--au-textarea-border-style, solid) oklch(var(--au-textarea-border-color, 78.94% 0 0));
+        border-radius: var(--au-textarea-border-radius, 0.25rem);
+        padding: var(--au-textarea-container-padding-vertical, 0.25rem) var(--au-textarea-container-padding-horizontal, 0.25rem);
+      }
+
       textarea {
         -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
         margin: 0;
@@ -33,12 +41,12 @@ class AuTextarea extends HTMLElement {
         font-size: var(--au-textarea-text-size, 1rem);
         font-family: var(--au-textarea-text-family, 'Helvetica, Arial, sans-serif, system-ui');
         line-height: var(--au-textarea-text-line-height, 1.5);
-         
-        border: var(--au-textarea-border-width, 1px) var(--au-textarea-border-style, solid) oklch(var(--au-textarea-border-color, 78.94% 0 0));
-        border-radius: var(--au-textarea-border-radius, 0.25rem);
 
+        border: 0;
         outline: none;
         background-color: var(--au-textarea-bg, 99.4% 0 0);
+        border-radius: var(--au-textarea-border-radius, 0.25rem);
+        width: 100%;
         
         resize: none;
         field-sizing: content;
@@ -61,6 +69,10 @@ class AuTextarea extends HTMLElement {
     this.labelEl.setAttribute('for', this._id);
     this.labelEl.textContent = this.getAttribute('label') || '';
 
+    const textareaContainer = document.createElement('div');
+    textareaContainer.className = 'textarea-container';
+
+
     this.textarea = document.createElement('textarea');
     this.textarea.id = this._id;
 
@@ -80,7 +92,8 @@ class AuTextarea extends HTMLElement {
       this.dispatchEvent(new Event('change', { bubbles: true }));
     });
 
-    wrapper.append(this.labelEl, this.textarea);
+    textareaContainer.append(this.textarea);
+    wrapper.append(this.labelEl, textareaContainer);
     this.shadowRoot.append(style, wrapper);
   }
 

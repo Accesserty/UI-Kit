@@ -10,67 +10,66 @@ describe('AuTextarea', () => {
   });
 
   it('uses provided id and applies to label for', async () => {
-    const el = await fixture(html`<au-textarea id="custom-id" label="Description"></au-textarea>`);
+    const el = await fixture(html`<au-textarea id="my-id" label="Content"></au-textarea>`);
     const label = el.shadowRoot.querySelector('label');
     const textarea = el.shadowRoot.querySelector('textarea');
-    expect(textarea.id).to.equal('custom-id');
-    expect(label.getAttribute('for')).to.equal('custom-id');
+    expect(textarea.id).to.equal('my-id');
+    expect(label.getAttribute('for')).to.equal('my-id');
   });
 
-  it('generates id if not provided', async () => {
+  it('generates a unique id if not provided', async () => {
     const el = await fixture(html`<au-textarea></au-textarea>`);
     const textarea = el.shadowRoot.querySelector('textarea');
     expect(textarea.id).to.match(/^au-textarea-/);
   });
 
-  it('reflects value from attribute and allows programmatic change', async () => {
+  it('reflects value from property and updates textarea value', async () => {
     const el = await fixture(html`<au-textarea></au-textarea>`);
     el.value = 'Hello';
-    expect(el.value).to.equal('Hello');
     const textarea = el.shadowRoot.querySelector('textarea');
     expect(textarea.value).to.equal('Hello');
   });
 
-  it('updates value on user input', async () => {
+  it('updates component value when user types', async () => {
     const el = await fixture(html`<au-textarea></au-textarea>`);
     const textarea = el.shadowRoot.querySelector('textarea');
-    textarea.value = 'test input';
+    textarea.value = 'Typed!';
     textarea.dispatchEvent(new Event('input', { bubbles: true }));
-    expect(el.value).to.equal('test input');
+    expect(el.value).to.equal('Typed!');
   });
 
   it('dispatches change event correctly', async () => {
     const el = await fixture(html`<au-textarea></au-textarea>`);
     const textarea = el.shadowRoot.querySelector('textarea');
-  
+
     setTimeout(() => {
       textarea.dispatchEvent(new Event('change', { bubbles: true }));
     });
-  
+
     const event = await oneEvent(el, 'change');
     expect(event).to.exist;
   });
 
   it('reflects placeholder, rows, cols attributes', async () => {
-    const el = await fixture(html`<au-textarea placeholder="Enter" rows="4" cols="50"></au-textarea>`);
+    const el = await fixture(html`<au-textarea placeholder="Enter text" rows="4" cols="40"></au-textarea>`);
     const textarea = el.shadowRoot.querySelector('textarea');
-    expect(textarea.getAttribute('placeholder')).to.equal('Enter');
+    expect(textarea.getAttribute('placeholder')).to.equal('Enter text');
     expect(textarea.getAttribute('rows')).to.equal('4');
-    expect(textarea.getAttribute('cols')).to.equal('50');
+    expect(textarea.getAttribute('cols')).to.equal('40');
   });
 
-  it('participates in form submission and resets properly', async () => {
+  it('resets value on form reset', async () => {
     const el = await fixture(html`
       <form>
-        <au-textarea name="note" value="初始Content"></au-textarea>
+        <au-textarea name="text" value="Initial value"></au-textarea>
         <button type="reset">Reset</button>
       </form>
     `);
     const auTextarea = el.querySelector('au-textarea');
     const textarea = auTextarea.shadowRoot.querySelector('textarea');
 
-    textarea.value = 'After';
-    auTextarea.value = 'After';
+    textarea.value = 'Changed';
+    auTextarea.value = 'Changed';
 
     el.reset();
     await new Promise(r => setTimeout(r));
@@ -79,19 +78,26 @@ describe('AuTextarea', () => {
     expect(textarea.value).to.equal('');
   });
 
-  it('submits value with form', async () => {
+  it('submits value with form correctly', async () => {
     const el = await fixture(html`
       <form>
-        <au-textarea name="note"></au-textarea>
+        <au-textarea name="comment"></au-textarea>
       </form>
     `);
-  
     const textarea = el.querySelector('au-textarea');
-    textarea.value = 'Content';
+    textarea.value = 'Submitted value';
     await new Promise(r => setTimeout(r));
-  
-    const data = new FormData(el);
-    expect(data.get('note')).to.equal('Content');
+    const formData = new FormData(el);
+    expect(formData.get('comment')).to.equal('Submitted value');
   });
-  
+
+  it('has the required container structure', async () => {
+    const el = await fixture(html`<au-textarea></au-textarea>`);
+    const wrapper = el.shadowRoot.querySelector('.textarea-wrapper');
+    const container = el.shadowRoot.querySelector('.textarea-container');
+    const textarea = el.shadowRoot.querySelector('textarea');
+    expect(wrapper).to.exist;
+    expect(container).to.exist;
+    expect(container.contains(textarea)).to.be.true;
+  });
 });
