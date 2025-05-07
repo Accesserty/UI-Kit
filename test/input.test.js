@@ -23,9 +23,9 @@ describe('AuInput', () => {
     expect(el.value).to.equal('typed');
   });
 
-  it('supports au-clear and au-clear-label', async () => {
+  it('supports data-clear and data-clear-label', async () => {
     const el = await fixture(html`
-      <au-input au-clear au-clear-label="清除內容" value="abc"></au-input>
+      <au-input data-clear data-clear-label="清除內容" value="abc"></au-input>
     `);
     const clearBtn = el.shadowRoot.querySelector('.clear-input');
     expect(clearBtn).to.exist;
@@ -36,7 +36,7 @@ describe('AuInput', () => {
     expect(el.value).to.equal('');
   });
 
-  it('hides clear button if no value or no au-clear attr', async () => {
+  it('hides clear button if no value or no data-clear attr', async () => {
     const el = await fixture(html`<au-input value=""></au-input>`);
     const clearBtn = el.shadowRoot.querySelector('.clear-input');
     expect(clearBtn.hidden).to.be.true;
@@ -58,11 +58,11 @@ describe('AuInput', () => {
 
   it('adds correct size and layout attributes', async () => {
     const el = await fixture(html`
-      <au-input au-size="large" au-layout="vertical"></au-input>
+      <au-input data-size="large" data-layout="vertical"></au-input>
     `);
     const wrapper = el.shadowRoot.querySelector('.input-wrapper');
-    expect(wrapper.getAttribute('au-size')).to.equal('large');
-    expect(wrapper.getAttribute('au-layout')).to.equal('vertical');
+    expect(wrapper.getAttribute('data-size')).to.equal('large');
+    expect(wrapper.getAttribute('data-layout')).to.equal('vertical');
   });
 
   it('supports form association and reset', async () => {

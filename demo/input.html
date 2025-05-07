@@ -26,9 +26,9 @@
       <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
 
       <h2>Size</h2>
-      <au-input label="Small" au-size="small"></au-input>
+      <au-input label="Small" data-size="small"></au-input>
       <au-input label="Default"></au-input>
-      <au-input label="Large" au-size="large"></au-input>
+      <au-input label="Large" data-size="large"></au-input>
 
       <h2>Prefix, Affix (Slot)</h2>
       <au-input label="Default">
@@ -38,12 +38,12 @@
 
       <h2>Clearable</h2>
       <p>
-        using attibute <code>&lt;au-clear&gt;</code> contorll and <code>&lt;au-clear-label&gt;</code> setting text.
+        using attibute <code>&lt;data-clear&gt;</code> contorll and <code>&lt;data-clear-label&gt;</code> setting text.
       </p>
       <p>
         For input fields with `type="search"`, the clear button is not needed as browsers typically provide a native clear button for search inputs.
       </p>
-      <au-input label="au-clear" au-clear au-clear-label="Clear it now!"></au-input>
+      <au-input label="data-clear" data-clear data-clear-label="Clear it now!"></au-input>
       <au-input label="type=search" type="search"></au-input>
 
       <h2>Placeholder</h2>
@@ -53,7 +53,7 @@
       <au-input label="email(required, 5-10 letters)" type="email" required pattern=".{5,10}"></au-input>
 
       <h2>Layout</h2>
-      <au-input label="Layout" type="email" au-layout="vertical" au-clear au-clear-label="Clear it now!" placeholder="Enter...">
+      <au-input label="Layout" type="email" au-layout="vertical" data-clear data-clear-label="Clear it now!" placeholder="Enter...">
         <span slot="prefix">Prefix</span>
         <button type="button" slot="affix">Affix</button>
       </au-input>

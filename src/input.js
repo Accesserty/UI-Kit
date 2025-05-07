@@ -79,18 +79,18 @@ class AuInput extends HTMLElement {
             display: none;
           }
         }
-        &[au-size="small"] {
+        &[data-size="small"] {
           :is(label, input) {
             padding: var(--au-input-small-padding-vertical, 0.25rem) var(--au-input-small-padding-horizontal, 0.5rem);
           }
         }
-        &[au-size="large"] {
+        &[data-size="large"] {
           :is(label, input)  {
             padding: var(--au-input-large-padding-vertical, 1rem) var(--au-input-large-padding-horizontal, 2rem);
               font-size: var(--au-input-large-text-size, 1.25rem);
           }
         }
-        &[au-layout="vertical"] {
+        &[data-layout="vertical"] {
           flex-direction: column;
           align-items: initial;
           label {
@@ -175,20 +175,20 @@ class AuInput extends HTMLElement {
     return [
       'type', 'name', 'value', 'placeholder', 'required', 'disabled', 'readonly', 'label',
       'min', 'max', 'step', 'pattern', 'autocomplete', 'autofocus', 'inputmode', 'maxlength', 'minlength',
-      'au-size', 'au-layout', 'au-clear', 'au-clear-label'
+      'data-size', 'data-layout', 'data-clear', 'data-clear-label'
     ];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'label' && this.labelEl) {
       this.labelEl.textContent = newValue;
-    } else if ((name === 'au-size' || name === 'au-layout') && this.wrapper) {
+    } else if ((name === 'data-size' || name === 'data-layout') && this.wrapper) {
       if (newValue === null) {
         this.wrapper.removeAttribute(name);
       } else {
         this.wrapper.setAttribute(name, newValue);
       }
-    } else if (name === 'au-clear' || name === 'au-clear-label') {
+    } else if (name === 'data-clear' || name === 'data-clear-label') {
       this._updateClearButton();
     } else if (this.input) {
       if (newValue === null && typeof this.input[name] === 'boolean') {
@@ -245,7 +245,7 @@ class AuInput extends HTMLElement {
 
   syncAttributes() {
     Array.from(this.attributes).forEach(attr => {
-      if (!['au-size', 'au-layout', 'au-clear', 'au-clear-label'].includes(attr.name)) {
+      if (!['data-size', 'data-layout', 'data-clear', 'data-clear-label'].includes(attr.name)) {
         this.input.setAttribute(attr.name, attr.value);
         if (attr.name === 'value') {
           this.input.defaultValue = attr.value;
@@ -264,9 +264,9 @@ class AuInput extends HTMLElement {
   }
 
   _updateClearButton() {
-    const hasClear = this.hasAttribute('au-clear');
+    const hasClear = this.hasAttribute('data-clear');
     const hasValue = this.input.value.length > 0;
-    const label = this.getAttribute('au-clear-label') || 'Clear input';
+    const label = this.getAttribute('data-clear-label') || 'Clear input';
     this.clearButton.setAttribute('aria-label', label);
     this.clearButton.hidden = !(hasClear && hasValue);
   }
