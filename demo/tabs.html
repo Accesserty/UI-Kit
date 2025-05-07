@@ -41,16 +41,16 @@
           <td>tab name</td>
         </tr>
         <tr>
-          <td>au-prefix</td>
+          <td>data-prefix</td>
           <td>text before label </td>
         </tr>
         <tr>
-          <td>au-badge</td>
+          <td>data-badge</td>
           <td>text next label</td>
         </tr>
         <tr>
-          <td>au-affix</td>
-          <td>text after au-badge</td>
+          <td>data-affix</td>
+          <td>text after data-badge</td>
         </tr>
         <tr>
           <td>id</td>
@@ -59,7 +59,7 @@
       </table>
       <h2>Basic</h2>
       <au-tabs>
-        <div class="au-tab-panel" slot="panel" id="custom-id" label="Tab1" au-prefix="au-prefix" au-badge="au-badge" au-affix="au-affix"><button>123</button></div>
+        <div class="au-tab-panel" slot="panel" id="custom-id" label="Tab1" data-prefix="data-prefix" data-badge="data-badge" data-affix="data-affix"><button>123</button></div>
         <div class="au-tab-panel" slot="panel" label="Tab2">Content 2</div>
         <div class="au-tab-panel" slot="panel" label="Tab3">Content 3</div>
         <div class="au-tab-panel" slot="panel" label="Tab4">Content 4</div>
@@ -79,7 +79,7 @@
       </au-tabs>
       <h2>Custom Style</h2>
       <au-tabs class="custom-tabs">
-        <div class="au-tab-panel" slot="panel" label="Tab1" au-prefix="au-prefix" au-badge="au-badge" au-affix="au-affix">Content 1</div>
+        <div class="au-tab-panel" slot="panel" label="Tab1" data-prefix="data-prefix" data-badge="data-badge" data-affix="data-affix">Content 1</div>
         <div class="au-tab-panel" slot="panel" label="Tab2">Content 2</div>
         <div class="au-tab-panel" slot="panel" label="Tab3">Content 3</div>
         <div class="au-tab-panel" slot="panel" label="Tab4">Content 4</div>
@@ -123,11 +123,11 @@
           <tr><td>--au-tabpanels-border-color</td><td>Tab panels container border color</td><td>oklch(78.94% 0 0)</td></tr>
           <tr><td>--au-tab-panel-padding-vertical</td><td>Vertical padding for tab panel</td><td>0.75rem</td></tr>
           <tr><td>--au-tab-panel-padding-horizontal</td><td>Horizontal padding for tab panel</td><td>1rem</td></tr>
-          <tr><td>--au-tab-au-badge-bg</td><td>Badge background color</td><td>oklch(86.89% 0 0)</td></tr>
-          <tr><td>--au-tab-au-badge-text-color</td><td>Badge text color</td><td>oklch(13.98% 0 0)</td></tr>
-          <tr><td>--au-tab-au-badge-padding-vertical</td><td>Badge vertical padding</td><td>0</td></tr>
-          <tr><td>--au-tab-au-badge-padding-horizontal</td><td>Badge horizontal padding</td><td>0.5rem</td></tr>
-          <tr><td>--au-tab-au-badge-border-radius</td><td>Badge border radius</td><td>0.75rem</td></tr>
+          <tr><td>--au-tab-badge-bg</td><td>data-badge background color</td><td>oklch(86.89% 0 0)</td></tr>
+          <tr><td>--au-tab-badge-text-color</td><td>data-badge text color</td><td>oklch(13.98% 0 0)</td></tr>
+          <tr><td>--au-tab-badge-padding-vertical</td><td>data-badge vertical padding</td><td>0</td></tr>
+          <tr><td>--au-tab-badge-padding-horizontal</td><td>data-badge horizontal padding</td><td>0.5rem</td></tr>
+          <tr><td>--au-tab-badge-border-radius</td><td>data-badge border radius</td><td>0.75rem</td></tr>
         </tbody>
       </table>
     </main>

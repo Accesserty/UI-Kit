@@ -134,9 +134,9 @@ class AuTabs extends HTMLElement {
 
     tabPanels.forEach((panel, index) => {
       const label = panel.getAttribute("label") || `Tab ${index + 1}`;
-      const prefix = panel.getAttribute("prefix") || "";
-      const badge = panel.getAttribute("badge") || "";
-      const affix = panel.getAttribute("affix") || "";
+      const prefix = panel.getAttribute("data-prefix") || "";
+      const badge = panel.getAttribute("data-badge") || "";
+      const affix = panel.getAttribute("data-affix") || "";
       const id = panel.id || this.generateId();
       const tabId = `tab-${id}`;
       const panelId = `panel-${id}`;

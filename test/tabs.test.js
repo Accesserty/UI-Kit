@@ -102,7 +102,7 @@ describe('AuTabs with <div class="au-tab-panel">', () => {
   it('renders prefix, badge, and affix content correctly', async () => {
     const el = await fixture(html`
       <au-tabs>
-        <div class="au-tab-panel" slot="panel" label="Tab 1" prefix="Pre" badge="9+" affix="End">Panel 1</div>
+        <div class="au-tab-panel" slot="panel" label="Tab 1" data-prefix="Pre" data-badge="9+" data-affix="End">Panel 1</div>
       </au-tabs>
     `);
 
@@ -126,7 +126,7 @@ describe('AuTabs with <div class="au-tab-panel">', () => {
     const el = await fixture(html`
       <au-tabs>
         <div class="au-tab-panel" slot="panel" label="Tab 1"></div>
-        <div class="au-tab-panel" slot="panel" label="Tab 2" badge="0"></div>
+        <div class="au-tab-panel" slot="panel" label="Tab 2" data-badge="0"></div>
       </au-tabs>
     `);
 
