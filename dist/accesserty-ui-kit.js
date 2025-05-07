@@ -468,7 +468,9 @@ var k=Object.defineProperty;var w=(s,t,a)=>t in s?k(s,t,{enumerable:!0,configura
         background-color: oklch(var(--au-switch-inner-checked-bg, 99.4% 0 0));
         left: calc(100% - (var(--au-switch-input-width, 4rem) / 2 - 2 * var(--au-switch-inner-distance, 0.25rem)) - var(--au-switch-inner-distance, 0.25rem));
       }
-      .au-switch:hover,
+      .au-switch:hover {
+        text-decoration: underline;
+      }
       .au-switch:has(input:focus-visible) {
         box-shadow: inset 0 0 0 var(--au-switch-focus-shadow-width, 3px) oklch(var(--au-switch-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
       }
