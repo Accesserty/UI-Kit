@@ -6,3 +6,4 @@ import './components/input.js';
 import './components/radio.js';
 import './components/switch.js';
 import './components/tabs.js';
+import './components/textarea.js';

@@ -50,6 +50,9 @@
         <li>
           <a href="tabs.html" title="go to Tabs document">Tabs</a>
         </li>
+        <li>
+          <a href="textarea.html" title="go to Textarea document">Textarea</a>
+        </li>
       </ul>
 
       <au-tabs>
@@ -57,6 +60,7 @@
           <form id="demo-form">
             <au-input label="Name" name="name" data-layout="vertical" required></au-input>
             <au-input label="Email" name="email" type="email"  data-layout="vertical"  required></au-input>
+            <au-textarea id="custom-id" name="textarea" label="Textarea Label" placeholder="Enter..." required></au-textarea>
             <div role="group" aria-labelledby="fruit-group">
               <p id="fruit-group">Favorite Fruits</p>
               <au-checkbox name="fruit" value="apple">Apple</au-checkbox>
@@ -86,6 +90,11 @@
               // au-input
               document.querySelectorAll('au-input').forEach(input => {
                 const name = input.getAttribute('name') || 'input';
+                formData[name] = input.value;
+              });
+
+              document.querySelectorAll('au-textarea').forEach(input => {
+                const name = input.getAttribute('name') || 'textarea';
                 formData[name] = input.value;
               });
           
