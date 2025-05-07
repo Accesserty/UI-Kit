@@ -1,5 +1,5 @@
 import { html, fixture, expect } from '@open-wc/testing';
-import '../src/switch.js'; // 确保路径正确
+import '../src/components/switch.js'; // 确保路径正确
 
 describe('AuSwitch', () => {
   it('renders slot content correctly', async () => {

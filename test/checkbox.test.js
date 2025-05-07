@@ -1,5 +1,5 @@
 import { html, fixture, expect } from '@open-wc/testing';
-import '../src/checkbox.js';
+import '../src/components/checkbox.js';
 
 describe('AuCheckbox', () => {
   it('renders the checkbox with default properties', async () => {

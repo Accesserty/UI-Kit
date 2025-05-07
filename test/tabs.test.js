@@ -1,5 +1,5 @@
 import { html, fixture, expect } from '@open-wc/testing';
-import '../src/tabs.js';
+import '../src/components/tabs.js';
 
 describe('AuTabs with <div class="au-tab-panel">', () => {
   it('renders the correct number of tab panels', async () => {

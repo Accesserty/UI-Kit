@@ -1,0 +1,8 @@
+import './components/accordion.js';
+import './components/breadcrumbs.js';
+import './components/card.js';
+import './components/checkbox.js';
+import './components/input.js';
+import './components/radio.js';
+import './components/switch.js';
+import './components/tabs.js';

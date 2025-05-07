@@ -1,5 +1,5 @@
 import { html, fixture, expect } from "@open-wc/testing";
-import "../src/breadcrumbs.js";
+import "../src/components/breadcrumbs.js";
 
 describe("AuBreadcrumbs", () => {
   it("renders the correct number of breadcrumb items", async () => {

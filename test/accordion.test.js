@@ -1,6 +1,6 @@
 // accordion.test.js
 import { html, fixture, expect } from '@open-wc/testing';
-import '../src/accordion.js';
+import '../src/components/accordion.js';
 
 describe('AuAccordion and AuAccordionItem', () => {
   it('renders the correct number of AuAccordionItem components', async () => {
