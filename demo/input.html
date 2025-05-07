@@ -30,10 +30,15 @@
       <au-input label="Default"></au-input>
       <au-input label="Large" data-size="large"></au-input>
 
-      <h2>Prefix, Affix (Slot)</h2>
-      <au-input label="Default">
-        <span slot="prefix">Prefix</span>
-        <button type="button" slot="affix">Affix</button>
+      <h2>Prefix, Affix (Slot) and API</h2>
+
+      <au-input id="myInput" label="Search">
+        <span slot="prefix">Type a Date</span>
+        <div slot="affix">
+          <button onclick="myInput.suggest(new Date().toISOString().slice(0, 10))">Today(.suggest())</button>
+          <button onclick="myInput.clear()">Clear(.clear())</button>
+        </div>
+       
       </au-input>
 
       <h2>Clearable</h2>
@@ -93,6 +98,16 @@
             <td>--au-input-padding-horizontal</td>
             <td>Horizontal padding for label and input</td>
             <td>1rem</td>
+          </tr>
+          <tr>
+            <td>--au-input-container-padding-vertical</td>
+            <td>Vertical padding for container</td>
+            <td>0.25rem</td>
+          </tr>
+          <tr>
+            <td>--au-input-container-padding-horizontal</td>
+            <td>Horizontal padding for container</td>
+            <td>0.25rem</td>
           </tr>
           <tr>
             <td>--au-input-text-color</td>

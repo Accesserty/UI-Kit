@@ -1,4 +1,4 @@
-import { html, fixture, expect, oneEvent } from '@open-wc/testing';
+import { html, fixture, expect } from '@open-wc/testing';
 import '../src/components/input.js';
 
 describe('AuInput', () => {
@@ -33,6 +33,7 @@ describe('AuInput', () => {
     expect(clearBtn.getAttribute('aria-label')).to.equal('清除內容');
 
     clearBtn.click();
+    await new Promise(r => setTimeout(r));
     expect(el.value).to.equal('');
   });
 
@@ -75,11 +76,9 @@ describe('AuInput', () => {
     const auInput = el.querySelector('au-input');
     const input = auInput.shadowRoot.querySelector('input');
 
-    // change value
     input.value = 'changed';
     auInput.value = 'changed';
 
-    // reset
     el.reset();
     await new Promise(r => setTimeout(r));
 
@@ -97,5 +96,26 @@ describe('AuInput', () => {
     const input = el.querySelector('au-input');
     const formData = new FormData(el);
     expect(formData.get('username')).to.equal('user123');
+  });
+
+  it('can be cleared programmatically with .clear()', async () => {
+    const el = await fixture(html`<au-input value="toClear"></au-input>`);
+    el.clear();
+    await new Promise(r => setTimeout(r));
+    expect(el.value).to.equal('');
+  });
+
+  it('can be filled programmatically with .suggest()', async () => {
+    const el = await fixture(html`<au-input></au-input>`);
+    el.suggest('SuggestedValue');
+    await new Promise(r => setTimeout(r));
+    expect(el.value).to.equal('SuggestedValue');
+  });
+
+  it('can be focused programmatically with .focus()', async () => {
+    const el = await fixture(html`<au-input></au-input>`);
+    el.focus();
+    const input = el.shadowRoot.querySelector('input');
+    expect(document.activeElement === input || input.matches(':focus')).to.be.true;
   });
 });

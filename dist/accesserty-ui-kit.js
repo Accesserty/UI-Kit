@@ -246,99 +246,97 @@ var k=Object.defineProperty;var x=(c,t,e)=>t in c?k(c,t,{enumerable:!0,configura
         }
       }
     `;const a=document.createElement("div");a.setAttribute("class","au-checkbox");const i=document.createElement("label");i.setAttribute("for",t);const r=document.createElement("input");r.type="checkbox",r.id=t,r.name=this.getAttribute("name")||"default-checkbox",r.value=this.getAttribute("value")||"default";const o=document.createElement("div");o.setAttribute("class","text");const s=document.createElement("slot");o.appendChild(s),i.append(r,o),a.appendChild(i),this.shadowRoot.append(e,a),r.addEventListener("change",n=>{this.checked=n.target.checked,this.dispatchEvent(new CustomEvent("change",{detail:n.target.checked})),this.updateFormValue()}),r.addEventListener("focus",()=>{this.dispatchEvent(new CustomEvent("focus"))}),r.addEventListener("blur",()=>{this.dispatchEvent(new CustomEvent("blur"))})}generateId(){const t=new Uint32Array(1);return window.crypto.getRandomValues(t),`au-checkbox-${t[0].toString(36)}`}static get observedAttributes(){return["name","value","checked","disabled","required"]}attributeChangedCallback(t,e,a){const i=this.shadowRoot.querySelector("input");if(i)switch(t){case"checked":i.checked=a!==null;break;case"disabled":i.disabled=a!==null;break;case"name":i.name=a;break;case"value":i.value=a;break;case"required":i.required=a!==null;break}}connectedCallback(){this.updateCheckedState(),this.updateFormValue()}updateCheckedState(){const t=this.shadowRoot.querySelector("input");t&&(t.checked=this.hasAttribute("checked"))}updateFormValue(){const t=this.shadowRoot.querySelector("input"),e=t.checked?this.getAttribute("value")||"on":null;this.internals.setFormValue(e),t.validity.valid?this.internals.setValidity({}):this.internals.setValidity(t.validity,t.validationMessage,t)}formDisabledCallback(t){const e=this.shadowRoot.querySelector("input");e&&(e.disabled=t)}formResetCallback(){const t=this.shadowRoot.querySelector("input");t&&(t.checked=!1,this.checked=!1,this.updateFormValue())}}v(g,"formAssociated",!0);customElements.define("au-checkbox",g);class f extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"}),this.internals=this.attachInternals(),this._id=this.getAttribute("id")||this.generateId();const t=document.createElement("style");t.textContent=`
-      .input-wrapper {
-        display: flex;
-        align-items: center;
-        label {
-          word-break: break-word;
-        }
-        :is(label, input) {
-          margin: 0;
-          padding: var(--au-input-padding-vertical, 0.75rem) var(--au-input-padding-horizontal, 1rem);
-          color: oklch(var(--au-input-text-color, 13.98% 0 0));
-          font-size: var(--au-input-text-size, 1rem);
-          font-family: var(--au-input-text-family, 'Helvetica, Arial, sans-serif, system-ui');
-        }
-        input {
-          -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
-          border: 0;
-          border-radius: var(--au-input-border-radius, 0.25rem);
-          outline: none;
-          background-color: var(--au-input-bg, 99.4% 0 0);
-          line-height: var(--au-input-text-line-height, 1.5);
+    .input-wrapper {
+      display: flex;
+      align-items: center;
+      label {
+        word-break: break-word;
+      }
+      :is(label, input) {
+        margin: 0;
+        padding: var(--au-input-padding-vertical, 0.75rem) var(--au-input-padding-horizontal, 1rem);
+        color: oklch(var(--au-input-text-color, 13.98% 0 0));
+        font-size: var(--au-input-text-size, 1rem);
+        font-family: var(--au-input-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+      }
+      input {
+        -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
+        border: 0;
+        border-radius: var(--au-input-border-radius, 0.25rem);
+        outline: none;
+        background-color: var(--au-input-bg, 99.4% 0 0);
+        line-height: var(--au-input-text-line-height, 1.5);
 
-          &:user-invalid {
-            box-shadow: inset 0 0 0 var(--au-input-invalid-shadow-width, 3px) oklch(var(--au-input-invalid-shadow-color, 57.22% 0.233 29.08));
-          }
-
-          &:focus-visible {
-            box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) oklch(var(--au-input-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
-          }
+        &:user-invalid {
+          box-shadow: inset 0 0 0 var(--au-input-invalid-shadow-width, 3px) oklch(var(--au-input-invalid-shadow-color, 57.22% 0.233 29.08));
         }
-        .input-container {
-          display: flex;
-          align-items: center;
-          border: var(--au-input-border-width, 1px) var(--au-input-border-style, solid) oklch(var(--au-input-border-color, 78.94% 0 0));
-          border-radius: var(--au-input-border-radius, 0.25rem);
-          &:has(.prefix:not([hidden])) {
-            padding-left: var(--au-input-padding-horizontal, 1rem);
-          }
-        }
-        .clear-input {
-          display: grid;
-          place-content: center;
 
-          /* behavior */
-          cursor: pointer;
-          background-color: oklch(var(--au-input-clear-bg, 99.4% 0 0));
-          
-          width: 2rem;
-          height: 2rem;
-          
-          /* border */
-          border: 0;
-          border-radius: 0.25rem;
-
-          &:focus-visible {
-            outline: none;
-            box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) oklch(var(--au-input-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
-          }
-
-          &:hover {
-            background-color: oklch(var(--au-input-clear-hover-bg, 94.66% 0 0));
-          }
-          
-          &:active {
-            background-color: oklch(var(--au-input-clear-active-bg, 86.89% 0 0));
-          }
-
-          &[hidden] {
-            display: none;
-          }
-        }
-        &[data-size="small"] {
-          :is(label, input) {
-            padding: var(--au-input-small-padding-vertical, 0.25rem) var(--au-input-small-padding-horizontal, 0.5rem);
-          }
-        }
-        &[data-size="large"] {
-          :is(label, input)  {
-            padding: var(--au-input-large-padding-vertical, 1rem) var(--au-input-large-padding-horizontal, 2rem);
-              font-size: var(--au-input-large-text-size, 1.25rem);
-          }
-        }
-        &[data-layout="vertical"] {
-          flex-direction: column;
-          align-items: initial;
-          label {
-            padding-left: 0;
-          }
-          input {
-            flex: 1;
-          }
+        &:focus-visible {
+          box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) oklch(var(--au-input-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
         }
       }
-    `;const e=document.createElement("div");e.className="input-wrapper",this.wrapper=e,this.labelEl=document.createElement("label"),this.labelEl.setAttribute("for",this._id),this.labelEl.textContent=this.getAttribute("label")||"";const a=document.createElement("div");a.className="input-container",this.prefixSlot=document.createElement("slot"),this.prefixSlot.name="prefix",this.prefixSpan=document.createElement("span"),this.prefixSpan.className="prefix",this.prefixSpan.appendChild(this.prefixSlot),this.prefixSpan.hidden=!0,this.input=document.createElement("input"),this.input.id=this._id,this.syncAttributes(),this.clearButton=document.createElement("button"),this.clearButton.type="button",this.clearButton.className="clear-input",this.clearButton.textContent="✖",this.clearButton.hidden=!0,this.clearButton.addEventListener("click",()=>{this.input.value="",this.value="",this.internals.setFormValue(""),this.dispatchEvent(new Event("input",{bubbles:!0})),this.dispatchEvent(new Event("change",{bubbles:!0})),this._updateClearButton()}),this.affixSlot=document.createElement("slot"),this.affixSlot.name="affix",this.affixSpan=document.createElement("span"),this.affixSpan.className="affix",this.affixSpan.appendChild(this.affixSlot),this.affixSpan.hidden=!0,a.append(this.prefixSpan,this.input,this.clearButton,this.affixSpan),e.append(this.labelEl,a),this.shadowRoot.append(t,e),this.input.addEventListener("input",()=>{this.value=this.input.value,this.dispatchEvent(new Event("input",{bubbles:!0})),this.internals.setFormValue(this.value),this._syncValidity(),this._updateClearButton()}),this.input.addEventListener("change",()=>{this.dispatchEvent(new Event("change",{bubbles:!0}))}),this.prefixSlot.addEventListener("slotchange",()=>{this.prefixSpan.hidden=this.prefixSlot.assignedNodes().length===0}),this.affixSlot.addEventListener("slotchange",()=>{this.affixSpan.hidden=this.affixSlot.assignedNodes().length===0})}static get observedAttributes(){return["type","name","value","placeholder","required","disabled","readonly","label","min","max","step","pattern","autocomplete","autofocus","inputmode","maxlength","minlength","data-size","data-layout","data-clear","data-clear-label"]}attributeChangedCallback(t,e,a){t==="label"&&this.labelEl?this.labelEl.textContent=a:(t==="data-size"||t==="data-layout")&&this.wrapper?a===null?this.wrapper.removeAttribute(t):this.wrapper.setAttribute(t,a):t==="data-clear"||t==="data-clear-label"?this._updateClearButton():this.input&&(a===null&&typeof this.input[t]=="boolean"?(this.input[t]=!1,this.input.removeAttribute(t)):(this.input.setAttribute(t,a),typeof this.input[t]=="boolean"&&(this.input[t]=!0)),this._syncValidity())}connectedCallback(){this._initialValueSet||(this._initialValue=this.input.value,this._initialValueSet=!0),this.internals.setFormValue(this.input.value),this._syncValidity(),this._updateClearButton()}formResetCallback(){this.input.value=this._initialValue||"",this.internals.setFormValue(this.input.value),this._syncValidity(),this._updateClearButton()}get value(){var t;return(t=this.input)==null?void 0:t.value}set value(t){this.input&&(this.input.value=t,this.setAttribute("value",t),this.internals.setFormValue(t),this._syncValidity(),this._updateClearButton())}generateId(){const t=new Uint32Array(1);return window.crypto.getRandomValues(t),`au-input-${t[0].toString(36)}`}syncAttributes(){Array.from(this.attributes).forEach(t=>{["data-size","data-layout","data-clear","data-clear-label"].includes(t.name)||(this.input.setAttribute(t.name,t.value),t.name==="value"&&(this.input.defaultValue=t.value))})}_syncValidity(){this.input&&(this.input.validity.valid?this.internals.setValidity({}):this.internals.setValidity(this.input.validity,this.input.validationMessage,this.input))}_updateClearButton(){const t=this.hasAttribute("data-clear"),e=this.input.value.length>0,a=this.getAttribute("data-clear-label")||"Clear input";this.clearButton.setAttribute("aria-label",a),this.clearButton.hidden=!(t&&e)}}v(f,"formAssociated",!0);customElements.define("au-input",f);class C extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"});const t=document.createElement("style");t.textContent=`
+      .input-container {
+        display: flex;
+        align-items: center;
+        border: var(--au-input-border-width, 1px) var(--au-input-border-style, solid) oklch(var(--au-input-border-color, 78.94% 0 0));
+        border-radius: var(--au-input-border-radius, 0.25rem);
+        padding: var(--au-input-container-padding-vertical, 0.25rem) var(--au-input-container-padding-horizontal, 0.25rem);
+      }
+      .clear-input {
+        display: grid;
+        place-content: center;
+
+        /* behavior */
+        cursor: pointer;
+        background-color: oklch(var(--au-input-clear-bg, 99.4% 0 0));
+        
+        width: 2rem;
+        height: 2rem;
+        
+        /* border */
+        border: 0;
+        border-radius: 0.25rem;
+
+        &:focus-visible {
+          outline: none;
+          box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) oklch(var(--au-input-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
+        }
+
+        &:hover {
+          background-color: oklch(var(--au-input-clear-hover-bg, 94.66% 0 0));
+        }
+        
+        &:active {
+          background-color: oklch(var(--au-input-clear-active-bg, 86.89% 0 0));
+        }
+
+        &[hidden] {
+          display: none;
+        }
+      }
+      &[data-size="small"] {
+        :is(label, input) {
+          padding: var(--au-input-small-padding-vertical, 0.25rem) var(--au-input-small-padding-horizontal, 0.5rem);
+        }
+      }
+      &[data-size="large"] {
+        :is(label, input)  {
+          padding: var(--au-input-large-padding-vertical, 1rem) var(--au-input-large-padding-horizontal, 2rem);
+            font-size: var(--au-input-large-text-size, 1.25rem);
+        }
+      }
+      &[data-layout="vertical"] {
+        flex-direction: column;
+        align-items: initial;
+        label {
+          padding-left: 0;
+        }
+        input {
+          flex: 1;
+        }
+      }
+    }
+  `;const e=document.createElement("div");e.className="input-wrapper",this.wrapper=e,this.labelEl=document.createElement("label"),this.labelEl.setAttribute("for",this._id),this.labelEl.textContent=this.getAttribute("label")||"";const a=document.createElement("div");a.className="input-container",this.prefixSlot=document.createElement("slot"),this.prefixSlot.name="prefix",this.prefixSpan=document.createElement("span"),this.prefixSpan.className="prefix",this.prefixSpan.appendChild(this.prefixSlot),this.prefixSpan.hidden=!0,this.input=document.createElement("input"),this.input.id=this._id,this.syncAttributes(),this.clearButton=document.createElement("button"),this.clearButton.type="button",this.clearButton.className="clear-input",this.clearButton.textContent="✖",this.clearButton.hidden=!0,this.clearButton.addEventListener("click",()=>{this.clear()}),this.affixSlot=document.createElement("slot"),this.affixSlot.name="affix",this.affixSpan=document.createElement("span"),this.affixSpan.className="affix",this.affixSpan.appendChild(this.affixSlot),this.affixSpan.hidden=!0,a.append(this.prefixSpan,this.input,this.clearButton,this.affixSpan),e.append(this.labelEl,a),this.shadowRoot.append(t,e),this.input.addEventListener("input",()=>{this.value=this.input.value,this.dispatchEvent(new Event("input",{bubbles:!0})),this.internals.setFormValue(this.value),this._syncValidity(),this._updateClearButton()}),this.input.addEventListener("change",()=>{this.dispatchEvent(new Event("change",{bubbles:!0}))}),this.prefixSlot.addEventListener("slotchange",()=>{this.prefixSpan.hidden=this.prefixSlot.assignedNodes().length===0}),this.affixSlot.addEventListener("slotchange",()=>{this.affixSpan.hidden=this.affixSlot.assignedNodes().length===0})}static get observedAttributes(){return["type","name","value","placeholder","required","disabled","readonly","label","min","max","step","pattern","autocomplete","autofocus","inputmode","maxlength","minlength","data-size","data-layout","data-clear","data-clear-label"]}attributeChangedCallback(t,e,a){t==="label"&&this.labelEl?this.labelEl.textContent=a:(t==="data-size"||t==="data-layout")&&this.wrapper?a===null?this.wrapper.removeAttribute(t):this.wrapper.setAttribute(t,a):t==="data-clear"||t==="data-clear-label"?this._updateClearButton():this.input&&(a===null&&typeof this.input[t]=="boolean"?(this.input[t]=!1,this.input.removeAttribute(t)):(this.input.setAttribute(t,a),typeof this.input[t]=="boolean"&&(this.input[t]=!0)),this._syncValidity())}connectedCallback(){this._initialValueSet||(this._initialValue=this.input.value,this._initialValueSet=!0),this.internals.setFormValue(this.input.value),this._syncValidity(),this._updateClearButton()}formResetCallback(){this.input.value=this._initialValue||"",this.internals.setFormValue(this.input.value),this._syncValidity(),this._updateClearButton()}get value(){var t;return(t=this.input)==null?void 0:t.value}set value(t){this.input&&(this.input.value=t,this.setAttribute("value",t),this.internals.setFormValue(t),this._syncValidity(),this._updateClearButton())}clear(){this.input.value="",this.value="",this.internals.setFormValue(""),this.dispatchEvent(new Event("input",{bubbles:!0})),this.dispatchEvent(new Event("change",{bubbles:!0})),this._updateClearButton()}suggest(t=""){this.input.value=t,this.value=t,this.internals.setFormValue(t),this.dispatchEvent(new Event("input",{bubbles:!0})),this._updateClearButton()}focus(){var t;(t=this.input)==null||t.focus()}generateId(){const t=new Uint32Array(1);return window.crypto.getRandomValues(t),`au-input-${t[0].toString(36)}`}syncAttributes(){Array.from(this.attributes).forEach(t=>{["data-size","data-layout","data-clear","data-clear-label"].includes(t.name)||(this.input.setAttribute(t.name,t.value),t.name==="value"&&(this.input.defaultValue=t.value))})}_syncValidity(){this.input&&(this.input.validity.valid?this.internals.setValidity({}):this.internals.setValidity(this.input.validity,this.input.validationMessage,this.input))}_updateClearButton(){const t=this.hasAttribute("data-clear"),e=this.input.value.length>0,a=this.getAttribute("data-clear-label")||"Clear input";this.clearButton.setAttribute("aria-label",a),this.clearButton.hidden=!(t&&e)}}v(f,"formAssociated",!0);customElements.define("au-input",f);class C extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"});const t=document.createElement("style");t.textContent=`
       .au-radio-group {
         display: flex;
         flex-wrap: wrap;

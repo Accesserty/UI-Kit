@@ -9,99 +9,97 @@ class AuInput extends HTMLElement {
 
     const style = document.createElement('style');
     style.textContent = `
-      .input-wrapper {
-        display: flex;
-        align-items: center;
-        label {
-          word-break: break-word;
-        }
-        :is(label, input) {
-          margin: 0;
-          padding: var(--au-input-padding-vertical, 0.75rem) var(--au-input-padding-horizontal, 1rem);
-          color: oklch(var(--au-input-text-color, 13.98% 0 0));
-          font-size: var(--au-input-text-size, 1rem);
-          font-family: var(--au-input-text-family, 'Helvetica, Arial, sans-serif, system-ui');
-        }
-        input {
-          -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
-          border: 0;
-          border-radius: var(--au-input-border-radius, 0.25rem);
-          outline: none;
-          background-color: var(--au-input-bg, 99.4% 0 0);
-          line-height: var(--au-input-text-line-height, 1.5);
+    .input-wrapper {
+      display: flex;
+      align-items: center;
+      label {
+        word-break: break-word;
+      }
+      :is(label, input) {
+        margin: 0;
+        padding: var(--au-input-padding-vertical, 0.75rem) var(--au-input-padding-horizontal, 1rem);
+        color: oklch(var(--au-input-text-color, 13.98% 0 0));
+        font-size: var(--au-input-text-size, 1rem);
+        font-family: var(--au-input-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+      }
+      input {
+        -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
+        border: 0;
+        border-radius: var(--au-input-border-radius, 0.25rem);
+        outline: none;
+        background-color: var(--au-input-bg, 99.4% 0 0);
+        line-height: var(--au-input-text-line-height, 1.5);
 
-          &:user-invalid {
-            box-shadow: inset 0 0 0 var(--au-input-invalid-shadow-width, 3px) oklch(var(--au-input-invalid-shadow-color, 57.22% 0.233 29.08));
-          }
-
-          &:focus-visible {
-            box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) oklch(var(--au-input-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
-          }
+        &:user-invalid {
+          box-shadow: inset 0 0 0 var(--au-input-invalid-shadow-width, 3px) oklch(var(--au-input-invalid-shadow-color, 57.22% 0.233 29.08));
         }
-        .input-container {
-          display: flex;
-          align-items: center;
-          border: var(--au-input-border-width, 1px) var(--au-input-border-style, solid) oklch(var(--au-input-border-color, 78.94% 0 0));
-          border-radius: var(--au-input-border-radius, 0.25rem);
-          &:has(.prefix:not([hidden])) {
-            padding-left: var(--au-input-padding-horizontal, 1rem);
-          }
-        }
-        .clear-input {
-          display: grid;
-          place-content: center;
 
-          /* behavior */
-          cursor: pointer;
-          background-color: oklch(var(--au-input-clear-bg, 99.4% 0 0));
-          
-          width: 2rem;
-          height: 2rem;
-          
-          /* border */
-          border: 0;
-          border-radius: 0.25rem;
-
-          &:focus-visible {
-            outline: none;
-            box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) oklch(var(--au-input-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
-          }
-
-          &:hover {
-            background-color: oklch(var(--au-input-clear-hover-bg, 94.66% 0 0));
-          }
-          
-          &:active {
-            background-color: oklch(var(--au-input-clear-active-bg, 86.89% 0 0));
-          }
-
-          &[hidden] {
-            display: none;
-          }
-        }
-        &[data-size="small"] {
-          :is(label, input) {
-            padding: var(--au-input-small-padding-vertical, 0.25rem) var(--au-input-small-padding-horizontal, 0.5rem);
-          }
-        }
-        &[data-size="large"] {
-          :is(label, input)  {
-            padding: var(--au-input-large-padding-vertical, 1rem) var(--au-input-large-padding-horizontal, 2rem);
-              font-size: var(--au-input-large-text-size, 1.25rem);
-          }
-        }
-        &[data-layout="vertical"] {
-          flex-direction: column;
-          align-items: initial;
-          label {
-            padding-left: 0;
-          }
-          input {
-            flex: 1;
-          }
+        &:focus-visible {
+          box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) oklch(var(--au-input-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
         }
       }
-    `;
+      .input-container {
+        display: flex;
+        align-items: center;
+        border: var(--au-input-border-width, 1px) var(--au-input-border-style, solid) oklch(var(--au-input-border-color, 78.94% 0 0));
+        border-radius: var(--au-input-border-radius, 0.25rem);
+        padding: var(--au-input-container-padding-vertical, 0.25rem) var(--au-input-container-padding-horizontal, 0.25rem);
+      }
+      .clear-input {
+        display: grid;
+        place-content: center;
+
+        /* behavior */
+        cursor: pointer;
+        background-color: oklch(var(--au-input-clear-bg, 99.4% 0 0));
+        
+        width: 2rem;
+        height: 2rem;
+        
+        /* border */
+        border: 0;
+        border-radius: 0.25rem;
+
+        &:focus-visible {
+          outline: none;
+          box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) oklch(var(--au-input-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
+        }
+
+        &:hover {
+          background-color: oklch(var(--au-input-clear-hover-bg, 94.66% 0 0));
+        }
+        
+        &:active {
+          background-color: oklch(var(--au-input-clear-active-bg, 86.89% 0 0));
+        }
+
+        &[hidden] {
+          display: none;
+        }
+      }
+      &[data-size="small"] {
+        :is(label, input) {
+          padding: var(--au-input-small-padding-vertical, 0.25rem) var(--au-input-small-padding-horizontal, 0.5rem);
+        }
+      }
+      &[data-size="large"] {
+        :is(label, input)  {
+          padding: var(--au-input-large-padding-vertical, 1rem) var(--au-input-large-padding-horizontal, 2rem);
+            font-size: var(--au-input-large-text-size, 1.25rem);
+        }
+      }
+      &[data-layout="vertical"] {
+        flex-direction: column;
+        align-items: initial;
+        label {
+          padding-left: 0;
+        }
+        input {
+          flex: 1;
+        }
+      }
+    }
+  `;
 
     const wrapper = document.createElement('div');
     wrapper.className = 'input-wrapper';
@@ -131,12 +129,7 @@ class AuInput extends HTMLElement {
     this.clearButton.textContent = '✖';
     this.clearButton.hidden = true;
     this.clearButton.addEventListener('click', () => {
-      this.input.value = '';
-      this.value = '';
-      this.internals.setFormValue('');
-      this.dispatchEvent(new Event('input', { bubbles: true }));
-      this.dispatchEvent(new Event('change', { bubbles: true }));
-      this._updateClearButton();
+      this.clear();
     });
 
     this.affixSlot = document.createElement('slot');
@@ -205,12 +198,10 @@ class AuInput extends HTMLElement {
   }
 
   connectedCallback() {
-    // 僅第一次連接時記錄初始值
     if (!this._initialValueSet) {
       this._initialValue = this.input.value;
       this._initialValueSet = true;
     }
-  
     this.internals.setFormValue(this.input.value);
     this._syncValidity();
     this._updateClearButton();
@@ -235,6 +226,30 @@ class AuInput extends HTMLElement {
       this._syncValidity();
       this._updateClearButton();
     }
+  }
+
+  /** ✅ 開發者用：清空 input 值 */
+  clear() {
+    this.input.value = '';
+    this.value = '';
+    this.internals.setFormValue('');
+    this.dispatchEvent(new Event('input', { bubbles: true }));
+    this.dispatchEvent(new Event('change', { bubbles: true }));
+    this._updateClearButton();
+  }
+
+  /** ✅ 開發者用：注入建議值 */
+  suggest(val = '') {
+    this.input.value = val;
+    this.value = val;
+    this.internals.setFormValue(val);
+    this.dispatchEvent(new Event('input', { bubbles: true }));
+    this._updateClearButton();
+  }
+
+  /** ✅ 開發者用：聚焦 input 欄位 */
+  focus() {
+    this.input?.focus();
   }
 
   generateId() {
