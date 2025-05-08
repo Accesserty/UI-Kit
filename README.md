@@ -1,6 +1,7 @@
 # Accesserty UI Kit
 
 ![image](https://badgen.net/badge/license/MIT/orange)  
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Accesserty/UI-Kit)
 Accesserty UI Kit focuses on making web components that comply with accessibility standards. We hope that web pages can be barrier-free, reduce engineers' dependence on various packages, lower entry barriers, and improve usage flexibility, so that they can be easy to use, understandable, and stable during development. In this way, in addition to making the web pages barrier-free, it can also reduce costs in various ways.  
 
 
