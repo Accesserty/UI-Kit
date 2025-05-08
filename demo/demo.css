@@ -182,12 +182,22 @@ code {
       oklch(var(--color-primary-300) / 0.4) 0.125rem,
      transparent  0.125rem
     );
+  &::part(current-page) {
+    --au-btn-text-color: var(--color-white);
+    --au-btn-border-color: var(--color-primary-500);
+    --au-btn-bg: var(--color-primary-500);
+    --au-btn-hover-bg: var(--color-primary-400);
+    --au-btn-hover-border-color: var(--color-primary-400);
+    --au-btn-active-bg: var(--color-primary-600);
+    --au-btn-active-border-color: var(--color-primary-600);
+  }
+  
 }
 
 .f-l-au-accordion {
   max-width: 800px;
   --au-accordion-item-margin-bottom: 0;
-  ry-accordion-item {
+  au-accordion-item {
     &::part(button) {
       border-bottom: 0;
     }

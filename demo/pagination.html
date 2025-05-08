@@ -45,8 +45,9 @@
         data-text-next="Next"
         data-text-last="Last"
         data-text-go="Go to"
+        class="custom-btn--primary-outline"
       ></au-pagination>
-      
+
       <div id="output">Result</div>
       <!-- 列表容器 -->
       <ul id="item-list"></ul>
@@ -105,73 +106,173 @@
         </thead>
         <tbody>
           <tr>
-            <td><code>data-total</code></td>
+            <td>data-total</td>
             <td>Total number of items across all pages.</td>
           </tr>
           <tr>
-            <td><code>data-current-page</code></td>
+            <td>data-current-page</td>
             <td>The page number that is currently selected.</td>
           </tr>
           <tr>
-            <td><code>data-pager-count</code></td>
+            <td>data-pager-count</td>
             <td>How many page buttons to display in the pager group at once.</td>
           </tr>
           <tr>
-            <td><code>data-page-size</code></td>
+            <td>data-page-size</td>
             <td>Number of items to display per page.</td>
           </tr>
           <tr>
-            <td><code>data-page-size-options</code></td>
-            <td>Comma-separated or JSON array of available page-size options (e.g. <code>[10,30,50,100]</code>).</td>
+            <td>data-page-size-options</td>
+            <td>Comma-separated or JSON array of available page-size options (e.g. [10,30,50,100]).</td>
           </tr>
           <tr>
-            <td><code>data-layout</code></td>
-            <td>Array or list of elements to include in order (e.g. <code>['total_page','total_items','page_size','first','prev','pages','next','last','jump']</code>).</td>
+            <td>data-layout</td>
+            <td>Array or list of elements to include in order (e.g. ['total_page','total_items','page_size','first','prev','pages','next','last','jump']).</td>
           </tr>
           <tr>
-            <td><code>data-text-total-pages-prefix</code></td>
+            <td>data-text-total-pages-prefix</td>
             <td>Text shown before the total pages count (e.g. “Total”).</td>
           </tr>
           <tr>
-            <td><code>data-text-page</code></td>
+            <td>data-text-page</td>
             <td>Suffix text for a page number (e.g. “page(s)”).</td>
           </tr>
           <tr>
-            <td><code>data-text-total-items-suffix</code></td>
+            <td>data-text-total-items-suffix</td>
             <td>Suffix text for total items count (e.g. “item(s)”).</td>
           </tr>
           <tr>
-            <td><code>data-text-per</code></td>
+            <td>data-text-per</td>
             <td>Prefix text for the page-size selector (e.g. “each page”).</td>
           </tr>
           <tr>
-            <td><code>data-text-first</code></td>
+            <td>data-text-first</td>
             <td>Label for the “first page” button.</td>
           </tr>
           <tr>
-            <td><code>data-text-prev</code></td>
+            <td>data-text-prev</td>
             <td>Label for the “previous page” button.</td>
           </tr>
           <tr>
-            <td><code>data-text-next</code></td>
+            <td>data-text-next</td>
             <td>Label for the “next page” button.</td>
           </tr>
           <tr>
-            <td><code>data-text-last</code></td>
+            <td>data-text-last</td>
             <td>Label for the “last page” button.</td>
           </tr>
           <tr>
-            <td><code>data-text-go</code></td>
+            <td>data-text-go</td>
             <td>Prefix text for the “jump to” input (e.g. “go to”).</td>
           </tr>
           <tr>
-            <td><code>data-text-goto</code></td>
+            <td>data-text-goto</td>
             <td>Visually-hidden prefix for pager buttons (e.g. “go to”).</td>
           </tr>
         </tbody>
       </table>
 
-      
+      <h2>Custom Style</h2>
+      <h3>CSS Variables</h3>
+      <table>
+        <caption>Available CSS custom properties for au-pagination styling</caption>
+        <thead>
+          <tr>
+            <th scope="col">CSS Variable Name</th>
+            <th scope="col">Description</th>
+            <th scope="col">Default Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>--au-btn-padding-vertical</td>
+            <td>Vertical padding for pagination buttons</td>
+            <td>0.75rem</td>
+          </tr>
+          <tr>
+            <td>--au-btn-padding-horizontal</td>
+            <td>Horizontal padding for pagination buttons</td>
+            <td>1rem</td>
+          </tr>
+          <tr>
+            <td>--au-btn-text-color</td>
+            <td>Text color for buttons</td>
+            <td>oklch(13.98% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-btn-text-size</td>
+            <td>Font size for button text</td>
+            <td>1rem</td>
+          </tr>
+          <tr>
+            <td>--au-btn-text-family</td>
+            <td>Font family for button text</td>
+            <td>'Helvetica, Arial, sans-serif, system-ui'</td>
+          </tr>
+          <tr>
+            <td>--au-btn-text-line-height</td>
+            <td>Line-height for button text</td>
+            <td>1.5</td>
+          </tr>
+          <tr>
+            <td>--au-btn-border-width</td>
+            <td>Border width for buttons</td>
+            <td>1px</td>
+          </tr>
+          <tr>
+            <td>--au-btn-border-style</td>
+            <td>Border style for buttons</td>
+            <td>solid</td>
+          </tr>
+          <tr>
+            <td>--au-btn-border-color</td>
+            <td>Border color for buttons</td>
+            <td>oklch(78.94% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-btn-border-radius</td>
+            <td>Border radius for buttons</td>
+            <td>0.25rem</td>
+          </tr>
+          <tr>
+            <td>--au-btn-bg</td>
+            <td>Background color for buttons</td>
+            <td>oklch(99.4% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-btn-hover-bg</td>
+            <td>Background color on hover</td>
+            <td>oklch(94.66% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-btn-hover-border-color</td>
+            <td>Border color on hover</td>
+            <td>oklch(78.94% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-btn-active-bg</td>
+            <td>Background color on active</td>
+            <td>oklch(86.89% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-btn-active-border-color</td>
+            <td>Border color on active</td>
+            <td>oklch(78.94% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-btn-focus-shadow-width</td>
+            <td>Outline width when focused</td>
+            <td>3px</td>
+          </tr>
+          <tr>
+            <td>--au-btn-focus-shadow-color</td>
+            <td>Outline color when focused</td>
+            <td>oklch(83.15% 0.1568 78.05)</td>
+          </tr>
+        </tbody>
+      </table>
+
+
     </main>
   </body>
 </html>

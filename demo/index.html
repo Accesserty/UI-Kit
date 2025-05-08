@@ -61,103 +61,101 @@
         </li>
       </ul>
 
-      <au-tabs>
-         <div class="au-tab-panel" slot="panel" label="Form Demo">
-          <form id="demo-form">
-            <au-input label="Name" data-layout="vertical" required></au-input>
-            <au-input label="Email" type="email"  data-layout="vertical"  required></au-input>
-            <au-textarea id="custom-id" name="textarea" label="Textarea Label" placeholder="Enter..." required></au-textarea>
-            <br />
-            <div role="group" aria-labelledby="fruit-group">
-              <p id="fruit-group">Favorite Fruits</p>
-              <au-checkbox name="fruit" value="apple">Apple</au-checkbox>
-              <au-checkbox name="fruit" value="banana">Banana</au-checkbox>
-              <au-checkbox name="fruit" value="cherry" checked>Cherry</au-checkbox>
-            </div>
-            <br />
-            <div role="group" aria-labelledby="gender-group">
-              <p id="gender-group">Gender</p>
-              <au-radio-group name="gender">
-                <au-radio value="male" checked>Male</au-radio>
-                <au-radio value="female">Female</au-radio>
-                <au-radio value="other">Other</au-radio>
-              </au-radio-group>
-            </div>
-            <au-switch name="subscribe">
-              Subscribe to newsletter
-            </au-switch>
-            <au-file-upload
-              label="Upload Files"
-              multiple
-              required
-              max-files="3"
-              max-size-mb="2"
-              max-total-size-mb="2"
-              accept=".txt, .jpg,.png,application/pdf"
-              msg-button-text="Click button or drag & drop files to upload"
-              msg-drop-text="Drag & drop files here"
-              msg-remove-text="Delete"
-              msg-required="You must upload at least one document."
-              msg-type-error="is not a supported file format"
-              msg-size-error="is too large. Limit is"
-              msg-count-error="You can only attach up to"
-              msg-total-size-error="Total Size: "
-            >
-              <button slot="trigger" class="custom-btn--primary-flat">Choose file...</button>
-              <div slot="hint">.txt, .jpg, .png, application/pdf</div>
-            </au-file-upload>
-            <br />
-            <div>
-              <button type="submit">Submit</button>
-            </div>
-          </form>
-          <script>
-            document.querySelector('#demo-form').addEventListener('submit', (e) => {
-              e.preventDefault();
-              const formData = {};
-          
-              // au-input
-              document.querySelectorAll('au-input').forEach(input => {
-                const name = input.getAttribute('name') || 'input';
-                formData[name] = input.value;
-              });
+      <h2>Form Demo</h2>
+      <form id="demo-form">
+        <au-input label="Name" data-layout="vertical" required></au-input>
+        <au-input label="Email" type="email"  data-layout="vertical"  required></au-input>
+        <au-textarea id="custom-id" name="textarea" label="Textarea Label" placeholder="Enter..." required></au-textarea>
+        <br />
+        <div role="group" aria-labelledby="fruit-group">
+          <p id="fruit-group">Favorite Fruits</p>
+          <au-checkbox name="fruit" value="apple">Apple</au-checkbox>
+          <au-checkbox name="fruit" value="banana">Banana</au-checkbox>
+          <au-checkbox name="fruit" value="cherry" checked>Cherry</au-checkbox>
+        </div>
+        <br />
+        <div role="group" aria-labelledby="gender-group">
+          <p id="gender-group">Gender</p>
+          <au-radio-group name="gender">
+            <au-radio value="male" checked>Male</au-radio>
+            <au-radio value="female">Female</au-radio>
+            <au-radio value="other">Other</au-radio>
+          </au-radio-group>
+        </div>
+        <au-switch name="subscribe">
+          Subscribe to newsletter
+        </au-switch>
+        <au-file-upload
+          id="fileUpload"
+          label="Upload Files"
+          multiple
+          required
+          max-files="3"
+          max-size-mb="2"
+          max-total-size-mb="2"
+          accept=".txt, .jpg,.png,application/pdf"
+          msg-button-text="Click button or drag & drop files to upload"
+          msg-drop-text="Drag & drop files here"
+          msg-remove-text="Delete"
+          msg-required="You must upload at least one document."
+          msg-type-error="is not a supported file format"
+          msg-size-error="is too large. Limit is"
+          msg-count-error="You can only attach up to"
+          msg-total-size-error="Total Size: "
+        >
+          <button slot="trigger" class="custom-btn--primary-flat">Choose file...</button>
+          <div slot="hint">.txt, .jpg, .png, application/pdf</div>
+        </au-file-upload>
+        <br />
+        <div>
+          <button type="submit">Submit</button>
+        </div>
+      </form>
+      <script>
+        document.querySelector('#demo-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const formData = {};
+      
+          // au-input
+          document.querySelectorAll('au-input').forEach(input => {
+            const name = input.getAttribute('name') || 'input';
+            formData[name] = input.value;
+          });
 
-              document.querySelectorAll('au-textarea').forEach(input => {
-                const name = input.getAttribute('name') || 'textarea';
-                formData[name] = input.value;
-              });
-          
-              // au-checkbox
-              formData.fruit = Array.from(document.querySelectorAll('au-checkbox'))
-                .filter(cb => cb.shadowRoot.querySelector('input')?.checked)
-                .map(cb => cb.getAttribute('value'));
-          
-              // au-radio-group
-              const radioGroup = document.querySelector('au-radio-group');
-              const selectedRadio = Array.from(radioGroup.shadowRoot.querySelectorAll('input[type="radio"]'))
-                .find(r => r.checked);
-              formData.gender = selectedRadio?.value || null;
-          
-              // au-switch
-              const auSwitch = document.querySelector('au-switch');
-              const switchInput = auSwitch.shadowRoot.querySelector('input[type="checkbox"]');
-              formData.subscribe = switchInput?.checked || false;
-          
-              console.log(formData);
-            });
-          </script>
-        </div>
-         <div class="au-tab-panel" slot="panel" label="Nested Tabs Demo">
-          <au-tabs>
-             <div class="au-tab-panel" slot="panel" label="Tab 1">
-              Nested Tab Panel 1
-            </div>
-             <div class="au-tab-panel" slot="panel" label="Tab 2">
-              Nested Tab Panel 2
-            </div>
-          </au-tabs>
-        </div>
-      </au-tabs>
+          document.querySelectorAll('au-textarea').forEach(input => {
+            const name = input.getAttribute('name') || 'textarea';
+            formData[name] = input.value;
+          });
+      
+          // au-checkbox
+          formData.fruit = Array.from(document.querySelectorAll('au-checkbox'))
+            .filter(cb => cb.shadowRoot.querySelector('input')?.checked)
+            .map(cb => cb.getAttribute('value'));
+      
+          // au-radio-group
+          const radioGroup = document.querySelector('au-radio-group');
+          const selectedRadio = Array.from(radioGroup.shadowRoot.querySelectorAll('input[type="radio"]'))
+            .find(r => r.checked);
+          formData.gender = selectedRadio?.value || null;
+      
+          // au-switch
+          const auSwitch = document.querySelector('au-switch');
+          const switchInput = auSwitch.shadowRoot.querySelector('input[type="checkbox"]');
+          formData.subscribe = switchInput?.checked || false;
+
+          // au-file-upload
+          const fileUploadEl = document.getElementById('fileUpload');
+          if (fileUploadEl) {
+            const files = fileUploadEl.value || [];
+            formData.files = files.map(f => f.name);
+          } else {
+            console.warn('au-file-upload element with id=fileUpload not found');
+            formData.files = [];
+          }
+      
+          console.log(formData);
+        });
+      </script>
     </main>
   </body>
 </html>

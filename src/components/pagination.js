@@ -85,20 +85,20 @@ class AuPagination extends HTMLElement {
         -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
         
         /* spacing */
-        padding: var(--au-pagination-btn-padding-vertical, 0.75rem) var(--au-pagination-btn-padding-horizontal, 1rem);
+        padding: var(--au-btn-padding-vertical, 0.75rem) var(--au-btn-padding-horizontal, 1rem);
         
         /* text */
-        color: oklch(var(--au-pagination-btn-text-color, 13.98% 0 0));
-        font-size: var(--au-pagination-btn-text-size, 1rem);
-        font-family: var(--au-pagination-btn-text-family, 'Helvetica, Arial, sans-serif, system-ui');
-        line-height: var(--au-pagination-btn-text-line-height, 1.5);
+        color: oklch(var(--au-btn-text-color, 13.98% 0 0));
+        font-size: var(--au-btn-text-size, 1rem);
+        font-family: var(--au-btn-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+        line-height: var(--au-btn-text-line-height, 1.5);
         
         /* border */
-        border: var(--au-pagination-btn-border-width, 1px) var(--au-pagination-btn-border-style, solid) oklch(var(--au-pagination-btn-border-color, 78.94% 0 0));
-        border-radius: var(--au-pagination-btn-border-radius, 0.25rem);
+        border: var(--au-btn-border-width, 1px) var(--au-btn-border-style, solid) oklch(var(--au-btn-border-color, 78.94% 0 0));
+        border-radius: var(--au-btn-border-radius, 0.25rem);
         
         /* others decoration */
-        background-color: oklch(var(--au-pagination-btn-bg, 99.4% 0 0));
+        background-color: oklch(var(--au-btn-bg, 99.4% 0 0));
         transition: background-color 160ms ease-in;
         
         &:disabled {
@@ -108,32 +108,32 @@ class AuPagination extends HTMLElement {
         }
         
         &:hover {
-          background-color: oklch(var(--au-pagination-btn-hover-bg, 94.66% 0 0));
-          border-color: oklch(var(--au-pagination-btn-hover-border-color, 78.94% 0 0));
+          background-color: oklch(var(--au-btn-hover-bg, 94.66% 0 0));
+          border-color: oklch(var(--au-btn-hover-border-color, 78.94% 0 0));
         }
         
         &:active {
-          background-color: oklch(var(--au-pagination-btn-active-bg, 86.89% 0 0));
-          border-color: oklch(var(--au-pagination-btn-active-border-color, 78.94% 0 0));
+          background-color: oklch(var(--au-btn-active-bg, 86.89% 0 0));
+          border-color: oklch(var(--au-btn-active-border-color, 78.94% 0 0));
         }
         
         &:focus-visible {
           outline: none;
-          box-shadow: inset 0 0 0 var(--au-pagination-btn-focus-shadow-width, 3px) oklch(var(--au-pagination-btn-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-btn-focus-shadow-width, 3px) oklch(var(--au-btn-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
         }
         
         &.a11y {
           transition: none;
-          text-shadow: var(--au-pagination-btn-a11y-text-shadow, none);
-          background-image: var(--au-pagination-btn-a11y-bg-image, none);
+          text-shadow: var(--au-btn-a11y-text-shadow, none);
+          background-image: var(--au-btn-a11y-bg-image, none);
             
-          background-size: var(--au-pagination-btn-a11y-bg-size, 1.5rem 1.5rem);
-          background-position: var(--au-pagination-btn-a11y-bg-position, center center);
+          background-size: var(--au-btn-a11y-bg-size, 1.5rem 1.5rem);
+          background-position: var(--au-btn-a11y-bg-position, center center);
           &:hover {
-            background-image: var(--au-pagination-btn-a11y-hover-bg-image, none);
+            background-image: var(--au-btn-a11y-hover-bg-image, none);
           }
           &:active {
-            background-image: var(--au-pagination-btn-a11y-active-bg-image, none);
+            background-image: var(--au-btn-a11y-active-bg-image, none);
           }
         }
       }
@@ -172,16 +172,9 @@ class AuPagination extends HTMLElement {
       }
 
       .pagination-buttons {
+        gap: 0.5rem; 
         li {
-          &:last-child {  
-            button {
-              margin-right: 0;
-            }
-          }
-        }
-        button {
-          margin-right: 0.5rem;
-          &.pager:not([aria-current="page"]) {
+          &:has(.pager:not([aria-current="page"])) {
             @container (width <= 640px) {
               display: none;
             }
@@ -254,7 +247,7 @@ class AuPagination extends HTMLElement {
       const btn = document.createElement('button');
       btn.className = 'pager';
       btn.setAttribute('aria-current', page === this.currentPage ? 'page' : 'false');
-      btn.disabled = page === this.currentPage;
+      btn.setAttribute('part', page === this.currentPage ? 'current-page' : 'false');
       btn.innerHTML = '';
       const v1 = document.createElement('span'); v1.className = 'visually-hidden'; v1.textContent = t.gotoText;
       const v2 = document.createElement('span'); v2.textContent = page;

@@ -4,6 +4,7 @@ import './components/card.js';
 import './components/checkbox.js';
 import './components/file-upload.js';
 import './components/input.js';
+import './components/pagination.js';
 import './components/radio.js';
 import './components/switch.js';
 import './components/tabs.js';
