@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accesserty UI Kit Pagination</title>
+    <link rel="stylesheet" href="../src/css/au-style.css" />
+    <link rel="stylesheet" href="demo.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <script src="../src/components/pagination.js" defer></script>
+  </head>
+  <body>
+    <header><a href="../demo/index.html" title="go to home page">Home</a></header>
+    <main>
+      <h1>
+        Accesserty UI Kit Pagination
+      </h1>
+      <h2>How to use</h2>
+      <h3>HTML</h3>
+      <ol>
+        <li>Copy file (pagination.js or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
+        <li>
+          Add the JavaScript file to HTML using the
+          <code>&lt;script src=&quot;&quot; defer&gt;</code> tag
+        </li>
+        <li>Use the <code>&lt;au-pagination&gt;</code> tag</li>
+      </ol>
+      <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
+
+      <au-pagination
+        id="pagination"
+        data-total="1000"
+        data-current-page="1"
+        data-pager-count="5"
+        data-page-size="10"
+        data-page-size-options='[10,30,50,100]'
+        data-layout='["total_page","total_items","page_size","first","prev","pages","next","last","jump"]'
+        data-text-per="each page"
+        data-text-total-pages-prefix="Total"
+        data-text-goto="Go to"
+        data-text-page="page(s)"
+        data-text-total-items-suffix="item(s)"
+        data-text-first="First"
+        data-text-prev="Prev"
+        data-text-next="Next"
+        data-text-last="Last"
+        data-text-go="Go to"
+      ></au-pagination>
+      
+      <div id="output">Result</div>
+      <!-- 列表容器 -->
+      <ul id="item-list"></ul>
+      <script>
+        const totalItems = 1000;
+        const dataList = Array.from({ length: totalItems }, (_, i) => `item ${i + 1}`);
+
+        const pagination = document.getElementById('pagination');
+        const listEl = document.getElementById('item-list');
+
+        function renderList() {
+          const pageSize = pagination.getAttribute('data-page-size');
+          const currentPage = pagination.getAttribute('data-current-page');
+          const size = Number(pageSize);
+          const page = Number(currentPage);
+          const start = (page - 1) * size;
+          const end = start + size;
+          const slice = dataList.slice(start, end);
+
+          listEl.innerHTML = '';
+          slice.forEach(text => {
+            const li = document.createElement('li');
+            li.textContent = text;
+            listEl.appendChild(li);
+          });
+        }
+
+        pagination.addEventListener('page-change', () => {
+          renderList();
+        });
+        pagination.addEventListener('page-size-change', () => {
+          pagination.setAttribute('data-current-page', 1);
+          renderList();
+        });
+        renderList();
+       
+        const output = document.getElementById('output');
+    
+        pagination.addEventListener('page-change', e => {
+          output.textContent = `Current Page: ${e.detail}`;
+        });
+    
+        pagination.addEventListener('page-size-change', e => {
+          output.textContent += ` | ${e.detail} / Page`;
+        });
+      </script>
+
+      <h2>Attributes</h2>
+      <table>
+        <caption>The Accesserty UI Kit pagination attributes:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>data-total</code></td>
+            <td>Total number of items across all pages.</td>
+          </tr>
+          <tr>
+            <td><code>data-current-page</code></td>
+            <td>The page number that is currently selected.</td>
+          </tr>
+          <tr>
+            <td><code>data-pager-count</code></td>
+            <td>How many page buttons to display in the pager group at once.</td>
+          </tr>
+          <tr>
+            <td><code>data-page-size</code></td>
+            <td>Number of items to display per page.</td>
+          </tr>
+          <tr>
+            <td><code>data-page-size-options</code></td>
+            <td>Comma-separated or JSON array of available page-size options (e.g. <code>[10,30,50,100]</code>).</td>
+          </tr>
+          <tr>
+            <td><code>data-layout</code></td>
+            <td>Array or list of elements to include in order (e.g. <code>['total_page','total_items','page_size','first','prev','pages','next','last','jump']</code>).</td>
+          </tr>
+          <tr>
+            <td><code>data-text-total-pages-prefix</code></td>
+            <td>Text shown before the total pages count (e.g. “Total”).</td>
+          </tr>
+          <tr>
+            <td><code>data-text-page</code></td>
+            <td>Suffix text for a page number (e.g. “page(s)”).</td>
+          </tr>
+          <tr>
+            <td><code>data-text-total-items-suffix</code></td>
+            <td>Suffix text for total items count (e.g. “item(s)”).</td>
+          </tr>
+          <tr>
+            <td><code>data-text-per</code></td>
+            <td>Prefix text for the page-size selector (e.g. “each page”).</td>
+          </tr>
+          <tr>
+            <td><code>data-text-first</code></td>
+            <td>Label for the “first page” button.</td>
+          </tr>
+          <tr>
+            <td><code>data-text-prev</code></td>
+            <td>Label for the “previous page” button.</td>
+          </tr>
+          <tr>
+            <td><code>data-text-next</code></td>
+            <td>Label for the “next page” button.</td>
+          </tr>
+          <tr>
+            <td><code>data-text-last</code></td>
+            <td>Label for the “last page” button.</td>
+          </tr>
+          <tr>
+            <td><code>data-text-go</code></td>
+            <td>Prefix text for the “jump to” input (e.g. “go to”).</td>
+          </tr>
+          <tr>
+            <td><code>data-text-goto</code></td>
+            <td>Visually-hidden prefix for pager buttons (e.g. “go to”).</td>
+          </tr>
+        </tbody>
+      </table>
+
+      
+    </main>
+  </body>
+</html>
