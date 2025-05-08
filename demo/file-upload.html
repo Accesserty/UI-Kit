@@ -26,24 +26,25 @@
       <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
       
       <au-file-upload
-        name="documents"
-        label="Upload your documents"
-        accept=".pdf,.jpg,image/*"
+        label="Upload Files"
         multiple
         required
         max-files="3"
         max-size-mb="2"
-
-        msg-button-text="Choose files"
+        max-total-size-mb="2"
+        accept=".txt, .jpg,.png,application/pdf"
+        msg-button-text="Click button or drag & drop files to upload"
         msg-drop-text="Drag & drop files here"
         msg-remove-text="Delete"
         msg-required="You must upload at least one document."
         msg-type-error="is not a supported file format"
         msg-size-error="is too large. Limit is"
         msg-count-error="You can only attach up to"
-        max-total-size-mb="1"
-        msg-total-size-error="總檔案容量不能超過"
-      ></au-file-upload>
+        msg-total-size-error="Total Size: "
+      >
+        <button slot="trigger" class="custom-btn--primary-flat">Choose file...</button>
+        <div slot="hint">.txt, .jpg, .png, application/pdf</div>
+      </au-file-upload>
 
       <h2>CSS Variables</h2>
       <table>
@@ -56,9 +57,109 @@
         </thead>
         <tbody>
           <tr>
-            <td>--au-tabs-border-radius</td>
-            <td>Border radius for first/last tab</td>
+            <td>--au-file-upload-label-padding-vertical</td>
+            <td>padding-top/padding-bottom of label</td>
+            <td>0.75rem</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-label-padding-horizontal</td>
+            <td>padding-left/padding-right of label</td>
             <td>0</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-label-text-color</td>
+            <td>text color of label</td>
+            <td>oklch(13.98% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-label-text-size</td>
+            <td>font size of label</td>
+            <td>1rem</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-label-text-family</td>
+            <td>font family of label</td>
+            <td>Helvetica, Arial, sans-serif, system-ui'</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-area-border-width</td>
+            <td>border width of upload area</td>
+            <td>1px</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-area-border-style</td>
+            <td>border style of upload area</td>
+            <td>dashed</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-area-border-color</td>
+            <td>border color of upload area</td>
+            <td>oklch(78.94% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-area-border-radius</td>
+            <td>border radius of upload area</td>
+            <td>0.25rem</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-error-area-text-size</td>
+            <td>text color of error area</td>
+            <td>0.875rem</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-error-area-text-color</td>
+            <td>text color of error area</td>
+            <td>oklch(44.64% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-error-list-text-color</td>
+            <td>text color of error list</td>
+            <td>oklch(47.47% 0.193 29.04)</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-file-list-gap</td>
+            <td>gap between file item</td>
+            <td>0.5rem</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-file-list-item-gap</td>
+            <td>gap of file item element</td>
+            <td>0.5rem</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-file-list-item-inner-gap</td>
+            <td>gap between image/icon and title</td>
+            <td>0.5rem</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-file-list-preview-width</td>
+            <td>width of image/icon</td>
+            <td>3rem</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-file-list-preview-height</td>
+            <td>height of image/icon</td>
+            <td>3rem</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-file-list-preview-border-width</td>
+            <td>border width of image/icon</td>
+            <td>1px</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-file-list-preview-border-style</td>
+            <td>border style of image/icon</td>
+            <td>solid</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-file-list-preview-border-color</td>
+            <td>border color of image/icon</td>
+            <td>oklch(78.94% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-file-list-neme-ellipsis-line</td>
+            <td>file name lines</td>
+            <td>2</td>
           </tr>
         </tbody>
       </table>

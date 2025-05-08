@@ -16,7 +16,7 @@ class AuSwitch extends HTMLElement {
         padding-top: var(--au-switch-padding-top, 0.5rem);
         padding-right: var(--au-switch-padding-right, 0.25rem);
         padding-bottom: var(--au-switch-padding-bottom, 0.5rem);
-        padding-left: var(--au-switch-padding-left, 0.25rem);
+        padding-left: var(--au-switch-padding-left, 0);
         -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
       }
       .container {

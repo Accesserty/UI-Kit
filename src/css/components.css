@@ -123,15 +123,15 @@ select {
     word-break: break-word;
     white-space: pre-wrap;
     &:hover {
-      background-color: oklch(var(--au-option-hover-bg-color, 94.66% 0 0));
+      background-color: oklch(var(--au-option-hover-bg, 94.66% 0 0));
       color: oklch(var(--au-option-hover-text-color, 13.98% 0 0));
     }
     &:active {
-      background-color: oklch(var(--au-option-active-bg-color, 86.89% 0 0));
+      background-color: oklch(var(--au-option-active-bg, 86.89% 0 0));
       color: oklch(var(--au-option-active-text-color, 13.98% 0 0));
     }
     &:checked {
-      background-color: oklch(var(--au-option-checked-bg-color, 94.66% 0 0));
+      background-color: oklch(var(--au-option-checked-bg, 94.66% 0 0));
       color: oklch(var(--au-option-checked-text-color, 13.98% 0 0));
     }
     &:focus-visible {
