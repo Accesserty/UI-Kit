@@ -27,74 +27,6 @@
       </ol>
       <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
 
-      <au-pagination
-        id="pagination"
-        data-total="1000"
-        data-current-page="1"
-        data-pager-count="5"
-        data-page-size="10"
-        data-page-size-options='[10,30,50,100]'
-        data-layout='["total_page","total_items","page_size","first","prev","pages","next","last","jump"]'
-        data-text-per="each page"
-        data-text-total-pages-prefix="Total"
-        data-text-goto="Go to"
-        data-text-page="page(s)"
-        data-text-total-items-suffix="item(s)"
-        data-text-first="First"
-        data-text-prev="Prev"
-        data-text-next="Next"
-        data-text-last="Last"
-        data-text-go="Go to"
-        class="custom-btn--primary-outline"
-      ></au-pagination>
-
-      <div id="output">Result</div>
-      <!-- 列表容器 -->
-      <ul id="item-list"></ul>
-      <script>
-        const totalItems = 1000;
-        const dataList = Array.from({ length: totalItems }, (_, i) => `item ${i + 1}`);
-
-        const pagination = document.getElementById('pagination');
-        const listEl = document.getElementById('item-list');
-
-        function renderList() {
-          const pageSize = pagination.getAttribute('data-page-size');
-          const currentPage = pagination.getAttribute('data-current-page');
-          const size = Number(pageSize);
-          const page = Number(currentPage);
-          const start = (page - 1) * size;
-          const end = start + size;
-          const slice = dataList.slice(start, end);
-
-          listEl.innerHTML = '';
-          slice.forEach(text => {
-            const li = document.createElement('li');
-            li.textContent = text;
-            listEl.appendChild(li);
-          });
-        }
-
-        pagination.addEventListener('page-change', () => {
-          renderList();
-        });
-        pagination.addEventListener('page-size-change', () => {
-          pagination.setAttribute('data-current-page', 1);
-          renderList();
-        });
-        renderList();
-       
-        const output = document.getElementById('output');
-    
-        pagination.addEventListener('page-change', e => {
-          output.textContent = `Current Page: ${e.detail}`;
-        });
-    
-        pagination.addEventListener('page-size-change', e => {
-          output.textContent += ` | ${e.detail} / Page`;
-        });
-      </script>
-
       <h2>Attributes</h2>
       <table>
         <caption>The Accesserty UI Kit pagination attributes:</caption>
@@ -173,6 +105,74 @@
       </table>
 
       <h2>Custom Style</h2>
+      <p>Using <code>::part</code> style `current-page`</p>
+      <au-pagination
+        id="pagination"
+        data-total="1000"
+        data-current-page="1"
+        data-pager-count="5"
+        data-page-size="10"
+        data-page-size-options='[10,30,50,100]'
+        data-layout='["total_page","total_items","page_size","first","prev","pages","next","last","jump"]'
+        data-text-per="each page"
+        data-text-total-pages-prefix="Total"
+        data-text-goto="Go to"
+        data-text-page="page(s)"
+        data-text-total-items-suffix="item(s)"
+        data-text-first="First"
+        data-text-prev="Prev"
+        data-text-next="Next"
+        data-text-last="Last"
+        data-text-go="Go to"
+        class="custom-btn--primary-outline"
+      ></au-pagination>
+
+      <div id="output">Result</div>
+      <!-- 列表容器 -->
+      <ul id="item-list"></ul>
+      <script>
+        const totalItems = 1000;
+        const dataList = Array.from({ length: totalItems }, (_, i) => `item ${i + 1}`);
+
+        const pagination = document.getElementById('pagination');
+        const listEl = document.getElementById('item-list');
+
+        function renderList() {
+          const pageSize = pagination.getAttribute('data-page-size');
+          const currentPage = pagination.getAttribute('data-current-page');
+          const size = Number(pageSize);
+          const page = Number(currentPage);
+          const start = (page - 1) * size;
+          const end = start + size;
+          const slice = dataList.slice(start, end);
+
+          listEl.innerHTML = '';
+          slice.forEach(text => {
+            const li = document.createElement('li');
+            li.textContent = text;
+            listEl.appendChild(li);
+          });
+        }
+
+        pagination.addEventListener('page-change', () => {
+          renderList();
+        });
+        pagination.addEventListener('page-size-change', () => {
+          pagination.setAttribute('data-current-page', 1);
+          renderList();
+        });
+        renderList();
+       
+        const output = document.getElementById('output');
+    
+        pagination.addEventListener('page-change', e => {
+          output.textContent = `Current Page: ${e.detail}`;
+        });
+    
+        pagination.addEventListener('page-size-change', e => {
+          output.textContent += ` | ${e.detail} / Page`;
+        });
+      </script>
       <h3>CSS Variables</h3>
       <table>
         <caption>Available CSS custom properties for au-pagination styling</caption>
