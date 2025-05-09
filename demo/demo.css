@@ -262,6 +262,27 @@ code {
   --au-accordion-content-max-height: 200px;
 }
 
+.custom-breadcrumbs {
+  --au-breadcrumbs-bg: var(--color-gray-50);
+  --au-breadcrumbs-link-padding-vertical: var(--spacing-xl);
+  --au-breadcrumbs-link-padding-horizontal: var(--spacing-xl);
+  --au-breadcrumbs-text-size: 2rem;
+  /* --au-breadcrumbs-text-deco:; */
+  --au-breadcrumbs-link-color: var(--color-warning-600);
+  --au-breadcrumbs-link-visited-color: var(--color-purple-500);
+  /* --au-breadcrumbs-focus-shadow-width */
+  /* --au-breadcrumbs-focus-shadow-color:; */
+  /* --au-breadcrumbs-link-currentpage-color:; */
+  .icon {
+    position: relative;
+    top: 2px;
+  }
+  svg {
+    width: 1.625rem;
+    height: 1.625rem;
+  }
+}
+
 .custom-au-card {
   display: block;
   max-width: 300px;

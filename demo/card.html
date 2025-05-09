@@ -51,6 +51,23 @@
       <h2>Demo</h2>
       <p>Be mindful of the order in which you write elements and the final DOM order. The au-card enforces that the heading must appear first, allowing screen reading software to logically read the title before the content.</p>
       <p>You can still use grid or flex to visually swap positions.(set <code>&::part(au-card-container)</code> display)</p>
+      <au-card>
+        <div slot="content">
+          <p>17 MINUTE READ</p>
+        </div>
+        <div slot="media">
+          <img src="demo.jpg" loading="lazy" alt="test img">
+        </div>
+        <div slot="footer">
+          <button>Share Article</button>
+          <button>Read Article</button>
+        </div>
+        <div slot="heading">
+          <h3>Brittney Griner: What I Endured in a Russian Prison</h3>
+          <button>Like!</button>
+        </div>
+      </au-card>
+      <h2>Custom Style</h2>
       <au-card class="custom-au-card">
         <div slot="content" class="content">
           <p>17 MINUTE READ</p>
