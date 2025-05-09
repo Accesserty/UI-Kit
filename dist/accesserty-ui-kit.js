@@ -127,6 +127,7 @@ var S=Object.defineProperty;var z=(b,t,e)=>t in b?S(b,t,{enumerable:!0,configura
               }
               a {
                 display: inline-block;
+                vertical-align: middle;
                 padding: var(--au-breadcrumbs-link-padding-vertical, 0.75rem) var(--au-breadcrumbs-link-padding-horizontal, 0.5rem);
                 font-size: var(--au-breadcrumbs-text-size, 1rem);
                 text-decoration: var(--au-breadcrumbs-text-deco, none);
