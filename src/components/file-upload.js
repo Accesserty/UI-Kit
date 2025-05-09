@@ -21,7 +21,6 @@ class AuFileUpload extends HTMLElement {
         padding: var(--au-file-upload-label-padding-vertical, 0.75rem) var(--au-file-upload-label-padding-horizontal, 0);
         color: oklch(var(--au-file-upload-label-text-color, 13.98% 0 0));
         font-size: var(--au-file-upload-label-text-size, 1rem);
-        font-family: var(--au-file-upload-label-text-family, 'Helvetica, Arial, sans-serif, system-ui');
       }
       .upload-area {
         position: relative;
@@ -98,7 +97,6 @@ class AuFileUpload extends HTMLElement {
             /* text */
             color: oklch(var(--au-file-upload-delete-text-color, 13.98% 0 0));
             font-size: var(--au-file-upload-delete-text-size, 1rem);
-            font-family: var(--au-file-upload-delete-text-family, 'Helvetica, Arial, sans-serif, system-ui');
             line-height: var(--au-file-upload-delete-text-line-height, 1.5);
             
             /* border */
@@ -359,6 +357,7 @@ class AuFileUpload extends HTMLElement {
       removeBtn.className = 'delete';
       removeBtn.textContent = this.getAttribute('msg-remove-text') || 'Remove';
       removeBtn.setAttribute('aria-label', `Remove ${file.name}`);
+      removeBtn.setAttribute('part', 'delete');
       removeBtn.addEventListener('click', () => {
         this.files = this.files.filter(f => f.name !== file.name || f.size !== file.size);
         this.updateFileList();

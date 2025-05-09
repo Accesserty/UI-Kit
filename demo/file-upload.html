@@ -47,6 +47,28 @@
       </au-file-upload>
 
       <h2>Custom Style</h2>
+      <p>Using <code>::part</code> style delete button(or css variables)</p>
+      <au-file-upload
+        class="custom-file-upload"
+        label="Upload Files"
+        multiple
+        required
+        max-files="3"
+        max-size-mb="2"
+        max-total-size-mb="2"
+        accept=".txt, .jpg,.png,application/pdf"
+        msg-button-text="Click button or drag & drop files to upload"
+        msg-drop-text="Drag & drop files here"
+        msg-remove-text="Delete"
+        msg-required="You must upload at least one document."
+        msg-type-error="is not a supported file format"
+        msg-size-error="is too large. Limit is"
+        msg-count-error="You can only attach up to"
+        msg-total-size-error="Total Size: "
+      >
+        <button slot="trigger" class="custom-btn--primary-flat">Choose file...</button>
+        <div slot="hint">.txt, .jpg, .png, application/pdf</div>
+      </au-file-upload>
       <h3>CSS Variables</h3>
       <table>
         <thead>
@@ -76,11 +98,6 @@
             <td>--au-file-upload-label-text-size</td>
             <td>font size of label</td>
             <td>1rem</td>
-          </tr>
-          <tr>
-            <td>--au-file-upload-label-text-family</td>
-            <td>font family of label</td>
-            <td>Helvetica, Arial, sans-serif, system-ui'</td>
           </tr>
           <tr>
             <td>--au-file-upload-area-border-width</td>
@@ -181,11 +198,6 @@
             <td>--au-file-upload-delete-text-size</td>
             <td>font size of delete button</td>
             <td>1rem</td>
-          </tr>
-          <tr>
-            <td>--au-file-upload-delete-text-family</td>
-            <td>font family of delete button</td>
-            <td>Helvetica, Arial, sans-serif, system-ui</td>
           </tr>
           <tr>
             <td>--au-file-upload-delete-text-line-height</td>

@@ -356,6 +356,48 @@ code {
   --au-checkbox-label-disabled-text-color: var(--color-gray-50);
 }
 
+.custom-file-upload {
+  /* --au-file-upload-label-padding-vertical:; */
+  /* --au-file-upload-label-padding-horizontal:; */
+  /* --au-file-upload-label-text-color:; */
+  /* --au-file-upload-label-text-size:; */
+  /* --au-file-upload-area-border-width:; */
+  --au-file-upload-area-border-style: solid;
+  --au-file-upload-area-border-color: var(--color-primary-500);
+  --au-file-upload-area-border-radius: 1rem;
+  /* --au-file-upload-error-area-text-size:; */
+  --au-file-upload-error-area-text-color: var(--color-warning-600);
+  --au-file-upload-error-list-text-color: var(--color-purple-500);
+  --au-file-upload-file-list-gap: 1rem;
+  /* --au-file-upload-file-list-item-gap:; */
+  /* --au-file-upload-file-list-item-inner-gap:; */
+  --au-file-upload-file-list-preview-width: 5rem;
+  --au-file-upload-file-list-preview-height: 5rem;
+  /* --au-file-upload-file-list-preview-border-width:; */
+  /* --au-file-upload-file-list-preview-border-style:; */
+  /* --au-file-upload-file-list-preview-border-color:; */
+  --au-file-upload-file-list-neme-ellipsis-line: 1;
+  /* --au-file-upload-delete-padding-vertical:; */
+  /* --au-file-upload-delete-padding-horizontal:; */
+  /* --au-file-upload-delete-text-color:; */
+  /* --au-file-upload-delete-text-size:; */
+  /* --au-file-upload-delete-text-line-height:; */
+  /* --au-file-upload-delete-border-width:; */
+  /* --au-file-upload-delete-border-style:; */
+  /* --au-file-upload-delete-border-color:; */
+  /* --au-file-upload-delete-border-radius:; */
+  /* --au-file-upload-delete-bg:; */
+  /* --au-file-upload-delete-hover-bg:; */
+  /* --au-file-upload-delete-hover-border-color:; */
+  /* --au-file-upload-delete-active-bg:; */
+  /* --au-file-upload-delete-active-border-color:; */
+  /* --au-file-upload-delete-focus-shadow-width:; */
+  /* --au-file-upload-delete-focus-shadow-color:; */
+  &::part(delete) {
+    text-transform: uppercase;
+  }
+}
+
 .custom-au-switch {
   --au-switch-gap: 4rem;
   /* --au-switch-padding-top:; */
