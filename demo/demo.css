@@ -51,7 +51,6 @@ code {
   'opsz' 24
 }
 
-
 .custom-btn--primary-flat {
   /* --au-btn-padding-vertical:; */
   /* --au-btn-padding-horizontal:; */
@@ -436,25 +435,6 @@ code {
   }
 }
 
-.custom-au-switch {
-  --au-switch-gap: 4rem;
-  /* --au-switch-padding-top:; */
-  /* --au-switch-padding-right:; */
-  /* --au-switch-padding-bottom:; */
-  /* --au-switch-padding-left:; */
-  /* --au-switch-container-gap:; */
-  /* --au-switch-input-border-width:; */
-  /* --au-switch-input-border-style:; */
-  /* --au-switch-input-border-color:; */
-  --au-switch-input-border-radius: 0.625rem;
-  --au-switch-inner-border-radius: 0.5rem;
-  --au-switch-input-width: 6rem;
-  --au-switch-inner-distance: 0.5rem;
-  --au-switch-input-checked-bg: var(--color-primary-600);
-  /* --au-switch-focus-shadow-color:; */
-  /* --au-switch-focus-shadow-width:; */
-}
-
 .custom-au-radio {
   /* --au-radio-content-gap:; */
   /* --au-radio-input-width:; */
@@ -472,6 +452,25 @@ code {
   /* --au-radio-input-focus-shadow-width:; */
   /* --au-radio-input-focus-shadow-color:; */
   /* --au-radio-label-disabled-text-color:; */
+}
+
+.custom-au-switch {
+  --au-switch-gap: 4rem;
+  /* --au-switch-padding-top:; */
+  /* --au-switch-padding-right:; */
+  /* --au-switch-padding-bottom:; */
+  /* --au-switch-padding-left:; */
+  /* --au-switch-container-gap:; */
+  /* --au-switch-input-border-width:; */
+  /* --au-switch-input-border-style:; */
+  /* --au-switch-input-border-color:; */
+  --au-switch-input-border-radius: 0.625rem;
+  --au-switch-inner-border-radius: 0.5rem;
+  --au-switch-input-width: 6rem;
+  --au-switch-inner-distance: 0.5rem;
+  --au-switch-input-checked-bg: var(--color-primary-600);
+  /* --au-switch-focus-shadow-color:; */
+  /* --au-switch-focus-shadow-width:; */
 }
 
 .custom-tabs {
