@@ -15,19 +15,22 @@ class AuInput extends HTMLElement {
       label {
         word-break: break-word;
       }
-      :is(label, input) {
+      label {
+        margin: 0;
+        padding: var(--au-input-label-padding-vertical, 0.75rem) var(--au-input-label-padding-horizontal, 1rem);
+        color: oklch(var(--au-input-label-text-color, 13.98% 0 0));
+        font-size: var(--au-inpu-label-text-size, 1rem);
+      }
+      input {
+        -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
         margin: 0;
         padding: var(--au-input-padding-vertical, 0.75rem) var(--au-input-padding-horizontal, 1rem);
         color: oklch(var(--au-input-text-color, 13.98% 0 0));
         font-size: var(--au-input-text-size, 1rem);
-        font-family: var(--au-input-text-family, 'Helvetica, Arial, sans-serif, system-ui');
-      }
-      input {
-        -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
         border: 0;
         border-radius: var(--au-input-border-radius, 0.25rem);
         outline: none;
-        background-color: var(--au-input-bg, 99.4% 0 0);
+        background-color: oklch(var(--au-input-bg, 99.4% 0 0));
         line-height: var(--au-input-text-line-height, 1.5);
 
         &:user-invalid {
@@ -44,6 +47,7 @@ class AuInput extends HTMLElement {
         border: var(--au-input-border-width, 1px) var(--au-input-border-style, solid) oklch(var(--au-input-border-color, 78.94% 0 0));
         border-radius: var(--au-input-border-radius, 0.25rem);
         padding: var(--au-input-container-padding-vertical, 0.25rem) var(--au-input-container-padding-horizontal, 0.25rem);
+        gap: var(--au-input-container-gap, 0.5rem);
       }
       .clear-input {
         display: grid;
@@ -58,7 +62,7 @@ class AuInput extends HTMLElement {
         
         /* border */
         border: 0;
-        border-radius: 0.25rem;
+        border-radius: var(--au-input-clear-border-radius, 0.25rem);
 
         &:focus-visible {
           outline: none;
@@ -128,6 +132,7 @@ class AuInput extends HTMLElement {
     this.clearButton.className = 'clear-input';
     this.clearButton.textContent = '✖';
     this.clearButton.hidden = true;
+    this.clearButton.setAttribute('part', 'clear');
     this.clearButton.addEventListener('click', () => {
       this.clear();
     });

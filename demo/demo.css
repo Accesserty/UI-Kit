@@ -398,6 +398,44 @@ code {
   }
 }
 
+.custom-input {
+  /* --au-input-label-padding-vertical:; */
+  /* --au-input-label-padding-horizontal:; */
+  --au-input-label-text-color: var(--color-danger-500);
+  /* --au-input-label-text-size:; */
+  /* --au-input-padding-vertical:; */
+  /* --au-input-padding-horizontal:; */
+  --au-input-text-color: var(--color-green-500);
+  /* --au-input-text-size:; */
+  /* --au-input-border-radius:; */
+  --au-input-bg: var(--color-gray-100);
+  /* --au-input-text-line-height:; */
+  /* --au-input-invalid-shadow-width:; */
+  /* --au-input-invalid-shadow-color:; */
+  /* --au-input-focus-shadow-width:; */
+  /* --au-input-focus-shadow-color:; */
+  /* --au-input-border-width:; */
+  /* --au-input-border-style:; */
+  /* --au-input-border-color:; */
+  /* --au-input-border-radius:; */
+  /* --au-input-container-padding-vertical:; */
+  /* --au-input-container-padding-horizontal:; */
+  /* --au-input-clear-bg:; */
+  /* --au-input-clear-border-radius:; */
+  /* --au-input-focus-shadow-width:; */
+  /* --au-input-focus-shadow-color:; */
+  /* --au-input-clear-hover-bg:; */
+  /* --au-input-clear-active-bg:; */
+  /* --au-input-small-padding-vertical:; */
+  /* --au-input-small-padding-horizontal:; */
+  /* --au-input-large-padding-vertical:; */
+  /* --au-input-large-padding-horizontal:; */
+  /* --au-input-large-text-size:; */
+  &::part(clear) {
+    text-decoration: underline;
+  }
+}
+
 .custom-au-switch {
   --au-switch-gap: 4rem;
   /* --au-switch-padding-top:; */

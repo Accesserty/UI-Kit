@@ -32,13 +32,12 @@
 
       <h2>Prefix, Affix (Slot) and API</h2>
 
-      <au-input id="myInput" label="Search">
+      <au-input id="myInput" label="Enter Date">
         <span slot="prefix">Type a Date</span>
         <div slot="affix">
           <button onclick="myInput.suggest(new Date().toISOString().slice(0, 10))">Today(.suggest())</button>
           <button onclick="myInput.clear()">Clear(.clear())</button>
         </div>
-       
       </au-input>
 
       <h2>Clearable</h2>
@@ -80,6 +79,14 @@
         <button>Submit</button>
       </form>
       <h2>Custom Style</h2>
+      <p>Using <code>::part</code> style clear button</p>
+      <au-input id="myInput2" label="Enter Date" class="custom-input" data-clear data-clear-label="Clear it now!">
+        <span slot="prefix">Type a Date</span>
+        <div slot="affix">
+          <button class="custom-btn--primary-flat" onclick="myInput2.suggest(new Date().toISOString().slice(0, 10))">Today(.suggest())</button>
+          <button class="custom-btn--primary-flat" onclick="myInput2.clear()">Clear(.clear())</button>
+        </div>
+      </au-input>
       <h3>CSS Variables</h3>
       <table>
         <thead>
@@ -91,13 +98,13 @@
         </thead>
         <tbody>
           <tr>
-            <td>--au-input-padding-vertical</td>
-            <td>Vertical padding for label and input</td>
+            <td>--au-input-label-padding-vertical</td>
+            <td>Vertical padding for label</td>
             <td>0.75rem</td>
           </tr>
           <tr>
-            <td>--au-input-padding-horizontal</td>
-            <td>Horizontal padding for label and input</td>
+            <td>--au-input-label-padding-horizontal</td>
+            <td>Horizontal padding for label</td>
             <td>1rem</td>
           </tr>
           <tr>
@@ -111,19 +118,39 @@
             <td>0.25rem</td>
           </tr>
           <tr>
+            <td>--au-input-container-gap</td>
+            <td>gap of .input-container</td>
+            <td>0.5rem</td>
+          </tr>
+          <tr>
+            <td>--au-input-label-text-color</td>
+            <td>Text color for label</td>
+            <td>oklch(13.98% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-input-label-text-size</td>
+            <td>Font size for label</td>
+            <td>1rem</td>
+          </tr>
+          <tr>
+            <td>--au-input-padding-vertical</td>
+            <td>Vertical padding for input</td>
+            <td>0.75rem</td>
+          </tr>
+          <tr>
+            <td>--au-input-padding-horizontal</td>
+            <td>Horizontal padding for input</td>
+            <td>1rem</td>
+          </tr>
+          <tr>
             <td>--au-input-text-color</td>
-            <td>Text color for input and label</td>
+            <td>Text color for input</td>
             <td>oklch(13.98% 0 0)</td>
           </tr>
           <tr>
             <td>--au-input-text-size</td>
-            <td>Font size for input and label</td>
+            <td>Font size for input</td>
             <td>1rem</td>
-          </tr>
-          <tr>
-            <td>--au-input-text-family</td>
-            <td>Font family for input and label</td>
-            <td>'Helvetica, Arial, sans-serif, system-ui'</td>
           </tr>
           <tr>
             <td>--au-input-text-line-height</td>
@@ -179,6 +206,11 @@
             <td>--au-input-clear-bg</td>
             <td>Background color (clear button)</td>
             <td>oklch(99.4% 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-input-clear-border-radius</td>
+            <td>Border radius (clear button)</td>
+            <td>0.25rem</td>
           </tr>
           <tr>
             <td>--au-input-clear-hover-bg</td>
