@@ -21,15 +21,20 @@ describe('AuPagination Web Component', () => {
       ></au-pagination>
     `);
 
-    const grp1 = el.shadowRoot
-      .querySelector('.au-pagination-container > .au-pagination-group');
-    // 只統計直接子元素（span wrapper）數量
-    expect(grp1.children.length).to.equal(3);
+    const grp1 = el.shadowRoot.querySelector(
+      '.au-pagination-container > .au-pagination-group'
+    );
+    // Should have 6 direct children: hidden label, pre-span, select, post-span, plus two spans for totals
+    expect(grp1.children.length).to.equal(6);
 
-    const [totalPagesEl, totalItemsEl, pageSizeEl] = grp1.children;
-    expect(totalPagesEl.textContent).to.contain('10');
-    expect(totalItemsEl.textContent).to.contain('50');
-    expect(pageSizeEl.textContent).to.contain('5');
+    const [totalPagesSpan, totalItemsSpan, hiddenLabel, preSpan, select, postSpan] = Array.from(grp1.children);
+    expect(totalPagesSpan.textContent).to.contain('10');
+    expect(totalItemsSpan.textContent).to.contain('50');
+    expect(preSpan.textContent).to.equal(el.texts.perText);
+    // select.value should default to first option '10'
+    expect(select.tagName).to.equal('SELECT');
+    expect(select.value).to.equal('10');
+    expect(postSpan.textContent).to.equal(el.texts.totalItemsSuffix);
   });
 
   it('renders correct number of pagination buttons', async () => {
@@ -41,8 +46,9 @@ describe('AuPagination Web Component', () => {
         data-current-page="1"
       ></au-pagination>
     `);
-    const buttons = el.shadowRoot.querySelectorAll('.pagination-buttons li button');
-    // first, prev, 5 page buttons, next, last => total 9
+    const buttons = el.shadowRoot.querySelectorAll(
+      '.pagination-buttons li button'
+    );
     expect(buttons.length).to.equal(9);
   });
 
@@ -57,11 +63,11 @@ describe('AuPagination Web Component', () => {
     `);
 
     let detail;
-    el.addEventListener('page-change', e => detail = e.detail);
+    el.addEventListener('page-change', (e) => (detail = e.detail));
 
-    // click the 4th button: first, prev, page1, page2
-    const btn = el.shadowRoot
-      .querySelectorAll('.pagination-buttons li button')[3];
+    const btn = el.shadowRoot.querySelectorAll(
+      '.pagination-buttons li button'
+    )[3];
     btn.click();
     await el.updateComplete;
 
@@ -69,7 +75,7 @@ describe('AuPagination Web Component', () => {
     expect(el.getAttribute('data-current-page')).to.equal('2');
   });
 
-  it('emits page-size-change and retains current page on select change', async () => {
+  it('emits page-size-change and resets current page on select change', async () => {
     const el = await fixture(html`
       <au-pagination
         data-total="200"
@@ -79,7 +85,7 @@ describe('AuPagination Web Component', () => {
     `);
 
     let detail;
-    el.addEventListener('page-size-change', e => detail = e.detail);
+    el.addEventListener('page-size-change', (e) => (detail = e.detail));
 
     const select = el.shadowRoot.querySelector('select');
     select.value = '50';
@@ -87,8 +93,7 @@ describe('AuPagination Web Component', () => {
     await el.updateComplete;
 
     expect(detail).to.equal(50);
-    // 元件預設不改變 current-page，檢查仍舊是 3
-    expect(el.getAttribute('data-current-page')).to.equal('3');
+    expect(el.getAttribute('data-current-page')).to.equal('1');
   });
 
   it('renders jump input with correct value and max', async () => {

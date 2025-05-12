@@ -9,9 +9,19 @@ class AuPagination extends HTMLElement {
     ];
   }
 
+  // generate unique IDs for input and select
+  static generateId() {
+    const byteArray = new Uint32Array(1);
+    window.crypto.getRandomValues(byteArray);
+    return `au-pagination-${byteArray[0].toString(36)}`;
+  }
+
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+    // unique IDs for accessibility
+    this._selectId = AuPagination.generateId();
+    this._jumpId   = AuPagination.generateId();
     this._parseAttributes();
     this._render();
   }
@@ -29,12 +39,14 @@ class AuPagination extends HTMLElement {
     const opts = this.getAttribute('data-page-size-options');
     if (opts) {
       try { this.pageSizeOptions = JSON.parse(opts); }
-      catch { this.pageSizeOptions = opts.split(',').map(n => parseInt(n.trim())); }
-    } else { this.pageSizeOptions = [10, 30, 50, 100]; }
+      catch  { this.pageSizeOptions = opts.split(',').map(n => parseInt(n.trim())); }
+    } else {
+      this.pageSizeOptions = [10, 30, 50, 100];
+    }
     const lay = this.getAttribute('data-layout');
     if (lay) {
       try { this.layout = JSON.parse(lay); }
-      catch { this.layout = lay.replace(/\[|\]|'/g, '').split(',').map(s => s.trim()); }
+      catch { this.layout = lay.replace(/[[\]' ]/g, '').split(','); }
     } else {
       this.layout = ['total_page','total_items','page_size','first','prev','pages','next','last','jump'];
     }
@@ -187,27 +199,31 @@ class AuPagination extends HTMLElement {
     const root = document.createElement('div');
     root.className = 'au-pagination';
 
-
     const container = document.createElement('div');
     container.className = 'au-pagination-container';
 
     // 第一組: 總頁數/總筆數/每頁顯示
-    const grp1 = document.createElement('div');
-    grp1.className = 'au-pagination-group';
+    const grp1 = document.createElement('div'); grp1.className='au-pagination-group';
     if (layout.includes('total_page')) {
-      const el = document.createElement('span');
-      el.textContent = `${t.totalPagesPrefix}${totalPages}${t.pageSuffix}`;
-      grp1.appendChild(el);
+      const el = document.createElement('span'); el.textContent = `${t.totalPagesPrefix}${totalPages}${t.pageSuffix}`; grp1.appendChild(el);
     }
     if (layout.includes('total_items')) {
-      const el = document.createElement('span');
-      el.textContent = `${totalItems}${t.totalItemsSuffix}`;
-      grp1.appendChild(el);
+      const el = document.createElement('span'); el.textContent = `${totalItems}${t.totalItemsSuffix}`; grp1.appendChild(el);
     }
     if (layout.includes('page_size')) {
-      const wrap = document.createElement('span');
-      if (t.perText) wrap.append(Object.assign(document.createElement('span'), { textContent: t.perText }));
+      // hidden label + existing text spans preserved
+      const lbl = document.createElement('label');
+      lbl.setAttribute('for', this._selectId);
+      lbl.className = 'visually-hidden';
+      lbl.textContent = t.perText;
+
+      grp1.appendChild(lbl);
+      // original pre-span
+      const preSpan = document.createElement('span'); preSpan.textContent = t.perText;
+      grp1.appendChild(preSpan);
+
       const select = document.createElement('select');
+      select.id = this._selectId;
       this.pageSizeOptions.forEach(opt => {
         const o = document.createElement('option'); o.value = opt; o.textContent = opt;
         if (opt === this.pageSize) o.selected = true;
@@ -216,75 +232,59 @@ class AuPagination extends HTMLElement {
       select.addEventListener('change', e => {
         this.pageSize = +e.target.value;
         this.setAttribute('data-page-size', this.pageSize);
-        this.dispatchEvent(new CustomEvent('page-size-change', { detail: this.pageSize }));
-        this._render();
+        this.dispatchEvent(new CustomEvent('page-size-change',{detail:this.pageSize, bubbles: true, composed: true}));
+        this.currentPage = 1;
+        this.setAttribute('data-current-page','1');
       });
-      wrap.appendChild(select);
-      if (t.totalItemsSuffix) wrap.append(Object.assign(document.createElement('span'), { textContent: t.totalItemsSuffix }));
-      grp1.appendChild(wrap);
+      grp1.appendChild(select);
+      // original post-span
+      const postSpan = document.createElement('span'); postSpan.textContent = t.totalItemsSuffix;
+      grp1.appendChild(postSpan);
     }
     container.appendChild(grp1);
 
     // 第二組: 按鈕列表
-    const grp2 = document.createElement('div');
-    grp2.className = 'au-pagination-group';
-    const ul = document.createElement('ul');
-    ul.className = 'pagination-buttons';
+    const grp2 = document.createElement('div'); grp2.className='au-pagination-group';
+    const ul = document.createElement('ul'); ul.className='pagination-buttons';
     if (layout.includes('first')) {
-      const li = document.createElement('li');
-      const btn = document.createElement('button'); btn.textContent = t.firstText;
-      btn.disabled = this.currentPage === 1; btn.addEventListener('click', () => this._goto(1));
-      li.appendChild(btn); ul.appendChild(li);
+      const li = document.createElement('li'); const btn = document.createElement('button'); btn.textContent=t.firstText; btn.disabled=this.currentPage===1; btn.addEventListener('click',()=>this._goto(1)); li.appendChild(btn); ul.appendChild(li);
     }
     if (layout.includes('prev')) {
-      const li = document.createElement('li');
-      const btn = document.createElement('button'); btn.textContent = t.prevText;
-      btn.disabled = this.currentPage === 1; btn.addEventListener('click', () => this._goto(this.currentPage - 1));
-      li.appendChild(btn); ul.appendChild(li);
+      const li = document.createElement('li'); const btn = document.createElement('button'); btn.textContent=t.prevText; btn.disabled=this.currentPage===1; btn.addEventListener('click',()=>this._goto(this.currentPage-1)); li.appendChild(btn); ul.appendChild(li);
     }
-    if (layout.includes('pages')) this.pagers.forEach(page => {
+    if (layout.includes('pages')) this.pagers.forEach(page=>{
       const li = document.createElement('li');
-      const btn = document.createElement('button');
-      btn.className = 'pager';
-      btn.setAttribute('aria-current', page === this.currentPage ? 'page' : 'false');
-      btn.setAttribute('part', page === this.currentPage ? 'current-page' : 'false');
-      btn.innerHTML = '';
-      const v1 = document.createElement('span'); v1.className = 'visually-hidden'; v1.textContent = t.gotoText;
-      const v2 = document.createElement('span'); v2.textContent = page;
-      const v3 = document.createElement('span'); v3.className = 'visually-hidden'; v3.textContent = t.pageSuffix;
-      btn.append(v1, v2, v3, document.createComment(''));
-      btn.addEventListener('click', () => this._goto(page));
+      const btn= document.createElement('button');
+      btn.className='pager';
+      btn.setAttribute('aria-current', page===this.currentPage?'page':'false');
+      btn.textContent = page;
+      btn.addEventListener('click',()=>this._goto(page));
       li.appendChild(btn); ul.appendChild(li);
     });
     if (layout.includes('next')) {
-      const li = document.createElement('li');
-      const btn = document.createElement('button'); btn.textContent = t.nextText;
-      btn.disabled = this.currentPage >= totalPages; btn.addEventListener('click', () => this._goto(this.currentPage + 1));
-      li.appendChild(btn); ul.appendChild(li);
+      const li = document.createElement('li'); const btn = document.createElement('button'); btn.textContent=t.nextText; btn.disabled=this.currentPage>=totalPages; btn.addEventListener('click',()=>this._goto(this.currentPage+1)); li.appendChild(btn); ul.appendChild(li);
     }
     if (layout.includes('last')) {
-      const li = document.createElement('li');
-      const btn = document.createElement('button'); btn.textContent = t.lastText;
-      btn.disabled = this.currentPage >= totalPages; btn.addEventListener('click', () => this._goto(totalPages));
-      li.appendChild(btn); ul.appendChild(li);
+      const li = document.createElement('li'); const btn = document.createElement('button'); btn.textContent=t.lastText; btn.disabled=this.currentPage>=totalPages; btn.addEventListener('click',()=>this._goto(totalPages)); li.appendChild(btn); ul.appendChild(li);
     }
-    // nav 包裹 ul
-    const nav = document.createElement('nav');
-    nav.setAttribute('aria-label', 'pagination');
-    nav.appendChild(ul);
-    grp2.appendChild(nav);
-    container.appendChild(grp2);
+    const nav=document.createElement('nav'); nav.setAttribute('aria-label','pagination'); nav.appendChild(ul);
+    grp2.appendChild(nav); container.appendChild(grp2);
 
     // 第三組: 跳轉
     if (layout.includes('jump')) {
-      const grp3 = document.createElement('div');
-      grp3.className = 'au-pagination-group';
-      const label = document.createElement('span'); label.textContent = t.goText;
+      const grp3 = document.createElement('div'); grp3.className='au-pagination-group';
+      const lbl = document.createElement('label'); lbl.setAttribute('for', this._jumpId); lbl.className='visually-hidden'; lbl.textContent = t.goText;
+      grp3.appendChild(lbl);
+      // existing span before input
+      const pre = document.createElement('span'); pre.textContent = t.goText;
+      grp3.appendChild(pre);
       const input = document.createElement('input');
-      input.type = 'number'; input.min = 1; input.max = totalPages; input.value = this.currentPage;
-      input.addEventListener('keyup', e => { if (e.key === 'Enter') this._goto(+input.value); });
-      const suffix = document.createElement('span'); suffix.textContent = t.pageSuffix;
-      grp3.append(label, input, suffix);
+      input.type='number'; input.id=this._jumpId; input.min='1'; input.max=String(totalPages); input.value=String(this.currentPage);
+      input.addEventListener('keyup', e=>{ if(e.key==='Enter') this._goto(+input.value); });
+      grp3.appendChild(input);
+      // existing span after input
+      const suf = document.createElement('span'); suf.textContent = t.pageSuffix;
+      grp3.appendChild(suf);
       container.appendChild(grp3);
     }
 
@@ -293,13 +293,12 @@ class AuPagination extends HTMLElement {
   }
 
   _goto(page) {
-    if (page < 1) page = 1;
-    if (page > this.totalPages) page = this.totalPages;
-    if (page === this.currentPage) return;
-    this.currentPage = page;
-    this.setAttribute('data-current-page', page);
-    this.dispatchEvent(new CustomEvent('page-change', { detail: page }));
-    this._render();
+    if (page<1) page=1;
+    if (page>this.totalPages) page=this.totalPages;
+    if (page===this.currentPage) return;
+    this.currentPage=page;
+    this.setAttribute('data-current-page',String(page));
+    this.dispatchEvent(new CustomEvent('page-change',{detail:page, bubbles: true, composed: true}));
   }
 }
 

@@ -394,6 +394,7 @@ code {
   /* --au-file-upload-delete-focus-shadow-color:; */
   &::part(delete) {
     text-transform: uppercase;
+    color: oklch(var(--color-danger-700));
   }
 }
 
