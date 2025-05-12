@@ -16,10 +16,61 @@ Accesserty UI Kit focuses on making web components that comply with accessibilit
 - Usability Across Mainstream Frontend Frameworks: Accesserty UI Kit is developed with the principle of "copy and paste" usability to minimize the cost of creating accessible web pages, free from the pressures of version upgrades. Customization can be done independently if needed, though testing how to use Accesserty UI Kit across various mainstream frontend frameworks can be time-consuming.  
 
 
-## How to use  
+## Demo  
 
 Please open html file found in each component folder to read more.  
 
+
+## How to Use   
+
+### HTML  
+
+- Copy file (component.js or accesserty-ui-kit.js or accesserty-ui-kit.min.js)     
+- Add JavaScript file to HTML <script src="accesserty-ui-kiy.min.js" defer>    
+- Using <au-*> tag  
+- Add CSS files  
+
+### Nuxt    
+  
+- Copy file accesserty-ui-kit.min.js, move to public/vendors    
+- Create plugins/au-accordion.client.ts file    
+```js  
+import { defineNuxtPlugin } from '#app'    
+  
+export default defineNuxtPlugin(() => {    
+  if (process.client) {    
+    const s = document.createElement('script')    
+    s.src   = '/vendors/accesserty-ui-kit.min.js'    
+    s.defer = true    
+    document.head.appendChild(s)    
+  }  
+})  
+```  
+- Setting nuxt.config.ts    
+```js  
+export default defineNuxtConfig({  
+  vue: {  
+    compilerOptions: {  
+      isCustomElement: tag => tag.startsWith('au-')  
+    }  
+  },  
+  
+  plugins: [  
+    { src: '~/plugins/accesserty.client.ts', mode: 'client' },  
+  ]  
+})  
+```  
+- Using <au-*> webcomponent in <client-only>  
+- Add CSS Files  
+
+### CSS  
+
+CSS Cascade Layers, CSS Variables, CSS Nested and oklch color  
+
+- au-style  
+-- basic-variables (Basic CSS Variables)  
+-- components (Native HTML Element Style)  
+-- tokens-variables (Theme CSS Variables)  
 
 ## Developer  
 
