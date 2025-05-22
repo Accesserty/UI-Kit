@@ -104,20 +104,12 @@ class AuAccordionItem extends HTMLElement {
             background-color: oklch(var(--au-accordion-content-bg, 97.31% 0 0));
             color: oklch(var(--au-accordion-content-text-color, 13.98% 0 0));
             padding: var(--au-accordion-content-padding-top, 1rem)  var(--au-accordion-content-padding-right, 1rem)  var(--au-accordion-content-padding-bottom, 1rem)  var(--au-accordion-content-padding-left, 1rem);
-
-            &[aria-hidden="true"] {
-              display: none;
-            }
-
-            &[aria-hidden="false"] {
-              display: block;
-              overscroll-behavior: var(--au-accordion-content-overscroll-behavior, auto);
-              max-height: var(--au-accordion-content-max-height, 300px);
-              overflow: auto;
-              border-left: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
-              border-right: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
-              border-bottom: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
-            }
+            overscroll-behavior: var(--au-accordion-content-overscroll-behavior, auto);
+            max-height: var(--au-accordion-content-max-height, 300px);
+            overflow: auto;
+            border-left: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
+            border-right: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
+            border-bottom: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
           }
         </style>
         <button aria-expanded="false" aria-controls="${regionId}" part="button">
@@ -131,7 +123,7 @@ class AuAccordionItem extends HTMLElement {
               </div>
             </div>
         </button>
-        <div role="region" id="${regionId}" aria-labelledby="${titleId}" aria-hidden="true" part="region">
+        <div role="region" id="${regionId}" aria-labelledby="${titleId}" hidden part="region">
             <slot name="content"></slot>
         </div>
       `;
@@ -160,7 +152,11 @@ class AuAccordionItem extends HTMLElement {
     const isOpen = this.hasAttribute('open');
     this.button.setAttribute('aria-expanded', isOpen);
     const region = this.shadowRoot.querySelector('div[role="region"]');
-    region.setAttribute('aria-hidden', !isOpen);
+    if (isOpen) {
+        region.removeAttribute('hidden');
+    } else {
+        region.setAttribute('hidden', '');
+    }
   }
 
   generateId() {

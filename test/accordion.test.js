@@ -37,21 +37,20 @@ describe('AuAccordion and AuAccordionItem', () => {
     const button = accordionItem.shadowRoot.querySelector('button');
     const region = accordionItem.shadowRoot.querySelector('div[role="region"]');
     expect(button.getAttribute('aria-expanded')).to.equal('false');
-    expect(region.getAttribute('aria-hidden')).to.be.equal('true');
-
+    expect(region.getAttribute('hidden')).to.equal('');
     // Simulate click to expand
     button.click();
     await accordionItem.updateComplete;
     expect(accordionItem.hasAttribute('open')).to.be.true;
     expect(button.getAttribute('aria-expanded')).to.equal('true');
-    expect(region.getAttribute('aria-hidden')).to.be.equal('false');
+    expect(region.getAttribute('hidden')).to.be.null;
 
     // Simulate another click to collapse
     button.click();
     await accordionItem.updateComplete;
     expect(accordionItem.hasAttribute('open')).to.be.false;
     expect(button.getAttribute('aria-expanded')).to.equal('false');
-    expect(region.getAttribute('aria-hidden')).to.be.equal('true');
+    expect(region.getAttribute('hidden')).to.equal('');
 
   });
 

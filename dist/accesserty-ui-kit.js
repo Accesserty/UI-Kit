@@ -76,20 +76,12 @@ var z=Object.defineProperty;var L=(b,t,e)=>t in b?z(b,t,{enumerable:!0,configura
             background-color: oklch(var(--au-accordion-content-bg, 97.31% 0 0));
             color: oklch(var(--au-accordion-content-text-color, 13.98% 0 0));
             padding: var(--au-accordion-content-padding-top, 1rem)  var(--au-accordion-content-padding-right, 1rem)  var(--au-accordion-content-padding-bottom, 1rem)  var(--au-accordion-content-padding-left, 1rem);
-
-            &[aria-hidden="true"] {
-              display: none;
-            }
-
-            &[aria-hidden="false"] {
-              display: block;
-              overscroll-behavior: var(--au-accordion-content-overscroll-behavior, auto);
-              max-height: var(--au-accordion-content-max-height, 300px);
-              overflow: auto;
-              border-left: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
-              border-right: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
-              border-bottom: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
-            }
+            overscroll-behavior: var(--au-accordion-content-overscroll-behavior, auto);
+            max-height: var(--au-accordion-content-max-height, 300px);
+            overflow: auto;
+            border-left: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
+            border-right: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
+            border-bottom: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
           }
         </style>
         <button aria-expanded="false" aria-controls="${t}" part="button">
@@ -103,10 +95,10 @@ var z=Object.defineProperty;var L=(b,t,e)=>t in b?z(b,t,{enumerable:!0,configura
               </div>
             </div>
         </button>
-        <div role="region" id="${t}" aria-labelledby="${e}" aria-hidden="true" part="region">
+        <div role="region" id="${t}" aria-labelledby="${e}" hidden part="region">
             <slot name="content"></slot>
         </div>
-      `,this.shadowRoot.append(a),this.button=this.shadowRoot.querySelector("button"),this.button.addEventListener("click",()=>this.toggleAccordion())}connectedCallback(){this.updateExpanded()}static get observedAttributes(){return["open"]}attributeChangedCallback(t,e,a){t==="open"&&this.updateExpanded()}updateExpanded(){const t=this.hasAttribute("open");this.button.setAttribute("aria-expanded",t),this.shadowRoot.querySelector('div[role="region"]').setAttribute("aria-hidden",!t)}generateId(){const t=new Uint32Array(1);return window.crypto.getRandomValues(t),`au-accordion-item-${t[0].toString(36)}`}toggleAccordion(){this.hasAttribute("open")?this.removeAttribute("open"):this.setAttribute("open","")}}customElements.define("au-accordion-item",I);class R extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"})}connectedCallback(){this.attachInitialAttributes(),this.render()}attachInitialAttributes(){Array.from(this.attributes).forEach(t=>{t.name!=="style"&&!["class","label","items","separator"].includes(t.name)&&this.shadowRoot.host.setAttribute(t.name,t.value)})}static get observedAttributes(){return["id","class","aria-label","items","separator"]}attributeChangedCallback(t,e,a){e!==a&&this.render()}get items(){try{return JSON.parse(this.getAttribute("items")||"[]")}catch(t){return console.error("Error parsing 'items':",t),[]}}set items(t){try{JSON.parse(t),this.setAttribute("items",t),this.render()}catch{console.error("Invalid JSON provided for 'items':",t)}}render(){const t=this.getAttribute("id"),e=this.getAttribute("class"),a=this.getAttribute("aria-label"),i=this.items,n=this.getAttribute("separator")||"/";this.shadowRoot.innerHTML=`
+      `,this.shadowRoot.append(a),this.button=this.shadowRoot.querySelector("button"),this.button.addEventListener("click",()=>this.toggleAccordion())}connectedCallback(){this.updateExpanded()}static get observedAttributes(){return["open"]}attributeChangedCallback(t,e,a){t==="open"&&this.updateExpanded()}updateExpanded(){const t=this.hasAttribute("open");this.button.setAttribute("aria-expanded",t);const e=this.shadowRoot.querySelector('div[role="region"]');t?e.removeAttribute("hidden"):e.setAttribute("hidden","")}generateId(){const t=new Uint32Array(1);return window.crypto.getRandomValues(t),`au-accordion-item-${t[0].toString(36)}`}toggleAccordion(){this.hasAttribute("open")?this.removeAttribute("open"):this.setAttribute("open","")}}customElements.define("au-accordion-item",I);class R extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"})}connectedCallback(){this.attachInitialAttributes(),this.render()}attachInitialAttributes(){Array.from(this.attributes).forEach(t=>{t.name!=="style"&&!["class","label","items","separator"].includes(t.name)&&this.shadowRoot.host.setAttribute(t.name,t.value)})}static get observedAttributes(){return["id","class","aria-label","items","separator"]}attributeChangedCallback(t,e,a){e!==a&&this.render()}get items(){try{return JSON.parse(this.getAttribute("items")||"[]")}catch(t){return console.error("Error parsing 'items':",t),[]}}set items(t){try{JSON.parse(t),this.setAttribute("items",t),this.render()}catch{console.error("Invalid JSON provided for 'items':",t)}}render(){const t=this.getAttribute("id"),e=this.getAttribute("class"),a=this.getAttribute("aria-label"),i=this.items,n=this.getAttribute("separator")||"/";this.shadowRoot.innerHTML=`
       <style>
         nav {
           background-color: oklch(var(--au-breadcrumbs-bg, transparent));

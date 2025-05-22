@@ -50,88 +50,98 @@
         </tr>
       </table>
       <br>
-      <au-accordion>
-        <au-accordion-item>
-          <div slot="heading">Heading</div>
-          <div slot="sub">
-            sub
-          </div>
-          <div slot="icon">
-            icon
-          </div>
-          <div slot="content">Content</div>
-        </au-accordion-item>
-        <au-accordion-item>
-          <div slot="heading">Heading2</div>
-          <div slot="sub">
-            sub
-          </div>
-          <div slot="icon">
-            icon
-          </div>
-          <div slot="content">Content2</div>
-        </au-accordion-item>
-      </au-accordion>
+      <div role="group" aria-labelledby="group-label-basic">
+        <span id="group-label-basic" hidden>Basic</span>
+         <au-accordion>
+          <au-accordion-item>
+            <div slot="heading">Heading</div>
+            <div slot="sub">
+              sub
+            </div>
+            <div slot="icon">
+              icon
+            </div>
+            <div slot="content">Content</div>
+          </au-accordion-item>
+          <au-accordion-item>
+            <div slot="heading">Heading2</div>
+            <div slot="sub">
+              sub
+            </div>
+            <div slot="icon">
+              icon
+            </div>
+            <div slot="content">Content2</div>
+          </au-accordion-item>
+        </au-accordion>
+      </div>
+     
       <h2>Default Open</h2>
       <p>Add `open` attribute <code>&lt;au-accordion-item open&gt;</code> </p>
-      <au-accordion>
-        <au-accordion-item open>
-          <div slot="heading">Heading</div>
-          <div slot="sub">
-            sub
-          </div>
-          <div slot="icon">
-            icon
-          </div>
-          <div slot="content">Content</div>
-        </au-accordion-item>
-        <au-accordion-item>
-          <div slot="heading">Heading2</div>
-          <div slot="sub">
-            sub
-          </div>
-          <div slot="icon">
-            icon
-          </div>
-          <div slot="content">Content2</div>
-        </au-accordion-item>
-      </au-accordion>
+      <div role="group" aria-labelledby="group-label-default-open">
+        <span id="group-label-default-open" hidden>Default Open</span>
+        <au-accordion>
+          <au-accordion-item open>
+            <div slot="heading">Heading</div>
+            <div slot="sub">
+              sub
+            </div>
+            <div slot="icon">
+              icon
+            </div>
+            <div slot="content">Content</div>
+          </au-accordion-item>
+          <au-accordion-item>
+            <div slot="heading">Heading2</div>
+            <div slot="sub">
+              sub
+            </div>
+            <div slot="icon">
+              icon
+            </div>
+            <div slot="content">Content2</div>
+          </au-accordion-item>
+        </au-accordion>
+      </div>
       <h2>Nested</h2>
-      <au-accordion>
-        <au-accordion-item>
-          <div slot="heading">Heading</div>
-          <div slot="sub">
-            sub
-          </div>
-          <div slot="icon">
-            icon
-          </div>
-          <div slot="content">
-            <au-accordion>
-              <au-accordion-item>
-                <div slot="heading">Heading</div>
-                <div slot="sub">
-                  sub
-                </div>
-                <div slot="icon">
-                  icon
-                </div>
-                <div slot="content">Content</div>
-              </au-accordion-item>
-              <au-accordion-item>
-                <div slot="heading">Heading2</div>
-                <div slot="sub">
-                  sub
-                </div>
-                <div slot="icon">
-                  icon
-                </div>
-                <div slot="content">Content2</div>
-              </au-accordion-item>
-            </au-accordion>
-          </div>
-        </au-accordion-item>
-      </au-accordion>
+      <div role="group" aria-labelledby="group-label-nested">
+        <span id="group-label-nested" hidden>Nested</span>
+        <au-accordion>
+          <au-accordion-item>
+            <div slot="heading">Heading</div>
+            <div slot="sub">
+              sub
+            </div>
+            <div slot="icon">
+              icon
+            </div>
+            <div slot="content">
+              <au-accordion>
+                <au-accordion-item>
+                  <div slot="heading">Heading</div>
+                  <div slot="sub">
+                    sub
+                  </div>
+                  <div slot="icon">
+                    icon
+                  </div>
+                  <div slot="content">Content</div>
+                </au-accordion-item>
+                <au-accordion-item>
+                  <div slot="heading">Heading2</div>
+                  <div slot="sub">
+                    sub
+                  </div>
+                  <div slot="icon">
+                    icon
+                  </div>
+                  <div slot="content">Content2</div>
+                </au-accordion-item>
+              </au-accordion>
+            </div>
+          </au-accordion-item>
+        </au-accordion>
+      </div>
       <h2>Custom Style</h2>
       <h3>If you want to select first-child and last-child</h3>
       <p>Set external CSS and use <code>::part</code> style `button` and `region`</p>
@@ -173,38 +183,41 @@
         }
       </code>
       <br>
-      <au-accordion class="f-l-au-accordion">
-        <au-accordion-item>
-          <h4 slot="heading">Heading</h4>
-          <div slot="sub">
-            sub
-          </div>
-          <div slot="icon">
-            icon
-          </div>
-          <div slot="content">Content</div>
-        </au-accordion-item>
-        <au-accordion-item>
-          <h4 slot="heading">Heading2</h4>
-          <div slot="sub">
-            sub
-          </div>
-          <div slot="icon">
-            icon
-          </div>
-          <div slot="content">Content2</div>
-        </au-accordion-item>
-        <au-accordion-item>
-          <h4 slot="heading">Heading3</h4>
-          <div slot="sub">
-            sub
-          </div>
-          <div slot="icon">
-            icon
-          </div>
-          <div slot="content">Content3</div>
-        </au-accordion-item>
-      </au-accordion>
+      <div role="group" aria-labelledby="group-label-custom">
+        <span id="group-label-custom" hidden>custom</span>
+        <au-accordion class="f-l-au-accordion">
+          <au-accordion-item>
+            <h4 slot="heading">Heading</h4>
+            <div slot="sub">
+              sub
+            </div>
+            <div slot="icon">
+              icon
+            </div>
+            <div slot="content">Content</div>
+          </au-accordion-item>
+          <au-accordion-item>
+            <h4 slot="heading">Heading2</h4>
+            <div slot="sub">
+              sub
+            </div>
+            <div slot="icon">
+              icon
+            </div>
+            <div slot="content">Content2</div>
+          </au-accordion-item>
+          <au-accordion-item>
+            <h4 slot="heading">Heading3</h4>
+            <div slot="sub">
+              sub
+            </div>
+            <div slot="icon">
+              icon
+            </div>
+            <div slot="content">Content3</div>
+          </au-accordion-item>
+        </au-accordion>
+      </div>
       <h3>CSS Variables</h3>
       <table>
         <tr>
@@ -334,33 +347,36 @@
         </tr>
       </table>
       <br>
-      <au-accordion class="custom-au-accordion">
-        <au-accordion-item>
-          <div slot="heading">Heading icon using Google Font Emoji</div>
-          <div slot="sub">
-            <mark>watch this!</mark>
-          </div>
-          <div slot="icon">
-            <span class="material-symbols-outlined" aria-hidden="true">
-              expand_more
-            </span>
-          </div>
-          <div slot="content"><p>Content</p></div>
-        </au-accordion-item>
-        <au-accordion-item>
-          <div slot="heading">Heading icon using fontawesome svg</div>
-          <div slot="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 1rem;position: relative; top: 0.125rem;" aria-hidden="true">
-              <!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.!-->
-              <path 
-                fill="white"
-                d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
-              />
-            </svg>
-          </div>
-          <div slot="content"><div style="height: 500px;">Content2</div></div>
-        </au-accordion-item>
-      </au-accordion>
+      <div role="group" aria-labelledby="group-label-custom2">
+        <span id="group-label-custom2" hidden>custom2</span>
+        <au-accordion class="custom-au-accordion">
+          <au-accordion-item>
+            <div slot="heading">Heading icon using Google Font Emoji</div>
+            <div slot="sub">
+              <mark>watch this!</mark>
+            </div>
+            <div slot="icon">
+              <span class="material-symbols-outlined" aria-hidden="true">
+                expand_more
+              </span>
+            </div>
+            <div slot="content"><p>Content</p></div>
+          </au-accordion-item>
+          <au-accordion-item>
+            <div slot="heading">Heading icon using fontawesome svg</div>
+            <div slot="icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 1rem;position: relative; top: 0.125rem;" aria-hidden="true">
+                <!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.!-->
+                <path 
+                  fill="white"
+                  d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
+                />
+              </svg>
+            </div>
+            <div slot="content"><div style="height: 500px;">Content2</div></div>
+          </au-accordion-item>
+        </au-accordion>
+      </div>
       <h2>FAQ</h2>
       <h3>How about HTML tag &lt;details&gt;</h3>
       <p>&lt;details&gt; is a good choice, and we highly recommend using native HTML directly. If you opt to use &lt;details&gt;:</p>
