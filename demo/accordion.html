@@ -370,10 +370,17 @@
         <li>Some browsers or screen readers might not yet support &lt;details&gt;.</li>
         <li>If your title requires additional supplementary information, you will need to customize &lt;summary&gt; yourself.</li>
       </ul>
-      <details>
-        <summary>Demo Details</summary>
-        Inner text
-      </details>      
+      <div role="group" aria-labelledby="group-label-demo">
+        <span id="group-label-demo" hidden>Product description</span>
+        <details>
+          <summary>Box1</summary>
+          Inner text1
+        </details>
+        <details>
+          <summary>Box2</summary>
+          Inner text2
+        </details>
+      </div>       
       <h3>Conclusion</h3>
       <p>Developing an accordion is quite enjoyable as it requires understanding the relationships between <code>role="region"</code>, <code>aria-controls</code>, <code>aria-expanded</code>, <code>aria-hidden</code>, <code>aria-labelledby</code> and corresponding IDs, especially when it becomes clearer during unit testing.</p>
       <p>This Web Component is highly recommended for developers to create and use. Even developers who are not very familiar with accessibility can contribute to accessible web development by simply implementing it!</p>

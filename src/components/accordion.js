@@ -170,14 +170,11 @@ class AuAccordionItem extends HTMLElement {
   }
 
   toggleAccordion() {
-    const expanded = this.button.getAttribute('aria-expanded') === 'true';
-    this.button.setAttribute('aria-expanded', !expanded);
-    const region = this.shadowRoot.querySelector('div[role="region"]');
-    region.setAttribute('aria-hidden', expanded);
-    if (!expanded) {
-        this.setAttribute('open', '');
-    } else {
+    const isOpen = this.hasAttribute('open');
+    if (isOpen) {
         this.removeAttribute('open');
+    } else {
+        this.setAttribute('open', '');
     }
   }
 }
