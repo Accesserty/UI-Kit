@@ -43,7 +43,7 @@ class AuTabs extends HTMLElement {
         justify-content: space-between;
         align-items: center;
         gap: 0.25rem;
-        padding: var(--au-tabs-padding-vertical, 0.75rem) var(--au-tabs-padding-horizontal, 1rem);
+        padding: var(--au-tabs-padding-vertical, 0.625rem) var(--au-tabs-padding-horizontal, 1rem);
 
         /* border */
         border-top: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) oklch(var(--au-tabs-border-color, 78.94% 0 0));
@@ -89,13 +89,13 @@ class AuTabs extends HTMLElement {
       }
 
       .au-tab-panel {
-        padding: var(--au-tab-panel-padding-vertical, 0.75rem) var(--au-tab-panel-padding-horizontal, 1rem);
+        padding: var(--au-tab-panel-padding-vertical, 0.625rem) var(--au-tab-panel-padding-horizontal, 1rem);
       }
 
       .badge {
         background-color: oklch(var(--au-tab-badge-bg, 86.89% 0 0));
         color: oklch(var(--au-tab-badge-text-color, 13.98% 0 0));
-        padding: var(--au-tab-badge-padding-vertical, 0) var(--au-tab-badge-padding-horizontal, 0.5rem);
+        padding: var(--au-tab-badge-padding-vertical, 0) var(--au-tab-badge-padding-horizontal, 0.625rem);
         border-radius: var(--au-tab-badge-border-radius, 0.75rem);
       }
 

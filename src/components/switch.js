@@ -13,16 +13,16 @@ class AuSwitch extends HTMLElement {
         align-items: center;
         gap: var(--au-switch-gap, 1rem);
         cursor: pointer;
-        padding-top: var(--au-switch-padding-top, 0.5rem);
+        padding-top: var(--au-switch-padding-top, 0.625rem);
         padding-right: var(--au-switch-padding-right, 0.25rem);
-        padding-bottom: var(--au-switch-padding-bottom, 0.5rem);
+        padding-bottom: var(--au-switch-padding-bottom, 0.625rem);
         padding-left: var(--au-switch-padding-left, 0);
         -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
       }
       .container {
         display: flex;
         align-items: center;
-        gap: var(--au-switch-container-gap, 0.5rem);
+        gap: var(--au-switch-container-gap, 0.625rem);
       }
       .input {
         position: relative;
