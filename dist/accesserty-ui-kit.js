@@ -181,7 +181,7 @@ var z=Object.defineProperty;var L=(b,t,e)=>t in b?z(b,t,{enumerable:!0,configura
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: var(--au-checkbox-content-gap, 0.5rem);
+        gap: var(--au-checkbox-content-gap, 0.375rem);
         -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
         input[type="checkbox"] {
           appearance: none;
