@@ -469,7 +469,7 @@ var z=Object.defineProperty;var L=(b,t,e)=>t in b?z(b,t,{enumerable:!0,configura
         -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
         
         /* spacing */
-        padding: var(--au-btn-padding-vertical, 0.75rem) var(--au-btn-padding-horizontal, 1rem);
+        padding: var(--au-btn-padding-vertical, 0.625rem) var(--au-btn-padding-horizontal, 1rem);
         
         /* text */
         color: oklch(var(--au-btn-text-color, 13.98% 0 0));
@@ -551,12 +551,12 @@ var z=Object.defineProperty;var L=(b,t,e)=>t in b?z(b,t,{enumerable:!0,configura
       }
 
       :is(.au-pagination-group) {
-        gap: 0.5rem;
+        gap: 0.625rem;
         justify-content: center;
       }
 
       .pagination-buttons {
-        gap: 0.5rem; 
+        gap: 0.625rem; 
         li {
           &:has(.pager:not([aria-current="page"])) {
             @container (width <= 640px) {
