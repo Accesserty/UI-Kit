@@ -18,7 +18,8 @@ class AuFileUpload extends HTMLElement {
         }
       }
       label {
-        padding: var(--au-file-upload-label-padding-vertical, 0.75rem) var(--au-file-upload-label-padding-horizontal, 0);
+        display: inline-block;
+        padding: var(--au-file-upload-label-padding-vertical, 0.625rem) var(--au-file-upload-label-padding-horizontal, 0);
         color: oklch(var(--au-file-upload-label-text-color, 13.98% 0 0));
         font-size: var(--au-file-upload-label-text-size, 1rem);
       }
@@ -57,18 +58,18 @@ class AuFileUpload extends HTMLElement {
       .file-list {
         display: flex;
         flex-direction: column;
-        gap: var(--au-file-upload-file-list-gap, 0.5rem);
+        gap: var(--au-file-upload-file-list-gap, 0.625rem);
         [role="listitem"] {
           display: flex;
           justify-content: space-between;
-          gap: var(--au-file-upload-file-list-item-gap, 0.5rem);
+          gap: var(--au-file-upload-file-list-item-gap, 0.625rem);
           word-break: break-word;
           align-items: center;
           >div {
             flex: 1;
             display: flex;
             align-items: center;
-            gap: var(--au-file-upload-file-list-item-inner-gap, 0.5rem);
+            gap: var(--au-file-upload-file-list-item-inner-gap, 0.625rem);
           }
           .preview {
             flex: 0 0 3rem;
@@ -92,7 +93,7 @@ class AuFileUpload extends HTMLElement {
             -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
             
             /* spacing */
-            padding: var(--au-file-upload-delete-padding-vertical, 0.75rem) var(--au-file-upload-delete-padding-horizontal, 1rem);
+            padding: var(--au-file-upload-delete-padding-vertical, 0.625rem) var(--au-file-upload-delete-padding-horizontal, 1rem);
             
             /* text */
             color: oklch(var(--au-file-upload-delete-text-color, 13.98% 0 0));
