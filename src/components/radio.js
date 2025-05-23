@@ -9,7 +9,7 @@ class AuRadioGroup extends HTMLElement {
         display: flex;
         flex-wrap: wrap;
         gap: 1rem;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.625rem;
       }
       .au-radio-group--vertical {
         flex-direction: column;
@@ -21,7 +21,7 @@ class AuRadioGroup extends HTMLElement {
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: var(--au-radio-content-gap, 0.5rem);
+        gap: var(--au-radio-content-gap, 0.375rem);
         -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
         padding: 0.25rem;
         input[type="radio"] {

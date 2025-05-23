@@ -570,7 +570,7 @@ var z=Object.defineProperty;var L=(b,t,e)=>t in b?z(b,t,{enumerable:!0,configura
         display: flex;
         flex-wrap: wrap;
         gap: 1rem;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.625rem;
       }
       .au-radio-group--vertical {
         flex-direction: column;
@@ -582,7 +582,7 @@ var z=Object.defineProperty;var L=(b,t,e)=>t in b?z(b,t,{enumerable:!0,configura
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: var(--au-radio-content-gap, 0.5rem);
+        gap: var(--au-radio-content-gap, 0.375rem);
         -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
         padding: 0.25rem;
         input[type="radio"] {
