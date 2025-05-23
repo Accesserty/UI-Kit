@@ -248,7 +248,8 @@ var z=Object.defineProperty;var L=(b,t,e)=>t in b?z(b,t,{enumerable:!0,configura
         }
       }
       label {
-        padding: var(--au-file-upload-label-padding-vertical, 0.75rem) var(--au-file-upload-label-padding-horizontal, 0);
+        display: inline-block;
+        padding: var(--au-file-upload-label-padding-vertical, 0.625rem) var(--au-file-upload-label-padding-horizontal, 0);
         color: oklch(var(--au-file-upload-label-text-color, 13.98% 0 0));
         font-size: var(--au-file-upload-label-text-size, 1rem);
       }
@@ -287,18 +288,18 @@ var z=Object.defineProperty;var L=(b,t,e)=>t in b?z(b,t,{enumerable:!0,configura
       .file-list {
         display: flex;
         flex-direction: column;
-        gap: var(--au-file-upload-file-list-gap, 0.5rem);
+        gap: var(--au-file-upload-file-list-gap, 0.625rem);
         [role="listitem"] {
           display: flex;
           justify-content: space-between;
-          gap: var(--au-file-upload-file-list-item-gap, 0.5rem);
+          gap: var(--au-file-upload-file-list-item-gap, 0.625rem);
           word-break: break-word;
           align-items: center;
           >div {
             flex: 1;
             display: flex;
             align-items: center;
-            gap: var(--au-file-upload-file-list-item-inner-gap, 0.5rem);
+            gap: var(--au-file-upload-file-list-item-inner-gap, 0.625rem);
           }
           .preview {
             flex: 0 0 3rem;
@@ -322,7 +323,7 @@ var z=Object.defineProperty;var L=(b,t,e)=>t in b?z(b,t,{enumerable:!0,configura
             -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
             
             /* spacing */
-            padding: var(--au-file-upload-delete-padding-vertical, 0.75rem) var(--au-file-upload-delete-padding-horizontal, 1rem);
+            padding: var(--au-file-upload-delete-padding-vertical, 0.625rem) var(--au-file-upload-delete-padding-horizontal, 1rem);
             
             /* text */
             color: oklch(var(--au-file-upload-delete-text-color, 13.98% 0 0));
@@ -370,14 +371,14 @@ var z=Object.defineProperty;var L=(b,t,e)=>t in b?z(b,t,{enumerable:!0,configura
       }
       label {
         margin: 0;
-        padding: var(--au-input-label-padding-vertical, 0.75rem) var(--au-input-label-padding-horizontal, 1rem);
+        padding: var(--au-input-label-padding-vertical, 0.625rem) var(--au-input-label-padding-horizontal, 1rem);
         color: oklch(var(--au-input-label-text-color, 13.98% 0 0));
         font-size: var(--au-inpu-label-text-size, 1rem);
       }
       input {
         -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
         margin: 0;
-        padding: var(--au-input-padding-vertical, 0.75rem) var(--au-input-padding-horizontal, 1rem);
+        padding: var(--au-input-padding-vertical, 0.625rem) var(--au-input-padding-horizontal, 1rem);
         color: oklch(var(--au-input-text-color, 13.98% 0 0));
         font-size: var(--au-input-text-size, 1rem);
         border: 0;
@@ -400,7 +401,7 @@ var z=Object.defineProperty;var L=(b,t,e)=>t in b?z(b,t,{enumerable:!0,configura
         border: var(--au-input-border-width, 1px) var(--au-input-border-style, solid) oklch(var(--au-input-border-color, 78.94% 0 0));
         border-radius: var(--au-input-border-radius, 0.25rem);
         padding: var(--au-input-container-padding-vertical, 0.25rem) var(--au-input-container-padding-horizontal, 0.25rem);
-        gap: var(--au-input-container-gap, 0.5rem);
+        gap: var(--au-input-container-gap, 0.625rem);
       }
       .clear-input {
         display: grid;
@@ -436,13 +437,13 @@ var z=Object.defineProperty;var L=(b,t,e)=>t in b?z(b,t,{enumerable:!0,configura
       }
       &[data-size="small"] {
         :is(label, input) {
-          padding: var(--au-input-small-padding-vertical, 0.25rem) var(--au-input-small-padding-horizontal, 0.5rem);
+          padding: var(--au-input-small-padding-vertical, 0.25rem) var(--au-input-small-padding-horizontal, 0.375rem);
         }
       }
       &[data-size="large"] {
         :is(label, input)  {
-          padding: var(--au-input-large-padding-vertical, 1rem) var(--au-input-large-padding-horizontal, 2rem);
-            font-size: var(--au-input-large-text-size, 1.25rem);
+          padding: var(--au-input-large-padding-vertical, 1rem) var(--au-input-large-padding-horizontal, 1.625rem);
+          font-size: var(--au-input-large-text-size, 1.25rem);
         }
       }
       &[data-layout="vertical"] {

@@ -17,14 +17,14 @@ class AuInput extends HTMLElement {
       }
       label {
         margin: 0;
-        padding: var(--au-input-label-padding-vertical, 0.75rem) var(--au-input-label-padding-horizontal, 1rem);
+        padding: var(--au-input-label-padding-vertical, 0.625rem) var(--au-input-label-padding-horizontal, 1rem);
         color: oklch(var(--au-input-label-text-color, 13.98% 0 0));
         font-size: var(--au-inpu-label-text-size, 1rem);
       }
       input {
         -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
         margin: 0;
-        padding: var(--au-input-padding-vertical, 0.75rem) var(--au-input-padding-horizontal, 1rem);
+        padding: var(--au-input-padding-vertical, 0.625rem) var(--au-input-padding-horizontal, 1rem);
         color: oklch(var(--au-input-text-color, 13.98% 0 0));
         font-size: var(--au-input-text-size, 1rem);
         border: 0;
@@ -47,7 +47,7 @@ class AuInput extends HTMLElement {
         border: var(--au-input-border-width, 1px) var(--au-input-border-style, solid) oklch(var(--au-input-border-color, 78.94% 0 0));
         border-radius: var(--au-input-border-radius, 0.25rem);
         padding: var(--au-input-container-padding-vertical, 0.25rem) var(--au-input-container-padding-horizontal, 0.25rem);
-        gap: var(--au-input-container-gap, 0.5rem);
+        gap: var(--au-input-container-gap, 0.625rem);
       }
       .clear-input {
         display: grid;
@@ -83,13 +83,13 @@ class AuInput extends HTMLElement {
       }
       &[data-size="small"] {
         :is(label, input) {
-          padding: var(--au-input-small-padding-vertical, 0.25rem) var(--au-input-small-padding-horizontal, 0.5rem);
+          padding: var(--au-input-small-padding-vertical, 0.25rem) var(--au-input-small-padding-horizontal, 0.375rem);
         }
       }
       &[data-size="large"] {
         :is(label, input)  {
-          padding: var(--au-input-large-padding-vertical, 1rem) var(--au-input-large-padding-horizontal, 2rem);
-            font-size: var(--au-input-large-text-size, 1.25rem);
+          padding: var(--au-input-large-padding-vertical, 1rem) var(--au-input-large-padding-horizontal, 1.625rem);
+          font-size: var(--au-input-large-text-size, 1.25rem);
         }
       }
       &[data-layout="vertical"] {
