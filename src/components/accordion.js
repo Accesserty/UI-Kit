@@ -44,7 +44,7 @@ class AuAccordionItem extends HTMLElement {
             word-break: break-word;
             width: 100%;
             text-align: left;
-            padding: var(--au-accordion-heading-padding-vertical, 0.75rem) var(--au-accordion-heading-padding-horizontal, 1rem);
+            padding: var(--au-accordion-heading-padding-vertical, 0.625rem) var(--au-accordion-heading-padding-horizontal, 1rem);
             
             /* text */
             color: oklch(var(--au-accordion-heading-text-color, 13.98% 0 0));
