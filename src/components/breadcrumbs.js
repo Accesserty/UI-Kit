@@ -59,16 +59,17 @@ class AuBreadcrumbs extends HTMLElement {
       <style>
         nav {
           background-color: oklch(var(--au-breadcrumbs-bg, transparent));
-          overflow: auto;
+          overflow-x: auto;
+          overflow-y: hidden;
           white-space: nowrap;
           ol {
             list-style: none;
             padding: 0;
             margin: 0;
             width: 100%;
+            display: flex;
+            align-items: center;
             li {
-              display: inline-block;
-              vertical-align: middle;
               &:last-child {
                 a {
                   text-decoration: none;
@@ -76,8 +77,7 @@ class AuBreadcrumbs extends HTMLElement {
               }
               a {
                 display: inline-block;
-                vertical-align: middle;
-                padding: var(--au-breadcrumbs-link-padding-vertical, 0.75rem) var(--au-breadcrumbs-link-padding-horizontal, 0.5rem);
+                padding: var(--au-breadcrumbs-link-padding-vertical, 0.375rem) var(--au-breadcrumbs-link-padding-horizontal, 0.625rem);
                 font-size: var(--au-breadcrumbs-text-size, 1rem);
                 text-decoration: var(--au-breadcrumbs-text-deco, none);
                 color: oklch(var(--au-breadcrumbs-link-color, 42.9% 0.2972777928415759 264.05202063805507));
