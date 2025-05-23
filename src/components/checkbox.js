@@ -20,7 +20,7 @@ class AuCheckbox extends HTMLElement {
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: var(--au-checkbox-content-gap, 0.5rem);
+        gap: var(--au-checkbox-content-gap, 0.375rem);
         -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
         input[type="checkbox"] {
           appearance: none;
