@@ -33,7 +33,7 @@ Please open html file found in each component folder to read more.
 ### Nuxt    
   
 - Copy file accesserty-ui-kit.min.js, move to public/vendors    
-- Create plugins/au-accordion.client.ts file    
+- Create plugins/accesserty.client.ts file    
 ```js  
 import { defineNuxtPlugin } from '#app'    
   
