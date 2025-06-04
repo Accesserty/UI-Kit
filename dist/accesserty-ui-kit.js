@@ -84,7 +84,7 @@ var z=Object.defineProperty;var L=(b,t,e)=>t in b?z(b,t,{enumerable:!0,configura
             border-bottom: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
           }
         </style>
-        <button aria-expanded="false" aria-controls="${t}" part="button">
+        <button type="button" aria-expanded="false" aria-controls="${t}" part="button">
             <div class="heading" id="${e}"><slot name="heading"></slot></div>
             <div class="info">
               <div>

@@ -112,7 +112,7 @@ class AuAccordionItem extends HTMLElement {
             border-bottom: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) oklch(var(--au-accordion-heading-border-color, 78.94% 0 0));
           }
         </style>
-        <button aria-expanded="false" aria-controls="${regionId}" part="button">
+        <button type="button" aria-expanded="false" aria-controls="${regionId}" part="button">
             <div class="heading" id="${titleId}"><slot name="heading"></slot></div>
             <div class="info">
               <div>
