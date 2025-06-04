@@ -26,7 +26,7 @@ Please open html file found in each component folder to read more.
 ### HTML  
 
 - Copy file (component.js or accesserty-ui-kit.js or accesserty-ui-kit.min.js)     
-- Add JavaScript file to HTML <script src="accesserty-ui-kiy.min.js" defer>    
+- Add JavaScript file to HTML <script src="accesserty-ui-kit.min.js" defer>    
 - Using <au-*> tag  
 - Add CSS files  
 
