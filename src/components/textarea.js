@@ -45,7 +45,7 @@ class AuTextarea extends HTMLElement {
 
         border: 0;
         outline: none;
-        background-color: var(--au-textarea-bg, 99.4% 0 0);
+        background-color: oklch(var(--au-textarea-bg, 99.4% 0 0));
         border-radius: var(--au-textarea-border-radius, 0.25rem);
         width: 100%;
         
