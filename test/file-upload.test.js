@@ -115,4 +115,13 @@ describe('<au-file-upload>', () => {
     expect(valid).to.be.false;
     expect(el.internals.validity.valueMissing).to.be.true;
   });
+
+  it('focuses hidden input when component is focused', async () => {
+    const el = await fixture(html`<au-file-upload></au-file-upload>`);
+    await el.updateComplete;
+
+    el.focus();
+
+    expect(document.activeElement).to.equal(el.fileInput);
+  });
 });
