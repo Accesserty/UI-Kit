@@ -1,6 +1,4 @@
-/**
- * @jest-environment jsdom
- */
+// Tests run in the Web Test Runner environment
 import '../src/components/pagination.js';
 import { html, fixture, expect } from '@open-wc/testing';
 
