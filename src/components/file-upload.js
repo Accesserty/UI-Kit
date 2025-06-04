@@ -417,10 +417,6 @@ class AuFileUpload extends HTMLElement {
     this.checkValidity();
   }
 
-  focus() {
-    this.fileInput.focus();
-  }
-
   get value() {
     return this.files;
   }
