@@ -52,6 +52,18 @@
           <td></td>
         </tr>
         <tr>
+          <td>aria-labelledby</td>
+          <td>References the id of an element that labels the breadcrumbs</td>
+          <td>string</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>label</td>
+          <td>Uses this value as aria-label when other labels are absent</td>
+          <td>string</td>
+          <td></td>
+        </tr>
+        <tr>
           <td>separator</td>
           <td>Sets the separator between breadcrumb items.</td>
           <td>string</td>
@@ -99,6 +111,25 @@
         ]'
       ></au-breadcrumbs>
       <p>open devtool you can see <code>&lt;nav aria-label="This is main navigator."&gt;</code></p>
+      <h2>aria-labelledby</h2>
+      <p>The <code>aria-labelledby</code> attribute can reference an element that labels the breadcrumbs.</p>
+      <div id="demo-label">Navigation heading</div>
+      <au-breadcrumbs
+        aria-labelledby="demo-label"
+        items='[
+          {
+            "text":"Home",
+            "url":"/"
+          },
+          {
+            "text":"About",
+            "url":"/about"
+          },
+          {
+            "text":"Contact"
+          }
+        ]'
+      ></au-breadcrumbs>
       <h2>Separator</h2>
       <au-breadcrumbs
         label="This is main navigator."
@@ -117,6 +148,7 @@
           }
         ]'
       ></au-breadcrumbs>
+      <p>The above example sets <code>label</code>. When no <code>aria-label</code> or <code>aria-labelledby</code> is provided, this value becomes the <code>aria-label</code> for the inner <code>&lt;nav&gt;</code>.</p>
       <h2>Custom Style</h2>
       <p>Set a classname and change CSS Variables.</p>
       <p>If you want to add an icon in front of an item, you can use slot="icon-{count}". For example, for the second one, use `slot="icon-2"`.</p>
