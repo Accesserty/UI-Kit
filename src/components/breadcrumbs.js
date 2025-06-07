@@ -93,6 +93,10 @@ class AuBreadcrumbs extends HTMLElement {
                 a {
                   text-decoration: none;
                 }
+                >span {
+                  padding-left: var(--au-breadcrumbs-link-padding-horizontal, 0.625rem);
+                  font-size: var(--au-breadcrumbs-text-size, 1rem);
+                }
               }
               a {
                 display: inline-block;
@@ -114,8 +118,8 @@ class AuBreadcrumbs extends HTMLElement {
                   outline: none;
                   box-shadow: inset 0 0 0 var(--au-breadcrumbs-focus-shadow-width, 3px) oklch(var(--au-breadcrumbs-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
                 }
-                &[aria-current="page"] {
-                  color: oklch(var(--au-breadcrumbs-link-currentpage-color, 13.98% 0 0));
+                &+span {
+                  font-size: var(--au-breadcrumbs-text-size, 1rem);
                 }
               }
             }

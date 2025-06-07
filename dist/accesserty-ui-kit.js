@@ -117,6 +117,10 @@ var z=Object.defineProperty;var L=(m,t,e)=>t in m?z(m,t,{enumerable:!0,configura
                 a {
                   text-decoration: none;
                 }
+                >span {
+                  padding-left: var(--au-breadcrumbs-link-padding-horizontal, 0.625rem);
+                  font-size: var(--au-breadcrumbs-text-size, 1rem);
+                }
               }
               a {
                 display: inline-block;
@@ -138,8 +142,8 @@ var z=Object.defineProperty;var L=(m,t,e)=>t in m?z(m,t,{enumerable:!0,configura
                   outline: none;
                   box-shadow: inset 0 0 0 var(--au-breadcrumbs-focus-shadow-width, 3px) oklch(var(--au-breadcrumbs-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
                 }
-                &[aria-current="page"] {
-                  color: oklch(var(--au-breadcrumbs-link-currentpage-color, 13.98% 0 0));
+                &+span {
+                  font-size: var(--au-breadcrumbs-text-size, 1rem);
                 }
               }
             }
@@ -154,9 +158,7 @@ var z=Object.defineProperty;var L=(m,t,e)=>t in m?z(m,t,{enumerable:!0,configura
         <ol>
           ${l.map((p,u)=>`
                 <li>
-                  ${u===l.length-1?
-                    `<span aria-current="page"><slot name="icon-${u+1}"></slot><span>${p.text}</span></span>`:
-                    `<a href="${p.url||""}"><slot name="icon-${u+1}"></slot><span>${p.text}</span></a>`}
+                  ${u===l.length-1?`<span aria-current="page"><slot name="icon-${u+1}"></slot><span>${p.text}</span></span>`:`<a href="${p.url||""}"><slot name="icon-${u+1}"></slot><span>${p.text}</span></a>`}
                   ${u!==l.length-1?'<span aria-hidden="true">'+r+"</span>":""}
                 </li>
               `).join("")}
