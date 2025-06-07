@@ -27,11 +27,16 @@ describe("AuBreadcrumbs", () => {
         items='[{"text":"Home","url":"/"}, {"text":"About","url":"/about"}, {"text":"Contact"}]'
       ></au-breadcrumbs>`
     );
-    const items = el.shadowRoot.querySelectorAll("nav>ol>li>a");
-    expect(items.length).to.equal(3);
-    expect(items[0].href).to.contain("/");
-    expect(items[1].href).to.contain("/about");
-    expect(items[2].href).to.contain("");
+    const anchors = el.shadowRoot.querySelectorAll("nav>ol>li>a");
+    expect(anchors.length).to.equal(2);
+    expect(anchors[0].href).to.contain("/");
+    expect(anchors[1].href).to.contain("/about");
+
+    const lastLi = el.shadowRoot.querySelector('nav>ol>li:last-child');
+    expect(lastLi.querySelector('a')).to.be.null;
+    const current = lastLi.querySelector('[aria-current="page"]');
+    expect(current).to.not.be.null;
+    expect(current.hasAttribute('href')).to.be.false;
   });
 
   it('should use the custom separator string in li content, except the last one', async () => {

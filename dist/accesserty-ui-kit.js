@@ -140,7 +140,6 @@ var z=Object.defineProperty;var L=(m,t,e)=>t in m?z(m,t,{enumerable:!0,configura
                 }
                 &[aria-current="page"] {
                   color: oklch(var(--au-breadcrumbs-link-currentpage-color, 13.98% 0 0));
-                  pointer-events: none;
                 }
               }
             }
@@ -155,10 +154,9 @@ var z=Object.defineProperty;var L=(m,t,e)=>t in m?z(m,t,{enumerable:!0,configura
         <ol>
           ${l.map((p,u)=>`
                 <li>
-                  <a href="${p.url||""}" ${u===l.length-1?'aria-current="page"':""}>
-                    <slot name="icon-${u+1}"></slot>
-                    <span>${p.text}</span>
-                  </a>
+                  ${u===l.length-1?
+                    `<span aria-current="page"><slot name="icon-${u+1}"></slot><span>${p.text}</span></span>`:
+                    `<a href="${p.url||""}"><slot name="icon-${u+1}"></slot><span>${p.text}</span></a>`}
                   ${u!==l.length-1?'<span aria-hidden="true">'+r+"</span>":""}
                 </li>
               `).join("")}
