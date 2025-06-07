@@ -116,7 +116,6 @@ class AuBreadcrumbs extends HTMLElement {
                 }
                 &[aria-current="page"] {
                   color: oklch(var(--au-breadcrumbs-link-currentpage-color, 13.98% 0 0));
-                  pointer-events: none;
                 }
               }
             }
@@ -133,10 +132,11 @@ class AuBreadcrumbs extends HTMLElement {
             .map(
               (item, index) => `
                 <li>
-                  <a href="${item.url || ''}" ${index === items.length - 1 ? 'aria-current="page"' : ''}>
-                    <slot name="icon-${index+1}"></slot>
-                    <span>${item.text}</span>
-                  </a>
+                  ${
+                    index === items.length - 1
+                      ? `<span aria-current="page"><slot name="icon-${index + 1}"></slot><span>${item.text}</span></span>`
+                      : `<a href="${item.url || ''}"><slot name="icon-${index + 1}"></slot><span>${item.text}</span></a>`
+                  }
                   ${index !== items.length - 1 ? `<span aria-hidden="true">` + separator + `</span>` : ''}
                 </li>
               `
