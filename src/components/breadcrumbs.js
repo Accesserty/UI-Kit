@@ -19,7 +19,15 @@ class AuBreadcrumbs extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['id', 'class', 'aria-label', 'items', 'separator']
+    return [
+      'id',
+      'class',
+      'aria-label',
+      'aria-labelledby',
+      'label',
+      'items',
+      'separator'
+    ]
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -52,8 +60,19 @@ class AuBreadcrumbs extends HTMLElement {
     const id = this.getAttribute('id')
     const classname = this.getAttribute('class')
     const ariaLabel = this.getAttribute('aria-label')
+    const ariaLabelledby = this.getAttribute('aria-labelledby')
+    const labelAttr = this.getAttribute('label')
     const items = this.items // This should always be an array now
     const separator = this.getAttribute('separator') || '/'
+
+    let navAccessibleAttr = ''
+    if (ariaLabel !== null) {
+      navAccessibleAttr = `aria-label="${ariaLabel}"`
+    } else if (ariaLabelledby !== null) {
+      navAccessibleAttr = `aria-labelledby="${ariaLabelledby}"`
+    } else if (labelAttr !== null) {
+      navAccessibleAttr = `aria-label="${labelAttr}"`
+    }
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -104,10 +123,10 @@ class AuBreadcrumbs extends HTMLElement {
           }
         }
       </style>
-      <nav 
+      <nav
         ${id !== null ? `id="` + id + `"` : ''}
         ${classname !== null ? `class="` + classname + `"` : ''}
-        ${ariaLabel !== null ? `aria-label="` + ariaLabel + `"` : ''}
+        ${navAccessibleAttr}
       >
         <ol>
           ${items

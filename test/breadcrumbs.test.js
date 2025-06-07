@@ -84,4 +84,23 @@ describe("AuBreadcrumbs", () => {
     const slottedContent = iconSlot.assignedNodes()[0];
     expect(slottedContent.textContent).to.equal('icon');
   });
+
+  it('applies aria-labelledby when aria-label is absent', async () => {
+    const el = await fixture(html`
+      <div>
+        <span id="crumb-label">Breadcrumb navigation</span>
+        <au-breadcrumbs aria-labelledby="crumb-label"></au-breadcrumbs>
+      </div>
+    `);
+
+    const comp = el.querySelector('au-breadcrumbs');
+    const nav = comp.shadowRoot.querySelector('nav');
+    expect(nav.getAttribute('aria-labelledby')).to.equal('crumb-label');
+  });
+
+  it('uses label attribute as fallback aria-label', async () => {
+    const el = await fixture(html`<au-breadcrumbs label="My crumbs"></au-breadcrumbs>`);
+    const nav = el.shadowRoot.querySelector('nav');
+    expect(nav.getAttribute('aria-label')).to.equal('My crumbs');
+  });
 });

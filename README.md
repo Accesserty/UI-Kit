@@ -16,9 +16,12 @@ Accesserty UI Kit focuses on making web components that comply with accessibilit
 - Usability Across Mainstream Frontend Frameworks: Accesserty UI Kit is developed with the principle of "copy and paste" usability to minimize the cost of creating accessible web pages, free from the pressures of version upgrades. Customization can be done independently if needed, though testing how to use Accesserty UI Kit across various mainstream frontend frameworks can be time-consuming.  
 
 
-## Demo  
+## Demo
 
-Please open html file found in each component folder to read more.  
+Please open html file found in each component folder to read more.
+
+For `<au-breadcrumbs>` the inner `<nav>` derives its accessible name from
+`aria-label`, `aria-labelledby`, or the `label` attribute, in that order.
 
 
 ## How to Use   
