@@ -362,6 +362,7 @@ class AuFileUpload extends HTMLElement {
       preview.appendChild(nameSpan);
 
       const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
       removeBtn.className = 'delete';
       removeBtn.textContent = this.getAttribute('msg-remove-text') || 'Remove';
       removeBtn.setAttribute('aria-label', `Remove ${file.name}`);
