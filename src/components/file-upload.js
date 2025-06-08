@@ -6,6 +6,7 @@ class AuFileUpload extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this.internals = this.attachInternals();
     this.files = [];
+    this.previewUrls = new Map();
 
     const style = document.createElement('style');
     style.textContent = `
@@ -240,9 +241,23 @@ class AuFileUpload extends HTMLElement {
   disconnectedCallback() {
     document.removeEventListener('dragover', this._preventDefault);
     document.removeEventListener('drop', this._preventDefault);
+    this.revokeAllPreviewUrls();
   }
 
   _preventDefault = e => e.preventDefault();
+
+  revokePreviewUrl(file) {
+    const url = this.previewUrls.get(file);
+    if (url) {
+      URL.revokeObjectURL(url);
+      this.previewUrls.delete(file);
+    }
+  }
+
+  revokeAllPreviewUrls() {
+    this.previewUrls.forEach(url => URL.revokeObjectURL(url));
+    this.previewUrls.clear();
+  }
 
   handleFiles(fileList) {
     if (this.hasAttribute('disabled')) return;
@@ -343,7 +358,12 @@ class AuFileUpload extends HTMLElement {
       if (file.type.startsWith('image/')) {
         const img = document.createElement('img');
         img.className = "preview";
-        img.src = URL.createObjectURL(file);
+        let url = this.previewUrls.get(file);
+        if (!url) {
+          url = URL.createObjectURL(file);
+          this.previewUrls.set(file, url);
+        }
+        img.src = url;
         img.alt = file.name;
         img.width = 40;
         img.height = 40;
@@ -369,6 +389,7 @@ class AuFileUpload extends HTMLElement {
       removeBtn.setAttribute('part', 'delete');
       removeBtn.addEventListener('click', () => {
         if (this.hasAttribute('disabled')) return;
+        this.revokePreviewUrl(file);
         this.files = this.files.filter(f => f.name !== file.name || f.size !== file.size);
         this.updateFileList();
         this.updateUsage();
@@ -385,6 +406,7 @@ class AuFileUpload extends HTMLElement {
 
   removeFile(file) {
     if (this.hasAttribute('disabled')) return;
+    this.revokePreviewUrl(file);
     this.files = this.files.filter(f => f.name !== file.name || f.size !== file.size);
     this.updateFileList();
     this.updateUsage();
@@ -420,6 +442,7 @@ class AuFileUpload extends HTMLElement {
   }
 
   formResetCallback() {
+    this.revokeAllPreviewUrls();
     this.files = [];
     this.updateFileList();
     this.updateUsage();
@@ -433,6 +456,7 @@ class AuFileUpload extends HTMLElement {
 
   set value(val) {
     if (Array.isArray(val)) {
+      this.revokeAllPreviewUrls();
       this.files = val;
       this.updateFileList();
       this.updateUsage();
