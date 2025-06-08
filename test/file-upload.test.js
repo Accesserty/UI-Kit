@@ -115,4 +115,25 @@ describe('<au-file-upload>', () => {
     expect(valid).to.be.false;
     expect(el.internals.validity.valueMissing).to.be.true;
   });
+
+  it('prevents adding or removing files when disabled', async () => {
+    const el = await fixture(html`<au-file-upload disabled></au-file-upload>`);
+    const file = new File(['a'], 'a.jpg', { type: 'image/jpeg' });
+
+    el.handleFiles([file]);
+    await el.updateComplete;
+    expect(el.files.length).to.equal(0);
+
+    el.removeAttribute('disabled');
+    el.handleFiles([file]);
+    await el.updateComplete;
+    expect(el.files.length).to.equal(1);
+
+    el.setAttribute('disabled', '');
+    await el.updateComplete;
+    const removeBtn = el.shadowRoot.querySelector('button.delete');
+    removeBtn.click();
+    await el.updateComplete;
+    expect(el.files.length).to.equal(1);
+  });
 });

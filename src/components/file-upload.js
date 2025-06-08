@@ -159,7 +159,10 @@ class AuFileUpload extends HTMLElement {
 
     const triggerSlot = document.createElement('slot');
     triggerSlot.name = 'trigger';
-    triggerSlot.addEventListener('click', () => this.fileInput.click()); // 確保點擊會觸發 input
+    triggerSlot.addEventListener('click', () => {
+      if (this.hasAttribute('disabled')) return;
+      this.fileInput.click();
+    }); // 確保點擊會觸發 input
 
 
     this.dropZone = document.createElement('div');
@@ -194,13 +197,16 @@ class AuFileUpload extends HTMLElement {
 
     this.dropZone.addEventListener('dragover', e => {
       e.preventDefault();
+      if (this.hasAttribute('disabled')) return;
       this.dropZone.classList.add('dragover');
     });
     this.dropZone.addEventListener('dragleave', () => {
+      if (this.hasAttribute('disabled')) return;
       this.dropZone.classList.remove('dragover');
     });
     this.dropZone.addEventListener('drop', e => {
       e.preventDefault();
+      if (this.hasAttribute('disabled')) return;
       this.dropZone.classList.remove('dragover');
       const dt = e.dataTransfer;
       if (dt?.files) this.handleFiles(dt.files);
@@ -239,6 +245,7 @@ class AuFileUpload extends HTMLElement {
   _preventDefault = e => e.preventDefault();
 
   handleFiles(fileList) {
+    if (this.hasAttribute('disabled')) return;
     const maxTotalSizeMB = parseFloat(this.getAttribute('max-total-size-mb') || '20');
     const msgTotalSizeError = this.getAttribute('msg-total-size-error') || 'Total file size exceeds limit of';
     const msgTypeError = this.getAttribute('msg-type-error') || 'is not an accepted file type.';
@@ -360,6 +367,7 @@ class AuFileUpload extends HTMLElement {
       removeBtn.setAttribute('aria-label', `Remove ${file.name}`);
       removeBtn.setAttribute('part', 'delete');
       removeBtn.addEventListener('click', () => {
+        if (this.hasAttribute('disabled')) return;
         this.files = this.files.filter(f => f.name !== file.name || f.size !== file.size);
         this.updateFileList();
         this.updateUsage();
@@ -375,6 +383,7 @@ class AuFileUpload extends HTMLElement {
   }
 
   removeFile(file) {
+    if (this.hasAttribute('disabled')) return;
     this.files = this.files.filter(f => f.name !== file.name || f.size !== file.size);
     this.updateFileList();
     this.updateUsage();
