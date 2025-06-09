@@ -163,7 +163,7 @@ class AuFileUpload extends HTMLElement {
     triggerSlot.addEventListener('click', () => {
       if (this.hasAttribute('disabled')) return;
       this.fileInput.click();
-    }); // 確保點擊會觸發 input
+    }); // ensure the click triggers the input
     triggerSlot.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
         e.preventDefault();
