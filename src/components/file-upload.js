@@ -164,6 +164,13 @@ class AuFileUpload extends HTMLElement {
       if (this.hasAttribute('disabled')) return;
       this.fileInput.click();
     }); // 確保點擊會觸發 input
+    triggerSlot.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+        e.preventDefault();
+        if (this.hasAttribute('disabled')) return;
+        this.fileInput.click();
+      }
+    }); // support non-button trigger accessibility
 
 
     this.dropZone = document.createElement('div');
