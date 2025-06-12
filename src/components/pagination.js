@@ -227,13 +227,9 @@ class AuPagination extends HTMLElement {
       // hidden label + existing text spans preserved
       const lbl = document.createElement('label');
       lbl.setAttribute('for', this._selectId);
-      lbl.className = 'visually-hidden';
       lbl.textContent = t.perText;
 
       grp1.appendChild(lbl);
-      // original pre-span
-      const preSpan = document.createElement('span'); preSpan.textContent = t.perText;
-      grp1.appendChild(preSpan);
 
       const select = document.createElement('select');
       select.id = this._selectId;
@@ -286,23 +282,21 @@ class AuPagination extends HTMLElement {
     // 第三組: 跳轉
     if (layout.includes('jump')) {
       const grp3 = document.createElement('div'); grp3.className='au-pagination-group';
-      const lbl = document.createElement('label'); lbl.setAttribute('for', this._jumpId); lbl.className='visually-hidden'; lbl.textContent = t.goText;
+      const lbl = document.createElement('label'); lbl.setAttribute('for', this._jumpId); lbl.textContent = t.goText;
       grp3.appendChild(lbl);
-      // existing span before input
-      const pre = document.createElement('span'); pre.textContent = t.goText;
-      grp3.appendChild(pre);
       const input = document.createElement('input');
       input.type='number'; input.id=this._jumpId; input.min='1'; input.max=String(totalPages); input.value=String(this.currentPage);
       input.addEventListener('keyup', e=>{ if(e.key==='Enter') this._goto(+input.value); });
       grp3.appendChild(input);
+      // existing span after input
+      const suf = document.createElement('span'); suf.textContent = t.pageSuffix;
+      grp3.appendChild(suf);
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.textContent = t.gotoText;
       btn.addEventListener('click', () => this._goto(+input.value));
       grp3.appendChild(btn);
-      // existing span after input
-      const suf = document.createElement('span'); suf.textContent = t.pageSuffix;
-      grp3.appendChild(suf);
+      
       container.appendChild(grp3);
     }
 
