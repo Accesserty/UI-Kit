@@ -3,6 +3,29 @@ import '../src/components/pagination.js';
 import { html, fixture, expect } from '@open-wc/testing';
 
 describe('AuPagination Web Component', () => {
+  it('provides a confirm button for jump and emits page-change on click', async () => {
+    const el = await fixture(html`
+      <au-pagination
+        data-total="40"
+        data-page-size="10"
+        data-current-page="1"
+      ></au-pagination>
+    `);
+      
+    let detail;
+    el.addEventListener('page-change', e => (detail = e.detail));
+
+    const input = el.shadowRoot.querySelector('input[type="number"]');
+    const btn = el.shadowRoot.querySelector('.au-pagination-group:nth-child(3) button');
+    input.value = '3';
+     
+    btn.click();
+    await el.updateComplete;
+
+    expect(detail).to.equal(3);
+    expect(el.getAttribute('data-current-page')).to.equal('3');
+  });
+  
   it('calculates totalPages correctly', async () => {
     const el = await fixture(html`
       <au-pagination data-total="95" data-page-size="10"></au-pagination>
@@ -109,25 +132,5 @@ describe('AuPagination Web Component', () => {
     expect(input.min).to.equal('1');
   });
 
-  it('provides a confirm button for jump and emits page-change on click', async () => {
-    const el = await fixture(html`
-      <au-pagination
-        data-total="40"
-        data-page-size="10"
-        data-current-page="1"
-      ></au-pagination>
-    `);
-
-    let detail;
-    el.addEventListener('page-change', e => (detail = e.detail));
-
-    const input = el.shadowRoot.querySelector('input[type="number"]');
-    const btn = el.shadowRoot.querySelector('.au-pagination-group button');
-    input.value = '3';
-    btn.click();
-    await el.updateComplete;
-
-    expect(detail).to.equal(3);
-    expect(el.getAttribute('data-current-page')).to.equal('3');
-  });
+  
 });
