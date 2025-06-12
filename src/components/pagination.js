@@ -22,6 +22,10 @@ class AuPagination extends HTMLElement {
     // unique IDs for accessibility
     this._selectId = AuPagination.generateId();
     this._jumpId   = AuPagination.generateId();
+    this.liveRegion = document.createElement('div');
+    this.liveRegion.setAttribute('aria-live', 'polite');
+    this.liveRegion.setAttribute('role', 'status');
+    this.liveRegion.setAttribute('aria-atomic', 'true');
     this._parseAttributes();
     this._render();
   }
@@ -163,6 +167,15 @@ class AuPagination extends HTMLElement {
 
       .au-pagination {
         container-type: inline-size;
+        position: relative;
+      }
+
+      .au-pagination + [aria-live] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        z-index: -9999;
       }
 
       :is(.au-pagination-container, .au-pagination-group, .pagination-buttons) {
@@ -282,6 +295,11 @@ class AuPagination extends HTMLElement {
       input.type='number'; input.id=this._jumpId; input.min='1'; input.max=String(totalPages); input.value=String(this.currentPage);
       input.addEventListener('keyup', e=>{ if(e.key==='Enter') this._goto(+input.value); });
       grp3.appendChild(input);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = t.gotoText;
+      btn.addEventListener('click', () => this._goto(+input.value));
+      grp3.appendChild(btn);
       // existing span after input
       const suf = document.createElement('span'); suf.textContent = t.pageSuffix;
       grp3.appendChild(suf);
@@ -289,7 +307,7 @@ class AuPagination extends HTMLElement {
     }
 
     root.appendChild(container);
-    this.shadowRoot.appendChild(root);
+    this.shadowRoot.append(root, this.liveRegion);
   }
 
   _goto(page) {
@@ -299,6 +317,16 @@ class AuPagination extends HTMLElement {
     this.currentPage=page;
     this.setAttribute('data-current-page',String(page));
     this.dispatchEvent(new CustomEvent('page-change',{detail:page, bubbles: true, composed: true}));
+    this.announce(`Page ${page}`);
+  }
+
+  announce(message) {
+    while (this.liveRegion.firstChild) this.liveRegion.removeChild(this.liveRegion.firstChild);
+    requestAnimationFrame(() => {
+      const span = document.createElement('span');
+      span.textContent = message;
+      this.liveRegion.appendChild(span);
+    });
   }
 }
 
