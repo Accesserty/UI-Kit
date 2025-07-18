@@ -265,7 +265,14 @@ class AuPagination extends HTMLElement {
       const li = document.createElement('li');
       const btn= document.createElement('button');
       btn.className='pager';
-      btn.setAttribute('aria-current', page===this.currentPage?'page':'false');
+      if (page === this.currentPage) {
+        btn.setAttribute('aria-current', 'page');
+        btn.setAttribute('part', 'current-page');
+      } else {
+        btn.removeAttribute('aria-current'); // <--- 這裡！
+        // 如果不等於當前頁面，就移除 'part' 屬性
+        btn.removeAttribute('part');
+      }
       btn.textContent = page;
       btn.addEventListener('click',()=>this._goto(page));
       li.appendChild(btn); ul.appendChild(li);
