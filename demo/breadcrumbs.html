@@ -70,6 +70,12 @@
           <td>/</td>
         </tr>
         <tr>
+          <td>data-link-title-prefix</td>
+          <td>link title prefix</td>
+          <td>string</td>
+          <td>go to</td>
+        </tr>
+        <tr>
           <td>items</td>
           <td>Sets the text and url path of breadcrumb item.</td>
           <td>{ "text":string, "url":string }</td>
@@ -78,6 +84,23 @@
       </table>
       <h2>Basic</h2>
       <au-breadcrumbs
+        items='[
+          { 
+            "text":"Home",
+            "url":"/"
+          }, 
+          {
+            "text":"About",
+            "url":"/about"
+          }, 
+          { 
+            "text":"Contact"
+          }
+        ]'
+      ></au-breadcrumbs>
+      <h2>Link prefix</h2>
+      <au-breadcrumbs
+        data-link-title-prefix="go go go"
         items='[
           { 
             "text":"Home",

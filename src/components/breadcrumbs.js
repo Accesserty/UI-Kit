@@ -64,6 +64,7 @@ class AuBreadcrumbs extends HTMLElement {
     const labelAttr = this.getAttribute('label')
     const items = this.items // This should always be an array now
     const separator = this.getAttribute('separator') || '/'
+    const prefix = this.getAttribute('data-link-title-prefix') || 'go to';
 
     let navAccessibleAttr = ''
     if (ariaLabel !== null) {
@@ -139,7 +140,7 @@ class AuBreadcrumbs extends HTMLElement {
                   ${
                     index === items.length - 1
                       ? `<span aria-current="page"><slot name="icon-${index + 1}"></slot><span>${item.text}</span></span>`
-                      : `<a href="${item.url || ''}"><slot name="icon-${index + 1}"></slot><span>${item.text}</span></a>`
+                      : `<a href="${item.url || ''}" title="${prefix} ${item.text}"><slot name="icon-${index + 1}"></slot><span>${item.text}</span></a>`
                   }
                   ${index !== items.length - 1 ? `<span aria-hidden="true">` + separator + `</span>` : ''}
                 </li>
