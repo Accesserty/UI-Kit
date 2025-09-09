@@ -366,6 +366,8 @@ var z=Object.defineProperty;var L=(m,t,e)=>t in m?z(m,t,{enumerable:!0,configura
     .input-wrapper {
       display: flex;
       align-items: center;
+      background-color: oklch(var(--au-input-bg, 99.4% 0 0));
+
       label {
         word-break: break-word;
       }
@@ -410,7 +412,8 @@ var z=Object.defineProperty;var L=(m,t,e)=>t in m?z(m,t,{enumerable:!0,configura
         /* behavior */
         cursor: pointer;
         background-color: oklch(var(--au-input-clear-bg, 99.4% 0 0));
-        
+        color: oklch(var(--au-input-clear-text-color, 13.98% 0 0));
+
         width: 2rem;
         height: 2rem;
         

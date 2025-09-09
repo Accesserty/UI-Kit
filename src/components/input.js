@@ -12,6 +12,8 @@ class AuInput extends HTMLElement {
     .input-wrapper {
       display: flex;
       align-items: center;
+      background-color: oklch(var(--au-input-bg, 99.4% 0 0));
+
       label {
         word-break: break-word;
       }
@@ -56,7 +58,8 @@ class AuInput extends HTMLElement {
         /* behavior */
         cursor: pointer;
         background-color: oklch(var(--au-input-clear-bg, 99.4% 0 0));
-        
+        color: oklch(var(--au-input-clear-text-color, 13.98% 0 0));
+
         width: 2rem;
         height: 2rem;
         
