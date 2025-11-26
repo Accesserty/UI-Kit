@@ -1,4 +1,4 @@
-import { html, fixture, expect } from '@open-wc/testing';
+import { html, fixture, expect, nextFrame } from '@open-wc/testing';
 import '../src/components/input.js';
 
 describe('AuInput', () => {
@@ -33,7 +33,7 @@ describe('AuInput', () => {
     expect(clearBtn.getAttribute('aria-label')).to.equal('清除內容');
 
     clearBtn.click();
-    await new Promise(r => setTimeout(r));
+    await nextFrame();
     expect(el.value).to.equal('');
   });
 
@@ -50,7 +50,7 @@ describe('AuInput', () => {
         <span slot="affix">A</span>
       </au-input>
     `);
-    await el.updateComplete;
+    await nextFrame();
     const prefix = el.shadowRoot.querySelector('.prefix');
     const affix = el.shadowRoot.querySelector('.affix');
     expect(prefix.hidden).to.be.false;
@@ -80,7 +80,7 @@ describe('AuInput', () => {
     auInput.value = 'changed';
 
     el.reset();
-    await new Promise(r => setTimeout(r));
+    await nextFrame();
 
     expect(auInput.value).to.equal('default');
     expect(input.value).to.equal('default');
@@ -101,14 +101,14 @@ describe('AuInput', () => {
   it('can be cleared programmatically with .clear()', async () => {
     const el = await fixture(html`<au-input value="toClear"></au-input>`);
     el.clear();
-    await new Promise(r => setTimeout(r));
+    await nextFrame();
     expect(el.value).to.equal('');
   });
 
   it('can be filled programmatically with .suggest()', async () => {
     const el = await fixture(html`<au-input></au-input>`);
     el.suggest('SuggestedValue');
-    await new Promise(r => setTimeout(r));
+    await nextFrame();
     expect(el.value).to.equal('SuggestedValue');
   });
 

@@ -1,31 +1,36 @@
-html, body {
+html,
+body {
   line-height: 1.5;
-  
+
 }
 
 main {
   padding-bottom: 4rem;
   max-width: 1440px;
   margin: 0 auto;
-  accent-color: oklch(var(--color-primary-500));
+  accent-color: var(--color-primary-500);
 }
 
 table {
-  border: 1px solid oklch(var(--color-black));
+  border: 1px solid var(--color-black);
+
   caption {
     text-align: left;
   }
+
   th,
   td {
     padding: 0.5rem;
   }
+
   th {
-    background-color: oklch(var(--color-black));
+    background-color: var(--color-black);
     text-align: left;
-    color: oklch(var(--color-white));
+    color: var(--color-white);
   }
+
   td {
-    border: 1px solid oklch(var(--color-gray-200));
+    border: 1px solid var(--color-gray-200);
   }
 }
 
@@ -33,22 +38,22 @@ p {
   max-width: 80ch;
   word-break: break-word;
   hyphens: auto;
-  color: oklch(var(--color-gray-800));
+  color: var(--color-gray-800);
   margin: 0 0 1rem;
 }
 
 code {
-  background-color: oklch(var(--color-gray-100));
-  color: oklch(var(--color-black));
+  background-color: var(--color-gray-100);
+  color: var(--color-black);
 }
 
 .material-symbols-outlined {
-  line-height: inherit!important;
+  line-height: inherit !important;
   font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24
 }
 
 .custom-btn--primary-flat {
@@ -87,34 +92,22 @@ code {
 
   /* --au-btn-a11y-bg-position:; */
   /* --au-btn-a11y-bg-size:; */
-  --au-btn-a11y-text-shadow: 0 0 0.25rem oklch(var(--color-black) / 0.4);
-  --au-btn-a11y-bg-image: linear-gradient(
-      oklch(var(--color-primary-400) / 0.4) 0.125rem,
-      transparent 0.125rem
-    ),
-    linear-gradient(
-      to right,
-      oklch(var(--color-primary-400) / 0.4) 0.125rem,
-      oklch(var(--color-primary-500)) 0.125rem
-    );
-  --au-btn-a11y-hover-bg-image: linear-gradient(
-      oklch(var(--color-primary-300) / 0.4) 0.125rem,
-      transparent 0.125rem
-    ),
-    linear-gradient(
-      to right,
-      oklch(var(--color-primary-300) / 0.4) 0.125rem,
-      oklch(var(--color-primary-400)) 0.125rem
-    );
-  --au-btn-a11y-active-bg-image: linear-gradient(
-      oklch(var(--color-primary-500) / 0.4) 0.125rem,
-      transparent 0.125rem
-    ),
-    linear-gradient(
-      to right,
-      oklch(var(--color-primary-500) / 0.4) 0.125rem,
-      oklch(var(--color-primary-600)) 0.125rem
-    );
+  --au-btn-a11y-text-shadow: 0 0 0.25rem oklch(from var(--color-black)/ 0.4);
+  --au-btn-a11y-bg-image: linear-gradient(oklch(from var(--color-primary-400) l c h / 0.4) 0.125rem,
+      transparent 0.125rem),
+    linear-gradient(to right,
+      oklch(from var(--color-primary-400) l c h / 0.4) 0.125rem,
+      oklch(from var(--color-primary-500) l c h) 0.125rem);
+  --au-btn-a11y-hover-bg-image: linear-gradient(oklch(from var(--color-primary-300) l c h / 0.4) 0.125rem,
+      transparent 0.125rem),
+    linear-gradient(to right,
+      oklch(from var(--color-primary-300) l c h / 0.4) 0.125rem,
+      oklch(from var(--color-primary-400) l c h) 0.125rem);
+  --au-btn-a11y-active-bg-image: linear-gradient(oklch(from var(--color-primary-500) l c h / 0.4) 0.125rem,
+      transparent 0.125rem),
+    linear-gradient(to right,
+      oklch(from var(--color-primary-500) l c h / 0.4) 0.125rem,
+      oklch(from var(--color-primary-600) l c h) 0.125rem);
 }
 
 .custom-btn--primary-outline {
@@ -154,33 +147,22 @@ code {
   /* --au-btn-a11y-bg-position:; */
   /* --au-btn-a11y-bg-size:; */
   /* --au-btn-a11y-text-shadow:; */
-  --au-btn-a11y-bg-image: linear-gradient(
-      oklch(var(--color-primary-100) / 0.3) 0.125rem,
-      transparent 0.125rem
-    ),
-    linear-gradient(
-      to right,
-      oklch(var(--color-primary-100) / 0.3) 0.125rem,
-      oklch(var(--color-white)) 0.125rem
-    );
-  --au-btn-a11y-hover-bg-image: linear-gradient(
-      oklch(var(--color-primary-200) / 0.4) 0.125rem,
-      transparent 0.125rem
-    ),
-    linear-gradient(
-      to right,
-      oklch(var(--color-primary-200) / 0.4) 0.125rem,
-     transparent  0.125rem
-    );
-  --au-btn-a11y-active-bg-image: linear-gradient(
-      oklch(var(--color-primary-300) / 0.4) 0.125rem,
-      transparent 0.125rem
-    ),
-    linear-gradient(
-      to right,
-      oklch(var(--color-primary-300) / 0.4) 0.125rem,
-     transparent  0.125rem
-    );
+  --au-btn-a11y-bg-image: linear-gradient(oklch(from var(--color-primary-100) l c h / 0.3) 0.125rem,
+      transparent 0.125rem),
+    linear-gradient(to right,
+      oklch(from var(--color-primary-100) l c h / 0.3) 0.125rem,
+      oklch(from var(--color-white)) 0.125rem);
+  --au-btn-a11y-hover-bg-image: linear-gradient(oklch(from var(--color-primary-200) l c h / 0.4) 0.125rem,
+      transparent 0.125rem),
+    linear-gradient(to right,
+      oklch(from var(--color-primary-200) l c h / 0.4) 0.125rem,
+      transparent 0.125rem);
+  --au-btn-a11y-active-bg-image: linear-gradient(oklch(from var(--color-primary-300) l c h / 0.4) 0.125rem,
+      transparent 0.125rem),
+    linear-gradient(to right,
+      oklch(from var(--color-primary-300) l c h / 0.4) 0.125rem,
+      transparent 0.125rem);
+
   &::part(current-page) {
     --au-btn-text-color: var(--color-white);
     --au-btn-border-color: var(--color-primary-500);
@@ -190,39 +172,46 @@ code {
     --au-btn-active-bg: var(--color-primary-600);
     --au-btn-active-border-color: var(--color-primary-600);
   }
-  
+
 }
 
 .f-l-au-accordion {
   max-width: 800px;
   --au-accordion-item-margin-bottom: 0;
+
   au-accordion-item {
     &::part(button) {
       border-bottom: 0;
     }
+
     &::part(region) {
       border-bottom: 0;
     }
+
     &:first-child {
-      &::part(button){
+      &::part(button) {
         border-radius: 0.25rem 0.25rem 0 0;
       }
     }
+
     &:last-child {
-      &::part(button){
+      &::part(button) {
         border-bottom: 1px solid oklch(78.94% 0 0);
         border-radius: 0 0 0.25rem 0.25rem;
       }
-      &::part(region){
+
+      &::part(region) {
         border-radius: 0 0 0.25rem 0.25rem;
       }
     }
+
     &[open] {
       &:last-child {
         &::part(button) {
           border-bottom: 0;
           border-radius: 0;
         }
+
         &::part(region) {
           border-bottom: 1px solid oklch(78.94% 0 0);
         }
@@ -269,6 +258,7 @@ code {
   /* --au-breadcrumbs-text-deco:; */
   --au-breadcrumbs-link-color: var(--color-warning-600);
   --au-breadcrumbs-link-visited-color: var(--color-purple-500);
+
   /* --au-breadcrumbs-focus-shadow-width */
   /* --au-breadcrumbs-focus-shadow-color:; */
   /* --au-breadcrumbs-link-currentpage-color:; */
@@ -276,6 +266,7 @@ code {
     position: relative;
     top: 2px;
   }
+
   svg {
     width: 1.625rem;
     height: 1.625rem;
@@ -285,13 +276,15 @@ code {
 .custom-au-card {
   display: block;
   max-width: 300px;
-  border: 1px solid oklch(var(--color-border));
+  border: 1px solid var(--color-border);
   border-radius: var(--radius);
   overflow: hidden;
+
   &::part(au-card-container) {
     display: flex;
     flex-direction: column;
   }
+
   .heading {
     display: flex;
     justify-content: space-between;
@@ -299,18 +292,22 @@ code {
     align-items: center;
     padding: var(--spacing-xs) var(--spacing-m);
     order: 2;
+
     h3 {
       font-size: 1.5rem;
       margin: 0;
       word-break: brea-word;
       flex: 1;
     }
+
     ry-btn {
       flex: 0 1 auto;
     }
   }
+
   .media {
     order: 1;
+
     img {
       width: 100%;
       height: auto;
@@ -318,13 +315,15 @@ code {
       vertical-align: middle;
     }
   }
+
   .content {
     order: 3;
     padding: var(--spacing-m);
   }
+
   .footer {
     order: 4;
-    border-top: 1px solid oklch(var(--color-border));
+    border-top: 1px solid var(--color-border);
     padding: var(--spacing-m);
     display: flex;
     gap: 1rem;
@@ -376,6 +375,7 @@ code {
   /* --au-file-upload-file-list-preview-border-style:; */
   /* --au-file-upload-file-list-preview-border-color:; */
   --au-file-upload-file-list-neme-ellipsis-line: 1;
+
   /* --au-file-upload-delete-padding-vertical:; */
   /* --au-file-upload-delete-padding-horizontal:; */
   /* --au-file-upload-delete-text-color:; */
@@ -394,7 +394,7 @@ code {
   /* --au-file-upload-delete-focus-shadow-color:; */
   &::part(delete) {
     text-transform: uppercase;
-    color: oklch(var(--color-danger-700));
+    color: var(--color-danger-700);
   }
 }
 
@@ -409,6 +409,7 @@ code {
   /* --au-input-text-size:; */
   /* --au-input-border-radius:; */
   --au-input-bg: var(--color-gray-100);
+
   /* --au-input-text-line-height:; */
   /* --au-input-invalid-shadow-width:; */
   /* --au-input-invalid-shadow-color:; */

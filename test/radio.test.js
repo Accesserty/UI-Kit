@@ -1,4 +1,4 @@
-import { html, fixture, expect } from '@open-wc/testing';
+import { html, fixture, expect, nextFrame } from '@open-wc/testing';
 import '../src/components/radio.js';
 
 describe('AuRadioGroup', () => {
@@ -10,6 +10,7 @@ describe('AuRadioGroup', () => {
         <div value="three">Three</div>
       </au-radio-group>
     `);
+    await nextFrame();
 
     const radios = el.shadowRoot.querySelectorAll('input[type="radio"]');
     expect(radios.length).to.equal(3);
@@ -22,6 +23,7 @@ describe('AuRadioGroup', () => {
         <div value="b" checked>B</div>
       </au-radio-group>
     `);
+    await nextFrame();
 
     const radios = el.shadowRoot.querySelectorAll('input[type="radio"]');
     expect(radios[1].checked).to.be.true;
@@ -35,6 +37,7 @@ describe('AuRadioGroup', () => {
         <div value="y">Y</div>
       </au-radio-group>
     `);
+    await nextFrame();
 
     const radios = el.shadowRoot.querySelectorAll('input[type="radio"]');
     radios.forEach(radio => expect(radio.disabled).to.be.true);
@@ -47,6 +50,7 @@ describe('AuRadioGroup', () => {
         <div value="2">2</div>
       </au-radio-group>
     `);
+    await nextFrame();
 
     const radios = el.shadowRoot.querySelectorAll('input[type="radio"]');
     radios[0].focus();
@@ -61,6 +65,7 @@ describe('AuRadioGroup', () => {
         <div value="2">2</div>
       </au-radio-group>
     `);
+    await nextFrame();
 
     const radios = el.shadowRoot.querySelectorAll('input[type="radio"]');
     radios[0].focus();
@@ -74,6 +79,7 @@ describe('AuRadioGroup', () => {
         <div value="A">A</div>
       </au-radio-group>
     `);
+    await nextFrame();
 
     const group = el.shadowRoot.querySelector('.au-radio-group');
     expect(group.getAttribute('aria-label')).to.equal('Options');
@@ -86,6 +92,7 @@ describe('AuRadioGroup', () => {
         <div value="2">2</div>
       </au-radio-group>
     `);
+    await nextFrame();
 
     const group = el.shadowRoot.querySelector('.au-radio-group');
     expect(group.classList.contains('au-radio-group--vertical')).to.be.true;
@@ -98,6 +105,7 @@ describe('AuRadioGroup', () => {
         <div value="2" disabled>Two</div>
       </au-radio-group>
     `);
+    await nextFrame();
   
     const radios = el.shadowRoot.querySelectorAll('input[type="radio"]');
     expect(radios[0].disabled).to.be.false;
@@ -111,6 +119,7 @@ describe('AuRadioGroup', () => {
         <div value="y">Y</div>
       </au-radio-group>
     `);
+    await nextFrame();
   
     const radios = el.shadowRoot.querySelectorAll('input[type="radio"]');
     const name1 = radios[0].getAttribute('name');
@@ -125,6 +134,7 @@ describe('AuRadioGroup', () => {
         <div value="a">A</div>
       </au-radio-group>
     `);
+    await nextFrame();
   
     const label = el.shadowRoot.querySelector('label');
     const input = el.shadowRoot.querySelector('input[type="radio"]');

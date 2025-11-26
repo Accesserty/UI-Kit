@@ -27,9 +27,9 @@ class AuCheckbox extends HTMLElement {
           cursor: pointer;
           width: var(--au-checkbox-input-width, 1.5rem);
           height: var(--au-checkbox-input-height, 1.5rem);
-          border: var(--au-checkbox-input-border-width, 1px) var(--au-checkbox-input-border-style, solid) oklch(var(--au-checkbox-input-border-color, 78.94% 0 0));
+          border: var(--au-checkbox-input-border-width, 1px) var(--au-checkbox-input-border-style, solid) var(--au-checkbox-input-border-color, oklch(78.94% 0 0));
           border-radius: var(--au-checkbox-input-border-radius, 0.25rem);
-          background-color: oklch(var(--au-checkbox-input-bg, 99.4% 0 0));
+          background-color: var(--au-checkbox-input-bg, oklch(99.4% 0 0));
           &:focus-visible {
             outline: none;
           }
@@ -37,19 +37,19 @@ class AuCheckbox extends HTMLElement {
             cursor: not-allowed;
           }
           &:checked {
-            background-color: oklch(var(--au-checkbox-input-checked-bg, 13.98% 0 0));
+            background-color: var(--au-checkbox-input-checked-bg, oklch(13.98% 0 0));
             display: grid;
             place-content: center;
             &:before {
               content: var(--au-checkbox-input-checked-symbol, '✔︎');
-              color: oklch(var(--au-checkbox-input-checked-text-color, 99.4% 0 0));
+              color: var(--au-checkbox-input-checked-text-color, oklch(99.4% 0 0));
               font-size: var(--au-checkbox-input-checked-text-size, 1.125rem);
             }
           }
         }
         .text {
           flex: 1;
-          color: oklch(var(--au-checkbox-label-text-color, 13.98% 0 0));
+          color: var(--au-checkbox-label-text-color, oklch(13.98% 0 0));
           font-size: var(--au-checkbox-label-text-size, 1rem);
         }
         &:hover {
@@ -59,11 +59,11 @@ class AuCheckbox extends HTMLElement {
         }
         &:active {
           .text {
-            color: oklch(var(--au-checkbox-label-active-text-color, 53.7% 0 0));
+            color: var(--au-checkbox-label-active-text-color, oklch(53.7% 0 0));
           }
         }
         &:has(input:focus-visible) {
-          box-shadow: inset 0 0 0 var(--au-checkbox-input-focus-shadow-width, 3px) oklch(var(--au-checkbox-input-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-checkbox-input-focus-shadow-width, 3px) var(--au-checkbox-input-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
         }
         &:has(input[type="checkbox"]:disabled) {
           cursor: not-allowed;
@@ -73,7 +73,7 @@ class AuCheckbox extends HTMLElement {
           .text {
             pointer-events: none;
             text-decoration: none;
-            color: oklch(var(--au-checkbox-label-disabled-text-color, 53.7% 0 0));
+            color: var(--au-checkbox-label-disabled-text-color, oklch(53.7% 0 0));
           }
         }
       }

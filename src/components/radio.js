@@ -30,9 +30,9 @@ class AuRadioGroup extends HTMLElement {
           cursor: pointer;
           width: var(--au-radio-input-width, 1.5rem);
           height: var(--au-radio-input-height, 1.5rem);
-          border: var(--au-radio-input-border-width, 1px) var(--au-radio-input-border-style, solid) oklch(var(--au-radio-input-border-color, 78.94% 0 0));
+          border: var(--au-radio-input-border-width, 1px) var(--au-radio-input-border-style, solid) var(--au-radio-input-border-color, oklch(78.94% 0 0));
           border-radius: 50%;
-          background-color: oklch(var(--au-radio-input-bg, 99.4% 0 0));
+          background-color: var(--au-radio-input-bg, oklch(99.4% 0 0));
           &:focus-visible {
             outline: none;
           }
@@ -40,7 +40,7 @@ class AuRadioGroup extends HTMLElement {
             cursor: not-allowed;
           }
           &:checked {
-            background-color: oklch(var(--au-radio-input-checked-bg, 13.98% 0 0));
+            background-color: var(--au-radio-input-checked-bg, oklch(13.98% 0 0));
             display: grid;
             place-content: center;
             &:before {
@@ -48,13 +48,13 @@ class AuRadioGroup extends HTMLElement {
               width: 0.5rem;
               height: 0.5rem;
               border-radius: 50%;
-              background-color: oklch(var(--au-radio-input-checked-circle-color, 99.4% 0 0));
+              background-color: var(--au-radio-input-checked-circle-color, oklch(99.4% 0 0));
             }
           }
         }
         .text {
           flex: 1;
-          color: oklch(var(--au-radio-label-text-color, 13.98% 0 0));
+          color: var(--au-radio-label-text-color, oklch(13.98% 0 0));
           font-size: var(--au-radio-label-text-size, 1rem);
         }
         &:hover {
@@ -64,11 +64,11 @@ class AuRadioGroup extends HTMLElement {
         }
         &:active {
           .text {
-            color: oklch(var(--au-radio-label-active-text-color, 53.7% 0 0));
+            color: var(--au-radio-label-active-text-color, oklch(53.7% 0 0));
           }
         }
         &:has(input:focus-visible) {
-          box-shadow: inset 0 0 0 var(--au-radio-input-focus-shadow-width, 3px) oklch(var(--au-radio-input-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-radio-input-focus-shadow-width, 3px) var(--au-radio-input-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
         }
         &:has(input[type="radio"]:disabled) {
           cursor: not-allowed;
@@ -78,7 +78,7 @@ class AuRadioGroup extends HTMLElement {
           .text {
             pointer-events: none;
             text-decoration: none;
-            color: oklch(var(--au-radio-label-disabled-text-color, 53.7% 0 0));
+            color: var(--au-radio-label-disabled-text-color, oklch(53.7% 0 0));
           }
         }
       }
@@ -91,11 +91,20 @@ class AuRadioGroup extends HTMLElement {
     // Generate a unique name for the radio group
     this.groupName = 'radio-group-name-' + this.generateId();
 
-    this.shadowRoot.append(style, container);
+    const slot = document.createElement('slot');
+    slot.style.display = 'none';
+
+    this.shadowRoot.append(style, container, slot);
   }
 
   connectedCallback() {
+    const slot = this.shadowRoot.querySelector('slot');
+    slot.addEventListener('slotchange', () => {
+      this.renderRadios();
+    });
+    
     this.renderRadios();
+
     const ariaLabel = this.getAttribute('aria-label');
     if (ariaLabel) {
       const container = this.shadowRoot.querySelector('.au-radio-group');
@@ -112,7 +121,8 @@ class AuRadioGroup extends HTMLElement {
     const container = this.shadowRoot.querySelector('.au-radio-group');
     container.innerHTML = ''; // Clear the container before rendering
 
-    const radios = Array.from(this.children);
+    const slot = this.shadowRoot.querySelector('slot');
+    const radios = slot.assignedElements();
     const isDisabled = this.hasAttribute('disabled'); // Check if the group is disabled
 
     radios.forEach((radio, index) => {

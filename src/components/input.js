@@ -12,7 +12,7 @@ class AuInput extends HTMLElement {
     .input-wrapper {
       display: flex;
       align-items: center;
-      background-color: oklch(var(--au-input-bg, 99.4% 0 0));
+      background-color: var(--au-input-bg, oklch(99.4% 0 0));
 
       label {
         word-break: break-word;
@@ -27,26 +27,26 @@ class AuInput extends HTMLElement {
         -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
         margin: 0;
         padding: var(--au-input-padding-vertical, 0.625rem) var(--au-input-padding-horizontal, 1rem);
-        color: oklch(var(--au-input-text-color, 13.98% 0 0));
+        color: var(--au-input-text-color, oklch(13.98% 0 0));
         font-size: var(--au-input-text-size, 1rem);
         border: 0;
         border-radius: var(--au-input-border-radius, 0.25rem);
         outline: none;
-        background-color: oklch(var(--au-input-bg, 99.4% 0 0));
+        background-color: var(--au-input-bg, oklch(99.4% 0 0));
         line-height: var(--au-input-text-line-height, 1.5);
 
         &:user-invalid {
-          box-shadow: inset 0 0 0 var(--au-input-invalid-shadow-width, 3px) oklch(var(--au-input-invalid-shadow-color, 57.22% 0.233 29.08));
+          box-shadow: inset 0 0 0 var(--au-input-invalid-shadow-width, 3px) var(--au-input-invalid-shadow-color, oklch(57.22% 0.233 29.08));
         }
 
         &:focus-visible {
-          box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) oklch(var(--au-input-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) var(--au-input-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
         }
       }
       .input-container {
         display: flex;
         align-items: center;
-        border: var(--au-input-border-width, 1px) var(--au-input-border-style, solid) oklch(var(--au-input-border-color, 78.94% 0 0));
+        border: var(--au-input-border-width, 1px) var(--au-input-border-style, solid) var(--au-input-border-color, oklch(78.94% 0 0));
         border-radius: var(--au-input-border-radius, 0.25rem);
         padding: var(--au-input-container-padding-vertical, 0.25rem) var(--au-input-container-padding-horizontal, 0.25rem);
         gap: var(--au-input-container-gap, 0.625rem);
@@ -57,8 +57,8 @@ class AuInput extends HTMLElement {
 
         /* behavior */
         cursor: pointer;
-        background-color: oklch(var(--au-input-clear-bg, 99.4% 0 0));
-        color: oklch(var(--au-input-clear-text-color, 13.98% 0 0));
+        background-color: var(--au-input-clear-bg, oklch(99.4% 0 0));
+        color: var(--au-input-clear-text-color, oklch(13.98% 0 0));
 
         width: 2rem;
         height: 2rem;
@@ -69,15 +69,15 @@ class AuInput extends HTMLElement {
 
         &:focus-visible {
           outline: none;
-          box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) oklch(var(--au-input-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) var(--au-input-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
         }
 
         &:hover {
-          background-color: oklch(var(--au-input-clear-hover-bg, 94.66% 0 0));
+          background-color: var(--au-input-clear-hover-bg, oklch(94.66% 0 0));
         }
         
         &:active {
-          background-color: oklch(var(--au-input-clear-active-bg, 86.89% 0 0));
+          background-color: var(--au-input-clear-active-bg, oklch(86.89% 0 0));
         }
 
         &[hidden] {

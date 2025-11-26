@@ -27,7 +27,7 @@ class AuTabs extends HTMLElement {
         }
         &:last-of-type {
           [role="tab"] {
-            border-right: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) oklch(var(--au-tabs-border-color, 78.94% 0 0));
+            border-right: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) var(--au-tabs-border-color, oklch(78.94% 0 0));
             border-top-right-radius: var(--au-tabs-border-radius, 0);
           }
         }
@@ -46,46 +46,46 @@ class AuTabs extends HTMLElement {
         padding: var(--au-tabs-padding-vertical, 0.625rem) var(--au-tabs-padding-horizontal, 1rem);
 
         /* border */
-        border-top: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) oklch(var(--au-tabs-border-color, 78.94% 0 0));
-        border-left: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) oklch(var(--au-tabs-border-color, 78.94% 0 0));
+        border-top: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) var(--au-tabs-border-color, oklch(78.94% 0 0));
+        border-left: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) var(--au-tabs-border-color, oklch(78.94% 0 0));
         border-right: 0;
         border-bottom: 0;
 
         /* text */
-        color: oklch(var(--au-tabs-text-color, 13.98% 0 0));
+        color: var(--au-tabs-text-color, oklch(13.98% 0 0));
         font-size: var(--au-tabs-text-size, 1rem);
         font-family: var(--au-tabs-text-family, 'Helvetica, Arial, sans-serif, system-ui');
         line-height: var(--au-tabs-text-line-height, 1.5);
 
         /* background */
-        background-color: oklch(var(--au-tabs-bg, 97.31% 0 0));
+        background-color: var(--au-tabs-bg, oklch(97.31% 0 0));
         transition: background-color 120ms ease-in;
 
         &:hover {
-          background-color: oklch(var(--au-tabs-hover-bg, 94.66% 0 0));
+          background-color: var(--au-tabs-hover-bg, oklch(94.66% 0 0));
         }
         
         &:active {
-          background-color: oklch(var(--au-tabs-active-bg, 86.89% 0 0));
+          background-color: var(--au-tabs-active-bg, oklch(86.89% 0 0));
         }
 
         &[aria-selected="true"] {
           paint-order: stroke fill;
-          -webkit-text-stroke: var(--au-tabs-selected-text-stroke-width, 0.5px) oklch(var(--au-tabs-selected-text-stroke-color, 99.4% 0 0));
-          box-shadow: inset 0 0 0 var(--au-tabs-selected-shadow-width, 1px) oklch(var(--au-tabs-selected-shadow-color, 78.94% 0 0));
-          background-color: oklch(var(--au-tabs-selected-bg, 13.98% 0 0));
-          color: oklch(var(--au-tabs-selected-text-color, 99.4% 0 0));
+          -webkit-text-stroke: var(--au-tabs-selected-text-stroke-width, 0.5px) var(--au-tabs-selected-text-stroke-color, oklch(99.4% 0 0));
+          box-shadow: inset 0 0 0 var(--au-tabs-selected-shadow-width, 1px) var(--au-tabs-selected-shadow-color, oklch(78.94% 0 0));
+          background-color: var(--au-tabs-selected-bg, oklch(13.98% 0 0));
+          color: var(--au-tabs-selected-text-color, oklch(99.4% 0 0));
         }
 
         /* focusd */
         &:focus-visible {
           outline: none;
-          box-shadow: inset 0 0 0 var(--au-tabs-focus-shadow-width, 3px) oklch(var(--au-tabs-focus-shadow-color, 83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-tabs-focus-shadow-width, 3px) var(--au-tabs-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
         }
       }
 
       .au-tabpanels {
-        border: var(--au-tabpanels-border-width, 1px) var(--au-tabpanels-border-style, solid) oklch(var(--au-tabpanels-border-color, 78.94% 0 0));
+        border: var(--au-tabpanels-border-width, 1px) var(--au-tabpanels-border-style, solid) var(--au-tabpanels-border-color, oklch(78.94% 0 0));
       }
 
       .au-tab-panel {
@@ -93,8 +93,8 @@ class AuTabs extends HTMLElement {
       }
 
       .badge {
-        background-color: oklch(var(--au-tab-badge-bg, 86.89% 0 0));
-        color: oklch(var(--au-tab-badge-text-color, 13.98% 0 0));
+        background-color: var(--au-tab-badge-bg, oklch(86.89% 0 0));
+        color: var(--au-tab-badge-text-color, oklch(13.98% 0 0));
         padding: var(--au-tab-badge-padding-vertical, 0) var(--au-tab-badge-padding-horizontal, 0.625rem);
         border-radius: var(--au-tab-badge-border-radius, 0.75rem);
       }
@@ -102,7 +102,7 @@ class AuTabs extends HTMLElement {
        ::slotted(.au-tab-panel) {
         padding: var(--au-tab-panel-padding-vertical, 0.75rem) var(--au-tab-panel-padding-horizontal, 1rem);
         display: none;
-        border: var(--au-tabpanels-border-width, 1px) var(--au-tabpanels-border-style, solid) oklch(var(--au-tabpanels-border-color, 78.94% 0 0));
+        border: var(--au-tabpanels-border-width, 1px) var(--au-tabpanels-border-style, solid) var(--au-tabpanels-border-color, oklch(78.94% 0 0));
       }
 
       ::slotted(.au-tab-panel[aria-hidden="false"]) {
@@ -122,12 +122,20 @@ class AuTabs extends HTMLElement {
   }
 
   connectedCallback() {
+    const slot = this.shadowRoot.querySelector('slot[name="panel"]');
+    slot.addEventListener('slotchange', () => {
+      this._renderTabs();
+      this._attachEvents();
+    });
+    // Initial render attempt
     this._renderTabs();
     this._attachEvents();
   }
 
   _renderTabs() {
-    const tabPanels = Array.from(this.querySelectorAll(':scope > .au-tab-panel[slot="panel"]'));
+    const slot = this.shadowRoot.querySelector('slot[name="panel"]');
+    const tabPanels = slot.assignedElements().filter(el => el.classList.contains('au-tab-panel'));
+    
     this._tabs = [];
     this._panels = [];
     this.tabsList.innerHTML = "";

@@ -1,6 +1,6 @@
 // Tests run in the Web Test Runner environment
 import '../src/components/pagination.js';
-import { html, fixture, expect } from '@open-wc/testing';
+import { html, fixture, expect, nextFrame } from '@open-wc/testing';
 
 describe('AuPagination Web Component', () => {
   it('provides a confirm button for jump and emits page-change on click', async () => {
@@ -20,7 +20,7 @@ describe('AuPagination Web Component', () => {
     input.value = '3';
      
     btn.click();
-    await el.updateComplete;
+    await nextFrame();
 
     expect(detail).to.equal(3);
     expect(el.getAttribute('data-current-page')).to.equal('3');
@@ -90,7 +90,7 @@ describe('AuPagination Web Component', () => {
       '.pagination-buttons li button'
     )[3];
     btn.click();
-    await el.updateComplete;
+    await nextFrame();
 
     expect(detail).to.equal(2);
     expect(el.getAttribute('data-current-page')).to.equal('2');
@@ -111,7 +111,7 @@ describe('AuPagination Web Component', () => {
     const select = el.shadowRoot.querySelector('select');
     select.value = '50';
     select.dispatchEvent(new Event('change'));
-    await el.updateComplete;
+    await nextFrame();
 
     expect(detail).to.equal(50);
     expect(el.getAttribute('data-current-page')).to.equal('1');
