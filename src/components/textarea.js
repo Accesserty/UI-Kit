@@ -21,7 +21,7 @@ class AuTextarea extends HTMLElement {
         word-break: break-word;
         margin: var(--au-textarea-label-margin-vertical, 0) var(--au-textarea-label-margin-horizontal, 0);
         padding: var(--au-textarea-label-padding-vertical, 0.625rem) var(--au-textarea-label-padding-horizontal, 0);
-        color: var(--au-textarea-label-text-color, oklch(13.98% 0 0));
+        color: var(--au-textarea-label-text-color, oklch(0.1398 0 0));
         font-size: var(--au-textarea-label-text-size, 1rem);
         font-family: var(--au-textarea-label-text-family, 'Helvetica, Arial, sans-serif, system-ui');
       }
@@ -29,23 +29,23 @@ class AuTextarea extends HTMLElement {
       .textarea-container {
         display: flex;
         align-items: center;
-        border: var(--au-textarea-border-width, 1px) var(--au-textarea-border-style, solid) var(--au-textarea-border-color, oklch(78.94% 0 0));
+        border: var(--au-textarea-border-width, 1px) var(--au-textarea-border-style, solid) var(--au-textarea-border-color, oklch(0.7894 0 0));
         border-radius: var(--au-textarea-border-radius, 0.25rem);
         padding: var(--au-textarea-container-padding-vertical, 0.25rem) var(--au-textarea-container-padding-horizontal, 0.25rem);
       }
 
       textarea {
-        -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
+        -webkit-tap-highlight-color: oklch(0 0 0 / 0);
         margin: 0;
         padding: var(--au-textarea-padding-vertical, 0.625rem) var(--au-textarea-padding-horizontal, 1rem);
-        color: var(--au-textarea-text-color, oklch(13.98% 0 0));
+        color: var(--au-textarea-text-color, oklch(0.1398 0 0));
         font-size: var(--au-textarea-text-size, 1rem);
         font-family: var(--au-textarea-text-family, 'Helvetica, Arial, sans-serif, system-ui');
         line-height: var(--au-textarea-text-line-height, 1.5);
 
         border: 0;
         outline: none;
-        background-color: var(--au-textarea-bg, oklch(99.4% 0 0));
+        background-color: var(--au-textarea-bg, oklch(0.994 0 0));
         border-radius: var(--au-textarea-border-radius, 0.25rem);
         width: 100%;
         
@@ -53,11 +53,11 @@ class AuTextarea extends HTMLElement {
         field-sizing: content;
 
         &:user-invalid {
-          box-shadow: inset 0 0 0 var(--au-textarea-invalid-shadow-width, 3px) var(--au-textarea-invalid-shadow-color, oklch(57.22% 0.233 29.08));
+          box-shadow: inset 0 0 0 var(--au-textarea-invalid-shadow-width, 3px) var(--au-textarea-invalid-shadow-color, oklch(0.5722 0.233 29.08));
         }
 
         &:focus-visible {
-          box-shadow: inset 0 0 0 var(--au-textarea-focus-shadow-width, 3px) var(--au-textarea-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-textarea-focus-shadow-width, 3px) var(--au-textarea-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
         }
       }
         

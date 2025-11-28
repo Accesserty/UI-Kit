@@ -104,8 +104,8 @@ class AuBreadcrumbs extends HTMLElement {
                 padding: var(--au-breadcrumbs-link-padding-vertical, 0.375rem) var(--au-breadcrumbs-link-padding-horizontal, 0.625rem);
                 font-size: var(--au-breadcrumbs-text-size, 1rem);
                 text-decoration: var(--au-breadcrumbs-text-deco, none);
-                color: var(--au-breadcrumbs-link-color, oklch(42.9% 0.2972777928415759 264.05202063805507));
-                -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
+                color: var(--au-breadcrumbs-link-color, oklch(0.429 0.2972777928415759 264.05202063805507));
+                -webkit-tap-highlight-color: oklch(0 0 0 / 0);
                 &:hover {
                   opacity: 0.7;
                 }
@@ -113,11 +113,11 @@ class AuBreadcrumbs extends HTMLElement {
                   opacity: 1;
                 }
                 &:visited {
-                  color: var(--au-breadcrumbs-link-visited-color, oklch(37.48% 0.167 303.51));
+                  color: var(--au-breadcrumbs-link-visited-color, oklch(0.3748 0.167 303.51));
                 }
                 &:focus-visible {
                   outline: none;
-                  box-shadow: inset 0 0 0 var(--au-breadcrumbs-focus-shadow-width, 3px) var(--au-breadcrumbs-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
+                  box-shadow: inset 0 0 0 var(--au-breadcrumbs-focus-shadow-width, 3px) var(--au-breadcrumbs-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
                 }
                 &+span {
                   font-size: var(--au-breadcrumbs-text-size, 1rem);

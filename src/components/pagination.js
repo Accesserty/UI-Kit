@@ -107,23 +107,23 @@ class AuPagination extends HTMLElement {
       :is(button, select, input) {
         /* behavior */
         cursor: pointer;
-        -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
+        -webkit-tap-highlight-color: oklch(0 0 0 / 0);
         
         /* spacing */
         padding: var(--au-btn-padding-vertical, 0.625rem) var(--au-btn-padding-horizontal, 1rem);
         
         /* text */
-        color: var(--au-btn-text-color, oklch(13.98% 0 0));
+        color: var(--au-btn-text-color, oklch(0.1398 0 0));
         font-size: var(--au-btn-text-size, 1rem);
         font-family: var(--au-btn-text-family, 'Helvetica, Arial, sans-serif, system-ui');
         line-height: var(--au-btn-text-line-height, 1.5);
         
         /* border */
-        border: var(--au-btn-border-width, 1px) var(--au-btn-border-style, solid) var(--au-btn-border-color, oklch(78.94% 0 0));
+        border: var(--au-btn-border-width, 1px) var(--au-btn-border-style, solid) var(--au-btn-border-color, oklch(0.7894 0 0));
         border-radius: var(--au-btn-border-radius, 0.25rem);
         
         /* others decoration */
-        background-color: var(--au-btn-bg, oklch(99.4% 0 0));
+        background-color: var(--au-btn-bg, oklch(0.994 0 0));
         transition: background-color 160ms ease-in;
         
         &:disabled {
@@ -133,18 +133,18 @@ class AuPagination extends HTMLElement {
         }
         
         &:hover {
-          background-color: var(--au-btn-hover-bg, oklch(94.66% 0 0));
-          border-color: var(--au-btn-hover-border-color, oklch(78.94% 0 0));
+          background-color: var(--au-btn-hover-bg, oklch(0.9466 0 0));
+          border-color: var(--au-btn-hover-border-color, oklch(0.7894 0 0));
         }
         
         &:active {
-          background-color: var(--au-btn-active-bg, oklch(86.89% 0 0));
-          border-color: var(--au-btn-active-border-color, oklch(78.94% 0 0));
+          background-color: var(--au-btn-active-bg, oklch(0.8689 0 0));
+          border-color: var(--au-btn-active-border-color, oklch(0.7894 0 0));
         }
         
         &:focus-visible {
           outline: none;
-          box-shadow: inset 0 0 0 var(--au-btn-focus-shadow-width, 3px) var(--au-btn-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-btn-focus-shadow-width, 3px) var(--au-btn-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
         }
         
         &.a11y {

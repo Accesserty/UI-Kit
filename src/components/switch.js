@@ -17,7 +17,7 @@ class AuSwitch extends HTMLElement {
         padding-right: var(--au-switch-padding-right, 0.25rem);
         padding-bottom: var(--au-switch-padding-bottom, 0.625rem);
         padding-left: var(--au-switch-padding-left, 0);
-        -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
+        -webkit-tap-highlight-color: oklch(0 0 0 / 0);
       }
       .container {
         display: flex;
@@ -34,7 +34,7 @@ class AuSwitch extends HTMLElement {
         display: block;
         width: var(--au-switch-input-width, 4rem);
         height: calc(var(--au-switch-input-width, 4rem) / 2);
-        border: var(--au-switch-input-border-width, 1px) var(--au-switch-input-border-style, solid) var(--au-switch-input-border-color, oklch(78.94% 0 0));
+        border: var(--au-switch-input-border-width, 1px) var(--au-switch-input-border-style, solid) var(--au-switch-input-border-color, oklch(0.7894 0 0));
         border-radius: var(--au-switch-input-border-radius, calc(var(--au-switch-input-width, 4rem) / 4));
         transition: background-color 360ms ease-in;
       }
@@ -54,17 +54,17 @@ class AuSwitch extends HTMLElement {
         transition: background-color 360ms ease-in, left 240ms ease-in;
       }
       .input:has(input[type="checkbox"]:checked) input[type="checkbox"] {
-        background-color: var(--au-switch-input-checked-bg, oklch(13.98% 0 0));
+        background-color: var(--au-switch-input-checked-bg, oklch(0.1398 0 0));
       }
       .input:has(input[type="checkbox"]:checked):before {
-        background-color: var(--au-switch-inner-checked-bg, oklch(99.4% 0 0));
+        background-color: var(--au-switch-inner-checked-bg, oklch(0.994 0 0));
         left: calc(100% - (var(--au-switch-input-width, 4rem) / 2 - 2 * var(--au-switch-inner-distance, 0.25rem)) - var(--au-switch-inner-distance, 0.25rem));
       }
       .au-switch:hover {
         text-decoration: underline;
       }
       .au-switch:has(input:focus-visible) {
-        box-shadow: inset 0 0 0 var(--au-switch-focus-shadow-width, 3px) var(--au-switch-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
+        box-shadow: inset 0 0 0 var(--au-switch-focus-shadow-width, 3px) var(--au-switch-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
       }
     `;
 

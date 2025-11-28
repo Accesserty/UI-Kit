@@ -21,7 +21,7 @@ class AuFileUpload extends HTMLElement {
       label {
         display: inline-block;
         padding: var(--au-file-upload-label-padding-vertical, 0.625rem) var(--au-file-upload-label-padding-horizontal, 0);
-        color: var(--au-file-upload-label-text-color, oklch(13.98% 0 0));
+        color: var(--au-file-upload-label-text-color, oklch(0.1398 0 0));
         font-size: var(--au-file-upload-label-text-size, 1rem);
       }
       .upload-area {
@@ -29,7 +29,7 @@ class AuFileUpload extends HTMLElement {
         display: grid;
         place-content: center;
         padding: 4rem;
-        border: var(--au-file-upload-area-border-width, 1px) var(--au-file-upload-area-border-style, dashed) var(--au-file-upload-area-border-color, oklch(78.94% 0 0));
+        border: var(--au-file-upload-area-border-width, 1px) var(--au-file-upload-area-border-style, dashed) var(--au-file-upload-area-border-color, oklch(0.7894 0 0));
         border-radius: var(--au-file-upload-area-border-radius, 0.25rem);
         transition: box-shadow 120ms ease-in;
         ::slotted([slot="trigger"]) {
@@ -50,11 +50,11 @@ class AuFileUpload extends HTMLElement {
       }
       .error-area {
         font-size: var(--au-file-upload-error-area-text-size, 0.875rem);
-        color: var(--au-file-upload-error-area-text-color, oklch(44.64% 0 0));
+        color: var(--au-file-upload-error-area-text-color, oklch(0.4464 0 0));
       }
       .error-list {
         margin: 0;
-        color: var(--au-file-upload-error-list-text-color, oklch(47.47% 0.193 29.04));
+        color: var(--au-file-upload-error-list-text-color, oklch(0.4747 0.193 29.04));
       }
       .file-list {
         display: flex;
@@ -79,7 +79,7 @@ class AuFileUpload extends HTMLElement {
             display: grid;
             place-content: center;
             object-fit: contain;
-            border: var(--au-file-upload-file-list-preview-border-width, 1px) var(--au-file-upload-file-list-preview-border-style, solid) var(--au-file-upload-file-list-preview-border-color, oklch(78.94% 0 0));
+            border: var(--au-file-upload-file-list-preview-border-width, 1px) var(--au-file-upload-file-list-preview-border-style, solid) var(--au-file-upload-file-list-preview-border-color, oklch(0.7894 0 0));
           }
           .file-name  {
             flex: 1;
@@ -91,37 +91,37 @@ class AuFileUpload extends HTMLElement {
           .delete {
             /* behavior */
             cursor: pointer;
-            -webkit-tap-highlight-color: var(--au-file-upload-delete-tap-highlight-color, oklch(0% 0 0 / 0));
+            -webkit-tap-highlight-color: var(--au-file-upload-delete-tap-highlight-color, oklch(0 0 0 / 0));
             
             /* spacing */
             padding: var(--au-file-upload-delete-padding-vertical, 0.625rem) var(--au-file-upload-delete-padding-horizontal, 1rem);
             
             /* text */
-            color: var(--au-file-upload-delete-text-color, oklch(13.98% 0 0));
+            color: var(--au-file-upload-delete-text-color, oklch(0.1398 0 0));
             font-size: var(--au-file-upload-delete-text-size, 1rem);
             line-height: var(--au-file-upload-delete-text-line-height, 1.5);
             
             /* border */
-            border: var(--au-file-upload-delete-border-width, 1px) var(--au-file-upload-delete-border-style, solid) var(--au-file-upload-delete-border-color, oklch(78.94% 0 0));
+            border: var(--au-file-upload-delete-border-width, 1px) var(--au-file-upload-delete-border-style, solid) var(--au-file-upload-delete-border-color, oklch(0.7894 0 0));
             border-radius: var(--au-file-upload-delete-border-radius, 0.25rem);
             
             /* others decoration */
-            background-color: var(--au-file-upload-delete-bg, oklch(99.4% 0 0));
+            background-color: var(--au-file-upload-delete-bg, oklch(0.994 0 0));
             transition: background-color 160ms ease-in;
             
             &:hover {
-              background-color: var(--au-file-upload-delete-hover-bg, oklch(94.66% 0 0));
-              border-color: var(--au-file-upload-delete-hover-border-color, oklch(78.94% 0 0));
+              background-color: var(--au-file-upload-delete-hover-bg, oklch(0.9466 0 0));
+              border-color: var(--au-file-upload-delete-hover-border-color, oklch(0.7894 0 0));
             }
             
             &:active {
-              background-color: var(--au-file-upload-delete-active-bg, oklch(86.89% 0 0));
-              border-color: var(--au-file-upload-delete-active-border-color, oklch(78.94% 0 0));
+              background-color: var(--au-file-upload-delete-active-bg, oklch(0.8689 0 0));
+              border-color: var(--au-file-upload-delete-active-border-color, oklch(0.7894 0 0));
             }
             
             &:focus-visible {
               outline: none;
-              box-shadow: inset 0 0 0 var(--au-file-upload-delete-focus-shadow-width, 3px) var(--au-file-upload-delete-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
+              box-shadow: inset 0 0 0 var(--au-file-upload-delete-focus-shadow-width, 3px) var(--au-file-upload-delete-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
             }
           }
         }

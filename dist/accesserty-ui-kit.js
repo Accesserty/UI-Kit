@@ -6,7 +6,7 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
           button {
             /* behavior */
             cursor: pointer;
-            -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
+            -webkit-tap-highlight-color: oklch(0 0 0 / 0);
             
             /* spacing */
             display: flex;
@@ -19,17 +19,17 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
             padding: var(--au-accordion-heading-padding-vertical, 0.625rem) var(--au-accordion-heading-padding-horizontal, 1rem);
             
             /* text */
-            color: var(--au-accordion-heading-text-color, oklch(13.98% 0 0));
+            color: var(--au-accordion-heading-text-color, oklch(0.1398 0 0));
             font-size: var(--au-accordion-heading-text-size, 1rem);
             font-family: var(--au-accordion-heading-text-family, 'Helvetica, Arial, sans-serif, system-ui');
             line-height: var(--au-accordion-heading-text-line-height, 1.5);
             
             /* border */
-            border: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(78.94% 0 0));
+            border: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.7894 0 0));
             border-radius: var(--au-accordion-heading-border-radius, 0);
             
             /* others decoration */
-            background-color: var(--au-accordion-heading-bg, oklch(99.4% 0 0));
+            background-color: var(--au-accordion-heading-bg, oklch(0.994 0 0));
             transition: background-color 160ms ease-in;
 
             .heading {
@@ -57,31 +57,31 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
             }
 
             &:hover {
-              background-color: var(--au-accordion-heading-hover-bg, oklch(94.66% 0 0));
-              border-color: var(--au-accordion-heading-hover-border-color, oklch(78.94% 0 0));
+              background-color: var(--au-accordion-heading-hover-bg, oklch(0.9466 0 0));
+              border-color: var(--au-accordion-heading-hover-border-color, oklch(0.7894 0 0));
             }
             
             &:active {
-              background-color: var(--au-accordion-heading-active-bg, oklch(86.89% 0 0));
-              border-color: var(--au-accordion-heading-active-border-color, oklch(78.94% 0 0));
+              background-color: var(--au-accordion-heading-active-bg, oklch(0.8689 0 0));
+              border-color: var(--au-accordion-heading-active-border-color, oklch(0.7894 0 0));
             }
             
             &:focus-visible {
               outline: none;
-              box-shadow: inset 0 0 0 var(--au-accordion-heading-focus-shadow-width, 3px) var(--au-accordion-heading-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
+              box-shadow: inset 0 0 0 var(--au-accordion-heading-focus-shadow-width, 3px) var(--au-accordion-heading-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
             }
           }
 
           div[role="region"] {
-            background-color: var(--au-accordion-content-bg, oklch(97.31% 0 0));
-            color: var(--au-accordion-content-text-color, oklch(13.98% 0 0));
+            background-color: var(--au-accordion-content-bg, oklch(0.9731 0 0));
+            color: var(--au-accordion-content-text-color, oklch(0.1398 0 0));
             padding: var(--au-accordion-content-padding-top, 1rem)  var(--au-accordion-content-padding-right, 1rem)  var(--au-accordion-content-padding-bottom, 1rem)  var(--au-accordion-content-padding-left, 1rem);
             overscroll-behavior: var(--au-accordion-content-overscroll-behavior, auto);
             max-height: var(--au-accordion-content-max-height, 300px);
             overflow: auto;
-            border-left: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(78.94% 0 0));
-            border-right: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(78.94% 0 0));
-            border-bottom: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(78.94% 0 0));
+            border-left: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.7894 0 0));
+            border-right: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.7894 0 0));
+            border-bottom: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.7894 0 0));
           }
         </style>
         <button type="button" aria-expanded="false" aria-controls="${t}" part="button">
@@ -127,8 +127,8 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
                 padding: var(--au-breadcrumbs-link-padding-vertical, 0.375rem) var(--au-breadcrumbs-link-padding-horizontal, 0.625rem);
                 font-size: var(--au-breadcrumbs-text-size, 1rem);
                 text-decoration: var(--au-breadcrumbs-text-deco, none);
-                color: var(--au-breadcrumbs-link-color, oklch(42.9% 0.2972777928415759 264.05202063805507));
-                -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
+                color: var(--au-breadcrumbs-link-color, oklch(0.429 0.2972777928415759 264.05202063805507));
+                -webkit-tap-highlight-color: oklch(0 0 0 / 0);
                 &:hover {
                   opacity: 0.7;
                 }
@@ -136,11 +136,11 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
                   opacity: 1;
                 }
                 &:visited {
-                  color: var(--au-breadcrumbs-link-visited-color, oklch(37.48% 0.167 303.51));
+                  color: var(--au-breadcrumbs-link-visited-color, oklch(0.3748 0.167 303.51));
                 }
                 &:focus-visible {
                   outline: none;
-                  box-shadow: inset 0 0 0 var(--au-breadcrumbs-focus-shadow-width, 3px) var(--au-breadcrumbs-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
+                  box-shadow: inset 0 0 0 var(--au-breadcrumbs-focus-shadow-width, 3px) var(--au-breadcrumbs-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
                 }
                 &+span {
                   font-size: var(--au-breadcrumbs-text-size, 1rem);
@@ -182,15 +182,15 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
         display: flex;
         align-items: center;
         gap: var(--au-checkbox-content-gap, 0.375rem);
-        -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
+        -webkit-tap-highlight-color: oklch(0 0 0 / 0);
         input[type="checkbox"] {
           appearance: none;
           cursor: pointer;
           width: var(--au-checkbox-input-width, 1.5rem);
           height: var(--au-checkbox-input-height, 1.5rem);
-          border: var(--au-checkbox-input-border-width, 1px) var(--au-checkbox-input-border-style, solid) var(--au-checkbox-input-border-color, oklch(78.94% 0 0));
+          border: var(--au-checkbox-input-border-width, 1px) var(--au-checkbox-input-border-style, solid) var(--au-checkbox-input-border-color, oklch(0.7894 0 0));
           border-radius: var(--au-checkbox-input-border-radius, 0.25rem);
-          background-color: var(--au-checkbox-input-bg, oklch(99.4% 0 0));
+          background-color: var(--au-checkbox-input-bg, oklch(0.994 0 0));
           &:focus-visible {
             outline: none;
           }
@@ -198,19 +198,19 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
             cursor: not-allowed;
           }
           &:checked {
-            background-color: var(--au-checkbox-input-checked-bg, oklch(13.98% 0 0));
+            background-color: var(--au-checkbox-input-checked-bg, oklch(0.1398 0 0));
             display: grid;
             place-content: center;
             &:before {
               content: var(--au-checkbox-input-checked-symbol, '✔︎');
-              color: var(--au-checkbox-input-checked-text-color, oklch(99.4% 0 0));
+              color: var(--au-checkbox-input-checked-text-color, oklch(0.994 0 0));
               font-size: var(--au-checkbox-input-checked-text-size, 1.125rem);
             }
           }
         }
         .text {
           flex: 1;
-          color: var(--au-checkbox-label-text-color, oklch(13.98% 0 0));
+          color: var(--au-checkbox-label-text-color, oklch(0.1398 0 0));
           font-size: var(--au-checkbox-label-text-size, 1rem);
         }
         &:hover {
@@ -220,11 +220,11 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
         }
         &:active {
           .text {
-            color: var(--au-checkbox-label-active-text-color, oklch(53.7% 0 0));
+            color: var(--au-checkbox-label-active-text-color, oklch(0.537 0 0));
           }
         }
         &:has(input:focus-visible) {
-          box-shadow: inset 0 0 0 var(--au-checkbox-input-focus-shadow-width, 3px) var(--au-checkbox-input-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-checkbox-input-focus-shadow-width, 3px) var(--au-checkbox-input-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
         }
         &:has(input[type="checkbox"]:disabled) {
           cursor: not-allowed;
@@ -234,7 +234,7 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
           .text {
             pointer-events: none;
             text-decoration: none;
-            color: var(--au-checkbox-label-disabled-text-color, oklch(53.7% 0 0));
+            color: var(--au-checkbox-label-disabled-text-color, oklch(0.537 0 0));
           }
         }
       }
@@ -250,7 +250,7 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
       label {
         display: inline-block;
         padding: var(--au-file-upload-label-padding-vertical, 0.625rem) var(--au-file-upload-label-padding-horizontal, 0);
-        color: var(--au-file-upload-label-text-color, oklch(13.98% 0 0));
+        color: var(--au-file-upload-label-text-color, oklch(0.1398 0 0));
         font-size: var(--au-file-upload-label-text-size, 1rem);
       }
       .upload-area {
@@ -258,7 +258,7 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
         display: grid;
         place-content: center;
         padding: 4rem;
-        border: var(--au-file-upload-area-border-width, 1px) var(--au-file-upload-area-border-style, dashed) var(--au-file-upload-area-border-color, oklch(78.94% 0 0));
+        border: var(--au-file-upload-area-border-width, 1px) var(--au-file-upload-area-border-style, dashed) var(--au-file-upload-area-border-color, oklch(0.7894 0 0));
         border-radius: var(--au-file-upload-area-border-radius, 0.25rem);
         transition: box-shadow 120ms ease-in;
         ::slotted([slot="trigger"]) {
@@ -279,11 +279,11 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
       }
       .error-area {
         font-size: var(--au-file-upload-error-area-text-size, 0.875rem);
-        color: var(--au-file-upload-error-area-text-color, oklch(44.64% 0 0));
+        color: var(--au-file-upload-error-area-text-color, oklch(0.4464 0 0));
       }
       .error-list {
         margin: 0;
-        color: var(--au-file-upload-error-list-text-color, oklch(47.47% 0.193 29.04));
+        color: var(--au-file-upload-error-list-text-color, oklch(0.4747 0.193 29.04));
       }
       .file-list {
         display: flex;
@@ -308,7 +308,7 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
             display: grid;
             place-content: center;
             object-fit: contain;
-            border: var(--au-file-upload-file-list-preview-border-width, 1px) var(--au-file-upload-file-list-preview-border-style, solid) var(--au-file-upload-file-list-preview-border-color, oklch(78.94% 0 0));
+            border: var(--au-file-upload-file-list-preview-border-width, 1px) var(--au-file-upload-file-list-preview-border-style, solid) var(--au-file-upload-file-list-preview-border-color, oklch(0.7894 0 0));
           }
           .file-name  {
             flex: 1;
@@ -320,37 +320,37 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
           .delete {
             /* behavior */
             cursor: pointer;
-            -webkit-tap-highlight-color: var(--au-file-upload-delete-tap-highlight-color, oklch(0% 0 0 / 0));
+            -webkit-tap-highlight-color: var(--au-file-upload-delete-tap-highlight-color, oklch(0 0 0 / 0));
             
             /* spacing */
             padding: var(--au-file-upload-delete-padding-vertical, 0.625rem) var(--au-file-upload-delete-padding-horizontal, 1rem);
             
             /* text */
-            color: var(--au-file-upload-delete-text-color, oklch(13.98% 0 0));
+            color: var(--au-file-upload-delete-text-color, oklch(0.1398 0 0));
             font-size: var(--au-file-upload-delete-text-size, 1rem);
             line-height: var(--au-file-upload-delete-text-line-height, 1.5);
             
             /* border */
-            border: var(--au-file-upload-delete-border-width, 1px) var(--au-file-upload-delete-border-style, solid) var(--au-file-upload-delete-border-color, oklch(78.94% 0 0));
+            border: var(--au-file-upload-delete-border-width, 1px) var(--au-file-upload-delete-border-style, solid) var(--au-file-upload-delete-border-color, oklch(0.7894 0 0));
             border-radius: var(--au-file-upload-delete-border-radius, 0.25rem);
             
             /* others decoration */
-            background-color: var(--au-file-upload-delete-bg, oklch(99.4% 0 0));
+            background-color: var(--au-file-upload-delete-bg, oklch(0.994 0 0));
             transition: background-color 160ms ease-in;
             
             &:hover {
-              background-color: var(--au-file-upload-delete-hover-bg, oklch(94.66% 0 0));
-              border-color: var(--au-file-upload-delete-hover-border-color, oklch(78.94% 0 0));
+              background-color: var(--au-file-upload-delete-hover-bg, oklch(0.9466 0 0));
+              border-color: var(--au-file-upload-delete-hover-border-color, oklch(0.7894 0 0));
             }
             
             &:active {
-              background-color: var(--au-file-upload-delete-active-bg, oklch(86.89% 0 0));
-              border-color: var(--au-file-upload-delete-active-border-color, oklch(78.94% 0 0));
+              background-color: var(--au-file-upload-delete-active-bg, oklch(0.8689 0 0));
+              border-color: var(--au-file-upload-delete-active-border-color, oklch(0.7894 0 0));
             }
             
             &:focus-visible {
               outline: none;
-              box-shadow: inset 0 0 0 var(--au-file-upload-delete-focus-shadow-width, 3px) var(--au-file-upload-delete-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
+              box-shadow: inset 0 0 0 var(--au-file-upload-delete-focus-shadow-width, 3px) var(--au-file-upload-delete-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
             }
           }
         }
@@ -366,7 +366,7 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
     .input-wrapper {
       display: flex;
       align-items: center;
-      background-color: var(--au-input-bg, oklch(99.4% 0 0));
+      background-color: var(--au-input-bg, oklch(0.994 0 0));
 
       label {
         word-break: break-word;
@@ -374,33 +374,33 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
       label {
         margin: 0;
         padding: var(--au-input-label-padding-vertical, 0.625rem) var(--au-input-label-padding-horizontal, 1rem);
-        color: oklch(var(--au-input-label-text-color, 13.98% 0 0));
+        color: oklch(var(--au-input-label-text-color, oklch(0.1398 0 0)));
         font-size: var(--au-inpu-label-text-size, 1rem);
       }
       input {
-        -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
+        -webkit-tap-highlight-color: oklch(0 0 0 / 0);
         margin: 0;
         padding: var(--au-input-padding-vertical, 0.625rem) var(--au-input-padding-horizontal, 1rem);
-        color: var(--au-input-text-color, oklch(13.98% 0 0));
+        color: var(--au-input-text-color, oklch(0.1398 0 0));
         font-size: var(--au-input-text-size, 1rem);
         border: 0;
         border-radius: var(--au-input-border-radius, 0.25rem);
         outline: none;
-        background-color: var(--au-input-bg, oklch(99.4% 0 0));
+        background-color: var(--au-input-bg, oklch(0.994 0 0));
         line-height: var(--au-input-text-line-height, 1.5);
 
         &:user-invalid {
-          box-shadow: inset 0 0 0 var(--au-input-invalid-shadow-width, 3px) var(--au-input-invalid-shadow-color, oklch(57.22% 0.233 29.08));
+          box-shadow: inset 0 0 0 var(--au-input-invalid-shadow-width, 3px) var(--au-input-invalid-shadow-color, oklch(0.5722 0.233 29.08));
         }
 
         &:focus-visible {
-          box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) var(--au-input-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) var(--au-input-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
         }
       }
       .input-container {
         display: flex;
         align-items: center;
-        border: var(--au-input-border-width, 1px) var(--au-input-border-style, solid) var(--au-input-border-color, oklch(78.94% 0 0));
+        border: var(--au-input-border-width, 1px) var(--au-input-border-style, solid) var(--au-input-border-color, oklch(0.7894 0 0));
         border-radius: var(--au-input-border-radius, 0.25rem);
         padding: var(--au-input-container-padding-vertical, 0.25rem) var(--au-input-container-padding-horizontal, 0.25rem);
         gap: var(--au-input-container-gap, 0.625rem);
@@ -411,8 +411,8 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
 
         /* behavior */
         cursor: pointer;
-        background-color: var(--au-input-clear-bg, oklch(99.4% 0 0));
-        color: var(--au-input-clear-text-color, oklch(13.98% 0 0));
+        background-color: var(--au-input-clear-bg, oklch(0.994 0 0));
+        color: var(--au-input-clear-text-color, oklch(0.1398 0 0));
 
         width: 2rem;
         height: 2rem;
@@ -423,15 +423,15 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
 
         &:focus-visible {
           outline: none;
-          box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) var(--au-input-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) var(--au-input-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
         }
 
         &:hover {
-          background-color: var(--au-input-clear-hover-bg, oklch(94.66% 0 0));
+          background-color: var(--au-input-clear-hover-bg, oklch(0.9466 0 0));
         }
         
         &:active {
-          background-color: var(--au-input-clear-active-bg, oklch(86.89% 0 0));
+          background-color: var(--au-input-clear-active-bg, oklch(0.8689 0 0));
         }
 
         &[hidden] {
@@ -469,23 +469,23 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
       :is(button, select, input) {
         /* behavior */
         cursor: pointer;
-        -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
+        -webkit-tap-highlight-color: oklch(0 0 0 / 0);
         
         /* spacing */
         padding: var(--au-btn-padding-vertical, 0.625rem) var(--au-btn-padding-horizontal, 1rem);
         
         /* text */
-        color: var(--au-btn-text-color, oklch(13.98% 0 0));
+        color: var(--au-btn-text-color, oklch(0.1398 0 0));
         font-size: var(--au-btn-text-size, 1rem);
         font-family: var(--au-btn-text-family, 'Helvetica, Arial, sans-serif, system-ui');
         line-height: var(--au-btn-text-line-height, 1.5);
         
         /* border */
-        border: var(--au-btn-border-width, 1px) var(--au-btn-border-style, solid) var(--au-btn-border-color, oklch(78.94% 0 0));
+        border: var(--au-btn-border-width, 1px) var(--au-btn-border-style, solid) var(--au-btn-border-color, oklch(0.7894 0 0));
         border-radius: var(--au-btn-border-radius, 0.25rem);
         
         /* others decoration */
-        background-color: var(--au-btn-bg, oklch(99.4% 0 0));
+        background-color: var(--au-btn-bg, oklch(0.994 0 0));
         transition: background-color 160ms ease-in;
         
         &:disabled {
@@ -495,18 +495,18 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
         }
         
         &:hover {
-          background-color: var(--au-btn-hover-bg, oklch(94.66% 0 0));
-          border-color: var(--au-btn-hover-border-color, oklch(78.94% 0 0));
+          background-color: var(--au-btn-hover-bg, oklch(0.9466 0 0));
+          border-color: var(--au-btn-hover-border-color, oklch(0.7894 0 0));
         }
         
         &:active {
-          background-color: var(--au-btn-active-bg, oklch(86.89% 0 0));
-          border-color: var(--au-btn-active-border-color, oklch(78.94% 0 0));
+          background-color: var(--au-btn-active-bg, oklch(0.8689 0 0));
+          border-color: var(--au-btn-active-border-color, oklch(0.7894 0 0));
         }
         
         &:focus-visible {
           outline: none;
-          box-shadow: inset 0 0 0 var(--au-btn-focus-shadow-width, 3px) var(--au-btn-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-btn-focus-shadow-width, 3px) var(--au-btn-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
         }
         
         &.a11y {
@@ -595,7 +595,7 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
         display: flex;
         align-items: center;
         gap: var(--au-radio-content-gap, 0.375rem);
-        -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
+        -webkit-tap-highlight-color: oklch(0 0 0 / 0);
         padding: 0.25rem;
         input[type="radio"] {
           appearance: none;
@@ -603,9 +603,9 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
           cursor: pointer;
           width: var(--au-radio-input-width, 1.5rem);
           height: var(--au-radio-input-height, 1.5rem);
-          border: var(--au-radio-input-border-width, 1px) var(--au-radio-input-border-style, solid) var(--au-radio-input-border-color, oklch(78.94% 0 0));
+          border: var(--au-radio-input-border-width, 1px) var(--au-radio-input-border-style, solid) var(--au-radio-input-border-color, oklch(0.7894 0 0));
           border-radius: 50%;
-          background-color: var(--au-radio-input-bg, oklch(99.4% 0 0));
+          background-color: var(--au-radio-input-bg, oklch(0.994 0 0));
           &:focus-visible {
             outline: none;
           }
@@ -613,7 +613,7 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
             cursor: not-allowed;
           }
           &:checked {
-            background-color: var(--au-radio-input-checked-bg, oklch(13.98% 0 0));
+            background-color: var(--au-radio-input-checked-bg, oklch(0.1398 0 0));
             display: grid;
             place-content: center;
             &:before {
@@ -621,13 +621,13 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
               width: 0.5rem;
               height: 0.5rem;
               border-radius: 50%;
-              background-color: var(--au-radio-input-checked-circle-color, oklch(99.4% 0 0));
+              background-color: var(--au-radio-input-checked-circle-color, oklch(0.994 0 0));
             }
           }
         }
         .text {
           flex: 1;
-          color: var(--au-radio-label-text-color, oklch(13.98% 0 0));
+          color: var(--au-radio-label-text-color, oklch(0.1398 0 0));
           font-size: var(--au-radio-label-text-size, 1rem);
         }
         &:hover {
@@ -637,11 +637,11 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
         }
         &:active {
           .text {
-            color: var(--au-radio-label-active-text-color, oklch(53.7% 0 0));
+            color: var(--au-radio-label-active-text-color, oklch(0.537 0 0));
           }
         }
         &:has(input:focus-visible) {
-          box-shadow: inset 0 0 0 var(--au-radio-input-focus-shadow-width, 3px) var(--au-radio-input-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-radio-input-focus-shadow-width, 3px) var(--au-radio-input-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
         }
         &:has(input[type="radio"]:disabled) {
           cursor: not-allowed;
@@ -651,7 +651,7 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
           .text {
             pointer-events: none;
             text-decoration: none;
-            color: var(--au-radio-label-disabled-text-color, oklch(53.7% 0 0));
+            color: var(--au-radio-label-disabled-text-color, oklch(0.537 0 0));
           }
         }
       }
@@ -666,7 +666,7 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
         padding-right: var(--au-switch-padding-right, 0.25rem);
         padding-bottom: var(--au-switch-padding-bottom, 0.625rem);
         padding-left: var(--au-switch-padding-left, 0);
-        -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
+        -webkit-tap-highlight-color: oklch(0 0 0 / 0);
       }
       .container {
         display: flex;
@@ -683,7 +683,7 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
         display: block;
         width: var(--au-switch-input-width, 4rem);
         height: calc(var(--au-switch-input-width, 4rem) / 2);
-        border: var(--au-switch-input-border-width, 1px) var(--au-switch-input-border-style, solid) var(--au-switch-input-border-color, oklch(78.94% 0 0));
+        border: var(--au-switch-input-border-width, 1px) var(--au-switch-input-border-style, solid) var(--au-switch-input-border-color, oklch(0.7894 0 0));
         border-radius: var(--au-switch-input-border-radius, calc(var(--au-switch-input-width, 4rem) / 4));
         transition: background-color 360ms ease-in;
       }
@@ -703,17 +703,17 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
         transition: background-color 360ms ease-in, left 240ms ease-in;
       }
       .input:has(input[type="checkbox"]:checked) input[type="checkbox"] {
-        background-color: var(--au-switch-input-checked-bg, oklch(13.98% 0 0));
+        background-color: var(--au-switch-input-checked-bg, oklch(0.1398 0 0));
       }
       .input:has(input[type="checkbox"]:checked):before {
-        background-color: var(--au-switch-inner-checked-bg, oklch(99.4% 0 0));
+        background-color: var(--au-switch-inner-checked-bg, oklch(0.994 0 0));
         left: calc(100% - (var(--au-switch-input-width, 4rem) / 2 - 2 * var(--au-switch-inner-distance, 0.25rem)) - var(--au-switch-inner-distance, 0.25rem));
       }
       .au-switch:hover {
         text-decoration: underline;
       }
       .au-switch:has(input:focus-visible) {
-        box-shadow: inset 0 0 0 var(--au-switch-focus-shadow-width, 3px) var(--au-switch-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
+        box-shadow: inset 0 0 0 var(--au-switch-focus-shadow-width, 3px) var(--au-switch-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
       }
     `;const a=document.createElement("label");a.classList.add("au-switch"),a.setAttribute("for",t);const i=document.createElement("div");i.classList.add("container");const o=document.createElement("span");o.classList.add("off-text"),o.setAttribute("aria-hidden","true");const l=document.createElement("div");l.classList.add("input"),this.inputElement=document.createElement("input"),this.inputElement.id=t,this.inputElement.type="checkbox",this.inputElement.setAttribute("role","switch"),this.inputElement.setAttribute("aria-checked","false"),l.appendChild(this.inputElement);const r=document.createElement("span");r.classList.add("on-text"),r.setAttribute("aria-hidden","true"),i.append(o,l,r),a.append(i),this.shadowRoot.append(e,a);const c=document.createElement("slot");a.prepend(c),this.inputElement.addEventListener("change",u=>{const p=u.target.checked;this.inputElement.setAttribute("aria-checked",p.toString()),this.dispatchEvent(new CustomEvent("change",{detail:p}))})}generateId(){const t=new Uint32Array(1);return window.crypto.getRandomValues(t),`au-switch-${t[0].toString(36)}`}static get observedAttributes(){return["name","value","checked","disabled","off","on"]}attributeChangedCallback(t,e,a){const i=this.shadowRoot.querySelector("input"),o=this.shadowRoot.querySelector(".off-text"),l=this.shadowRoot.querySelector(".on-text");if(!(!i||!o||!l))switch(t){case"checked":i.checked=a!==null,i.setAttribute("aria-checked",i.checked.toString());break;case"disabled":i.disabled=a!==null;break;case"off":o.textContent=a||"Off";break;case"on":l.textContent=a||"On";break;default:i.setAttribute(t,a);break}}connectedCallback(){const t=this.shadowRoot.querySelector("input"),e=this.shadowRoot.querySelector(".off-text"),a=this.shadowRoot.querySelector(".on-text");t.setAttribute("aria-checked",t.checked.toString()),this.hasAttribute("off")?e.textContent=this.getAttribute("off"):e.textContent="",this.hasAttribute("on")?a.textContent=this.getAttribute("on"):a.textContent=""}}customElements.define("au-switch",N);class F extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"}),this._tabs=[],this._panels=[],this._selectedIndex=0,this.container=document.createElement("div"),this.container.classList.add("au-tabs");const t=document.createElement("style");t.textContent=`
       .au-tablist {
@@ -732,7 +732,7 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
         }
         &:last-of-type {
           [role="tab"] {
-            border-right: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) var(--au-tabs-border-color, oklch(78.94% 0 0));
+            border-right: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) var(--au-tabs-border-color, oklch(0.7894 0 0));
             border-top-right-radius: var(--au-tabs-border-radius, 0);
           }
         }
@@ -741,7 +741,7 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
       button[role="tab"] {
         /* behavior */
         cursor: pointer;
-        -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
+        -webkit-tap-highlight-color: oklch(0 0 0 / 0);
 
         /* spacing */
         display: flex;
@@ -751,46 +751,46 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
         padding: var(--au-tabs-padding-vertical, 0.625rem) var(--au-tabs-padding-horizontal, 1rem);
 
         /* border */
-        border-top: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) var(--au-tabs-border-color, oklch(78.94% 0 0));
-        border-left: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) var(--au-tabs-border-color, oklch(78.94% 0 0));
+        border-top: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) var(--au-tabs-border-color, oklch(0.7894 0 0));
+        border-left: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) var(--au-tabs-border-color, oklch(0.7894 0 0));
         border-right: 0;
         border-bottom: 0;
 
         /* text */
-        color: var(--au-tabs-text-color, oklch(13.98% 0 0));
+        color: var(--au-tabs-text-color, oklch(0.1398 0 0));
         font-size: var(--au-tabs-text-size, 1rem);
         font-family: var(--au-tabs-text-family, 'Helvetica, Arial, sans-serif, system-ui');
         line-height: var(--au-tabs-text-line-height, 1.5);
 
         /* background */
-        background-color: var(--au-tabs-bg, oklch(97.31% 0 0));
+        background-color: var(--au-tabs-bg, oklch(0.9731 0 0));
         transition: background-color 120ms ease-in;
 
         &:hover {
-          background-color: var(--au-tabs-hover-bg, oklch(94.66% 0 0));
+          background-color: var(--au-tabs-hover-bg, oklch(0.9466 0 0));
         }
         
         &:active {
-          background-color: var(--au-tabs-active-bg, oklch(86.89% 0 0));
+          background-color: var(--au-tabs-active-bg, oklch(0.8689 0 0));
         }
 
         &[aria-selected="true"] {
           paint-order: stroke fill;
-          -webkit-text-stroke: var(--au-tabs-selected-text-stroke-width, 0.5px) var(--au-tabs-selected-text-stroke-color, oklch(99.4% 0 0));
-          box-shadow: inset 0 0 0 var(--au-tabs-selected-shadow-width, 1px) var(--au-tabs-selected-shadow-color, oklch(78.94% 0 0));
-          background-color: var(--au-tabs-selected-bg, oklch(13.98% 0 0));
-          color: var(--au-tabs-selected-text-color, oklch(99.4% 0 0));
+          -webkit-text-stroke: var(--au-tabs-selected-text-stroke-width, 0.5px) var(--au-tabs-selected-text-stroke-color, oklch(0.994 0 0));
+          box-shadow: inset 0 0 0 var(--au-tabs-selected-shadow-width, 1px) var(--au-tabs-selected-shadow-color, oklch(0.7894 0 0));
+          background-color: var(--au-tabs-selected-bg, oklch(0.1398 0 0));
+          color: var(--au-tabs-selected-text-color, oklch(0.994 0 0));
         }
 
         /* focusd */
         &:focus-visible {
           outline: none;
-          box-shadow: inset 0 0 0 var(--au-tabs-focus-shadow-width, 3px) var(--au-tabs-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-tabs-focus-shadow-width, 3px) var(--au-tabs-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
         }
       }
 
       .au-tabpanels {
-        border: var(--au-tabpanels-border-width, 1px) var(--au-tabpanels-border-style, solid) var(--au-tabpanels-border-color, oklch(78.94% 0 0));
+        border: var(--au-tabpanels-border-width, 1px) var(--au-tabpanels-border-style, solid) var(--au-tabpanels-border-color, oklch(0.7894 0 0));
       }
 
       .au-tab-panel {
@@ -798,8 +798,8 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
       }
 
       .badge {
-        background-color: var(--au-tab-badge-bg, oklch(86.89% 0 0));
-        color: var(--au-tab-badge-text-color, oklch(13.98% 0 0));
+        background-color: var(--au-tab-badge-bg, oklch(0.8689 0 0));
+        color: var(--au-tab-badge-text-color, oklch(0.1398 0 0));
         padding: var(--au-tab-badge-padding-vertical, 0) var(--au-tab-badge-padding-horizontal, 0.625rem);
         border-radius: var(--au-tab-badge-border-radius, 0.75rem);
       }
@@ -807,7 +807,7 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
        ::slotted(.au-tab-panel) {
         padding: var(--au-tab-panel-padding-vertical, 0.75rem) var(--au-tab-panel-padding-horizontal, 1rem);
         display: none;
-        border: var(--au-tabpanels-border-width, 1px) var(--au-tabpanels-border-style, solid) var(--au-tabpanels-border-color, oklch(78.94% 0 0));
+        border: var(--au-tabpanels-border-width, 1px) var(--au-tabpanels-border-style, solid) var(--au-tabpanels-border-color, oklch(0.7894 0 0));
       }
 
       ::slotted(.au-tab-panel[aria-hidden="false"]) {
@@ -825,7 +825,7 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
         word-break: break-word;
         margin: var(--au-textarea-label-margin-vertical, 0) var(--au-textarea-label-margin-horizontal, 0);
         padding: var(--au-textarea-label-padding-vertical, 0.625rem) var(--au-textarea-label-padding-horizontal, 0);
-        color: var(--au-textarea-label-text-color, oklch(13.98% 0 0));
+        color: var(--au-textarea-label-text-color, oklch(0.1398 0 0));
         font-size: var(--au-textarea-label-text-size, 1rem);
         font-family: var(--au-textarea-label-text-family, 'Helvetica, Arial, sans-serif, system-ui');
       }
@@ -833,23 +833,23 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
       .textarea-container {
         display: flex;
         align-items: center;
-        border: var(--au-textarea-border-width, 1px) var(--au-textarea-border-style, solid) var(--au-textarea-border-color, oklch(78.94% 0 0));
+        border: var(--au-textarea-border-width, 1px) var(--au-textarea-border-style, solid) var(--au-textarea-border-color, oklch(0.7894 0 0));
         border-radius: var(--au-textarea-border-radius, 0.25rem);
         padding: var(--au-textarea-container-padding-vertical, 0.25rem) var(--au-textarea-container-padding-horizontal, 0.25rem);
       }
 
       textarea {
-        -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
+        -webkit-tap-highlight-color: oklch(0 0 0 / 0);
         margin: 0;
         padding: var(--au-textarea-padding-vertical, 0.625rem) var(--au-textarea-padding-horizontal, 1rem);
-        color: var(--au-textarea-text-color, oklch(13.98% 0 0));
+        color: var(--au-textarea-text-color, oklch(0.1398 0 0));
         font-size: var(--au-textarea-text-size, 1rem);
         font-family: var(--au-textarea-text-family, 'Helvetica, Arial, sans-serif, system-ui');
         line-height: var(--au-textarea-text-line-height, 1.5);
 
         border: 0;
         outline: none;
-        background-color: var(--au-textarea-bg, oklch(99.4% 0 0));
+        background-color: var(--au-textarea-bg, oklch(0.994 0 0));
         border-radius: var(--au-textarea-border-radius, 0.25rem);
         width: 100%;
         
@@ -857,11 +857,11 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
         field-sizing: content;
 
         &:user-invalid {
-          box-shadow: inset 0 0 0 var(--au-textarea-invalid-shadow-width, 3px) var(--au-textarea-invalid-shadow-color, oklch(57.22% 0.233 29.08));
+          box-shadow: inset 0 0 0 var(--au-textarea-invalid-shadow-width, 3px) var(--au-textarea-invalid-shadow-color, oklch(0.5722 0.233 29.08));
         }
 
         &:focus-visible {
-          box-shadow: inset 0 0 0 var(--au-textarea-focus-shadow-width, 3px) var(--au-textarea-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-textarea-focus-shadow-width, 3px) var(--au-textarea-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
         }
       }
         

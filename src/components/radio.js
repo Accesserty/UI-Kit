@@ -22,7 +22,7 @@ class AuRadioGroup extends HTMLElement {
         display: flex;
         align-items: center;
         gap: var(--au-radio-content-gap, 0.375rem);
-        -webkit-tap-highlight-color: oklch(0% 0 0 / 0);
+        -webkit-tap-highlight-color: oklch(0 0 0 / 0);
         padding: 0.25rem;
         input[type="radio"] {
           appearance: none;
@@ -30,9 +30,9 @@ class AuRadioGroup extends HTMLElement {
           cursor: pointer;
           width: var(--au-radio-input-width, 1.5rem);
           height: var(--au-radio-input-height, 1.5rem);
-          border: var(--au-radio-input-border-width, 1px) var(--au-radio-input-border-style, solid) var(--au-radio-input-border-color, oklch(78.94% 0 0));
+          border: var(--au-radio-input-border-width, 1px) var(--au-radio-input-border-style, solid) var(--au-radio-input-border-color, oklch(0.7894 0 0));
           border-radius: 50%;
-          background-color: var(--au-radio-input-bg, oklch(99.4% 0 0));
+          background-color: var(--au-radio-input-bg, oklch(0.994 0 0));
           &:focus-visible {
             outline: none;
           }
@@ -40,7 +40,7 @@ class AuRadioGroup extends HTMLElement {
             cursor: not-allowed;
           }
           &:checked {
-            background-color: var(--au-radio-input-checked-bg, oklch(13.98% 0 0));
+            background-color: var(--au-radio-input-checked-bg, oklch(0.1398 0 0));
             display: grid;
             place-content: center;
             &:before {
@@ -48,13 +48,13 @@ class AuRadioGroup extends HTMLElement {
               width: 0.5rem;
               height: 0.5rem;
               border-radius: 50%;
-              background-color: var(--au-radio-input-checked-circle-color, oklch(99.4% 0 0));
+              background-color: var(--au-radio-input-checked-circle-color, oklch(0.994 0 0));
             }
           }
         }
         .text {
           flex: 1;
-          color: var(--au-radio-label-text-color, oklch(13.98% 0 0));
+          color: var(--au-radio-label-text-color, oklch(0.1398 0 0));
           font-size: var(--au-radio-label-text-size, 1rem);
         }
         &:hover {
@@ -64,11 +64,11 @@ class AuRadioGroup extends HTMLElement {
         }
         &:active {
           .text {
-            color: var(--au-radio-label-active-text-color, oklch(53.7% 0 0));
+            color: var(--au-radio-label-active-text-color, oklch(0.537 0 0));
           }
         }
         &:has(input:focus-visible) {
-          box-shadow: inset 0 0 0 var(--au-radio-input-focus-shadow-width, 3px) var(--au-radio-input-focus-shadow-color, oklch(83.15% 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-radio-input-focus-shadow-width, 3px) var(--au-radio-input-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
         }
         &:has(input[type="radio"]:disabled) {
           cursor: not-allowed;
@@ -78,7 +78,7 @@ class AuRadioGroup extends HTMLElement {
           .text {
             pointer-events: none;
             text-decoration: none;
-            color: var(--au-radio-label-disabled-text-color, oklch(53.7% 0 0));
+            color: var(--au-radio-label-disabled-text-color, oklch(0.537 0 0));
           }
         }
       }
