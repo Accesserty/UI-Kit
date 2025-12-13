@@ -12,7 +12,7 @@ class AuInput extends HTMLElement {
     .input-wrapper {
       display: flex;
       align-items: center;
-      background-color: var(--au-input-bg, oklch(0.994 0 0));
+      background: var(--au-input-wrapper-bg, transparent);
 
       label {
         word-break: break-word;

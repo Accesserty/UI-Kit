@@ -366,7 +366,7 @@ var z=Object.defineProperty;var L=(g,t,e)=>t in g?z(g,t,{enumerable:!0,configura
     .input-wrapper {
       display: flex;
       align-items: center;
-      background-color: var(--au-input-bg, oklch(0.994 0 0));
+      background: var(--au-input-wrapper-bg, transparent);
 
       label {
         word-break: break-word;
