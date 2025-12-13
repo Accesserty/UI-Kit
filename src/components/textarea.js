@@ -85,8 +85,8 @@ class AuTextarea extends HTMLElement {
 
     this.textarea.addEventListener('input', () => {
       this.value = this.textarea.value;
-      this.internals.setFormValue(this.value);
       this.dispatchEvent(new Event('input', { bubbles: true }));
+      this._syncValidity();
     });
 
     this.textarea.addEventListener('change', () => {
@@ -100,6 +100,26 @@ class AuTextarea extends HTMLElement {
 
   static get observedAttributes() {
     return ['placeholder', 'name', 'rows', 'cols', 'disabled', 'readonly', 'required', 'maxlength', 'minlength', 'aria-label', 'aria-labelledby', 'label', 'id'];
+  }
+
+  get validity() {
+    return this.internals.validity;
+  }
+
+  get validationMessage() {
+    return this.internals.validationMessage;
+  }
+
+  get willValidate() {
+    return this.internals.willValidate;
+  }
+
+  checkValidity() {
+    return this.internals.checkValidity();
+  }
+
+  reportValidity() {
+    return this.internals.reportValidity();
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -118,10 +138,12 @@ class AuTextarea extends HTMLElement {
         this.textarea.setAttribute(name, newValue);
       }
     }
+    this._syncValidity();
   }
 
   connectedCallback() {
     this.internals.setFormValue(this.textarea.value);
+    this._syncValidity();
   }
 
   get value() {
@@ -131,6 +153,7 @@ class AuTextarea extends HTMLElement {
   set value(val) {
     this.textarea.value = val;
     this.internals.setFormValue(val);
+    this._syncValidity();
   }
 
   formResetCallback() {
@@ -141,6 +164,15 @@ class AuTextarea extends HTMLElement {
     const byteArray = new Uint32Array(1);
     window.crypto.getRandomValues(byteArray);
     return `au-textarea-${byteArray[0].toString(36)}`;
+  }
+
+  _syncValidity() {
+    if (!this.textarea) return;
+    if (this.textarea.validity.valid) {
+      this.internals.setValidity({});
+    } else {
+      this.internals.setValidity(this.textarea.validity, this.textarea.validationMessage, this.textarea);
+    }
   }
 }
 

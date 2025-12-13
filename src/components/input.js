@@ -205,6 +205,26 @@ class AuInput extends HTMLElement {
     }
   }
 
+  get validity() {
+    return this.internals.validity;
+  }
+
+  get validationMessage() {
+    return this.internals.validationMessage;
+  }
+
+  get willValidate() {
+    return this.internals.willValidate;
+  }
+
+  checkValidity() {
+    return this.internals.checkValidity();
+  }
+
+  reportValidity() {
+    return this.internals.reportValidity();
+  }
+
   connectedCallback() {
     if (!this._initialValueSet) {
       this._initialValue = this.input.value;
