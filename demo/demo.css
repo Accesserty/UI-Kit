@@ -512,3 +512,50 @@ code {
 #demo-form {
   max-width: 800px;
 }
+
+.dialog-custom {
+  --au-dialog-bg: yellow;
+  --au-dialog-text-color: green;
+  --au-dialog-border-color: red;
+  --au-dialog-border-radius: 1.5rem;
+  --au-dialog-padding: 3rem;
+  --au-dialog-max-width: 800px;
+  --au-dialog-max-height: 600px;
+  --au-dialog-shadow: 0 0 1rem purple;
+  /* --au-dialog-z-index: ;*/
+  --au-dialog-backdrop-bg: oklch(from orange l c h / 0.5);
+  --au-dialog-backdrop-blur: 4px;
+}
+
+.custom-dropdown {
+  /* --au-dropdown-padding-vertical:; */
+  /* --au-dropdown-padding-horizontal:; */
+  --au-dropdown-text-color: red;
+  --au-dropdown-text-size: 3rem;
+  /* --au-dropdown-text-family:; */
+  /* --au-dropdown-text-line-height:; */
+  /* --au-dropdown-border-width */
+  /* --au-dropdown-border-style */
+  /* --au-dropdown-border-color */
+  /* --au-dropdown-border-radius */
+  /* --au-dropdown-bg */
+  /* --au-dropdown-hover-bg */
+  /* --au-dropdown-hover-border-color */
+  /* --au-dropdown-active-bg */
+  /* --au-dropdown-active-border-color */
+  /* --au-dropdown-focus-shadow-width */
+  /* --au-dropdown-focus-shadow-color */
+  --au-dropdown-menu-bg: yellow;
+  /* --au-dropdown-menu-border-width:; */
+  /* --au-dropdown-menu-border-style:; */
+  /* --au-dropdown-menu-border-color:; */
+  --au-dropdown-menu-border-radius: 1.5rem;
+  --au-dropdown-menu-border-width: 1px;
+  --au-dropdown-menu-border-style: solid;
+  --au-dropdown-menu-border-color: red;
+  /* --au-dropdown-menu-padding:; */
+  /* --au-dropdown-item-color:; */
+  /* --au-dropdown-item-hover-bg:; */
+  /* --au-dropdown-item-hover-color */
+
+}

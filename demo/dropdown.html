@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accesserty UI Kit Dropdown</title>
+    <link rel="stylesheet" href="../src/css/au-style.css" />
+    <link rel="stylesheet" href="demo.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <script src="../src/components/dropdown.js" defer></script>
+  </head>
+  <body>
+    <header><a href="../demo/index.html" title="go to home page">Home</a></header>
+    <main>
+      <h1>
+        Accesserty UI Kit Dropdown
+      </h1>
+      <section>
+        <h2>How to use</h2>
+        <h3>HTML</h3>
+        <ol>
+          <li>Copy file (dropdown.js or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
+          <li>
+            Add the JavaScript file to HTML using the
+            <code>&lt;script src=&quot;&quot; defer&gt;</code> tag
+          </li>
+          <li>Use the <code>&lt;au-dropdown&gt;</code> and <code>&lt;au-dropdown-item&gt;</code> tags</li>
+        </ol>
+      </section>
+      
+      
+      <section>
+        <h2>Basic &lt;slot&gt;</h2>
+        <h3>&lt;au-dropdown&gt;</h3>
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>trigger</td>
+            <td>Content of the dropdown toggle button</td>
+          </tr>
+          <tr>
+            <td>(default)</td>
+            <td>Container for <code>&lt;au-dropdown-item&gt;</code> elements</td>
+          </tr>
+        </table>
+
+        <h3>&lt;au-dropdown-item&gt;</h3>
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>(default)</td>
+            <td>Content of the menu item</td>
+          </tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>Basic</h2>
+        <div role="group" aria-labelledby="group-label-basic">
+          <span id="group-label-basic" hidden>Basic Dropdown</span>
+          <au-dropdown id="basic-dropdown">
+            <span slot="trigger">Options</span>
+            <au-dropdown-item value="1">Action 1</au-dropdown-item>
+            <au-dropdown-item value="2">Action 2</au-dropdown-item>
+            <hr />
+            <au-dropdown-item value="3">Action 3 (Separated)</au-dropdown-item>
+          </au-dropdown>
+          <br>
+          <p id="basic-status"></p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Custom Style</h2>
+        <div role="group" aria-labelledby="group-label-custom-style">
+          <span id="group-label-custom-style" hidden>Custom Style Dropdown</span>
+          <au-dropdown id="basic-dropdown" class="custom-dropdown">
+            <span slot="trigger">Options</span>
+            <au-dropdown-item value="1">Action 1</au-dropdown-item>
+            <au-dropdown-item value="2">Action 2</au-dropdown-item>
+            <hr />
+            <au-dropdown-item value="3">Action 3 (Separated)</au-dropdown-item>
+          </au-dropdown>
+          <br>
+          <p id="basic-status"></p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Interaction with Icons</h2>
+        <div role="group" aria-labelledby="group-label-icons">
+          <span id="group-label-icons" hidden>Dropdown with Icons</span>
+          <au-dropdown>
+            <div slot="trigger" class="info">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+                Settings
+              </div>
+            </div>
+            <au-dropdown-item value="profile">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-outlined" aria-hidden="true">person</span>
+                Profile
+              </div>
+            </au-dropdown-item>
+            <au-dropdown-item value="security">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+                Security
+              </div>
+            </au-dropdown-item>
+          </au-dropdown>
+        </div>
+      </section>
+
+      <section>
+        <h2>Advanced Usage (Links & Functions)</h2>
+        <div role="group" aria-labelledby="group-label-advanced">
+          <span id="group-label-advanced" hidden>Advanced Dropdown</span>
+          <au-dropdown id="advanced-dropdown">
+            <span slot="trigger">Custom Actions</span>
+            
+            <!-- Custom function example -->
+            <au-dropdown-item onclick="window.print()">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-outlined" aria-hidden="true">print</span>
+                Print Page
+              </div>
+            </au-dropdown-item>
+
+            <!-- Native Link example -->
+            <au-dropdown-item>
+              <a href="https://example.com" target="_blank">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+                  External Link
+                </div>
+              </a>
+            </au-dropdown-item>
+
+            <hr>
+
+            <au-dropdown-item value="export">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                Export Data...
+              </div>
+            </au-dropdown-item>
+          </au-dropdown>
+        </div>
+      </section>
+
+      <section>
+        <h2>CSS Variables</h2>
+        <h3>Trigger Button</h3>
+        <table>
+          <tr>
+            <th scope="col">Variable</th>
+            <th scope="col">Description</th>
+            <th scope="col">Default</th>
+          </tr>
+          <tr>
+            <td>--au-dropdown-padding-vertical</td>
+            <td>Vertical padding</td>
+            <td>0.625rem</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-padding-horizontal</td>
+            <td>Horizontal padding</td>
+            <td>1rem</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-text-color</td>
+            <td>Text color</td>
+            <td>oklch(0.1398 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-text-size</td>
+            <td>Font size</td>
+            <td>1rem</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-text-family</td>
+            <td>Font family</td>
+            <td>'Helvetica, Arial, sans-serif, system-ui'</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-text-line-height</td>
+            <td>Line height</td>
+            <td>1.5</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-border-width</td>
+            <td>Border width</td>
+            <td>1px</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-border-style</td>
+            <td>Border style</td>
+            <td>solid</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-border-color</td>
+            <td>Border color</td>
+            <td>oklch(0.7894 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-border-radius</td>
+            <td>Border radius</td>
+            <td>0</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-bg</td>
+            <td>Background color</td>
+            <td>oklch(0.994 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-hover-bg</td>
+            <td>Hover background</td>
+            <td>oklch(0.9466 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-hover-border-color</td>
+            <td>Hover border color</td>
+            <td>oklch(0.7894 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-active-bg</td>
+            <td>Active background</td>
+            <td>oklch(0.8689 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-active-border-color</td>
+            <td>Active border color</td>
+            <td>oklch(0.7894 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-focus-shadow-width</td>
+            <td>Focus ring width</td>
+            <td>3px</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-focus-shadow-color</td>
+            <td>Focus ring color</td>
+            <td>oklch(0.8315 0.157 78)</td>
+          </tr>
+        </table>
+
+        <h3>Menu</h3>
+        <table>
+          <tr>
+            <th scope="col">Variable</th>
+            <th scope="col">Description</th>
+            <th scope="col">Default</th>
+          </tr>
+          <tr>
+            <td>--au-dropdown-menu-bg</td>
+            <td>Background color</td>
+            <td>oklch(1 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-menu-border-width</td>
+            <td>Border width</td>
+            <td>1px</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-menu-border-style</td>
+            <td>Border style</td>
+            <td>solid</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-menu-border-color</td>
+            <td>Border color</td>
+            <td>oklch(0.8 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-menu-border-radius</td>
+            <td>Border radius</td>
+            <td>0</td>
+          </tr>
+        </table>
+
+        <h3>Menu Item</h3>
+        <table>
+          <tr>
+            <th scope="col">Variable</th>
+            <th scope="col">Description</th>
+            <th scope="col">Default</th>
+          </tr>
+          <tr>
+            <td>--au-dropdown-item-padding</td>
+            <td>Padding</td>
+            <td>0.5rem 1rem</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-item-color</td>
+            <td>Text color</td>
+            <td>oklch(0.2 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-item-hover-bg</td>
+            <td>Hover background</td>
+            <td>oklch(0.95 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-dropdown-item-hover-color</td>
+            <td>Hover text color</td>
+            <td>oklch(0.1 0 0)</td>
+          </tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>Event listeners</h2>
+        <p>The <code>&lt;au-dropdown&gt;</code> component dispatches a <code>selected</code> event when an item is clicked.</p>
+        <code style="display: block; white-space: pre-wrap; background: #f4f4f4; padding: 1rem; border-radius: 4px;">
+  document.querySelector('au-dropdown').addEventListener('selected', (e) => {
+    console.log('Selected value:', e.detail.value);
+  });
+        </code>
+      </section>
+
+      <section>
+        <h2>Conclusion</h2>
+        <p>The <code>AuDropdown</code> component ensures that users can interact with menus using standard keyboard patterns (Arrows, Enter, Space, Escape) while providing clear semantic hints to assistive technologies.</p>
+      </section>
+    </main>
+
+    <script type="module">
+      const dropdown = document.getElementById('basic-dropdown');
+      const status = document.getElementById('basic-status');
+      
+      dropdown.addEventListener('selected', (e) => {
+        status.textContent = `Last selected: ${e.detail.value} at ${new Date().toLocaleTimeString()}`;
+      });
+    </script>
+  </body>
+</html>
