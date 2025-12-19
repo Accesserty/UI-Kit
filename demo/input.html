@@ -1,23 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Accesserty UI Kit Input</title>
-    <link rel="stylesheet" href="../src/css/au-style.css" />
-    <link rel="stylesheet" href="demo.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <script src="../src/components/input.js" defer></script>
-  </head>
-  <body>
-    <header><a href="../demo/index.html" title="go to home page">Home</a></header>
-    <main>
-      <h1>Accesserty UI Kit Input</h1>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accesserty UI Kit Input</title>
+  <link rel="stylesheet" href="../src/css/au-style.css" />
+  <link rel="stylesheet" href="demo.css" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script src="../src/components/input.js" defer></script>
+</head>
+
+<body>
+  <header><a href="../demo/index.html" title="go to home page">Home</a></header>
+  <main>
+    <h1>Accesserty UI Kit Input</h1>
+    <section>
       <h2>Size</h2>
       <au-input label="Small" data-size="small"></au-input>
       <au-input label="Default"></au-input>
       <au-input label="Large" data-size="large"></au-input>
+    </section>
 
+    <section>
       <h2>Prefix, Affix (Slot) and API</h2>
 
       <au-input id="myInput" label="Enter Date">
@@ -27,29 +33,41 @@
           <button onclick="myInput.clear()">Clear(.clear())</button>
         </div>
       </au-input>
+    </section>
 
+    <section>
       <h2>Clearable</h2>
       <p>
         using attibute <code>&lt;data-clear&gt;</code> contorll and <code>&lt;data-clear-label&gt;</code> setting text.
       </p>
       <p>
-        For input fields with `type="search"`, the clear button is not needed as browsers typically provide a native clear button for search inputs.
+        For input fields with `type="search"`, the clear button is not needed as browsers typically provide a native
+        clear button for search inputs.
       </p>
       <au-input label="data-clear" data-clear data-clear-label="Clear it now!"></au-input>
       <au-input label="type=search" type="search"></au-input>
+    </section>
 
+    <section>
       <h2>Placeholder</h2>
       <au-input label="Default" placeholder="Please Enter Here..."></au-input>
+    </section>
 
+    <section>
       <h2>Required</h2>
       <au-input label="email(required, 5-10 letters)" type="email" required pattern=".{5,10}"></au-input>
+    </section>
 
+    <section>
       <h2>Layout</h2>
-      <au-input label="Layout" type="email" data-layout="vertical" data-clear data-clear-label="Clear it now!" placeholder="Enter...">
+      <au-input label="Layout" type="email" data-layout="vertical" data-clear data-clear-label="Clear it now!"
+        placeholder="Enter...">
         <span slot="prefix">Prefix</span>
         <button type="button" slot="affix">Affix</button>
       </au-input>
+    </section>
 
+    <section>
       <h2>Types</h2>
       <form action="">
         <au-input label="text"></au-input>
@@ -66,16 +84,23 @@
         <au-input label="time" type="time"></au-input>
         <button>Submit</button>
       </form>
+    </section>
+
+    <section>
       <h2>Custom Style</h2>
       <p>Using <code>::part</code> style clear button</p>
       <au-input id="myInput2" label="Enter Date" class="custom-input" data-clear data-clear-label="Clear it now!">
         <span slot="prefix">Type a Date</span>
         <div slot="affix">
-          <button class="custom-btn--primary-flat" onclick="myInput2.suggest(new Date().toISOString().slice(0, 10))">Today(.suggest())</button>
+          <button class="custom-btn--primary-flat"
+            onclick="myInput2.suggest(new Date().toISOString().slice(0, 10))">Today(.suggest())</button>
           <button class="custom-btn--primary-flat" onclick="myInput2.clear()">Clear(.clear())</button>
         </div>
       </au-input>
-      <h3>CSS Variables</h3>
+    </section>
+
+    <section>
+      <h2>CSS Variables</h2>
       <table>
         <thead>
           <tr>
@@ -247,6 +272,8 @@
           </tr>
         </tbody>
       </table>
-    </main>
-  </body>
+    </section>
+  </main>
+</body>
+
 </html>

@@ -1,20 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Accesserty UI Kit Radio</title>
-    <link rel="stylesheet" href="../src/css/au-style.css" />
-    <link rel="stylesheet" href="demo.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <script src="../src/components/radio.js" defer></script>
-  </head>
-  <body>
-    <header><a href="../demo/index.html" title="go to home page">Home</a></header>
-    <main>
-      <h1>
-        Accesserty UI Kit Radio
-      </h1>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accesserty UI Kit Radio</title>
+  <link rel="stylesheet" href="../src/css/au-style.css" />
+  <link rel="stylesheet" href="demo.css" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script src="../src/components/radio.js" defer></script>
+</head>
+
+<body>
+  <header><a href="../demo/index.html" title="go to home page">Home</a></header>
+  <main>
+    <h1>
+      Accesserty UI Kit Radio
+    </h1>
+    <section>
       <h2>Attribute</h2>
       <table>
         <caption>
@@ -41,6 +45,8 @@
           <td>horizontal / vertical</td>
         </tr>
       </table>
+    </section>
+    <section>
       <h2>Basic</h2>
       <h3>Empty</h3>
       <au-radio-group aria-label="Empty">
@@ -66,13 +72,17 @@
         <au-radio>Radio 2</au-radio>
         <au-radio>Radio 3</au-radio>
       </au-radio-group>
+    </section>
+    <section>
       <h2>Custom Style</h2>
       <au-radio-group aria-label="Custom Radio" class="custom-au-radio">
         <au-radio checked>Radio 1</au-radio>
         <au-radio disabled>Radio 2</au-radio>
         <au-radio>Radio 3</au-radio>
       </au-radio-group>
-      <h3>CSS Variables</h3>
+    </section>
+    <section>
+      <h2>CSS Variables</h2>
       <table>
         <tr>
           <th scope="col">CSS Variables nam</th>
@@ -160,6 +170,8 @@
           <td>oklch(0.537 0 0)</td>
         </tr>
       </table>
-    </main>
-  </body>
+    </section>
+  </main>
+</body>
+
 </html>

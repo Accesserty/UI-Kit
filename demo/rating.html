@@ -1,281 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Accesserty UI Kit Rating</title>
-    <link rel="stylesheet" href="../src/css/au-style.css" />
-    <link rel="stylesheet" href="demo.css" />
-    <script src="../src/components/rating.js" defer></script>
-  </head>
-  <body>
-    <header><a href="../demo/index.html" title="go to home page">Home</a></header>
-    <main>
-      <h1>Accesserty UI Kit Rating</h1>
 
-      <section>
-        <h2>How to use</h2>
-        <h3>HTML</h3>
-        <ol>
-          <li>Copy file (rating.js or accesserty-ui-kit.js)</li>
-          <li>Add the JavaScript file to HTML using the <code>&lt;script src="" defer&gt;</code> tag</li>
-          <li>Use the <code>&lt;au-rating&gt;</code> tag</li>
-        </ol>
-      </section>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accesserty UI Kit Rating</title>
+  <link rel="stylesheet" href="../src/css/au-style.css" />
+  <link rel="stylesheet" href="demo.css" />
+  <script src="../src/components/rating.js" defer></script>
+</head>
 
-      <section>
-        <h2>Attributes</h2>
-        <table>
-          <tr>
-            <th scope="col">Attribute</th>
-            <th scope="col">Description</th>
-            <th scope="col">Default</th>
-          </tr>
-          <tr>
-            <td>name</td>
-            <td>Form field name</td>
-            <td>rating</td>
-          </tr>
-          <tr>
-            <td>max</td>
-            <td>Maximum score (number of stars)</td>
-            <td>5</td>
-          </tr>
-          <tr>
-            <td>value</td>
-            <td>Currently selected value</td>
-            <td>0</td>
-          </tr>
-          <tr>
-            <td>labels</td>
-            <td>Comma-separated labels for each level</td>
-            <td>-</td>
-          </tr>
-          <tr>
-            <td>aria-label</td>
-            <td>Accessible label for the group</td>
-            <td>Rating</td>
-          </tr>
-          <tr>
-            <td>score-info</td>
-            <td>Additional text displayed after the score</td>
-            <td>-</td>
-          </tr>
-          <tr>
-            <td>show-score</td>
-            <td>Display "value / max" text next to stars</td>
-            <td>-</td>
-          </tr>
-          <tr>
-            <td>disabled</td>
-            <td>Disable all interaction</td>
-            <td>false</td>
-          </tr>
-          <tr>
-            <td>readonly</td>
-            <td>Prevent interaction but allow focus (for display)</td>
-            <td>false</td>
-          </tr>
-        </table>
-      </section>
+<body>
+  <header><a href="../demo/index.html" title="go to home page">Home</a></header>
+  <main>
+    <h1>Accesserty UI Kit Rating</h1>
 
-      <section>
-        <h2>Basic Rating</h2>
-        <au-rating 
-          id="basic-rating"
-          aria-label="Rate this product"
-          labels="Very Bad,Bad,OK,Good,Excellent"
-        ></au-rating>
-        <p id="rating-status"></p>
-      </section>
+    <section>
+      <h2>How to use</h2>
+      <h3>HTML</h3>
+      <ol>
+        <li>Copy file (rating.js or accesserty-ui-kit.js)</li>
+        <li>Add the JavaScript file to HTML using the <code>&lt;script src="" defer&gt;</code> tag</li>
+        <li>Use the <code>&lt;au-rating&gt;</code> tag</li>
+      </ol>
+    </section>
 
-      <section>
-        <h2>Rating with Default Value</h2>
-        <au-rating 
-          aria-label="Rate your experience"
-          value="3"
-          labels="1 Star,2 Stars,3 Stars,4 Stars,5 Stars"
-        ></au-rating>
-      </section>
+    <section>
+      <h2>Attributes</h2>
+      <table>
+        <tr>
+          <th scope="col">Attribute</th>
+          <th scope="col">Description</th>
+          <th scope="col">Default</th>
+        </tr>
+        <tr>
+          <td>name</td>
+          <td>Form field name</td>
+          <td>rating</td>
+        </tr>
+        <tr>
+          <td>max</td>
+          <td>Maximum score (number of stars)</td>
+          <td>5</td>
+        </tr>
+        <tr>
+          <td>value</td>
+          <td>Currently selected value</td>
+          <td>0</td>
+        </tr>
+        <tr>
+          <td>labels</td>
+          <td>Comma-separated labels for each level</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>aria-label</td>
+          <td>Accessible label for the group</td>
+          <td>Rating</td>
+        </tr>
+        <tr>
+          <td>score-info</td>
+          <td>Additional text displayed after the score</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>show-score</td>
+          <td>Display "value / max" text next to stars</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>disabled</td>
+          <td>Disable all interaction</td>
+          <td>false</td>
+        </tr>
+        <tr>
+          <td>readonly</td>
+          <td>Prevent interaction but allow focus (for display)</td>
+          <td>false</td>
+        </tr>
+      </table>
+    </section>
 
-      <section>
-        <h2>Rating with Score Display</h2>
-        <au-rating 
-          aria-label="Product rating"
-          value="4"
-          show-score
-          labels="Very Bad,Bad,OK,Good,Excellent"
-        ></au-rating>
-      </section>
+    <section>
+      <h2>Basic Rating</h2>
+      <au-rating id="basic-rating" aria-label="Rate this product" labels="Very Bad,Bad,OK,Good,Excellent"></au-rating>
+      <p id="rating-status"></p>
+    </section>
 
-      <section>
-        <h2>10-Star Rating with Score</h2>
-        <au-rating 
-          aria-label="Rate 1 to 10"
-          max="10"
-          value="7"
-          show-score
-        ></au-rating>
-      </section>
+    <section>
+      <h2>Rating with Default Value</h2>
+      <au-rating aria-label="Rate your experience" value="3"
+        labels="1 Star,2 Stars,3 Stars,4 Stars,5 Stars"></au-rating>
+    </section>
 
-      <section>
-        <h2>Rating with Score Info</h2>
-        <p>Use <code>score-info</code> attribute to add text after the score.</p>
-        <au-rating 
-          aria-label="Average rating"
-          value="4"
-          show-score
-          score-info="(128 reviews)"
-          labels="Very Bad,Bad,OK,Good,Excellent"
-        ></au-rating>
-      </section>
+    <section>
+      <h2>Rating with Score Display</h2>
+      <au-rating aria-label="Product rating" value="4" show-score labels="Very Bad,Bad,OK,Good,Excellent"></au-rating>
+    </section>
 
-      <section>
-        <h2>Native Form Participation</h2>
-        <form id="demo-form" action="javascript:void(0);">
-          <div style="margin-bottom: 1rem;">
-            <label for="form-rating" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Rate Us:</label>
-            <au-rating 
-              id="form-rating"
-              name="user-rating"
-              value="3" 
-              labels="Poor,Fair,Good,Very Good,Excellent"
-            ></au-rating>
-          </div>
-          <button type="submit" style="padding: 0.5rem 1rem; cursor: pointer;">Submit Form</button>
-        </form>
-        <div id="form-output" style="margin-top: 1rem; padding: 1rem; background: #eee; border-radius: 4px; display: none;"></div>
-      </section>
+    <section>
+      <h2>10-Star Rating with Score</h2>
+      <au-rating aria-label="Rate 1 to 10" max="10" value="7" show-score></au-rating>
+    </section>
 
-      <section>
-        <h2>Read-only State</h2>
-        <p>Use <code>readonly</code> attribute for display-only scenarios.</p>
-        <au-rating 
-          readonly 
-          value="3.7" 
-          show-score 
-          score-info="(Read-only)"
-        ></au-rating>
-      </section>
+    <section>
+      <h2>Rating with Score Info</h2>
+      <p>Use <code>score-info</code> attribute to add text after the score.</p>
+      <au-rating aria-label="Average rating" value="4" show-score score-info="(128 reviews)"
+        labels="Very Bad,Bad,OK,Good,Excellent"></au-rating>
+    </section>
 
-      <section>
-        <h2>Disabled State</h2>
-        <p>Use <code>disabled</code> attribute to prevent all interaction.</p>
-        <au-rating 
-          disabled 
-          value="2" 
-          show-score
-        ></au-rating>
-      </section>
+    <section>
+      <h2>Native Form Participation</h2>
+      <form id="demo-form" action="javascript:void(0);">
+        <div style="margin-bottom: 1rem;">
+          <label for="form-rating" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Rate Us:</label>
+          <au-rating id="form-rating" name="user-rating" value="3"
+            labels="Poor,Fair,Good,Very Good,Excellent"></au-rating>
+        </div>
+        <button type="submit" style="padding: 0.5rem 1rem; cursor: pointer;">Submit Form</button>
+      </form>
+      <div id="form-output"
+        style="margin-top: 1rem; padding: 1rem; background: #eee; border-radius: 4px; display: none;"></div>
+    </section>
 
-      <section>
-        <h2>CSS Variables</h2>
-        <table>
-          <tr>
-            <th scope="col">Variable</th>
-            <th scope="col">Description</th>
-            <th scope="col">Default</th>
-          </tr>
-          <tr>
-            <td>--au-rating-star-size</td>
-            <td>Star icon size</td>
-            <td>2rem</td>
-          </tr>
-          <tr>
-            <td>--au-rating-star-color</td>
-            <td>Empty star color</td>
-            <td>oklch(0.8 0 0)</td>
-          </tr>
-          <tr>
-            <td>--au-rating-star-filled-color</td>
-            <td>Filled star color</td>
-            <td>oklch(0.75 0.15 85)</td>
-          </tr>
-          <tr>
-          <tr>
-            <td>--au-rating-star-stroke-color</td>
-            <td>Star stroke color</td>
-            <td>oklch(0.6 0 0)</td>
-          </tr>
-          <tr>
-            <td>--au-rating-label-color</td>
-            <td>Label text color</td>
-            <td>oklch(0.1398 0 0)</td>
-          </tr>
-          <tr>
-            <td>--au-rating-label-size</td>
-            <td>Label font size</td>
-            <td>0.75rem</td>
-          </tr>
-          <tr>
-            <td>--au-rating-gap</td>
-            <td>Gap between stars</td>
-            <td>0.25rem</td>
-          </tr>
-          <tr>
-            <td>--au-rating-focus-width</td>
-            <td>Focus ring width</td>
-            <td>3px</td>
-          </tr>
-          <tr>
-            <td>--au-rating-focus-color</td>
-            <td>Focus ring color</td>
-            <td>oklch(0.8315 0.157 78)</td>
-          </tr>
-          <tr>
-            <td>--au-rating-score-color</td>
-            <td>Score text color</td>
-            <td>oklch(0.1398 0 0)</td>
-          </tr>
-          <tr>
-            <td>--au-rating-score-size</td>
-            <td>Score font size</td>
-            <td>1rem</td>
-          </tr>
-        </table>
-      </section>
+    <section>
+      <h2>Read-only State</h2>
+      <p>Use <code>readonly</code> attribute for display-only scenarios.</p>
+      <au-rating readonly value="3.7" show-score score-info="(Read-only)"></au-rating>
+    </section>
 
-      <section>
-        <h2>Event Listeners</h2>
-        <p>The <code>&lt;au-rating&gt;</code> component dispatches a <code>change</code> event when the rating is selected.</p>
-        <code style="display: block; white-space: pre-wrap; background: #f4f4f4; padding: 1rem; border-radius: 4px;">
+    <section>
+      <h2>Disabled State</h2>
+      <p>Use <code>disabled</code> attribute to prevent all interaction.</p>
+      <au-rating disabled value="2" show-score></au-rating>
+    </section>
+
+    <section>
+      <h2>CSS Variables</h2>
+      <table>
+        <tr>
+          <th scope="col">Variable</th>
+          <th scope="col">Description</th>
+          <th scope="col">Default</th>
+        </tr>
+        <tr>
+          <td>--au-rating-star-size</td>
+          <td>Star icon size</td>
+          <td>2rem</td>
+        </tr>
+        <tr>
+          <td>--au-rating-star-color</td>
+          <td>Empty star color</td>
+          <td>oklch(0.8 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-rating-star-filled-color</td>
+          <td>Filled star color</td>
+          <td>oklch(0.75 0.15 85)</td>
+        </tr>
+        <tr>
+        <tr>
+          <td>--au-rating-star-stroke-color</td>
+          <td>Star stroke color</td>
+          <td>oklch(0.6 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-rating-label-color</td>
+          <td>Label text color</td>
+          <td>oklch(0.1398 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-rating-label-size</td>
+          <td>Label font size</td>
+          <td>0.75rem</td>
+        </tr>
+        <tr>
+          <td>--au-rating-gap</td>
+          <td>Gap between stars</td>
+          <td>0.25rem</td>
+        </tr>
+        <tr>
+          <td>--au-rating-focus-width</td>
+          <td>Focus ring width</td>
+          <td>3px</td>
+        </tr>
+        <tr>
+          <td>--au-rating-focus-color</td>
+          <td>Focus ring color</td>
+          <td>oklch(0.8315 0.157 78)</td>
+        </tr>
+        <tr>
+          <td>--au-rating-score-color</td>
+          <td>Score text color</td>
+          <td>oklch(0.1398 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-rating-score-size</td>
+          <td>Score font size</td>
+          <td>1rem</td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Event Listeners</h2>
+      <p>The <code>&lt;au-rating&gt;</code> component dispatches a <code>change</code> event when the rating is
+        selected.</p>
+      <code style="display: block; white-space: pre-wrap; background: #f4f4f4; padding: 1rem; border-radius: 4px;">
 document.querySelector('au-rating').addEventListener('change', (e) => {
   console.log('Selected rating:', e.detail.value);
 });
         </code>
-      </section>
+    </section>
 
-      <section>
-        <h2>Accessibility</h2>
-        <ul>
-          <li>Uses native <code>&lt;input type="radio"&gt;</code> for proper form integration</li>
-          <li>Keyboard navigation with Arrow keys (←↑→↓)</li>
-          <li>Screen reader support via <code>role="radiogroup"</code></li>
-          <li>Visible labels below each star for clarity</li>
-          <li>Focus indication with visible ring</li>
-          <li>Use <code>disabled</code> for read-only display mode</li>
-        </ul>
-      </section>
-    </main>
+    <section>
+      <h2>Accessibility</h2>
+      <ul>
+        <li>Uses native <code>&lt;input type="radio"&gt;</code> for proper form integration</li>
+        <li>Keyboard navigation with Arrow keys (←↑→↓)</li>
+        <li>Screen reader support via <code>role="radiogroup"</code></li>
+        <li>Visible labels below each star for clarity</li>
+        <li>Focus indication with visible ring</li>
+        <li>Use <code>disabled</code> for read-only display mode</li>
+      </ul>
+    </section>
+  </main>
 
-    <script type="module">
-      const rating = document.getElementById('basic-rating');
-      const status = document.getElementById('rating-status');
-      
-      rating.addEventListener('change', (e) => {
-        status.textContent = `You selected: ${e.detail.value} stars`;
-      });
+  <script type="module">
+    const rating = document.getElementById('basic-rating');
+    const status = document.getElementById('rating-status');
 
-      const form = document.getElementById('demo-form');
-      const output = document.getElementById('form-output');
+    rating.addEventListener('change', (e) => {
+      status.textContent = `You selected: ${e.detail.value} stars`;
+    });
 
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-        output.style.display = 'block';
-        output.textContent = 'Form Data Submitted: ' + JSON.stringify(data, null, 2);
-      });
-    </script>
-  </body>
+    const form = document.getElementById('demo-form');
+    const output = document.getElementById('form-output');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      output.style.display = 'block';
+      output.textContent = 'Form Data Submitted: ' + JSON.stringify(data, null, 2);
+    });
+  </script>
+</body>
+
 </html>

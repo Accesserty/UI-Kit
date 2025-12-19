@@ -1,246 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Accesserty UI Kit Select</title>
-    <link rel="stylesheet" href="../src/css/au-style.css" />
-    <link rel="stylesheet" href="demo.css" />
-  </head>
-  <body>
-    <header><a href="../demo/index.html" title="go to home page">Home</a></header>
-    <main>
-      <h1>
-        Accesserty UI Kit Select
-      </h1>
-      
-      <section>
-        <h2>Basic</h2>
-        <h3>We recommand using original select because now we can style <code>&lt;option&gt;</code></h3>
-        <p>
-          We use the same style because <code>&lt;button&gt;</code> and <code>&lt;select&gt;</code> often appear in the same area, such as for page filters or form inputs.
-        </p>
-        <button data-size="large">This is a Large Button</button>
-        <select data-size="large">
-          <button>
-            <selectedcontent></selectedcontent>
-          </button>
-          <div>
-            <div role="group">
-              <label>Group1</label>
-              <option value="a">Taipei</option>
-              <option value="b"><b>New York(Custom HTML)</b></option>
-              <option value="c">Hong Kong</option>
-            </div>
-            <div role="group">
-              <label>Group2</label>
-              <option value="d">LA</option>
-              <option value="e"><b>CA(Custom HTML)</b></option>
-              <option value="f">AL</option>
-            </div>
-          </div>
-        </select>
-      </section>
 
-      <section>
-        <h2>Custom Style</h2>
-        <button data-size="large" class="custom-btn--primary-flat a11y">This is a Large Button</button>
-        <select data-size="large" class="custom-btn--primary-flat a11y">
-          <button>
-            <selectedcontent></selectedcontent>
-          </button>
-          <div>
-            <div role="group">
-              <label>Group1</label>
-              <option value="a">Taipei</option>
-              <option value="b"><b>New York(Custom HTML)</b></option>
-              <option value="c">Hong Kong</option>
-            </div>
-            <div role="group">
-              <label>Group2</label>
-              <option value="d">LA</option>
-              <option value="e"><b>CA(Custom HTML)</b></option>
-              <option value="f">AL</option>
-            </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accesserty UI Kit Select</title>
+  <link rel="stylesheet" href="../src/css/au-style.css" />
+  <link rel="stylesheet" href="demo.css" />
+</head>
+
+<body>
+  <header><a href="../demo/index.html" title="go to home page">Home</a></header>
+  <main>
+    <h1>
+      Accesserty UI Kit Select
+    </h1>
+
+    <section>
+      <h2>Basic</h2>
+      <h3>We recommand using original select because now we can style <code>&lt;option&gt;</code></h3>
+      <p>
+        We use the same style because <code>&lt;button&gt;</code> and <code>&lt;select&gt;</code> often appear in the
+        same area, such as for page filters or form inputs.
+      </p>
+      <button data-size="large">This is a Large Button</button>
+      <select data-size="large">
+        <button>
+          <selectedcontent></selectedcontent>
+        </button>
+        <div>
+          <div role="group">
+            <label>Group1</label>
+            <option value="a">Taipei</option>
+            <option value="b"><b>New York(Custom HTML)</b></option>
+            <option value="c">Hong Kong</option>
           </div>
-        </select>
-        <p>If you want to change <code>&lt;select&gt;</code> html structure, here you are:</p>
-        <ul>
-          <li>
-            <a href="https://developer.chrome.com/blog/a-customizable-select?hl=zh-tw" title="go to Chrome developer">Learn how to custom select element</a>
-          </li>
-          <li>
-            <a href="https://codepen.io/web-dot-dev/pen/gbOKyRZ" title="go to Codepen demo">Demo</a>
-          </li>
-        </ul> 
-        <h3>CSS Variables</h3>
-        <table>
-          <tr>
-            <th scope="col">CSS Variables name</th>
-            <th scope="col">Description</th>
-            <th scope="col">Default value</th>
-          </tr>
-          <tr>
-            <td>--au-select-picker-border-width</td>
-            <td>option popover border width</td>
-            <td>1px</td>
-          </tr>
-          <tr>
-            <td>--au-select-picker-border-style</td>
-            <td>option popover border style</td>
-            <td>solid</td>
-          </tr>
-          <tr>
-            <td>--au-select-picker-border-color</td>
-            <td>option popover border color</td>
-            <td>oklch(0.7894 0 0)</td>
-          </tr>
-          <tr>
-            <td>--au-select-picker-border-radius</td>
-            <td>option popover border radiusr</td>
-            <td>0.25rem</td>
-          </tr>
-          <tr>
-            <td>--au-select-picker-bg</td>
-            <td>option popover border background color</td>
-            <td>oklch(0.994 0 0)</td>
-          </tr>
-          <tr>
-            <td>--au-select-picker-text-color</td>
-            <td>option popover border text color</td>
-            <td>oklch(0.1398 0 0)</td>
-          </tr>
-          <tr>
-            <td>--au-group-label-padding-top</td>
-            <td>group text padding top</td>
-            <td>0.25rem</td>
-          </tr>
-          <tr>
-            <td>--au-group-label-padding-bottom</td>
-            <td>group text padding bottom</td>
-            <td>0.25rem</td>
-          </tr>
-          <tr>
-            <td>--au-group-label-padding-left</td>
-            <td>group text padding left</td>
-            <td>0.375rem</td>
-          </tr>
-          <tr>
-            <td>--au-group-label-padding-right</td>
-            <td>group text padding right</td>
-            <td>0.375rem</td>
-          </tr>
-          <tr>
-            <td>--au-group-label-text-size</td>
-            <td>group text font size</td>
-            <td>0.875rem</td>
-          </tr>
-          <tr>
-            <td>--au-group-label-text-color</td>
-            <td>group text text color</td>
-            <td>oklch(0.1398 0 0)</td>
-          </tr>
-          <tr>
-            <td>--au-group-label-bg</td>
-            <td>group background color</td>
-            <td>oklch(0.994 0 0)</td>
-          </tr>
-          <tr>
-            <td>--au-group-label-border-width</td>
-            <td>group border width</td>
-            <td>1px</td>
-          </tr>
-          <tr>
-            <td>--au-group-label-border-style</td>
-            <td>group border style</td>
-            <td>solid</td>
-          </tr>
-          <tr>
-            <td>--au-group-label-border-color</td>
-            <td>group border color</td>
-            <td>oklch(0.7894 0 0)</td>
-          </tr>
-          <tr>
-            <td>--au-checkmark-padding-top</td>
-            <td>checkmark padding top</td>
-            <td>0.375rem</td>
-          </tr>
-          <tr>
-            <td>--au-checkmark-padding-left</td>
-            <td>checkmark padding left</td>
-            <td>1rem</td>
-          </tr>
-          <tr>
-            <td>--au-option-text-color</td>
-            <td>option text color</td>
-            <td>oklch(0.1398 0 0)</td>
-          </tr>
-          <tr>
-            <td>--au-option-padding-top</td>
-            <td>option padding-top</td>
-            <td>0.375rem</td>
-          </tr>
-          <tr>
-            <td>--au-option-padding-right</td>
-            <td>option padding-right</td>
-            <td>0.625rem</td>
-          </tr>
-          <tr>
-            <td>--au-option-padding-bottom</td>
-            <td>option padding-bottom</td>
-            <td>0.375rem</td>
-          </tr>
-          <tr>
-            <td>--au-option-padding-left</td>
-            <td>option padding-left</td>
-            <td>2.625rem</td>
-          </tr>
-          <tr>
-            <td>--au-option-hover-bg</td>
-            <td>option bg(hover)</td>
-            <td>oklch(0.9466 0 0)</td>
-          </tr>
-          <tr>
-            <td>--au-option-hover-text-color</td>
-            <td>option text color(hover)</td>
-            <td>oklch(0.1398 0 0)</td>
-          </tr>
-          <tr>
-            <td>--au-option-active-bg</td>
-            <td>option bg(active)</td>
-            <td>oklch(0.8689 0 0)</td>
-          </tr>
-          <tr>
-            <td>--au-option-active-text-color</td>
-            <td>option text color(active)</td>
-            <td>oklch(0.1398 0 0)</td>
-          </tr>
-          <tr>
-            <td>--au-option-checked-bg</td>
-            <td>option bg(checked)</td>
-            <td>oklch(0.9466 0 0)</td>
-          </tr>
-          <tr>
-            <td>--au-option-checked-text-color</td>
-            <td>option text color(checked)</td>
-            <td>oklch(0.1398 0 0)</td>
-          </tr>
-          <tr>
-            <td>--au-option-focus-shadow-width</td>
-            <td>focusd border width(box-shadow)</td>
-            <td>oklch(0.8315 0.15681888825079074 78.05241467152487)</td>
-          </tr>
-          <tr>
-            <td>--au-select-arrow-down-icon</td>
-            <td>checkmark icon(not open)</td>
-            <td>▼</td>
-          </tr>
-          <tr>
-            <td>--au-select-arrow-up-icon</td>
-            <td>checkmark icon(open)</td>
-            <td>▲</td>
-          </tr>
-        </table>
-      </section>
-  </body>
+          <div role="group">
+            <label>Group2</label>
+            <option value="d">LA</option>
+            <option value="e"><b>CA(Custom HTML)</b></option>
+            <option value="f">AL</option>
+          </div>
+        </div>
+      </select>
+    </section>
+
+    <section>
+      <h2>Custom Style</h2>
+      <button data-size="large" class="custom-btn--primary-flat a11y">This is a Large Button</button>
+      <select data-size="large" class="custom-btn--primary-flat a11y">
+        <button>
+          <selectedcontent></selectedcontent>
+        </button>
+        <div>
+          <div role="group">
+            <label>Group1</label>
+            <option value="a">Taipei</option>
+            <option value="b"><b>New York(Custom HTML)</b></option>
+            <option value="c">Hong Kong</option>
+          </div>
+          <div role="group">
+            <label>Group2</label>
+            <option value="d">LA</option>
+            <option value="e"><b>CA(Custom HTML)</b></option>
+            <option value="f">AL</option>
+          </div>
+        </div>
+      </select>
+      <p>If you want to change <code>&lt;select&gt;</code> html structure, here you are:</p>
+      <ul>
+        <li>
+          <a href="https://developer.chrome.com/blog/a-customizable-select?hl=zh-tw"
+            title="go to Chrome developer">Learn how to custom select element</a>
+        </li>
+        <li>
+          <a href="https://codepen.io/web-dot-dev/pen/gbOKyRZ" title="go to Codepen demo">Demo</a>
+        </li>
+      </ul>
+      <h3>CSS Variables</h3>
+      <table>
+        <tr>
+          <th scope="col">CSS Variables name</th>
+          <th scope="col">Description</th>
+          <th scope="col">Default value</th>
+        </tr>
+        <tr>
+          <td>--au-select-picker-border-width</td>
+          <td>option popover border width</td>
+          <td>1px</td>
+        </tr>
+        <tr>
+          <td>--au-select-picker-border-style</td>
+          <td>option popover border style</td>
+          <td>solid</td>
+        </tr>
+        <tr>
+          <td>--au-select-picker-border-color</td>
+          <td>option popover border color</td>
+          <td>oklch(0.7894 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-select-picker-border-radius</td>
+          <td>option popover border radiusr</td>
+          <td>0.25rem</td>
+        </tr>
+        <tr>
+          <td>--au-select-picker-bg</td>
+          <td>option popover border background color</td>
+          <td>oklch(0.994 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-select-picker-text-color</td>
+          <td>option popover border text color</td>
+          <td>oklch(0.1398 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-group-label-padding-top</td>
+          <td>group text padding top</td>
+          <td>0.25rem</td>
+        </tr>
+        <tr>
+          <td>--au-group-label-padding-bottom</td>
+          <td>group text padding bottom</td>
+          <td>0.25rem</td>
+        </tr>
+        <tr>
+          <td>--au-group-label-padding-left</td>
+          <td>group text padding left</td>
+          <td>0.375rem</td>
+        </tr>
+        <tr>
+          <td>--au-group-label-padding-right</td>
+          <td>group text padding right</td>
+          <td>0.375rem</td>
+        </tr>
+        <tr>
+          <td>--au-group-label-text-size</td>
+          <td>group text font size</td>
+          <td>0.875rem</td>
+        </tr>
+        <tr>
+          <td>--au-group-label-text-color</td>
+          <td>group text text color</td>
+          <td>oklch(0.1398 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-group-label-bg</td>
+          <td>group background color</td>
+          <td>oklch(0.994 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-group-label-border-width</td>
+          <td>group border width</td>
+          <td>1px</td>
+        </tr>
+        <tr>
+          <td>--au-group-label-border-style</td>
+          <td>group border style</td>
+          <td>solid</td>
+        </tr>
+        <tr>
+          <td>--au-group-label-border-color</td>
+          <td>group border color</td>
+          <td>oklch(0.7894 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-checkmark-padding-top</td>
+          <td>checkmark padding top</td>
+          <td>0.375rem</td>
+        </tr>
+        <tr>
+          <td>--au-checkmark-padding-left</td>
+          <td>checkmark padding left</td>
+          <td>1rem</td>
+        </tr>
+        <tr>
+          <td>--au-option-text-color</td>
+          <td>option text color</td>
+          <td>oklch(0.1398 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-option-padding-top</td>
+          <td>option padding-top</td>
+          <td>0.375rem</td>
+        </tr>
+        <tr>
+          <td>--au-option-padding-right</td>
+          <td>option padding-right</td>
+          <td>0.625rem</td>
+        </tr>
+        <tr>
+          <td>--au-option-padding-bottom</td>
+          <td>option padding-bottom</td>
+          <td>0.375rem</td>
+        </tr>
+        <tr>
+          <td>--au-option-padding-left</td>
+          <td>option padding-left</td>
+          <td>2.625rem</td>
+        </tr>
+        <tr>
+          <td>--au-option-hover-bg</td>
+          <td>option bg(hover)</td>
+          <td>oklch(0.9466 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-option-hover-text-color</td>
+          <td>option text color(hover)</td>
+          <td>oklch(0.1398 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-option-active-bg</td>
+          <td>option bg(active)</td>
+          <td>oklch(0.8689 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-option-active-text-color</td>
+          <td>option text color(active)</td>
+          <td>oklch(0.1398 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-option-checked-bg</td>
+          <td>option bg(checked)</td>
+          <td>oklch(0.9466 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-option-checked-text-color</td>
+          <td>option text color(checked)</td>
+          <td>oklch(0.1398 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-option-focus-shadow-width</td>
+          <td>focusd border width(box-shadow)</td>
+          <td>oklch(0.8315 0.15681888825079074 78.05241467152487)</td>
+        </tr>
+        <tr>
+          <td>--au-select-arrow-down-icon</td>
+          <td>checkmark icon(not open)</td>
+          <td>▼</td>
+        </tr>
+        <tr>
+          <td>--au-select-arrow-up-icon</td>
+          <td>checkmark icon(open)</td>
+          <td>▲</td>
+        </tr>
+      </table>
+    </section>
+</body>
+
 </html>

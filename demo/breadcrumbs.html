@@ -1,20 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Accesserty UI Kit Breadcrumbs</title>
-    <link rel="stylesheet" href="../src/css/au-style.css" />
-    <link rel="stylesheet" href="demo.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <script src="../src/components/breadcrumbs.js" defer></script>
-  </head>
-  <body>
-    <header><a href="../demo/index.html" title="go to home page">Home</a></header>
-    <main>
-      <h1>Accesserty UI Kit  Breadcrumbs</h1>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accesserty UI Kit Breadcrumbs</title>
+  <link rel="stylesheet" href="../src/css/au-style.css" />
+  <link rel="stylesheet" href="demo.css" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script src="../src/components/breadcrumbs.js" defer></script>
+</head>
+
+<body>
+  <header><a href="../demo/index.html" title="go to home page">Home</a></header>
+  <main>
+    <h1>Accesserty UI Kit Breadcrumbs</h1>
+    <section>
       <h2>How to use</h2>
-      <h3>HTML</h3>
       <ol>
         <li>Copy file (breadcrumbs.js or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
         <li>
@@ -23,7 +26,11 @@
         </li>
         <li>Use the <code>&lt;au-breadcrumbs&gt;</code> tag</li>
       </ol>
-      <p>Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and filenames are correct to avoid loading errors.</p>
+      <p>
+        Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and
+        filenames are correct to avoid loading errors.</p>
+    </section>
+    <section>
       <h2>Attribute</h2>
       <table>
         The Accesserty UI Kit breadcrumbs inherits attributes, with some custom options available:
@@ -82,64 +89,62 @@
           <td></td>
         </tr>
       </table>
+    </section>
+    <section>
       <h2>Basic</h2>
-      <au-breadcrumbs
-        items='[
-          { 
-            "text":"Home",
-            "url":"/"
-          }, 
-          {
-            "text":"About",
-            "url":"/about"
-          }, 
-          { 
-            "text":"Contact"
-          }
-        ]'
-      ></au-breadcrumbs>
+      <au-breadcrumbs items='[
+            { 
+              "text":"Home",
+              "url":"/"
+            }, 
+            {
+              "text":"About",
+              "url":"/about"
+            }, 
+            { 
+              "text":"Contact"
+            }
+          ]'></au-breadcrumbs>
+    </section>
+    <section>
       <h2>Link prefix</h2>
-      <au-breadcrumbs
-        data-link-title-prefix="go go go"
-        items='[
-          { 
-            "text":"Home",
-            "url":"/"
-          }, 
-          {
-            "text":"About",
-            "url":"/about"
-          }, 
-          { 
-            "text":"Contact"
-          }
-        ]'
-      ></au-breadcrumbs>
+      <au-breadcrumbs data-link-title-prefix="go go go" items='[
+            { 
+              "text":"Home",
+              "url":"/"
+            }, 
+            {
+              "text":"About",
+              "url":"/about"
+            }, 
+            { 
+              "text":"Contact"
+            }
+          ]'></au-breadcrumbs>
+    </section>
+    <section>
       <h2>aria-label</h2>
       <p>Recommend to add <code>aria-label</code></p>
-      <au-breadcrumbs
-        aria-label="This is main navigator."
-        items='[
-          { 
-            "text":"Home",
-            "url":"/"
-          }, 
-          {
-            "text":"About",
-            "url":"/about"
-          }, 
-          { 
-            "text":"Contact"
-          }
-        ]'
-      ></au-breadcrumbs>
+      <au-breadcrumbs aria-label="This is main navigator." items='[
+            { 
+              "text":"Home",
+              "url":"/"
+            }, 
+            {
+              "text":"About",
+              "url":"/about"
+            }, 
+            { 
+              "text":"Contact"
+            }
+          ]'></au-breadcrumbs>
       <p>open devtool you can see <code>&lt;nav aria-label="This is main navigator."&gt;</code></p>
+    </section>
+    <section>
       <h2>aria-labelledby</h2>
       <p>The <code>aria-labelledby</code> attribute can reference an element that labels the breadcrumbs.</p>
       <div id="demo-label">Navigation heading</div>
-      <au-breadcrumbs
-        aria-labelledby="demo-label"
-        items='[
+      <au-breadcrumbs aria-labelledby="demo-label" items='[
           {
             "text":"Home",
             "url":"/"
@@ -151,36 +156,33 @@
           {
             "text":"Contact"
           }
-        ]'
-      ></au-breadcrumbs>
+        ]'></au-breadcrumbs>
+    </section>
+    <section>
       <h2>Separator</h2>
-      <au-breadcrumbs
-        label="This is main navigator."
-        separator=">"
-        items='[
-          { 
-            "text":"Home",
-            "url":"/"
-          }, 
-          {
-            "text":"About",
-            "url":"/about"
-          }, 
-          { 
-            "text":"Contact"
-          }
-        ]'
-      ></au-breadcrumbs>
-      <p>The above example sets <code>label</code>. When no <code>aria-label</code> or <code>aria-labelledby</code> is provided, this value becomes the <code>aria-label</code> for the inner <code>&lt;nav&gt;</code>.</p>
+      <au-breadcrumbs label="This is main navigator." separator=">" items='[
+            { 
+              "text":"Home",
+              "url":"/"
+            }, 
+            {
+              "text":"About",
+              "url":"/about"
+            }, 
+            { 
+              "text":"Contact"
+            }
+          ]'></au-breadcrumbs>
+      <p>The above example sets <code>label</code>. When no <code>aria-label</code> or <code>aria-labelledby</code> is
+        provided, this value becomes the <code>aria-label</code> for the inner <code>&lt;nav&gt;</code>.</p>
+    </section>
+    <section>
       <h2>Custom Style</h2>
       <p>Set a classname and change CSS Variables.</p>
-      <p>If you want to add an icon in front of an item, you can use slot="icon-{count}". For example, for the second one, use `slot="icon-2"`.</p>
-      <au-breadcrumbs
-        id="aaa"
-        class="custom-breadcrumbs"
-        aria-label="Test navigator."
-        separator=">"
-        items='[
+      <p>If you want to add an icon in front of an item, you can use slot="icon-{count}". For example, for the second
+        one,
+        use `slot="icon-2"`.</p>
+      <au-breadcrumbs id="aaa" class="custom-breadcrumbs" aria-label="Test navigator." separator=">" items='[
           { 
             "text":"Home",
             "url":"/"
@@ -192,13 +194,18 @@
           { 
             "text":"Contact"
           }
-        ]'
-      >
+        ]'>
         <span slot="icon-2" aria-hidden="true" class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc. --><path d="M96 0C43 0 0 43 0 96L0 416c0 53 43 96 96 96l288 0 32 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l0-64c17.7 0 32-14.3 32-32l0-320c0-17.7-14.3-32-32-32L384 0 96 0zm0 384l256 0 0 64L96 448c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16l192 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-192 0c-8.8 0-16-7.2-16-16zm16 48l192 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-192 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z"/></svg>
-        </span>  
+          <svg xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc. -->
+            <path
+              d="M96 0C43 0 0 43 0 96L0 416c0 53 43 96 96 96l288 0 32 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l0-64c17.7 0 32-14.3 32-32l0-320c0-17.7-14.3-32-32-32L384 0 96 0zm0 384l256 0 0 64L96 448c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16l192 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-192 0c-8.8 0-16-7.2-16-16zm16 48l192 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-192 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z" />
+          </svg>
+        </span>
       </au-breadcrumbs>
-      <h3>CSS Variables</h3>
+    </section>
+    <section>
+      <h2>CSS Variables</h2>
       <table>
         <tr>
           <th scope="col">CSS Variables name</th>
@@ -256,6 +263,8 @@
           <td>oklch(0.1398 0 0)</td>
         </tr>
       </table>
+    </section>
+    <section>
       <h2>Conclusion</h2>
       <p>This is a simple Web Component with basic functionalities. It includes:</p>
       <ul>
@@ -265,7 +274,10 @@
         <li>Indicates the current page with <code>aria-current="page"</code> and renders it as plain text.</li>
         <li> Uses CSS Variables to adjust the main appearance.</li>
       </ul>
-      <p>For developers, creating an accessible breadcrumbs web component is not difficult, and its application can be very convenient, making it a worthwhile feature to develop or use.</p>
-    </main>
-  </body>
+      <p>For developers, creating an accessible breadcrumbs web component is not difficult, and its application can be
+        very convenient, making it a worthwhile feature to develop or use.</p>
+    </section>
+  </main>
+</body>
+
 </html>

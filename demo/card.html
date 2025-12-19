@@ -1,18 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Accesserty UI Kit Card</title>
-    <link rel="stylesheet" href="../src/css/au-style.css" />
-    <link rel="stylesheet" href="demo.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <script src="../src/components/card.js" defer></script>
-  </head>
-  <body>
-    <header><a href="../demo/index.html" title="go to home page">Home</a></header>
-    <main>
-      <h1>Accesserty UI Kit Card</h1>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accesserty UI Kit Card</title>
+  <link rel="stylesheet" href="../src/css/au-style.css" />
+  <link rel="stylesheet" href="demo.css" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script src="../src/components/card.js" defer></script>
+</head>
+
+<body>
+  <header><a href="../demo/index.html" title="go to home page">Home</a></header>
+  <main>
+    <h1>Accesserty UI Kit Card</h1>
+    <section>
       <h2>Slot</h2>
       <table>
         <tr>
@@ -36,9 +40,13 @@
           <td>Set the footer of card</td>
         </tr>
       </table>
+    </section>
+    <section>
       <h2>Demo</h2>
-      <p>Be mindful of the order in which you write elements and the final DOM order. The au-card enforces that the heading must appear first, allowing screen reading software to logically read the title before the content.</p>
-      <p>You can still use grid or flex to visually swap positions.(set <code>&::part(au-card-container)</code> display)</p>
+      <p>Be mindful of the order in which you write elements and the final DOM order. The au-card enforces that the
+        heading must appear first, allowing screen reading software to logically read the title before the content.</p>
+      <p>You can still use grid or flex to visually swap positions.(set <code>&::part(au-card-container)</code> display)
+      </p>
       <au-card>
         <div slot="content">
           <p>17 MINUTE READ</p>
@@ -55,6 +63,8 @@
           <button>Like!</button>
         </div>
       </au-card>
+    </section>
+    <section>
       <h2>Custom Style</h2>
       <au-card class="custom-au-card">
         <div slot="content" class="content">
@@ -72,9 +82,15 @@
           <button>Like!</button>
         </div>
       </au-card>
+    </section>
+    <section>
       <h2>Conclusion</h2>
-      <p>Based on the results, I believe that cards are well-suited for development as Web Components because they can ensure that keyboard navigation follows the information structure to a considerable extent.</p>
-      <p>However, given the myriad forms of cards and the need to allow developers the freedom to be creative, we have only set up slots and the part attribute for developers to utilize here.</p>
-    </main>
-  </body>
+      <p>Based on the results, I believe that cards are well-suited for development as Web Components because they can
+        ensure that keyboard navigation follows the information structure to a considerable extent.</p>
+      <p>However, given the myriad forms of cards and the need to allow developers the freedom to be creative, we have
+        only set up slots and the part attribute for developers to utilize here.</p>
+    </section>
+  </main>
+</body>
+
 </html>

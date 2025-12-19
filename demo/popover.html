@@ -1,63 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Accesserty UI Kit Popover</title>
-    <link rel="stylesheet" href="../src/css/au-style.css" />
-    <link rel="stylesheet" href="demo.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <style>
-      .anchor {
-        display: block;
-        anchor-name: --anchor-popover;
-      }
 
-      .anchor-position {
-        position-anchor: --anchor-popover;
-        inset: auto;
-        top: anchor(bottom);
-        left: anchor(left);
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accesserty UI Kit Popover</title>
+  <link rel="stylesheet" href="../src/css/au-style.css" />
+  <link rel="stylesheet" href="demo.css" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <style>
+    .anchor {
+      display: block;
+      anchor-name: --anchor-popover;
+    }
 
-      .sr-only {
-        clip: rect(0 0 0 0); 
-        clip-path: inset(50%);
-        height: 1px;
-        overflow: hidden;
-        position: absolute;
-        white-space: nowrap; 
-        width: 1px;
-      }
-    </style>
-  </head>
-  <body>
-    <header><a href="../demo/index.html" title="go to home page">Home</a></header>
-    <main>
-      <h1>Accesserty UI Kit Popover</h1>
+    .anchor-position {
+      position-anchor: --anchor-popover;
+      inset: auto;
+      top: anchor(bottom);
+      left: anchor(left);
+    }
+
+    .sr-only {
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      height: 1px;
+      overflow: hidden;
+      position: absolute;
+      white-space: nowrap;
+      width: 1px;
+    }
+  </style>
+</head>
+
+<body>
+  <header><a href="../demo/index.html" title="go to home page">Home</a></header>
+  <main>
+    <h1>Accesserty UI Kit Popover</h1>
+    <section>
       <h2>Key Point</h2>
       <ul>
-        <li>Using the global HTML attribute <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/popover" title="(Open new window) Go to Mozilla" target="_blank" rel="noreferrer noopener">popover</a>, you can create meaningful pop-up tooltips based on the purpose without the need to create a special component.</li>
-        <li>Use the <a href="https://developer.chrome.com/blog/anchor-positioning-api?hl=zh-tw"  title="(Open new window) Go to Google Document" target="_blank" rel="noreferrer noopener"> Anchor Positioning API </a>  to determine the position of the pop-up tooltip.</li>
+        <li>Using the global HTML attribute <a
+            href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/popover"
+            title="(Open new window) Go to Mozilla" target="_blank" rel="noreferrer noopener">popover</a>, you can
+          create meaningful pop-up tooltips based on the purpose without the need to create a special component.</li>
+        <li>Use the <a href="https://developer.chrome.com/blog/anchor-positioning-api?hl=zh-tw"
+            title="(Open new window) Go to Google Document" target="_blank" rel="noreferrer noopener"> Anchor
+            Positioning API </a> to determine the position of the pop-up tooltip.</li>
       </ul>
-     
-      <h3>Basic</h3>
+    </section>
+    <section>
+      <h2>Basic</h2>
       <button popovertarget="ref_1" class="anchor">
         <span aria-hidden="true">?</span>
         <span class="sr-only">Hint</span>
       </button>
 
       <div id="ref_1" popover="manual" class="anchor-position">
-        <p>This is a nested popover that requires manual closing and uses CSS Anchor Positioning. Please note that there is an issue in manual mode: when the first-level popover is closed, the second-level popover still remains on the screen.</p>
+        <p>This is a nested popover that requires manual closing and uses CSS Anchor Positioning. Please note that there
+          is an issue in manual mode: when the first-level popover is closed, the second-level popover still remains on
+          the screen.</p>
         <button popovertarget="ref_2" class="anchor2">
           <span aria-hidden="true">?</span>
           <span class="sr-only">nested popover</span>
         </button>
       </div>
-      
+
       <div id="ref_2" popover class="anchor-position2">
-        <p>The position of this popover is set by default. There is a backdrop layer behind it. Clicking outside will close the popover, and the focus will return to the button of the previous popover.</p>
+        <p>The position of this popover is set by default. There is a backdrop layer behind it. Clicking outside will
+          close the popover, and the focus will return to the button of the previous popover.</p>
       </div>
-    </main>
-  </body>
+    </section>
+  </main>
+</body>
+
 </html>

@@ -7,6 +7,8 @@ import './components/file-upload.js';
 import './components/input.js';
 import './components/pagination.js';
 import './components/radio.js';
+import './components/rating.js';
 import './components/switch.js';
 import './components/tabs.js';
 import './components/textarea.js';
+import './components/tree.js';

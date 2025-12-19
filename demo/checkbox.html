@@ -1,18 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Accesserty UI Kit Checkbox</title>
-    <link rel="stylesheet" href="../src/css/au-style.css" />
-    <link rel="stylesheet" href="demo.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <script src="../src/components/checkbox.js" defer></script>
-  </head>
-  <body>
-    <header><a href="../demo/index.html" title="go to home page">Home</a></header>
-    <main>
-      <h1>Accesserty UI Kit Checkbox</h1>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accesserty UI Kit Checkbox</title>
+  <link rel="stylesheet" href="../src/css/au-style.css" />
+  <link rel="stylesheet" href="demo.css" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script src="../src/components/checkbox.js" defer></script>
+</head>
+
+<body>
+  <header><a href="../demo/index.html" title="go to home page">Home</a></header>
+  <main>
+    <h1>Accesserty UI Kit Checkbox</h1>
+    <section>
       <h2>Attribute</h2>
       <table>
         <caption>
@@ -39,69 +43,39 @@
           <td>checkbox disabled</td>
         </tr>
       </table>
+    </section>
+    <section>
       <h2>Basic</h2>
-      <au-checkbox 
-        name="basic-checkbox"
-        value="Checkbox_value"
-      >
+      <au-checkbox name="basic-checkbox" value="Checkbox_value">
         Checkbox1
-      </au-checkbox> 
-      <au-checkbox 
-        name="basic-checkbox"
-        value="Checkbox_value2"
-        checked
-      >
+      </au-checkbox>
+      <au-checkbox name="basic-checkbox" value="Checkbox_value2" checked>
         Checkbox2(cheked)
-      </au-checkbox> 
-      <au-checkbox 
-        name="basic-checkbox"
-        value="Checkbox_value3"
-        disabled
-      >
+      </au-checkbox>
+      <au-checkbox name="basic-checkbox" value="Checkbox_value3" disabled>
         Checkbox3(disabled)
       </au-checkbox>
-      <au-checkbox 
-        name="basic-checkbox"
-        value="Checkbox_value4"
-        checked
-        disabled
-      >
+      <au-checkbox name="basic-checkbox" value="Checkbox_value4" checked disabled>
         Checkbox4(disabled, checked)
       </au-checkbox>
+    </section>
+    <section>
       <h2>Custom Style</h2>
-      <au-checkbox 
-        name="custom-checkbox"
-        value="custom_checkbox_value1"
-        class="custom-checkbox"
-      >
+      <au-checkbox name="custom-checkbox" value="custom_checkbox_value1" class="custom-checkbox">
         Checkbox1
       </au-checkbox>
-      <au-checkbox 
-        name="custom-checkbox"
-        value="custom_checkbox_value2"
-        class="custom-checkbox"
-        checked
-      >
+      <au-checkbox name="custom-checkbox" value="custom_checkbox_value2" class="custom-checkbox" checked>
         Checkbox2(cheked)
       </au-checkbox>
-      <au-checkbox 
-        name="custom-checkbox"
-        value="custom_checkbox_value3"
-        class="custom-checkbox"
-        disabled
-      >
-      Checkbox3(disabled)
+      <au-checkbox name="custom-checkbox" value="custom_checkbox_value3" class="custom-checkbox" disabled>
+        Checkbox3(disabled)
       </au-checkbox>
-      <au-checkbox 
-        name="custom-checkbox"
-        value="custom_checkbox_value4"
-        class="custom-checkbox"
-        checked
-        disabled
-      >
-      Checkbox4(checked, disabled)
+      <au-checkbox name="custom-checkbox" value="custom_checkbox_value4" class="custom-checkbox" checked disabled>
+        Checkbox4(checked, disabled)
       </au-checkbox>
-      <h3>CSS Variables</h3>
+    </section>
+    <section>
+      <h2>CSS Variables</h2>
       <table>
         <tr>
           <th scope="col">CSS Variables name</th>
@@ -209,10 +183,16 @@
           <td>oklch(0.537 0 0)</td>
         </tr>
       </table>
+    </section>
+    <section>
       <h2>FAQ</h2>
       <h3>How does it compare to native checkboxes?</h3>
-      <p>Using the <code>au-checkbox</code> ensures that screen readers correctly interpret the association between the label and input, making it recommended for use.</p>
-      <p>But even so, this is still not enough. If there is a group of multiple related checkboxes, it's best to use role="group", aria-labelledby, &lt;ul&gt; and &lt;li&gt. This way, it is possible to know how many checkboxes are in the same group.</p>
+      <p>Using the <code>au-checkbox</code> ensures that screen readers correctly interpret the association between the
+        label and input, making it recommended for use.</p>
+      <p>But even so, this is still not enough. If there is a group of multiple related checkboxes, it's best to use
+        role="group", aria-labelledby, &lt;ul&gt; and &lt;li&gt. This way, it is possible to know how many checkboxes
+        are
+        in the same group.</p>
       <form id="foodForm">
         <div role="group" aria-labelledby="checkbox-group">
           <p id="checkbox-group">Choose at least one</p>
@@ -223,23 +203,25 @@
           <button type="submit">Send</button>
         </div>
       </form>
-    </main>
-    <script>
-      const form = document.getElementById('foodForm');
-      const errorMessage = document.getElementById('errorMessage');
-  
-      form.addEventListener('submit', (event) => {
-        event.preventDefault(); // 阻止默认提交行为
-        const formData = new FormData(form);
-        const selectedFoods = formData.getAll('food');
-  
-        if (selectedFoods.length > 0) {
-          errorMessage.style.display = 'none';
-          alert('Your Choose：' + selectedFoods.join(', '));
-        } else {
-          errorMessage.style.display = 'block';
-        }
-      });
-    </script>
-  </body>
+    </section>
+  </main>
+  <script>
+    const form = document.getElementById('foodForm');
+    const errorMessage = document.getElementById('errorMessage');
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault(); // 阻止默认提交行为
+      const formData = new FormData(form);
+      const selectedFoods = formData.getAll('food');
+
+      if (selectedFoods.length > 0) {
+        errorMessage.style.display = 'none';
+        alert('Your Choose：' + selectedFoods.join(', '));
+      } else {
+        errorMessage.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+
 </html>

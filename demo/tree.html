@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Accesserty UI Kit Accordion</title>
+	<link rel="stylesheet" href="../src/css/au-style.css" />
+	<link rel="stylesheet" href="demo.css" />
+	<link rel="stylesheet"
+		href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+	<script src="../src/components/tree.js" defer></script>
+</head>
+
+<body>
+	<header><a href="../demo/index.html" title="go to home page">Home</a></header>
+	<main>
+		<h1>
+			Accesserty UI Kit Tree
+		</h1>
+		<section>
+			<h2>How to use</h2>
+			<ol>
+				<li>Copy file (accordion.js or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
+				<li>
+					Add the JavaScript file to HTML using the
+					<code>&lt;script src=&quot;&quot; defer&gt;</code> tag
+				</li>
+				<li>Use the <code>&lt;au-tree&gt;</code> tag</li>
+			</ol>
+			<p>
+				Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and
+				filenames are correct to avoid loading errors.
+			</p>
+		</section>
+
+		<section>
+			<h2>Basic</h2>
+			<au-tree id="tree-basic"></au-tree>
+		</section>
+
+		<section>
+			<h2>Checkbox Tree</h2>
+			<p>Supports tri-state selection (Indeterminate).</p>
+			<au-tree id="tree-check" show-checkbox></au-tree>
+		</section>
+
+		<section>
+			<h2>Custom Toggle Label</h2>
+			<p>Customize the aria-label of toggle buttons.</p>
+			<au-tree id="tree-custom-label"></au-tree>
+			<code style="display: block; white-space: pre-wrap; background: #f4f4f4; padding: 1rem; border-radius: 4px;">
+const customLabelTree = document.getElementById('tree-custom-label');
+customLabelTree.toggleLabel = (node) => {	
+	return `Expand or collapse ${node.label}`;
+};
+			</code>
+		</section>
+
+		<section>
+			<h2>CSS Variables</h2>
+			<table>
+				<tr>
+					<th scope="col">CSS Variables name</th>
+					<th scope="col">Description</th>
+					<th scope="col">Default value</th>
+				</tr>
+				<tr>
+					<td>--au-tree-font-family</td>
+					<td>Font family for the tree container</td>
+					<td>system-ui, -apple-system, sans-serif</td>
+				</tr>
+				<tr>
+					<td>--au-tree-font-size</td>
+					<td>Font size for the tree container</td>
+					<td>1rem</td>
+				</tr>
+				<tr>
+					<td>--au-tree-color</td>
+					<td>Text color for the tree container</td>
+					<td>oklch(0.1398 0 0)</td>
+				</tr>
+				<tr>
+					<td>--au-tree-indent</td>
+					<td>Indentation for child nodes</td>
+					<td>1.5rem</td>
+				</tr>
+				<tr>
+					<td>--au-tree-focus-shadow-width</td>
+					<td>Width of the focus ring</td>
+					<td>3px</td>
+				</tr>
+				<tr>
+					<td>--au-tree-focus-shadow-color</td>
+					<td>Color of the focus ring</td>
+					<td>oklch(0.8315 0.1568 78.05)</td>
+				</tr>
+				<!-- Node Content -->
+				<tr>
+					<td>--au-tree-node-padding-horizontal</td>
+					<td>Horizontal padding for node content</td>
+					<td>0.25rem</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-padding-vertical</td>
+					<td>Vertical padding for node content</td>
+					<td>0.25rem</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-bg</td>
+					<td>Background color of the node</td>
+					<td>oklch(0.994 0 0)</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-hover-bg</td>
+					<td>Background color on hover</td>
+					<td>oklch(0.9466 0 0)</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-active-bg</td>
+					<td>Background color on active</td>
+					<td>oklch(0.8689 0 0)</td>
+				</tr>
+				<!-- Node Text -->
+				<tr>
+					<td>--au-tree-node-text-color</td>
+					<td>Text color for node label</td>
+					<td>oklch(0.1398 0 0)</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-text-size</td>
+					<td>Font size for node label</td>
+					<td>1rem</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-text-family</td>
+					<td>Font family for node label</td>
+					<td>Helvetica, Arial, sans-serif, system-ui</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-text-line-height</td>
+					<td>Line height for node label</td>
+					<td>1.5</td>
+				</tr>
+				<!-- Node Borders -->
+				<tr>
+					<td>--au-tree-node-border-width</td>
+					<td>Border width for node</td>
+					<td>0</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-border-style</td>
+					<td>Border style for node</td>
+					<td>solid</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-border-color</td>
+					<td>Border color for node</td>
+					<td>oklch(0.7894 0 0)</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-border-radius</td>
+					<td>Border radius for node</td>
+					<td>0</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-hover-border-color</td>
+					<td>Border color on hover</td>
+					<td>oklch(0.7894 0 0)</td>
+				</tr>
+				<!-- Toggle Button -->
+				<tr>
+					<td>--au-tree-node-toggle-btn-size</td>
+					<td>Size of the toggle button</td>
+					<td>2rem</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-toggle-icon-size</td>
+					<td>Size of the toggle icon</td>
+					<td>1rem</td>
+				</tr>
+				<!-- Checkbox -->
+				<tr>
+					<td>--au-tree-node-checkbox-content-gap</td>
+					<td>Gap between checkbox and label</td>
+					<td>0.375rem</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-input-width</td>
+					<td>Width of the checkbox input</td>
+					<td>1.5rem</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-input-height</td>
+					<td>Height of the checkbox input</td>
+					<td>1.5rem</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-input-bg</td>
+					<td>Background color of checkbox</td>
+					<td>oklch(0.994 0 0)</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-input-border-width</td>
+					<td>Border width of checkbox</td>
+					<td>1px</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-input-border-style</td>
+					<td>Border style of checkbox</td>
+					<td>solid</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-input-border-color</td>
+					<td>Border color of checkbox</td>
+					<td>oklch(0.7894 0 0)</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-input-border-radius</td>
+					<td>Border radius of checkbox</td>
+					<td>0.25rem</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-input-checked-bg</td>
+					<td>Background color when checked</td>
+					<td>oklch(0.1398 0 0)</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-input-checked-symbol</td>
+					<td>Symbol shown when checked</td>
+					<td>'✔︎'</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-input-checked-text-color</td>
+					<td>Color of the check symbol</td>
+					<td>oklch(0.994 0 0)</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-input-checked-text-size</td>
+					<td>Size of the check symbol</td>
+					<td>1.125rem</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-label-text-color</td>
+					<td>Color of the checkbox label text</td>
+					<td>oklch(0.1398 0 0)</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-label-text-size</td>
+					<td>Size of the checkbox label text</td>
+					<td>1rem</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-label-hover-text-deco</td>
+					<td>Text decoration on hover for label</td>
+					<td>underline</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-label-active-text-color</td>
+					<td>Text color on active for label</td>
+					<td>oklch(0.537 0 0)</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-label-disabled-text-color</td>
+					<td>Text color when disabled</td>
+					<td>oklch(0.537 0 0)</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-input-focus-shadow-width</td>
+					<td>Focus shadow width for checkbox</td>
+					<td>3px</td>
+				</tr>
+				<tr>
+					<td>--au-tree-node-checkbox-input-focus-shadow-color</td>
+					<td>Focus shadow color for checkbox</td>
+					<td>oklch(0.8315 0.1568 78.05)</td>
+				</tr>
+			</table>
+		</section>
+	</main>
+	<script type="module">
+		const data = [
+			{
+				label: 'Project A',
+				children: [
+					{
+						label: 'src', children: [
+							{ label: 'index.js' },
+							{ label: 'style.css' }
+						]
+					},
+					{ label: 'package.json' },
+					{ label: 'README.md' }
+				]
+			},
+			{
+				label: 'Project B',
+				children: [
+					{
+						label: 'Documents', children: [
+							{ label: 'Report.pdf' },
+							{ label: 'Data.xlsx' }
+						]
+					}
+				]
+			},
+			{ label: 'Notes.txt' }
+		];
+
+		document.getElementById('tree-basic').data = data;
+		document.getElementById('tree-check').data = data;
+
+		const checkTree = document.getElementById('tree-check');
+		checkTree.addEventListener('change', (e) => {
+			console.log('Tree Change:', e.detail);
+		});
+
+		const customLabelTree = document.getElementById('tree-custom-label');
+		customLabelTree.data = data;
+	</script>
+</body>
+
+</html>

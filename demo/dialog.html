@@ -2,23 +2,25 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dialog Component Demo</title>
-    <link rel="stylesheet" href="../src/css/au-style.css">
-    <link rel="stylesheet" href="demo.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dialog Component Demo</title>
+  <link rel="stylesheet" href="../src/css/au-style.css">
+  <link rel="stylesheet" href="demo.css" />
 </head>
 
 <body>
   <header><a href="../demo/index.html" title="go to home page">Home</a></header>
   <main>
     <h1>Accesserty UI Kit Dialog</h1>
-
-    <h2>Key Point</h2>
-    <p>Using Html dialog element with <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog" title="(Open new window) Go to Mozilla" target="_blank" rel="noreferrer noopener">dialog</a></p>
-
     <section>
-      <h3>Basic Dialog</h3>
+      <h2>Key Point</h2>
+      <p>Using Html dialog element with <a
+          href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog"
+          title="(Open new window) Go to Mozilla" target="_blank" rel="noreferrer noopener">dialog</a></p>
+    </section>
+    <section>
+      <h2>Basic Dialog</h2>
       <button class="btn" onclick="document.getElementById('dialog-basic').showModal()">Open Modal Dialog</button>
       <button class="btn" onclick="document.getElementById('dialog-basic').show()">Open Non-Modal Dialog</button>
 
@@ -35,59 +37,61 @@
     </section>
 
     <section>
-        <h3>Dialog with Backdrop Click Close</h3>
-        <p>Custom JavaScript is needed to close on backdrop click for native dialogs.</p>
-        <button class="btn" onclick="document.getElementById('dialog-backdrop').showModal()">Open Dialog</button>
+      <h2>Dialog with Backdrop Click Close</h2>
+      <p>Custom JavaScript is needed to close on backdrop click for native dialogs.</p>
+      <button class="btn" onclick="document.getElementById('dialog-backdrop').showModal()">Open Dialog</button>
 
-        <dialog id="dialog-backdrop">
-          <form method="dialog">
-            <h3>Click Outside to Close</h3>
-            <p>Try clicking the backdrop.</p>
-            <button class="btn">Close</button>
-          </form>
-        </dialog>
-        <script>
-          const dialog = document.getElementById('dialog-backdrop');
-          dialog.addEventListener('click', (event) => {
-            if (event.target === dialog) {
-              dialog.close();
-            }
-          });
-        </script>
+      <dialog id="dialog-backdrop">
+        <form method="dialog">
+          <h3>Click Outside to Close</h3>
+          <p>Try clicking the backdrop.</p>
+          <button class="btn">Close</button>
+        </form>
+      </dialog>
+      <script>
+        const dialog = document.getElementById('dialog-backdrop');
+        dialog.addEventListener('click', (event) => {
+          if (event.target === dialog) {
+            dialog.close();
+          }
+        });
+      </script>
     </section>
 
     <section>
-        <h3>Nested</h3>
-         <button class="btn" onclick="document.getElementById('dialog-nested').showModal()">Open Modal Dialog</button>
+      <h2>Nested</h2>
+      <button class="btn" onclick="document.getElementById('dialog-nested').showModal()">Open Modal Dialog</button>
 
-        <dialog id="dialog-nested">
-          <form method="dialog">
-            <h3>Dialog Title</h3>
-            <p>This is a native HTML dialog component.</p>
-            <p>It supports accessibility features out of the box.</p>
-            <div class="spacer"></div>
-            <button class="btn" value="cancel">Cancel</button>
-            <button class="btn" value="confirm" autofocus>Confirm</button>
-          </form>
-           <button class="btn" onclick="document.getElementById('dialog-nested2').showModal()">Open Nested Dialog</button>
-        </dialog>
+      <dialog id="dialog-nested">
+        <form method="dialog">
+          <h3>Dialog Title</h3>
+          <p>This is a native HTML dialog component.</p>
+          <p>It supports accessibility features out of the box.</p>
+          <div class="spacer"></div>
+          <button class="btn" value="cancel">Cancel</button>
+          <button class="btn" value="confirm" autofocus>Confirm</button>
+        </form>
+        <button class="btn" onclick="document.getElementById('dialog-nested2').showModal()">Open Nested Dialog</button>
+      </dialog>
 
-        <dialog id="dialog-nested2">  
-          <form method="dialog">
-            <h3>Dialog Title</h3>
-            <p>This is a native HTML dialog component.</p>
-            <p>It supports accessibility features out of the box.</p>
-            <div class="spacer"></div>
-            <button class="btn" value="cancel">Cancel</button>
-            <button class="btn" value="confirm" autofocus>Confirm</button>
-          </form>
-        </dialog>
+      <dialog id="dialog-nested2">
+        <form method="dialog">
+          <h3>Dialog Title</h3>
+          <p>This is a native HTML dialog component.</p>
+          <p>It supports accessibility features out of the box.</p>
+          <div class="spacer"></div>
+          <button class="btn" value="cancel">Cancel</button>
+          <button class="btn" value="confirm" autofocus>Confirm</button>
+        </form>
+      </dialog>
     </section>
 
     <section>
-      <h3>Custom Dialog Style</h3>
-      <button class="btn" onclick="document.getElementsByClassName('dialog-custom')[0].showModal()">Open Modal Dialog</button>
-      <button class="btn" onclick="document.getElementsByClassName('dialog-custom')[0].show()">Open Non-Modal Dialog</button>
+      <h2>Custom Dialog Style</h2>
+      <button class="btn" onclick="document.getElementsByClassName('dialog-custom')[0].showModal()">Open Modal
+        Dialog</button>
+      <button class="btn" onclick="document.getElementsByClassName('dialog-custom')[0].show()">Open Non-Modal
+        Dialog</button>
 
       <dialog class="dialog-custom">
         <form method="dialog">
@@ -102,7 +106,7 @@
     </section>
 
     <section>
-       <h3>CSS Variables</h3>
+      <h2>CSS Variables</h2>
       <table>
         <tr>
           <th scope="col">CSS Variables name</th>

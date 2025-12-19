@@ -1,20 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Accesserty UI Kit Pagination</title>
-    <link rel="stylesheet" href="../src/css/au-style.css" />
-    <link rel="stylesheet" href="demo.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <script src="../src/components/pagination.js" defer></script>
-  </head>
-  <body>
-    <header><a href="../demo/index.html" title="go to home page">Home</a></header>
-    <main>
-      <h1>
-        Accesserty UI Kit Pagination
-      </h1>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accesserty UI Kit Pagination</title>
+  <link rel="stylesheet" href="../src/css/au-style.css" />
+  <link rel="stylesheet" href="demo.css" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script src="../src/components/pagination.js" defer></script>
+</head>
+
+<body>
+  <header><a href="../demo/index.html" title="go to home page">Home</a></header>
+  <main>
+    <h1>
+      Accesserty UI Kit Pagination
+    </h1>
+    <section>
       <h2>Attributes</h2>
       <table>
         <caption>The Accesserty UI Kit pagination attributes:</caption>
@@ -47,7 +51,8 @@
           </tr>
           <tr>
             <td>data-layout</td>
-            <td>Array or list of elements to include in order (e.g. ['total_page','total_items','page_size','first','prev','pages','next','last','jump']).</td>
+            <td>Array or list of elements to include in order (e.g.
+              ['total_page','total_items','page_size','first','prev','pages','next','last','jump']).</td>
           </tr>
           <tr>
             <td>data-text-total-pages-prefix</td>
@@ -91,77 +96,66 @@
           </tr>
         </tbody>
       </table>
-
+    </section>
+    <section>
       <h2>Custom Style</h2>
       <p>Using <code>::part</code> style `current-page`</p>
-      <au-pagination
-        id="pagination"
-        data-total="1000"
-        data-current-page="1"
-        data-pager-count="5"
-        data-page-size="10"
+      <au-pagination id="pagination" data-total="1000" data-current-page="1" data-pager-count="5" data-page-size="10"
         data-page-size-options='[10,30,50,100]'
         data-layout='["total_page","total_items","page_size","first","prev","pages","next","last","jump"]'
-        data-text-per="each page"
-        data-text-total-pages-prefix="Total"
-        data-text-goto="Jump"
-        data-text-page="page(s)"
-        data-text-total-items-suffix="item(s)"
-        data-text-first="First"
-        data-text-prev="Prev"
-        data-text-next="Next"
-        data-text-last="Last"
-        data-text-go="Go to"
-        class="custom-btn--primary-outline"
-      ></au-pagination>
+        data-text-per="each page" data-text-total-pages-prefix="Total" data-text-goto="Jump" data-text-page="page(s)"
+        data-text-total-items-suffix="item(s)" data-text-first="First" data-text-prev="Prev" data-text-next="Next"
+        data-text-last="Last" data-text-go="Go to" class="custom-btn--primary-outline"></au-pagination>
 
       <div id="output">Result</div>
       <!-- 列表容器 -->
       <ul id="item-list"></ul>
-      <script>
-        const totalItems = 1000;
-        const dataList = Array.from({ length: totalItems }, (_, i) => `item ${i + 1}`);
+    </section>
+    <script>
+      const totalItems = 1000;
+      const dataList = Array.from({ length: totalItems }, (_, i) => `item ${i + 1}`);
 
-        const pagination = document.getElementById('pagination');
-        const listEl = document.getElementById('item-list');
+      const pagination = document.getElementById('pagination');
+      const listEl = document.getElementById('item-list');
 
-        function renderList() {
-          const pageSize = pagination.getAttribute('data-page-size');
-          const currentPage = pagination.getAttribute('data-current-page');
-          const size = Number(pageSize);
-          const page = Number(currentPage);
-          const start = (page - 1) * size;
-          const end = start + size;
-          const slice = dataList.slice(start, end);
+      function renderList() {
+        const pageSize = pagination.getAttribute('data-page-size');
+        const currentPage = pagination.getAttribute('data-current-page');
+        const size = Number(pageSize);
+        const page = Number(currentPage);
+        const start = (page - 1) * size;
+        const end = start + size;
+        const slice = dataList.slice(start, end);
 
-          listEl.innerHTML = '';
-          slice.forEach(text => {
-            const li = document.createElement('li');
-            li.textContent = text;
-            listEl.appendChild(li);
-          });
-        }
-
-        pagination.addEventListener('page-change', () => {
-          renderList();
+        listEl.innerHTML = '';
+        slice.forEach(text => {
+          const li = document.createElement('li');
+          li.textContent = text;
+          listEl.appendChild(li);
         });
-        pagination.addEventListener('page-size-change', () => {
-          pagination.setAttribute('data-current-page', 1);
-          renderList();
-        });
+      }
+
+      pagination.addEventListener('page-change', () => {
         renderList();
-       
-        const output = document.getElementById('output');
-    
-        pagination.addEventListener('page-change', e => {
-          output.textContent = `Current Page: ${e.detail}`;
-        });
-    
-        pagination.addEventListener('page-size-change', e => {
-          output.textContent += ` | ${e.detail} / Page`;
-        });
-      </script>
-      <h3>CSS Variables</h3>
+      });
+      pagination.addEventListener('page-size-change', () => {
+        pagination.setAttribute('data-current-page', 1);
+        renderList();
+      });
+      renderList();
+
+      const output = document.getElementById('output');
+
+      pagination.addEventListener('page-change', e => {
+        output.textContent = `Current Page: ${e.detail}`;
+      });
+
+      pagination.addEventListener('page-size-change', e => {
+        output.textContent += ` | ${e.detail} / Page`;
+      });
+    </script>
+    <section>
+      <h2>CSS Variables</h2>
       <table>
         <caption>Available CSS custom properties for au-pagination styling</caption>
         <thead>
@@ -259,8 +253,8 @@
           </tr>
         </tbody>
       </table>
+    </section>
+  </main>
+</body>
 
-
-    </main>
-  </body>
 </html>
