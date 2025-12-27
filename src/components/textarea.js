@@ -59,6 +59,18 @@ class AuTextarea extends HTMLElement {
         &:focus-visible {
           box-shadow: inset 0 0 0 var(--au-textarea-focus-shadow-width, 3px) var(--au-textarea-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
         }
+
+        &:read-only {
+          color: var(--au-textarea-readonly-text-color, oklch(0.1398 0 0));
+          background-color: var(--au-textarea-readonly-bg, oklch(0.95 0 0));
+          cursor: default;
+          pointer-events: none;
+        }
+
+        &:disabled {
+          cursor: not-allowed;
+          opacity: 0.5;
+        }        
       }
         
     `;
@@ -99,7 +111,7 @@ class AuTextarea extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['placeholder', 'name', 'rows', 'cols', 'disabled', 'readonly', 'required', 'maxlength', 'minlength', 'aria-label', 'aria-labelledby', 'label', 'id'];
+    return ['value', 'placeholder', 'name', 'rows', 'cols', 'disabled', 'readonly', 'required', 'maxlength', 'minlength', 'aria-label', 'aria-labelledby', 'label', 'id'];
   }
 
   get validity() {
@@ -131,6 +143,8 @@ class AuTextarea extends HTMLElement {
     } else if (name === 'id' && newValue) {
       this.textarea.id = newValue;
       this.labelEl?.setAttribute('for', newValue);
+    } else if (name === 'value') {
+      this.value = newValue;
     } else {
       if (newValue === null) {
         this.textarea.removeAttribute(name);
@@ -157,7 +171,11 @@ class AuTextarea extends HTMLElement {
   }
 
   formResetCallback() {
-    this.value = '';
+    this.value = this.getAttribute('value') || '';
+  }
+
+  formStateRestoreCallback(state, mode) {
+    this.value = state;
   }
 
   generateId() {

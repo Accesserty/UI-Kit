@@ -56,7 +56,14 @@ class AuTree extends HTMLElement {
     }
   }
 
+  generateId() {
+    const byteArray = new Uint32Array(1);
+    window.crypto.getRandomValues(byteArray);
+    return `au-tree-${byteArray[0].toString(36)}`;
+  }
+
   render() {
+    const treeId = this.generateId();
     this.shadowRoot.innerHTML = `
       <style>
         :host {
@@ -71,10 +78,10 @@ class AuTree extends HTMLElement {
           padding: 0;
         }
       </style>
-      <div role="tree" id="root-tree"></div>
+      <div role="tree" id="${treeId}"></div>
     `;
 
-    const rootContainer = this.shadowRoot.getElementById('root-tree');
+    const rootContainer = this.shadowRoot.getElementById(treeId);
 
     if (Array.isArray(this._data)) {
       this._data.forEach(item => {
@@ -287,6 +294,7 @@ class AuTreeNode extends HTMLElement {
 
   get label() { return this._data.label || ''; }
   get hasChildren() { return this._data.children && this._data.children.length > 0; }
+
 
   connectedCallback() {
     // 捕獲子節點的勾選變更（向上傳播）
@@ -538,7 +546,7 @@ class AuTreeNode extends HTMLElement {
           border-radius: var(--au-tree-node-border-radius, 0);
           
           /* others decoration */
-          background-color: var(--au-tree-node-bg, oklch(0.994 0 0));
+          background-color: var(--au-tree-node-bg, transparent);
           transition: background-color 160ms ease-in;
 
           .heading {
@@ -621,9 +629,26 @@ class AuTreeNode extends HTMLElement {
             display: grid;
             place-content: center;
             &:before {
-              content: var(--au-tree-node-checkbox-input-checked-symbol, '✔︎');
+              content: var(--au-tree-node-checkbox-input-checked-symbol, '✔');
               color: var(--au-tree-node-checkbox-input-checked-text-color, oklch(0.994 0 0));
               font-size: var(--au-tree-node-checkbox-input-checked-text-size, 1.125rem);
+            }
+          }
+          &:indeterminate {
+            background-color: var(--au-tree-node-checkbox-input-checked-bg, oklch(0.1398 0 0)); /* 建議背景色與 checked 一致 */
+            border-color: transparent;
+            display: grid;
+            place-content: center;
+
+            &:before {
+              /* 使用 '−' (Minus Sign) 符號，比一般連字號 '-' 更寬更置中 */
+              content: var(--au-tree-node-checkbox-input-indeterminate-symbol, '−'); 
+              color: var(--au-tree-node-checkbox-input-checked-text-color, oklch(0.994 0 0));
+              font-size: var(--au-tree-node-checkbox-input-checked-text-size, 1.125rem);
+              
+              /* 確保符號垂直置中 */
+              line-height: 0; 
+              font-weight: bold;
             }
           }
         }
@@ -636,13 +661,7 @@ class AuTreeNode extends HTMLElement {
           -webkit-tap-highlight-color: oklch(0 0 0 / 0);
           .text {
             flex: 1;
-            color: var(--au-tree-node-checkbox-label-text-color, oklch(0.1398 0 0));
             font-size: var(--au-tree-node-checkbox-label-text-size, 1rem);
-          }
-          &:hover {
-            .text {
-              text-decoration: var(--au-tree-node-checkbox-label-hover-text-deco, underline);
-            }
           }
           &:active {
             .text {
@@ -714,7 +733,10 @@ class AuTreeNode extends HTMLElement {
     const container = this.shadowRoot.querySelector('.node-content');
     if (!container) return;
     const showCheckbox = this.hasAttribute('show-checkbox');
+    const labelText = this._data.label || 'Node'; // 取得純文字標籤
 
+    // 1. 修正：直接在 Host 上設定 aria-label，解決 Shadow DOM 邊界問題
+    this.setAttribute('aria-label', labelText);
     const arrowIcon = `<svg class="toggle-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" aria-hidden="true"/></svg><span class="visually-hidden">${this._data.label || 'Node'}</span>`;
 
     const toggleLabelText = typeof this._toggleLabel === 'function'
@@ -736,8 +758,8 @@ class AuTreeNode extends HTMLElement {
 
     const labelId = `${this._uid}-label`;
     const labelHtml = showCheckbox
-      ? `<label id="${labelId}" for="${this._uid}">${this._data.label || ''}</label></div>`
-      : `<span>${this._data.label || ''}</span>`;
+      ? `<label id="${labelId}" for="${this._uid}">${this._data.label || 'Node'}</label></div>`
+      : `<span>${this._data.label || 'Node'}</span>`;
     // 更好：如果沒有核取方塊， label 表現為文字。
     // 如果我們想要在沒有核取方塊時點擊標籤展開，我們需要監聽器。
 
@@ -747,8 +769,6 @@ class AuTreeNode extends HTMLElement {
         ${labelHtml}
       `;
 
-    // 明確指定 Accessible Name 來源，避免 VoiceOver 讀取不完整的 Shadow DOM 內容或產生奇怪的「中空佇列」
-    this.setAttribute('aria-labelledby', labelId);
 
     if (showCheckbox && this.indeterminate) {
       const input = container.querySelector('input');

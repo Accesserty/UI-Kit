@@ -5,7 +5,7 @@ class AuAccordion extends HTMLElement {
 
     const container = document.createElement('div');
     container.setAttribute('class', 'au-accordion');
-    
+
     const slot = document.createElement('slot');
     container.appendChild(slot);
     this.shadowRoot.appendChild(container);
@@ -17,16 +17,16 @@ customElements.define("au-accordion", AuAccordion);
 
 class AuAccordionItem extends HTMLElement {
   constructor() {
-      super();
-      this.attachShadow({ mode: "open" });
+    super();
+    this.attachShadow({ mode: "open" });
 
-      const regionId = this.generateId();
-      const titleId = this.generateId();
+    const regionId = this.generateId();
+    const titleId = this.generateId();
 
-      const content = document.createElement('div');
-      content.setAttribute('class', 'au-accordion-item');
-      
-      content.innerHTML = `
+    const content = document.createElement('div');
+    content.setAttribute('class', 'au-accordion-item');
+
+    content.innerHTML = `
         <style>
           .au-accordion-item {
             margin-bottom: var(--au-accordion-item-margin-bottom, 1rem);
@@ -105,11 +105,26 @@ class AuAccordionItem extends HTMLElement {
             color: var(--au-accordion-content-text-color, oklch(0.1398 0 0));
             padding: var(--au-accordion-content-padding-top, 1rem)  var(--au-accordion-content-padding-right, 1rem)  var(--au-accordion-content-padding-bottom, 1rem)  var(--au-accordion-content-padding-left, 1rem);
             overscroll-behavior: var(--au-accordion-content-overscroll-behavior, auto);
-            max-height: var(--au-accordion-content-max-height, 300px);
-            overflow: auto;
+            /* 這裡設定展開時的高度 */
+            /* 注意：calc-size 目前支援度較低，確保你在支援的環境下使用 */
+            height: calc-size(auto, size); 
+            overflow: hidden; /* 確保內容縮放時不會溢出 */
+
+            /* --- 2. 關鍵：Transition 必須寫在這裡 --- */
+            transition-behavior: allow-discrete;
+            transition: height 0.5s ease-in-out, display 0.5s step-end allow-discrete; 
             border-left: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.7894 0 0));
             border-right: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.7894 0 0));
             border-bottom: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.7894 0 0));
+            border-radius: var(--au-accordion-content-border-radius, 0);
+            @starting-style {
+              height: 0;
+            }
+
+            &[hidden] {
+              height: 0;
+              display: none;
+            }
           }
         </style>
         <button type="button" aria-expanded="false" aria-controls="${regionId}" part="button">
@@ -128,10 +143,10 @@ class AuAccordionItem extends HTMLElement {
         </div>
       `;
 
-      this.shadowRoot.append(content);
+    this.shadowRoot.append(content);
 
-      this.button = this.shadowRoot.querySelector('button');
-      this.button.addEventListener('click', () => this.toggleAccordion());
+    this.button = this.shadowRoot.querySelector('button');
+    this.button.addEventListener('click', () => this.toggleAccordion());
   }
 
   connectedCallback() {
@@ -144,7 +159,7 @@ class AuAccordionItem extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === "open") {
-        this.updateExpanded();
+      this.updateExpanded();
     }
   }
 
@@ -153,9 +168,9 @@ class AuAccordionItem extends HTMLElement {
     this.button.setAttribute('aria-expanded', isOpen);
     const region = this.shadowRoot.querySelector('div[role="region"]');
     if (isOpen) {
-        region.removeAttribute('hidden');
+      region.removeAttribute('hidden');
     } else {
-        region.setAttribute('hidden', '');
+      region.setAttribute('hidden', '');
     }
   }
 
@@ -168,9 +183,9 @@ class AuAccordionItem extends HTMLElement {
   toggleAccordion() {
     const isOpen = this.hasAttribute('open');
     if (isOpen) {
-        this.removeAttribute('open');
+      this.removeAttribute('open');
     } else {
-        this.setAttribute('open', '');
+      this.setAttribute('open', '');
     }
   }
 }

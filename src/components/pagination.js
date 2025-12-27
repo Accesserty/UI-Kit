@@ -21,7 +21,7 @@ class AuPagination extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     // unique IDs for accessibility
     this._selectId = AuPagination.generateId();
-    this._jumpId   = AuPagination.generateId();
+    this._jumpId = AuPagination.generateId();
     this.liveRegion = document.createElement('div');
     this.liveRegion.setAttribute('aria-live', 'polite');
     this.liveRegion.setAttribute('role', 'status');
@@ -52,7 +52,7 @@ class AuPagination extends HTMLElement {
     const opts = this.getAttribute('data-page-size-options');
     if (opts) {
       try { this.pageSizeOptions = JSON.parse(opts); }
-      catch  { this.pageSizeOptions = opts.split(',').map(n => parseInt(n.trim())); }
+      catch { this.pageSizeOptions = opts.split(',').map(n => parseInt(n.trim())); }
     } else {
       this.pageSizeOptions = [10, 30, 50, 100];
     }
@@ -61,7 +61,7 @@ class AuPagination extends HTMLElement {
       try { this.layout = JSON.parse(lay); }
       catch { this.layout = lay.replace(/[[\]' ]/g, '').split(','); }
     } else {
-      this.layout = ['total_page','total_items','page_size','first','prev','pages','next','last','jump'];
+      this.layout = ['total_page', 'total_items', 'page_size', 'first', 'prev', 'pages', 'next', 'last', 'jump'];
     }
     this.texts = {
       totalPagesPrefix: this.getAttribute('data-text-total-pages-prefix') || 'Total',
@@ -108,55 +108,65 @@ class AuPagination extends HTMLElement {
         /* behavior */
         cursor: pointer;
         -webkit-tap-highlight-color: oklch(0 0 0 / 0);
-        
+
         /* spacing */
         padding: var(--au-btn-padding-vertical, 0.625rem) var(--au-btn-padding-horizontal, 1rem);
-        
+
         /* text */
         color: var(--au-btn-text-color, oklch(0.1398 0 0));
         font-size: var(--au-btn-text-size, 1rem);
         font-family: var(--au-btn-text-family, 'Helvetica, Arial, sans-serif, system-ui');
         line-height: var(--au-btn-text-line-height, 1.5);
-        
+
         /* border */
         border: var(--au-btn-border-width, 1px) var(--au-btn-border-style, solid) var(--au-btn-border-color, oklch(0.7894 0 0));
-        border-radius: var(--au-btn-border-radius, 0.25rem);
-        
+        border-radius: var(--au-btn-border-radius, 0);
+
         /* others decoration */
         background-color: var(--au-btn-bg, oklch(0.994 0 0));
         transition: background-color 160ms ease-in;
-        
+
         &:disabled {
           cursor: not-allowed;
           pointer-events: none;
           opacity: 0.4;
         }
-        
+
         &:hover {
           background-color: var(--au-btn-hover-bg, oklch(0.9466 0 0));
           border-color: var(--au-btn-hover-border-color, oklch(0.7894 0 0));
         }
-        
+
         &:active {
           background-color: var(--au-btn-active-bg, oklch(0.8689 0 0));
           border-color: var(--au-btn-active-border-color, oklch(0.7894 0 0));
         }
-        
+
         &:focus-visible {
           outline: none;
           box-shadow: inset 0 0 0 var(--au-btn-focus-shadow-width, 3px) var(--au-btn-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
         }
-        
+
+        &[aria-current="page"] {
+          cursor: not-allowed;
+          pointer-events: none;
+          background-color: var(--au-btn-current-bg, oklch(0.7894 0 0));
+          color: var(--au-btn-current-text-color, oklch(0.1398 0 0));
+          border-color: var(--au-btn-current-border-color, oklch(0.7894 0 0));
+        }
+
         &.a11y {
           transition: none;
           text-shadow: var(--au-btn-a11y-text-shadow, none);
           background-image: var(--au-btn-a11y-bg-image, none);
-            
+
           background-size: var(--au-btn-a11y-bg-size, 1.5rem 1.5rem);
           background-position: var(--au-btn-a11y-bg-position, center center);
+
           &:hover {
             background-image: var(--au-btn-a11y-hover-bg-image, none);
           }
+
           &:active {
             background-image: var(--au-btn-a11y-active-bg-image, none);
           }
@@ -225,7 +235,7 @@ class AuPagination extends HTMLElement {
     container.className = 'au-pagination-container';
 
     // 第一組: 總頁數/總筆數/每頁顯示
-    const grp1 = document.createElement('div'); grp1.className='au-pagination-group';
+    const grp1 = document.createElement('div'); grp1.className = 'au-pagination-group';
     if (layout.includes('total_page')) {
       const el = document.createElement('span'); el.textContent = `${t.totalPagesPrefix}${totalPages}${t.pageSuffix}`; grp1.appendChild(el);
     }
@@ -254,9 +264,9 @@ class AuPagination extends HTMLElement {
       select.addEventListener('change', e => {
         this.pageSize = +e.target.value;
         this.setAttribute('data-page-size', this.pageSize);
-        this.dispatchEvent(new CustomEvent('page-size-change',{detail:this.pageSize, bubbles: true, composed: true}));
+        this.dispatchEvent(new CustomEvent('page-size-change', { detail: this.pageSize, bubbles: true, composed: true }));
         this.currentPage = 1;
-        this.setAttribute('data-current-page','1');
+        this.setAttribute('data-current-page', '1');
       });
       grp1.appendChild(select);
       // original post-span
@@ -266,18 +276,18 @@ class AuPagination extends HTMLElement {
     container.appendChild(grp1);
 
     // 第二組: 按鈕列表
-    const grp2 = document.createElement('div'); grp2.className='au-pagination-group';
-    const ul = document.createElement('ul'); ul.className='pagination-buttons';
+    const grp2 = document.createElement('div'); grp2.className = 'au-pagination-group';
+    const ul = document.createElement('ul'); ul.className = 'pagination-buttons';
     if (layout.includes('first')) {
-      const li = document.createElement('li'); const btn = document.createElement('button'); btn.textContent=t.firstText; btn.disabled=this.currentPage===1; btn.addEventListener('click',()=>this._goto(1)); li.appendChild(btn); ul.appendChild(li);
+      const li = document.createElement('li'); const btn = document.createElement('button'); btn.textContent = t.firstText; btn.disabled = this.currentPage === 1; btn.addEventListener('click', () => this._goto(1)); li.appendChild(btn); ul.appendChild(li);
     }
     if (layout.includes('prev')) {
-      const li = document.createElement('li'); const btn = document.createElement('button'); btn.textContent=t.prevText; btn.disabled=this.currentPage===1; btn.addEventListener('click',()=>this._goto(this.currentPage-1)); li.appendChild(btn); ul.appendChild(li);
+      const li = document.createElement('li'); const btn = document.createElement('button'); btn.textContent = t.prevText; btn.disabled = this.currentPage === 1; btn.addEventListener('click', () => this._goto(this.currentPage - 1)); li.appendChild(btn); ul.appendChild(li);
     }
-    if (layout.includes('pages')) this.pagers.forEach(page=>{
+    if (layout.includes('pages')) this.pagers.forEach(page => {
       const li = document.createElement('li');
-      const btn= document.createElement('button');
-      btn.className='pager';
+      const btn = document.createElement('button');
+      btn.className = 'pager';
       if (page === this.currentPage) {
         btn.setAttribute('aria-current', 'page');
         btn.setAttribute('part', 'current-page');
@@ -287,26 +297,26 @@ class AuPagination extends HTMLElement {
         btn.removeAttribute('part');
       }
       btn.textContent = page;
-      btn.addEventListener('click',()=>this._goto(page));
+      btn.addEventListener('click', () => this._goto(page));
       li.appendChild(btn); ul.appendChild(li);
     });
     if (layout.includes('next')) {
-      const li = document.createElement('li'); const btn = document.createElement('button'); btn.textContent=t.nextText; btn.disabled=this.currentPage>=totalPages; btn.addEventListener('click',()=>this._goto(this.currentPage+1)); li.appendChild(btn); ul.appendChild(li);
+      const li = document.createElement('li'); const btn = document.createElement('button'); btn.textContent = t.nextText; btn.disabled = this.currentPage >= totalPages; btn.addEventListener('click', () => this._goto(this.currentPage + 1)); li.appendChild(btn); ul.appendChild(li);
     }
     if (layout.includes('last')) {
-      const li = document.createElement('li'); const btn = document.createElement('button'); btn.textContent=t.lastText; btn.disabled=this.currentPage>=totalPages; btn.addEventListener('click',()=>this._goto(totalPages)); li.appendChild(btn); ul.appendChild(li);
+      const li = document.createElement('li'); const btn = document.createElement('button'); btn.textContent = t.lastText; btn.disabled = this.currentPage >= totalPages; btn.addEventListener('click', () => this._goto(totalPages)); li.appendChild(btn); ul.appendChild(li);
     }
-    const nav=document.createElement('nav'); nav.setAttribute('aria-label','pagination'); nav.appendChild(ul);
+    const nav = document.createElement('nav'); nav.setAttribute('aria-label', 'pagination'); nav.appendChild(ul);
     grp2.appendChild(nav); container.appendChild(grp2);
 
     // 第三組: 跳轉
     if (layout.includes('jump')) {
-      const grp3 = document.createElement('div'); grp3.className='au-pagination-group';
+      const grp3 = document.createElement('div'); grp3.className = 'au-pagination-group';
       const lbl = document.createElement('label'); lbl.setAttribute('for', this._jumpId); lbl.textContent = t.goText;
       grp3.appendChild(lbl);
       const input = document.createElement('input');
-      input.type='number'; input.id=this._jumpId; input.min='1'; input.max=String(totalPages); input.value=String(this.currentPage);
-      input.addEventListener('keyup', e=>{ if(e.key==='Enter') this._goto(+input.value); });
+      input.type = 'number'; input.id = this._jumpId; input.min = '1'; input.max = String(totalPages); input.value = String(this.currentPage);
+      input.addEventListener('keyup', e => { if (e.key === 'Enter') this._goto(+input.value); });
       grp3.appendChild(input);
       // existing span after input
       const suf = document.createElement('span'); suf.textContent = t.pageSuffix;
@@ -316,7 +326,7 @@ class AuPagination extends HTMLElement {
       btn.textContent = t.gotoText;
       btn.addEventListener('click', () => this._goto(+input.value));
       grp3.appendChild(btn);
-      
+
       container.appendChild(grp3);
     }
 
@@ -325,12 +335,12 @@ class AuPagination extends HTMLElement {
   }
 
   _goto(page) {
-    if (page<1) page=1;
-    if (page>this.totalPages) page=this.totalPages;
-    if (page===this.currentPage) return;
-    this.currentPage=page;
-    this.setAttribute('data-current-page',String(page));
-    this.dispatchEvent(new CustomEvent('page-change',{detail:page, bubbles: true, composed: true}));
+    if (page < 1) page = 1;
+    if (page > this.totalPages) page = this.totalPages;
+    if (page === this.currentPage) return;
+    this.currentPage = page;
+    this.setAttribute('data-current-page', String(page));
+    this.dispatchEvent(new CustomEvent('page-change', { detail: page, bubbles: true, composed: true }));
     this.announce(`Page ${page}`);
   }
 

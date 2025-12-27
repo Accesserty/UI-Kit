@@ -15,13 +15,11 @@ class AuInput extends HTMLElement {
       background: var(--au-input-wrapper-bg, transparent);
 
       label {
-        word-break: break-word;
-      }
-      label {
         margin: 0;
         padding: var(--au-input-label-padding-vertical, 0.625rem) var(--au-input-label-padding-horizontal, 1rem);
-        color: oklch(var(--au-input-label-text-color, oklch(0.1398 0 0)));
-        font-size: var(--au-inpu-label-text-size, 1rem);
+        color: var(--au-input-label-text-color, oklch(0.1398 0 0));
+        font-size: var(--au-input-label-text-size, 1rem);
+        word-break: break-word;
       }
       input {
         -webkit-tap-highlight-color: oklch(0 0 0 / 0);
@@ -42,6 +40,10 @@ class AuInput extends HTMLElement {
         &:focus-visible {
           box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) var(--au-input-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
         }
+
+        &[type="color"] {
+         padding: 0;
+        }
       }
       .input-container {
         display: flex;
@@ -50,6 +52,12 @@ class AuInput extends HTMLElement {
         border-radius: var(--au-input-border-radius, 0.25rem);
         padding: var(--au-input-container-padding-vertical, 0.25rem) var(--au-input-container-padding-horizontal, 0.25rem);
         gap: var(--au-input-container-gap, 0.625rem);
+      }
+      .color-code {
+        font-family: var(--au-input-font-family, monospace);
+        font-size: var(--au-input-text-size, 1rem);
+        color: var(--au-input-text-color, oklch(0.1398 0 0));
+        user-select: text; /* Allow copying */
       }
       .clear-input {
         display: grid;
@@ -85,12 +93,12 @@ class AuInput extends HTMLElement {
         }
       }
       &[data-size="small"] {
-        :is(label, input) {
+        :is(label, input, .color-code) {
           padding: var(--au-input-small-padding-vertical, 0.25rem) var(--au-input-small-padding-horizontal, 0.375rem);
         }
       }
       &[data-size="large"] {
-        :is(label, input)  {
+        :is(label, input, .color-code)  {
           padding: var(--au-input-large-padding-vertical, 1rem) var(--au-input-large-padding-horizontal, 1.625rem);
           font-size: var(--au-input-large-text-size, 1.25rem);
         }
@@ -130,6 +138,10 @@ class AuInput extends HTMLElement {
     this.input.id = this._id;
     this.syncAttributes();
 
+    this.colorCodeSpan = document.createElement('span');
+    this.colorCodeSpan.className = 'color-code';
+    this.colorCodeSpan.hidden = true;
+
     this.clearButton = document.createElement('button');
     this.clearButton.type = 'button';
     this.clearButton.className = 'clear-input';
@@ -147,7 +159,7 @@ class AuInput extends HTMLElement {
     this.affixSpan.appendChild(this.affixSlot);
     this.affixSpan.hidden = true;
 
-    inputContainer.append(this.prefixSpan, this.input, this.clearButton, this.affixSpan);
+    inputContainer.append(this.prefixSpan, this.input, this.colorCodeSpan, this.clearButton, this.affixSpan);
     wrapper.append(this.labelEl, inputContainer);
     this.shadowRoot.append(style, wrapper);
 
@@ -157,6 +169,7 @@ class AuInput extends HTMLElement {
       this.internals.setFormValue(this.value);
       this._syncValidity();
       this._updateClearButton();
+      this._updateColorCode();
     });
 
     this.input.addEventListener('change', () => {
@@ -176,7 +189,7 @@ class AuInput extends HTMLElement {
     return [
       'type', 'name', 'value', 'placeholder', 'required', 'disabled', 'readonly', 'label',
       'min', 'max', 'step', 'pattern', 'autocomplete', 'autofocus', 'inputmode', 'maxlength', 'minlength',
-      'data-size', 'data-layout', 'data-clear', 'data-clear-label'
+      'list', 'data-size', 'data-layout', 'data-clear', 'data-clear-label'
     ];
   }
 
@@ -191,6 +204,8 @@ class AuInput extends HTMLElement {
       }
     } else if (name === 'data-clear' || name === 'data-clear-label') {
       this._updateClearButton();
+    } else if (name === 'list') {
+      this._handleListAttribute(newValue);
     } else if (this.input) {
       if (newValue === null && typeof this.input[name] === 'boolean') {
         this.input[name] = false;
@@ -202,6 +217,7 @@ class AuInput extends HTMLElement {
         }
       }
       this._syncValidity();
+      this._updateColorCode();
     }
   }
 
@@ -233,6 +249,14 @@ class AuInput extends HTMLElement {
     this.internals.setFormValue(this.input.value);
     this._syncValidity();
     this._updateClearButton();
+    this._updateColorCode();
+
+    // Attempt to sync list initially (deferred to ensure light DOM is parsed)
+    if (this.hasAttribute('list')) {
+      requestAnimationFrame(() => {
+        this._handleListAttribute(this.getAttribute('list'));
+      });
+    }
   }
 
   formResetCallback() {
@@ -240,6 +264,7 @@ class AuInput extends HTMLElement {
     this.internals.setFormValue(this.input.value);
     this._syncValidity();
     this._updateClearButton();
+    this._updateColorCode();
   }
 
   get value() {
@@ -253,6 +278,7 @@ class AuInput extends HTMLElement {
       this.internals.setFormValue(val);
       this._syncValidity();
       this._updateClearButton();
+      this._updateColorCode();
     }
   }
 
@@ -264,6 +290,7 @@ class AuInput extends HTMLElement {
     this.dispatchEvent(new Event('input', { bubbles: true }));
     this.dispatchEvent(new Event('change', { bubbles: true }));
     this._updateClearButton();
+    this._updateColorCode();
   }
 
   /** ✅ 開發者用：注入建議值 */
@@ -273,6 +300,7 @@ class AuInput extends HTMLElement {
     this.internals.setFormValue(val);
     this.dispatchEvent(new Event('input', { bubbles: true }));
     this._updateClearButton();
+    this._updateColorCode();
   }
 
   /** ✅ 開發者用：聚焦 input 欄位 */
@@ -312,6 +340,63 @@ class AuInput extends HTMLElement {
     const label = this.getAttribute('data-clear-label') || 'Clear input';
     this.clearButton.setAttribute('aria-label', label);
     this.clearButton.hidden = !(hasClear && hasValue);
+  }
+
+  _updateColorCode() {
+    if (this.input.type === 'color') {
+      this.colorCodeSpan.textContent = this.input.value;
+      this.colorCodeSpan.hidden = false;
+    } else {
+      this.colorCodeSpan.hidden = true;
+    }
+  }
+
+  /**
+   * Syncs the external datalist to an internal shadow DOM datalist
+   * because list attributes do not cross shadow DOM boundaries.
+   */
+  _handleListAttribute(listId) {
+    if (!this.shadowRoot || !this.input) return;
+
+    // Remove existing internal datalist if any
+    const existingDotted = this.shadowRoot.querySelector('datalist');
+    if (existingDotted) {
+      existingDotted.remove();
+    }
+
+    if (!listId) {
+      this.input.removeAttribute('list');
+      return;
+    }
+
+    // Find external datalist in the root node (document or parent shadow root)
+    const root = this.getRootNode();
+    const externalDatalist = root instanceof Document || root instanceof ShadowRoot
+      ? root.getElementById(listId)
+      : document.getElementById(listId);
+
+    if (externalDatalist && externalDatalist.tagName === 'DATALIST') {
+      // Create internal datalist
+      const internalDatalist = document.createElement('datalist');
+      internalDatalist.id = listId; // Use same ID, scoped to shadow root
+
+      // Clone options
+      // Note: We clone the children deep to get options
+      Array.from(externalDatalist.options).forEach(opt => {
+        internalDatalist.appendChild(opt.cloneNode(true));
+      });
+
+      this.shadowRoot.appendChild(internalDatalist);
+      this.input.setAttribute('list', listId);
+
+      // Optional: Observer for changes in external datalist could be added here
+      // for full reactivity, but simple clone is often sufficient for static lists.
+    } else {
+      // If not found, just pass the attribute anyway (maybe it will exist later?)
+      // But purely inside shadow DOM, it won't resolve to outer ID.
+      // We accept that limitation for now if not found immediately.
+      this.input.setAttribute('list', listId);
+    }
   }
 }
 

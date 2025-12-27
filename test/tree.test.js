@@ -42,6 +42,8 @@ describe('AuTree', () => {
     const node = el.shadowRoot.querySelector('au-tree-node');
     expect(node.getAttribute('role')).to.equal('treeitem');
     expect(node.getAttribute('aria-expanded')).to.equal('false');
+    // Ensure host has accessible name
+    expect(node.getAttribute('aria-label')).to.equal('Root 1');
   });
 
   describe('toggleLabel', () => {

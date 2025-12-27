@@ -18,6 +18,17 @@ class AuSwitch extends HTMLElement {
         padding-bottom: var(--au-switch-padding-bottom, 0.625rem);
         padding-left: var(--au-switch-padding-left, 0);
         -webkit-tap-highlight-color: oklch(0 0 0 / 0);
+        &:hover {
+          text-decoration: underline;
+        }
+        &:has(input:focus-visible) {
+          box-shadow: inset 0 0 0 var(--au-switch-focus-shadow-width, 3px) var(--au-switch-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
+        } 
+        &:has(input:disabled) {
+          cursor: not-allowed;
+          opacity: 0.5;
+          text-decoration: none;
+        } 
       }
       .container {
         display: flex;
@@ -26,46 +37,44 @@ class AuSwitch extends HTMLElement {
       }
       .input {
         position: relative;
+        &:before {
+          content: '';
+          display: block;
+          width: calc(var(--au-switch-input-width, 4rem) / 2 - 2 * var(--au-switch-inner-distance, 0.25rem));
+          height: calc(var(--au-switch-input-width, 4rem) / 2 - 2 * var(--au-switch-inner-distance, 0.25rem));
+          background-color: gray;
+          position: absolute;
+          top: var(--au-switch-inner-distance, 0.25rem);
+          left: var(--au-switch-inner-distance, 0.25rem);
+          border-radius: var(--au-switch-inner-border-radius, calc((var(--au-switch-input-width, 4rem) / 2 - var(--au-switch-inner-distance, 0.25rem)) / 2));
+          transition: background-color 360ms ease-in, left 240ms ease-in;
+        }
+        input[type="checkbox"] {
+          appearance: none;
+          cursor: pointer;
+          margin: 0;
+          display: block;
+          width: var(--au-switch-input-width, 4rem);
+          height: calc(var(--au-switch-input-width, 4rem) / 2);
+          border: var(--au-switch-input-border-width, 1px) var(--au-switch-input-border-style, solid) var(--au-switch-input-border-color, oklch(0.7894 0 0));
+          border-radius: var(--au-switch-input-border-radius, calc(var(--au-switch-input-width, 4rem) / 4));
+          transition: background-color 360ms ease-in;
+          &:focus-visible {
+            outline: none;
+          }
+          &:disabled {
+            cursor: not-allowed;
+          }
+        }
+        &:has(input[type="checkbox"]:checked) input[type="checkbox"] {
+          background-color: var(--au-switch-input-checked-bg, oklch(0.1398 0 0));
+        }
+        &:has(input[type="checkbox"]:checked):before {
+          background-color: var(--au-switch-inner-checked-bg, oklch(0.994 0 0));
+          left: calc(100% - (var(--au-switch-input-width, 4rem) / 2 - 2 * var(--au-switch-inner-distance, 0.25rem)) - var(--au-switch-inner-distance, 0.25rem));
+        }
       }
-      input[type="checkbox"] {
-        appearance: none;
-        cursor: pointer;
-        margin: 0;
-        display: block;
-        width: var(--au-switch-input-width, 4rem);
-        height: calc(var(--au-switch-input-width, 4rem) / 2);
-        border: var(--au-switch-input-border-width, 1px) var(--au-switch-input-border-style, solid) var(--au-switch-input-border-color, oklch(0.7894 0 0));
-        border-radius: var(--au-switch-input-border-radius, calc(var(--au-switch-input-width, 4rem) / 4));
-        transition: background-color 360ms ease-in;
-      }
-      input[type="checkbox"]:focus-visible {
-        outline: none;
-      }
-      .input:before {
-        content: '';
-        display: block;
-        width: calc(var(--au-switch-input-width, 4rem) / 2 - 2 * var(--au-switch-inner-distance, 0.25rem));
-        height: calc(var(--au-switch-input-width, 4rem) / 2 - 2 * var(--au-switch-inner-distance, 0.25rem));
-        background-color: gray;
-        position: absolute;
-        top: var(--au-switch-inner-distance, 0.25rem);
-        left: var(--au-switch-inner-distance, 0.25rem);
-        border-radius: var(--au-switch-inner-border-radius, calc((var(--au-switch-input-width, 4rem) / 2 - var(--au-switch-inner-distance, 0.25rem)) / 2));
-        transition: background-color 360ms ease-in, left 240ms ease-in;
-      }
-      .input:has(input[type="checkbox"]:checked) input[type="checkbox"] {
-        background-color: var(--au-switch-input-checked-bg, oklch(0.1398 0 0));
-      }
-      .input:has(input[type="checkbox"]:checked):before {
-        background-color: var(--au-switch-inner-checked-bg, oklch(0.994 0 0));
-        left: calc(100% - (var(--au-switch-input-width, 4rem) / 2 - 2 * var(--au-switch-inner-distance, 0.25rem)) - var(--au-switch-inner-distance, 0.25rem));
-      }
-      .au-switch:hover {
-        text-decoration: underline;
-      }
-      .au-switch:has(input:focus-visible) {
-        box-shadow: inset 0 0 0 var(--au-switch-focus-shadow-width, 3px) var(--au-switch-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
-      }
+     
     `;
 
     const switchElement = document.createElement('label');

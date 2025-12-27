@@ -4,7 +4,7 @@
 
 /* Button & Select */
 
-:is(button, select, .btn) {
+:is(button, select) {
   /* behavior */
   cursor: pointer;
   -webkit-tap-highlight-color: oklch(0 0 0 / 0);
@@ -83,7 +83,6 @@ select {
     border: var(--au-select-picker-border-width, 1px) var(--au-select-picker-border-style, solid) var(--au-select-picker-border-color, oklch(0.7894 0 0));
     border-radius: var(--au-select-picker-border-radius, 0.25rem);
     background-color: var(--au-select-picker-bg, oklch(0.994 0 0));
-    color: var(--au-select-picker-text-color, oklch(0.1398 0 0));
     box-shadow: var(--box-shadow);
     text-shadow: none;
   }
@@ -149,7 +148,7 @@ select {
     }
 
     &:focus-visible {
-      box-shadow: inset 0 0 0 var(--au-option-focus-shadow-width, 3px) oklch(var(--au-option-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487)));
+      background-color: var(--au-option-focus-bg, oklch(0.9466 0 0));
     }
 
     &::checkmark {
@@ -249,19 +248,28 @@ dialog {
   /* animation initial state */
   opacity: 0;
   transform: scale(0.95) translateY(10px);
-  transition: opacity 0.3s ease-out, transform 0.3s ease-out, overlay 0.3s ease-out allow-discrete, display 0.3s allow-discrete;
+  transition:
+    opacity 0.3s ease-out,
+    transform 0.3s ease-out,
+    overlay 0.3s allow-discrete,
+    display 0.3s allow-discrete;
 
   &::backdrop {
+    opacity: 0;
     background-color: var(--au-dialog-backdrop-bg, oklch(0 0 0 / 0.5));
     backdrop-filter: blur(var(--au-dialog-backdrop-blur, 2px));
-    opacity: 0;
-    transition: opacity 0.3s ease-out, overlay 0.3s ease-out allow-discrete, display 0.3s allow-discrete;
+    /* 記得給顏色 */
+    transition:
+      opacity 0.3s ease-out,
+      display 0.3s allow-discrete,
+      overlay 0.3s allow-discrete;
   }
 
   &[open] {
     opacity: 1;
     transform: scale(1) translateY(0);
 
+    /* 5. 進場動畫的起始點 */
     @starting-style {
       opacity: 0;
       transform: scale(0.95) translateY(10px);
@@ -273,6 +281,64 @@ dialog {
       @starting-style {
         opacity: 0;
       }
+    }
+  }
+}
+
+
+/* details */
+
+details {
+  border: var(--au-details-border-width, 1px) var(--au-details-border-style, solid) var(--au-details-border-color, oklch(0.7894 0 0));
+  border-radius: var(--au-details-border-radius, 0);
+  padding: var(--au-details-padding-vertical, 1rem) var(--au-details-padding-horizontal, 1rem);
+
+  &[open] {
+    background-color: var(--au-details-open-bg, oklch(0.994 0 0));
+  }
+
+  &+& {
+    margin-top: 1rem;
+  }
+
+  summary {
+    /* behavior */
+    cursor: var(--au-summary-cursor, pointer);
+    -webkit-tap-highlight-color: oklch(0 0 0 / 0);
+
+    /* spacing */
+    padding: var(--au-summary-padding-vertical, 0.625rem) var(--au-summary-padding-horizontal, 0);
+
+    /* text */
+    color: var(--au-summary-text-color, oklch(0.1398 0 0));
+    font-size: var(--au-summary-text-size, 1rem);
+    font-family: var(--au-summary-text-family, inherit);
+    line-height: var(--au-summary-text-line-height, 1.5);
+
+    /* background */
+    background-color: var(--au-summary-bg, transparent);
+    transition: background-color 160ms ease-in;
+
+    /* border */
+    border: var(--au-summary-border-width, 0) var(--au-summary-border-style, solid) var(--au-summary-border-color, transparent);
+    border-radius: var(--au-summary-border-radius, 0.25rem);
+
+    /* marker */
+    &::marker {
+      color: var(--au-summary-marker-color, oklch(0.1398 0 0));
+    }
+
+    &:hover {
+      background-color: var(--au-summary-hover-bg, oklch(0.9466 0 0));
+    }
+
+    &:active {
+      background-color: var(--au-summary-active-bg, oklch(0.8689 0 0));
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: inset 0 0 0 var(--au-summary-focus-shadow-width, 3px) var(--au-summary-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
     }
   }
 }

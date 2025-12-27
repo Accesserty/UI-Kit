@@ -4,6 +4,8 @@ This document records the development priorities and architectural decisions reg
 
 ## Priorities
 
+### 0. Playground
+
 ### 1. Datalist Styling (資料清單樣式)
 - **Priority**: Highest (Immediate)
 - **Status**: Pending Requirements

@@ -13,13 +13,12 @@ class AuDropdown extends HTMLElement {
         :host {
           display: inline-block;
         }
-        
-        button {
-          /* behavior */
+        :is(button) {
           anchor-name: --dropdown-anchor;
+          /* behavior */
           cursor: pointer;
           -webkit-tap-highlight-color: oklch(0 0 0 / 0);
-          
+
           /* spacing */
           display: flex;
           justify-content: space-between;
@@ -28,63 +27,67 @@ class AuDropdown extends HTMLElement {
           word-break: break-word;
           width: 100%;
           text-align: left;
-          padding: var(--au-dropdown-padding-vertical, 0.625rem) var(--au-dropdown-padding-horizontal, 1rem);
-          
+          padding: var(--au-btn-padding-vertical, 0.625rem) var(--au-btn-padding-horizontal, 1rem);
+
           /* text */
-          color: var(--au-dropdown-text-color, oklch(0.1398 0 0));
-          font-size: var(--au-dropdown-text-size, 1rem);
-          font-family: var(--au-dropdown-text-family, 'Helvetica, Arial, sans-serif, system-ui');
-          line-height: var(--au-dropdown-text-line-height, 1.5);
-          
+          color: var(--au-btn-text-color, oklch(0.1398 0 0));
+          font-size: var(--au-btn-text-size, 1rem);
+          font-family: var(--au-btn-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+          line-height: var(--au-btn-text-line-height, 1.5);
+
           /* border */
-          border: var(--au-dropdown-border-width, 1px) var(--au-dropdown-border-style, solid) var(--au-dropdown-border-color, oklch(0.7894 0 0));
-          border-radius: var(--au-dropdown-border-radius, 0);
-          
+          border: var(--au-btn-border-width, 1px) var(--au-btn-border-style, solid) var(--au-btn-border-color, oklch(0.7894 0 0));
+          border-radius: var(--au-btn-border-radius, 0);
+
           /* others decoration */
-          background-color: var(--au-dropdown-bg, oklch(0.994 0 0));
+          background-color: var(--au-btn-bg, oklch(0.994 0 0));
           transition: background-color 160ms ease-in;
 
-          .heading {
-            flex: 1;
+          &[data-size="small"] {
+            padding: var(--au-btn-small-padding-vertical, 0.25rem) var(--au-btn-small-padding-horizontal, 0.375rem);
           }
 
-          .info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex: 0 1 auto;
+          &[data-size="large"] {
+            padding: var(--au-btn-large-padding-vertical, 1rem) var(--au-btn-large-padding-horizontal, 1.625rem);
+            font-size: var(--au-btn-large-text-size, 1.25rem);
           }
 
-          .icon {
-            transition: transform 300ms ease-in;
-            display: flex;
-            align-items: middle;
-            width: 1rem;
-            height: 1rem;
-            font-size: 1rem;
-            line-height: 1rem;
-          }
-
-          &[aria-expanded="true"] {
-            .icon {
-              transform: rotate3d(0, 0, 1, 180deg);
-              transform-origin: center;
-            }
+          &:disabled {
+            cursor: not-allowed;
+            pointer-events: none;
+            opacity: 0.4;
           }
 
           &:hover {
-            background-color: var(--au-dropdown-hover-bg, oklch(0.9466 0 0));
-            border-color: var(--au-dropdown-hover-border-color, oklch(0.7894 0 0));
+            background-color: var(--au-btn-hover-bg, oklch(0.9466 0 0));
+            border-color: var(--au-btn-hover-border-color, oklch(0.7894 0 0));
           }
-          
+
           &:active {
-            background-color: var(--au-dropdown-active-bg, oklch(0.8689 0 0));
-            border-color: var(--au-dropdown-active-border-color, oklch(0.7894 0 0));
+            background-color: var(--au-btn-active-bg, oklch(0.8689 0 0));
+            border-color: var(--au-btn-active-border-color, oklch(0.7894 0 0));
           }
-          
+
           &:focus-visible {
             outline: none;
-            box-shadow: inset 0 0 0 var(--au-dropdown-focus-shadow-width, 3px) var(--au-dropdown-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
+            box-shadow: inset 0 0 0 var(--au-btn-focus-shadow-width, 3px) var(--au-btn-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
+          }
+
+          &.a11y {
+            transition: none;
+            text-shadow: var(--au-btn-a11y-text-shadow, none);
+            background-image: var(--au-btn-a11y-bg-image, none);
+
+            background-size: var(--au-btn-a11y-bg-size, 1.5rem 1.5rem);
+            background-position: var(--au-btn-a11y-bg-position, center center);
+
+            &:hover {
+              background-image: var(--au-btn-a11y-hover-bg-image, none);
+            }
+
+            &:active {
+              background-image: var(--au-btn-a11y-active-bg-image, none);
+            }
           }
         }
 
@@ -181,20 +184,20 @@ class AuDropdown extends HTMLElement {
   handleToggle(e) {
     const isOpen = e.newState === 'open';
     this.trigger.setAttribute('aria-expanded', isOpen);
-    
+
     if (isOpen) {
       requestAnimationFrame(() => {
         // 優先使用 open() 指定的 index，如果沒有指定（例如滑鼠點擊），預設為 0
         const indexToFocus = this._focusIndex ?? 0;
         this.focusItem(indexToFocus);
-        
+
         // 重置狀態，避免下次開啟時誤用舊的 index
         this._focusIndex = null;
       });
     } else {
       // 確保關閉時焦點回到 Trigger
       if (document.activeElement?.closest('au-dropdown') === this) {
-         this.trigger.focus();
+        this.trigger.focus();
       }
       this._focusIndex = null;
     }
@@ -211,7 +214,7 @@ class AuDropdown extends HTMLElement {
       let idx = index;
       if (idx < 0) idx = items.length - 1;
       if (idx >= items.length) idx = 0;
-      
+
       items[idx].focus();
     }
   }
@@ -224,6 +227,7 @@ class AuDropdown extends HTMLElement {
     switch (e.key) {
       case 'Enter':
       case ' ':
+      case 'Spacebar':
       case 'ArrowDown':
         e.preventDefault();
         this.open(0);
@@ -273,7 +277,7 @@ class AuDropdownItem extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
-    
+
     const template = document.createElement('template');
     template.innerHTML = `
       <style>
@@ -313,7 +317,7 @@ class AuDropdownItem extends HTMLElement {
 
   connectedCallback() {
     this.setAttribute('tabindex', '-1');
-    this.setAttribute('role', 'none'); 
+    this.setAttribute('role', 'none');
 
     this.addEventListener('click', () => {
       this.dispatchEvent(new CustomEvent('selected', {
@@ -321,13 +325,13 @@ class AuDropdownItem extends HTMLElement {
         composed: true,
         detail: { value: this.getAttribute('value') }
       }));
-      
+
       const dropdown = this.closest('au-dropdown');
       if (dropdown) dropdown.close();
     });
-    
+
     this.item.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
         e.preventDefault();
         const link = this.querySelector('a');
         if (link) {

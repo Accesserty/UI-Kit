@@ -18,7 +18,7 @@ describe('AuDropdown', () => {
   it('renders with correct initial attributes', () => {
     const trigger = el.shadowRoot.querySelector('button');
     const menu = el.shadowRoot.querySelector('[role="menu"]');
-    
+
     expect(trigger.getAttribute('role')).to.equal('button');
     expect(trigger.getAttribute('aria-haspopup')).to.equal('menu');
     expect(trigger.getAttribute('popovertarget')).to.equal(menu.id);
@@ -78,11 +78,11 @@ describe('AuDropdown', () => {
   it('navigates with ArrowDown (cycles to first from last)', async () => {
     el.open(2); // Focus last item
     await new Promise(r => setTimeout(r, 100));
-    
+
     const lastItem = el.items[2];
     lastItem.shadowRoot.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, composed: true }));
     await new Promise(r => setTimeout(r, 50));
-    
+
     // Should now be on first item (cycling)
     expect(el.items[0].shadowRoot.activeElement).to.not.be.null;
   });
@@ -90,11 +90,11 @@ describe('AuDropdown', () => {
   it('navigates with ArrowUp (cycles to last from first)', async () => {
     el.open(0); // Focus first item
     await new Promise(r => setTimeout(r, 100));
-    
+
     const firstItem = el.items[0];
     firstItem.shadowRoot.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, composed: true }));
     await new Promise(r => setTimeout(r, 50));
-    
+
     // Should now be on last item (cycling)
     expect(el.items[el.items.length - 1].shadowRoot.activeElement).to.not.be.null;
   });
@@ -102,20 +102,20 @@ describe('AuDropdown', () => {
   it('navigates to first item with Home key', async () => {
     el.open(1);
     await new Promise(r => setTimeout(r, 100));
-    
+
     el.items[1].shadowRoot.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true, composed: true }));
     await new Promise(r => setTimeout(r, 50));
-    
+
     expect(el.items[0].shadowRoot.activeElement).to.not.be.null;
   });
 
   it('navigates to last item with End key', async () => {
     el.open(0);
     await new Promise(r => setTimeout(r, 100));
-    
+
     el.items[0].shadowRoot.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true, composed: true }));
     await new Promise(r => setTimeout(r, 50));
-    
+
     expect(el.items[el.items.length - 1].shadowRoot.activeElement).to.not.be.null;
   });
 
@@ -123,10 +123,10 @@ describe('AuDropdown', () => {
   it('closes on Escape key, returns focus to trigger', async () => {
     el.open();
     await new Promise(r => setTimeout(r, 50));
-    
+
     el.menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await new Promise(r => setTimeout(r, 50));
-    
+
     expect(el.isOpen).to.be.false;
     expect(el.shadowRoot.activeElement).to.equal(el.trigger);
   });
@@ -134,10 +134,10 @@ describe('AuDropdown', () => {
   it('closes on Tab key', async () => {
     el.open();
     await new Promise(r => setTimeout(r, 50));
-    
+
     el.menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
     await new Promise(r => setTimeout(r, 50));
-    
+
     expect(el.isOpen).to.be.false;
   });
 
@@ -145,10 +145,10 @@ describe('AuDropdown', () => {
   it('dispatches selected event on item mouse click', async () => {
     let eventDetail = null;
     el.addEventListener('selected', (e) => { eventDetail = e.detail; });
-    
+
     el.items[0].click();
     await new Promise(r => setTimeout(r, 50));
-    
+
     expect(eventDetail).to.not.be.null;
     expect(eventDetail.value).to.equal('1');
     expect(el.isOpen).to.be.false;
@@ -157,13 +157,13 @@ describe('AuDropdown', () => {
   it('dispatches selected event on item keyboard activation (Enter)', async () => {
     let eventDetail = null;
     el.addEventListener('selected', (e) => { eventDetail = e.detail; });
-    
+
     el.open(0);
     await new Promise(r => setTimeout(r, 100));
-    
+
     el.items[0].shadowRoot.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     await new Promise(r => setTimeout(r, 50));
-    
+
     expect(eventDetail).to.not.be.null;
     expect(eventDetail.value).to.equal('1');
     expect(el.isOpen).to.be.false;
@@ -172,13 +172,13 @@ describe('AuDropdown', () => {
   it('dispatches selected event on item keyboard activation (Space)', async () => {
     let eventDetail = null;
     el.addEventListener('selected', (e) => { eventDetail = e.detail; });
-    
+
     el.open(1);
     await new Promise(r => setTimeout(r, 100));
-    
+
     el.items[1].shadowRoot.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
     await new Promise(r => setTimeout(r, 50));
-    
+
     expect(eventDetail).to.not.be.null;
     expect(eventDetail.value).to.equal('2');
     expect(el.isOpen).to.be.false;
@@ -189,10 +189,10 @@ describe('AuDropdown', () => {
     el.open();
     await new Promise(r => setTimeout(r, 50));
     expect(el.isOpen).to.be.true;
-    
+
     el.close();
     await new Promise(r => setTimeout(r, 50));
-    
+
     expect(el.isOpen).to.be.false;
     expect(el.shadowRoot.activeElement).to.equal(el.trigger);
   });

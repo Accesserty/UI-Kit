@@ -56,6 +56,7 @@ class AuTabs extends HTMLElement {
         font-size: var(--au-tabs-text-size, 1rem);
         font-family: var(--au-tabs-text-family, 'Helvetica, Arial, sans-serif, system-ui');
         line-height: var(--au-tabs-text-line-height, 1.5);
+        white-space: nowrap;
 
         /* background */
         background-color: var(--au-tabs-bg, oklch(0.9731 0 0));
@@ -135,7 +136,7 @@ class AuTabs extends HTMLElement {
   _renderTabs() {
     const slot = this.shadowRoot.querySelector('slot[name="panel"]');
     const tabPanels = slot.assignedElements().filter(el => el.classList.contains('au-tab-panel'));
-    
+
     this._tabs = [];
     this._panels = [];
     this.tabsList.innerHTML = "";

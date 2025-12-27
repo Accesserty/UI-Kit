@@ -164,13 +164,9 @@ code {
       transparent 0.125rem);
 
   &::part(current-page) {
-    --au-btn-text-color: var(--color-white);
-    --au-btn-border-color: var(--color-primary-500);
-    --au-btn-bg: var(--color-primary-500);
-    --au-btn-hover-bg: var(--color-primary-400);
-    --au-btn-hover-border-color: var(--color-primary-400);
-    --au-btn-active-bg: var(--color-primary-600);
-    --au-btn-active-border-color: var(--color-primary-600);
+    --au-btn-current-text-color: var(--color-white);
+    --au-btn-current-border-color: var(--color-primary-500);
+    --au-btn-current-bg: var(--color-primary-500);
   }
 
 }
@@ -298,10 +294,6 @@ code {
       margin: 0;
       word-break: brea-word;
       flex: 1;
-    }
-
-    ry-btn {
-      flex: 0 1 auto;
     }
   }
 

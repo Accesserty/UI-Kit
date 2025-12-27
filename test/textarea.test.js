@@ -74,8 +74,8 @@ describe('AuTextarea', () => {
     el.reset();
     await new Promise(r => setTimeout(r));
 
-    expect(auTextarea.value).to.equal('');
-    expect(textarea.value).to.equal('');
+    expect(auTextarea.value).to.equal('Initial value');
+    expect(textarea.value).to.equal('Initial value');
   });
 
   it('submits value with form correctly', async () => {

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accesserty UI Kit - Modular Playground</title>
+  <link rel="stylesheet" href="../src/css/au-style.css" />
+  <link rel="stylesheet" href="demo.css" />
+
+  <script src="../dist/accesserty-ui-kit.min.js" defer></script>
+
+  <style>
+    .playground-layout {
+      display: grid;
+      grid-template-columns: 1fr 3fr;
+      gap: 1rem;
+    }
+
+    .generated-css {
+      display: block;
+      background: #1f2937;
+      color: #f3f4f6;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: monospace;
+      white-space: pre-wrap;
+      min-height: 100px;
+      border: 1px solid #111827;
+    }
+
+    .controls-area {
+      max-height: 80dvh;
+      min-height: 40dvh;
+      overflow: auto;
+    }
+
+    .control-group {
+      border: 1px solid #ddd;
+      padding: 1rem;
+      position: relative;
+
+      &+& {
+        margin-top: 1rem;
+      }
+
+      h3 {
+        position: sticky;
+        top: 0;
+        background-color: oklch(0.994 0 0 / 0.8);
+      }
+    }
+
+    main {
+      .input-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+
+        &+& {
+          margin-top: 1rem;
+        }
+      }
+
+      .color-group {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      input {
+        min-height: 2rem;
+        font-size: 1rem;
+        border-radius: 0;
+        border: 1px solid #aaa;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header><a href="../demo/index.html" title="go to home page">Home</a></header>
+  <main style="max-width: 1400px; margin: 0 auto; padding: 2rem;">
+    <h1>Accesserty UI Playground</h1>
+
+    <au-tabs id="main-tabs-controller"></au-tabs>
+
+    <div id="playground-interface" class="playground-layout">
+
+      <div class="controls-area">
+        <h2 class="sr-only">Configuration Controls</h2>
+        <div id="controls-container"></div>
+      </div>
+
+      <div class="preview-area">
+        <div class="sticky-wrapper">
+          <h2>Preview</h2>
+          <div id="preview-sandbox" class="preview-box" aria-label="Component Preview Area">
+          </div>
+
+          <h2>Generated CSS</h2>
+          <div class="code-block-wrapper">
+            <pre><code id="generated-css" class="generated-css" tabindex="0">/* Styles will appear here */</code></pre>
+            <button id="copy-btn" class="btn-copy">Copy Code</button>
+            <div id="copy-status" class="sr-only" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="playground-engine.js"></script>
+</body>
+
+</html>

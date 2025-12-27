@@ -97,6 +97,7 @@ class AuBreadcrumbs extends HTMLElement {
                 >span {
                   padding-left: var(--au-breadcrumbs-link-padding-horizontal, 0.625rem);
                   font-size: var(--au-breadcrumbs-text-size, 1rem);
+                  color: var(--au-breadcrumbs-link-currentpage-color, oklch(0.1398 0 0));
                 }
               }
               a {
