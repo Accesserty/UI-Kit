@@ -21,7 +21,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
             /* text */
             color: var(--au-accordion-heading-text-color, oklch(0.1398 0 0));
             font-size: var(--au-accordion-heading-text-size, 1rem);
-            font-family: var(--au-accordion-heading-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+            // font-family: var(--au-accordion-heading-text-family, 'Helvetica, Arial, sans-serif, system-ui');
             line-height: var(--au-accordion-heading-text-line-height, 1.5);
             
             /* border */
@@ -278,7 +278,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
           /* text */
           color: var(--au-btn-text-color, oklch(0.1398 0 0));
           font-size: var(--au-btn-text-size, 1rem);
-          font-family: var(--au-btn-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+          // font-family: var(--au-btn-text-family, 'Helvetica, Arial, sans-serif, system-ui');
           line-height: var(--au-btn-text-line-height, 1.5);
 
           /* border */
@@ -394,7 +394,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
           padding: var(--au-dropdown-item-padding, 0.5rem 1rem);
           cursor: pointer;
           color: var(--au-dropdown-item-color, oklch(0.2 0 0));
-          font-family: inherit;
+          // font-family: inherit;
           white-space: nowrap;
           transition: background 150ms ease;
         }
@@ -584,7 +584,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
         gap: var(--au-input-container-gap, 0.625rem);
       }
       .color-code {
-        font-family: var(--au-input-font-family, monospace);
+        // font-family: var(--au-input-font-family, monospace);
         font-size: var(--au-input-text-size, 1rem);
         color: var(--au-input-text-color, oklch(0.1398 0 0));
         user-select: text; /* Allow copying */
@@ -661,7 +661,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
         /* text */
         color: var(--au-btn-text-color, oklch(0.1398 0 0));
         font-size: var(--au-btn-text-size, 1rem);
-        font-family: var(--au-btn-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+        // font-family: var(--au-btn-text-family, 'Helvetica, Arial, sans-serif, system-ui');
         line-height: var(--au-btn-text-line-height, 1.5);
 
         /* border */
@@ -1108,7 +1108,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
         /* text */
         color: var(--au-tabs-text-color, oklch(0.1398 0 0));
         font-size: var(--au-tabs-text-size, 1rem);
-        font-family: var(--au-tabs-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+        // font-family: var(--au-tabs-text-family, 'Helvetica, Arial, sans-serif, system-ui');
         line-height: var(--au-tabs-text-line-height, 1.5);
         white-space: nowrap;
 
@@ -1177,7 +1177,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
         padding: var(--au-textarea-label-padding-vertical, 0.625rem) var(--au-textarea-label-padding-horizontal, 0);
         color: var(--au-textarea-label-text-color, oklch(0.1398 0 0));
         font-size: var(--au-textarea-label-text-size, 1rem);
-        font-family: var(--au-textarea-label-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+        // font-family: var(--au-textarea-label-text-family, 'Helvetica, Arial, sans-serif, system-ui');
       }
 
       .textarea-container {
@@ -1194,7 +1194,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
         padding: var(--au-textarea-padding-vertical, 0.625rem) var(--au-textarea-padding-horizontal, 1rem);
         color: var(--au-textarea-text-color, oklch(0.1398 0 0));
         font-size: var(--au-textarea-text-size, 1rem);
-        font-family: var(--au-textarea-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+        // font-family: var(--au-textarea-text-family, 'Helvetica, Arial, sans-serif, system-ui');
         line-height: var(--au-textarea-text-line-height, 1.5);
 
         border: 0;

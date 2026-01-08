@@ -49,7 +49,7 @@ class AuAccordionItem extends HTMLElement {
             /* text */
             color: var(--au-accordion-heading-text-color, oklch(0.1398 0 0));
             font-size: var(--au-accordion-heading-text-size, 1rem);
-            font-family: var(--au-accordion-heading-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+            // font-family: var(--au-accordion-heading-text-family, 'Helvetica, Arial, sans-serif, system-ui');
             line-height: var(--au-accordion-heading-text-line-height, 1.5);
             
             /* border */
