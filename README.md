@@ -58,9 +58,11 @@ export default defineNuxtConfig({
     }  
   },  
   
-  plugins: [  
-    { src: '~/plugins/accesserty.client.ts', mode: 'client' },  
-  ]  
+  head: {
+    {
+      src: '/vendors/accesserty-ui-kit.min.js',
+    }
+  } 
 })  
 ```  
 - Using <au-*> webcomponent in <client-only>  
