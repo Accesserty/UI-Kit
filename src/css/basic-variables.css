@@ -92,7 +92,7 @@
 
   /* Font */
   --font-size-base: 1rem;
-  --font-family: Helvetica, Arial, sans-serif, system-ui;
+  --font-family: "Noto Sans TC";
 
   /* Breakpoint */
   --breakpoint-375: 375px;

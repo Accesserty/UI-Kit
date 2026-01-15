@@ -21,7 +21,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
             /* text */
             color: var(--au-accordion-heading-text-color, oklch(0.1398 0 0));
             font-size: var(--au-accordion-heading-text-size, 1rem);
-            // font-family: var(--au-accordion-heading-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+            font-family: var(--au-accordion-heading-text-family);
             line-height: var(--au-accordion-heading-text-line-height, 1.5);
             
             /* border */
@@ -113,7 +113,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
         <div role="region" id="${e}" aria-labelledby="${t}" hidden part="region">
             <slot name="content"></slot>
         </div>
-      `,this.shadowRoot.append(a),this.button=this.shadowRoot.querySelector("button"),this.button.addEventListener("click",()=>this.toggleAccordion())}connectedCallback(){this.updateExpanded()}static get observedAttributes(){return["open"]}attributeChangedCallback(e,t,a){e==="open"&&this.updateExpanded()}updateExpanded(){const e=this.hasAttribute("open");this.button.setAttribute("aria-expanded",e);const t=this.shadowRoot.querySelector('div[role="region"]');e?t.removeAttribute("hidden"):t.setAttribute("hidden","")}generateId(){const e=new Uint32Array(1);return window.crypto.getRandomValues(e),`au-accordion-item-${e[0].toString(36)}`}toggleAccordion(){this.hasAttribute("open")?this.removeAttribute("open"):this.setAttribute("open","")}}customElements.define("au-accordion-item",I);class N extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"})}connectedCallback(){this.attachInitialAttributes(),this.render()}attachInitialAttributes(){Array.from(this.attributes).forEach(e=>{e.name!=="style"&&!["class","label","items","separator"].includes(e.name)&&this.shadowRoot.host.setAttribute(e.name,e.value)})}static get observedAttributes(){return["id","class","aria-label","aria-labelledby","label","items","separator"]}attributeChangedCallback(e,t,a){t!==a&&this.render()}get items(){try{return JSON.parse(this.getAttribute("items")||"[]")}catch(e){return console.error("Error parsing 'items':",e),[]}}set items(e){try{JSON.parse(e),this.setAttribute("items",e),this.render()}catch{console.error("Invalid JSON provided for 'items':",e)}}render(){const e=this.getAttribute("id"),t=this.getAttribute("class"),a=this.getAttribute("aria-label"),i=this.getAttribute("aria-labelledby"),r=this.getAttribute("label"),n=this.items,o=this.getAttribute("separator")||"/",s=this.getAttribute("data-link-title-prefix")||"go to";let u="";a!==null?u=`aria-label="${a}"`:i!==null?u=`aria-labelledby="${i}"`:r!==null&&(u=`aria-label="${r}"`),this.shadowRoot.innerHTML=`
+      `,this.shadowRoot.append(a),this.button=this.shadowRoot.querySelector("button"),this.button.addEventListener("click",()=>this.toggleAccordion())}connectedCallback(){this.updateExpanded()}static get observedAttributes(){return["open"]}attributeChangedCallback(e,t,a){e==="open"&&this.updateExpanded()}updateExpanded(){const e=this.hasAttribute("open");this.button.setAttribute("aria-expanded",e);const t=this.shadowRoot.querySelector('div[role="region"]');e?t.removeAttribute("hidden"):t.setAttribute("hidden","")}generateId(){const e=new Uint32Array(1);return window.crypto.getRandomValues(e),`au-accordion-item-${e[0].toString(36)}`}toggleAccordion(){this.hasAttribute("open")?this.removeAttribute("open"):this.setAttribute("open","")}}customElements.define("au-accordion-item",I);class N extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"})}connectedCallback(){this.render()}static get observedAttributes(){return["id","class","aria-label","aria-labelledby","label","items","separator","data-link-title-prefix"]}attributeChangedCallback(e,t,a){t!==a&&this.render()}get items(){const e=this.getAttribute("items");if(!e)return[];try{return JSON.parse(e)}catch(t){return console.error("Error parsing 'items':",t),[]}}set items(e){if(typeof e=="string")this.setAttribute("items",e);else if(Array.isArray(e)||e&&typeof e=="object"){const t=Array.isArray(e)?e:[e];this.setAttribute("items",JSON.stringify(t))}else{console.error("Invalid value provided for 'items'. Expected string (JSON) or Array:",e);return}}render(){if(!this.shadowRoot)return;const e=this.getAttribute("id"),t=this.getAttribute("class"),a=this.getAttribute("aria-label"),i=this.getAttribute("aria-labelledby"),r=this.getAttribute("label"),n=this.items,o=this.getAttribute("separator")||"/",s=this.getAttribute("data-link-title-prefix")||"go to";let u="";a!==null?u=`aria-label="${a}"`:i!==null?u=`aria-labelledby="${i}"`:r!==null&&(u=`aria-label="${r}"`),this.shadowRoot.innerHTML=`
       <style>
         nav {
           background-color: var(--au-breadcrumbs-bg, transparent);
@@ -278,7 +278,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
           /* text */
           color: var(--au-btn-text-color, oklch(0.1398 0 0));
           font-size: var(--au-btn-text-size, 1rem);
-          // font-family: var(--au-btn-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+          font-family: var(--au-btn-text-family);
           line-height: var(--au-btn-text-line-height, 1.5);
 
           /* border */
@@ -394,7 +394,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
           padding: var(--au-dropdown-item-padding, 0.5rem 1rem);
           cursor: pointer;
           color: var(--au-dropdown-item-color, oklch(0.2 0 0));
-          // font-family: inherit;
+          font-family: inherit;
           white-space: nowrap;
           transition: background 150ms ease;
         }
@@ -584,7 +584,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
         gap: var(--au-input-container-gap, 0.625rem);
       }
       .color-code {
-        // font-family: var(--au-input-font-family, monospace);
+        font-family: var(--au-input-text-family);
         font-size: var(--au-input-text-size, 1rem);
         color: var(--au-input-text-color, oklch(0.1398 0 0));
         user-select: text; /* Allow copying */
@@ -661,7 +661,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
         /* text */
         color: var(--au-btn-text-color, oklch(0.1398 0 0));
         font-size: var(--au-btn-text-size, 1rem);
-        // font-family: var(--au-btn-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+        font-family: var(--au-btn-text-family);
         line-height: var(--au-btn-text-line-height, 1.5);
 
         /* border */
@@ -1108,7 +1108,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
         /* text */
         color: var(--au-tabs-text-color, oklch(0.1398 0 0));
         font-size: var(--au-tabs-text-size, 1rem);
-        // font-family: var(--au-tabs-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+        font-family: var(--au-tabs-text-family);
         line-height: var(--au-tabs-text-line-height, 1.5);
         white-space: nowrap;
 
@@ -1177,7 +1177,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
         padding: var(--au-textarea-label-padding-vertical, 0.625rem) var(--au-textarea-label-padding-horizontal, 0);
         color: var(--au-textarea-label-text-color, oklch(0.1398 0 0));
         font-size: var(--au-textarea-label-text-size, 1rem);
-        // font-family: var(--au-textarea-label-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+        font-family: var(--au-textarea-label-text-family);
       }
 
       .textarea-container {
@@ -1194,7 +1194,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
         padding: var(--au-textarea-padding-vertical, 0.625rem) var(--au-textarea-padding-horizontal, 1rem);
         color: var(--au-textarea-text-color, oklch(0.1398 0 0));
         font-size: var(--au-textarea-text-size, 1rem);
-        // font-family: var(--au-textarea-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+        font-family: var(--au-textarea-text-family);
         line-height: var(--au-textarea-text-line-height, 1.5);
 
         border: 0;
@@ -1231,7 +1231,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
       <style>
         :host {
           display: block;
-          font-family: var(--au-tree-font-family, system-ui, -apple-system, sans-serif);
+          font-family: var(--au-tree-text-family);
           font-size: var(--au-tree-font-size, 1rem);
           color: var(--au-tree-color, oklch(0.1398 0 0));
         }
@@ -1286,7 +1286,7 @@ var L=Object.defineProperty;var R=(g,e,t)=>e in g?L(g,e,{enumerable:!0,configura
           /* text */
           color: var(--au-tree-node-text-color, oklch(0.1398 0 0));
           font-size: var(--au-tree-node-text-size, 1rem);
-          font-family: var(--au-tree-node-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+          font-family: var(--au-tree-node-text-family);
           line-height: var(--au-tree-node-text-line-height, 1.5);
           
           /* border */

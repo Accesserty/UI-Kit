@@ -54,7 +54,7 @@ class AuTabs extends HTMLElement {
         /* text */
         color: var(--au-tabs-text-color, oklch(0.1398 0 0));
         font-size: var(--au-tabs-text-size, 1rem);
-        // font-family: var(--au-tabs-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+        font-family: var(--au-tabs-text-family);
         line-height: var(--au-tabs-text-line-height, 1.5);
         white-space: nowrap;
 

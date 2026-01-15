@@ -5,17 +5,7 @@ class AuBreadcrumbs extends HTMLElement {
   }
 
   connectedCallback() {
-    this.attachInitialAttributes()
     this.render()
-  }
-
-  attachInitialAttributes() {
-    // Initially copy attributes to internal elements if needed (only non-style and non-specific attributes are handled here).
-    Array.from(this.attributes).forEach((attr) => {
-      if (attr.name !== 'style' && !['class', 'label', 'items', 'separator'].includes(attr.name)) {
-        this.shadowRoot.host.setAttribute(attr.name, attr.value)
-      }
-    })
   }
 
   static get observedAttributes() {
@@ -26,7 +16,8 @@ class AuBreadcrumbs extends HTMLElement {
       'aria-labelledby',
       'label',
       'items',
-      'separator'
+      'separator',
+      'data-link-title-prefix'
     ]
   }
 
@@ -37,9 +28,12 @@ class AuBreadcrumbs extends HTMLElement {
   }
 
   get items() {
+    const attr = this.getAttribute('items')
+    if (!attr) return []
+
     try {
-      // Attempt to parse the 'items' attribute
-      return JSON.parse(this.getAttribute('items') || '[]')
+      // Attempt to parse the 'items' attribute as JSON
+      return JSON.parse(attr)
     } catch (e) {
       console.error("Error parsing 'items':", e)
       return [] // Return an empty array in case of parsing error
@@ -47,16 +41,20 @@ class AuBreadcrumbs extends HTMLElement {
   }
 
   set items(val) {
-    try {
-      JSON.parse(val) // Validate it's a proper JSON string
-      this.setAttribute('items', val)
-      this.render()
-    } catch (e) {
-      console.error("Invalid JSON provided for 'items':", val)
+    if (typeof val === 'string') {
+      // 這裡只需要設定屬性，不需要呼叫 render，因為 setAttribute 會觸發 attributeChangedCallback
+      this.setAttribute('items', val) 
+    } else if (Array.isArray(val) || (val && typeof val === 'object')) {
+        const newVal = Array.isArray(val) ? val : [val];
+        this.setAttribute('items', JSON.stringify(newVal))
+    } else {
+      console.error("Invalid value provided for 'items'. Expected string (JSON) or Array:", val)
+      return
     }
   }
 
   render() {
+    if (!this.shadowRoot) return;
     const id = this.getAttribute('id')
     const classname = this.getAttribute('class')
     const ariaLabel = this.getAttribute('aria-label')
@@ -135,19 +133,18 @@ class AuBreadcrumbs extends HTMLElement {
       >
         <ol>
           ${items
-            .map(
-              (item, index) => `
+        .map(
+          (item, index) => `
                 <li>
-                  ${
-                    index === items.length - 1
-                      ? `<span aria-current="page"><slot name="icon-${index + 1}"></slot><span>${item.text}</span></span>`
-                      : `<a href="${item.url || ''}" title="${prefix} ${item.text}"><slot name="icon-${index + 1}"></slot><span>${item.text}</span></a>`
-                  }
+                  ${index === items.length - 1
+              ? `<span aria-current="page"><slot name="icon-${index + 1}"></slot><span>${item.text}</span></span>`
+              : `<a href="${item.url || ''}" title="${prefix} ${item.text}"><slot name="icon-${index + 1}"></slot><span>${item.text}</span></a>`
+            }
                   ${index !== items.length - 1 ? `<span aria-hidden="true">` + separator + `</span>` : ''}
                 </li>
               `
-            )
-            .join('')}
+        )
+        .join('')}
         </ol>
       </nav>
     `

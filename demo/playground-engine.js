@@ -35,7 +35,7 @@ const COMPONENT_CONFIGS = [
           { name: "--au-btn-text-color", default: "oklch(0.1398 0 0)", type: "color" },
           { name: "--au-btn-text-size", default: "1rem", type: "size" },
           { name: "--au-btn-text-line-height", default: "1.5", type: "size" },
-          { name: "--au-btn-text-family", default: "'Helvetica, Arial, sans-serif, system-ui'", type: "text" },
+          // { name: "--au-btn-text-family", default: "'Helvetica, Arial, sans-serif, system-ui'", type: "text" },
         ]
       },
       {
@@ -161,8 +161,8 @@ const COMPONENT_CONFIGS = [
           { name: "--au-option-text-color", default: "oklch(0.1398 0 0)", type: "color" },
           { name: "--au-option-padding-top", default: "0.375rem", type: "size" },
           { name: "--au-option-padding-bottom", default: "0.625rem", type: "size" },
-          { name: "--au-option-padding-left", default: "0.375rem", type: "size" },
-          { name: "--au-option-padding-right", default: "2.675rem", type: "size" },
+          { name: "--au-option-padding-left", default: "2.675rem", type: "size" },
+          { name: "--au-option-padding-right", default: "0.375rem", type: "size" },
           { name: "--au-option-hover-bg", default: "oklch(0.9466 0 0)", type: "color" },
           { name: "--au-option-hover-text-color", default: "oklch(0.1398 0 0)", type: "color" },
           { name: "--au-option-active-bg", default: "oklch(0.8689 0 0)", type: "color" },
@@ -231,7 +231,7 @@ const COMPONENT_CONFIGS = [
         vars: [
           { name: "--au-accordion-heading-text-color", default: "oklch(0.1398 0 0)", type: "color" },
           { name: "--au-accordion-heading-text-size", default: "1rem", type: "size" },
-          { name: "--au-accordion-heading-text-family", default: "'Helvetica, Arial, sans-serif, system-ui'", type: "text" },
+          // { name: "--au-accordion-heading-text-family", default: "'Helvetica, Arial, sans-serif, system-ui'", type: "text" },
           { name: "--au-accordion-heading-text-line-height", default: "1.5", type: "size" },
         ]
       },
@@ -451,7 +451,7 @@ const COMPONENT_CONFIGS = [
         vars: [
           { name: "--au-tabs-text-color", default: "oklch(0.1398 0 0)", type: "color" },
           { name: "--au-tabs-text-size", default: "1rem", type: "size" },
-          { name: "--au-tabs-text-family", default: "'Helvetica, Arial, sans-serif, system-ui'", type: "text" },
+          // { name: "--au-tabs-text-family", default: "'Helvetica, Arial, sans-serif, system-ui'", type: "text" },
         ]
       },
       {

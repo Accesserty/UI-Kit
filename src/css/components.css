@@ -4,7 +4,7 @@
 
 /* Button & Select */
 
-:is(button, select) {
+:is(button, select, .btn) {
   /* behavior */
   cursor: pointer;
   -webkit-tap-highlight-color: oklch(0 0 0 / 0);
@@ -15,7 +15,7 @@
   /* text */
   color: var(--au-btn-text-color, oklch(0.1398 0 0));
   font-size: var(--au-btn-text-size, 1rem);
-  /* font-family: var(--au-btn-text-family, 'Helvetica, Arial, sans-serif, system-ui'); */
+  font-family: var(--au-btn-text-family);
   line-height: var(--au-btn-text-line-height, 1.5);
 
   /* border */

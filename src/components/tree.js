@@ -68,7 +68,7 @@ class AuTree extends HTMLElement {
       <style>
         :host {
           display: block;
-          font-family: var(--au-tree-font-family, system-ui, -apple-system, sans-serif);
+          font-family: var(--au-tree-text-family);
           font-size: var(--au-tree-font-size, 1rem);
           color: var(--au-tree-color, oklch(0.1398 0 0));
         }
@@ -538,7 +538,7 @@ class AuTreeNode extends HTMLElement {
           /* text */
           color: var(--au-tree-node-text-color, oklch(0.1398 0 0));
           font-size: var(--au-tree-node-text-size, 1rem);
-          font-family: var(--au-tree-node-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+          font-family: var(--au-tree-node-text-family);
           line-height: var(--au-tree-node-text-line-height, 1.5);
           
           /* border */

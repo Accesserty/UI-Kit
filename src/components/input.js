@@ -54,7 +54,7 @@ class AuInput extends HTMLElement {
         gap: var(--au-input-container-gap, 0.625rem);
       }
       .color-code {
-        // font-family: var(--au-input-font-family, monospace);
+        font-family: var(--au-input-text-family);
         font-size: var(--au-input-text-size, 1rem);
         color: var(--au-input-text-color, oklch(0.1398 0 0));
         user-select: text; /* Allow copying */

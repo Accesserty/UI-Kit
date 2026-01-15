@@ -32,7 +32,7 @@ class AuDropdown extends HTMLElement {
           /* text */
           color: var(--au-btn-text-color, oklch(0.1398 0 0));
           font-size: var(--au-btn-text-size, 1rem);
-          // font-family: var(--au-btn-text-family, 'Helvetica, Arial, sans-serif, system-ui');
+          font-family: var(--au-btn-text-family);
           line-height: var(--au-btn-text-line-height, 1.5);
 
           /* border */
@@ -290,7 +290,7 @@ class AuDropdownItem extends HTMLElement {
           padding: var(--au-dropdown-item-padding, 0.5rem 1rem);
           cursor: pointer;
           color: var(--au-dropdown-item-color, oklch(0.2 0 0));
-          // font-family: inherit;
+          font-family: inherit;
           white-space: nowrap;
           transition: background 150ms ease;
         }
