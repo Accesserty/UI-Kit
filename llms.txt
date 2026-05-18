@@ -1,0 +1,159 @@
+# Accesserty UI Kit
+
+> A framework-agnostic library of 14 accessibility-first Web Components. Zero runtime dependencies. WCAG 2.2 AA compliant. Works in plain HTML, Vue, React, Angular, and Nuxt via a single JS file.
+
+## Key Links
+
+- Repository: https://github.com/Accesserty/UI-Kit
+- Component demos: demo/index.html
+- Full API reference: demo/*.html (one file per component)
+- Interactive playground: demo/playground.html
+
+## Project Structure
+
+- `src/components/` — Source for all 14 custom elements (one .js file each)
+- `src/css/` — Design system CSS (cascade layers: basic-variables, tokens-variables, components)
+- `src/accesserty-ui-kit.js` — Bundle entry point (imports all components)
+- `demo/` — Human-readable documentation with live examples and CSS variable tables
+- `test/` — Browser-based unit tests using @web/test-runner and @open-wc/testing
+- `dist/` — Build output: `accesserty-ui-kit.js` and `accesserty-ui-kit.min.js`
+- `CLAUDE.md` — AI assistant work handbook (patterns, rules, constraints)
+- `docs/ARCHITECTURE.md` — Technical architecture deep-dive
+
+## Components
+
+### au-accordion
+Tag: `<au-accordion>`, `<au-accordion-item>`
+Attributes (accordion-item): open
+Properties: open (boolean getter/setter), exclusive (on au-accordion)
+Events: au-toggle (detail: { open })
+Form-associated: No
+CSS variables: 15+ (--au-accordion-heading-*, --au-accordion-content-*)
+
+### au-breadcrumbs
+Tag: `<au-breadcrumbs>`
+Attributes: items (JSON array), separator, aria-label, label
+Properties: items (getter/setter), separator (getter/setter)
+Events: none
+Form-associated: No
+CSS variables: 8 (--au-breadcrumbs-*)
+
+### au-card
+Tag: `<au-card>`
+Slots: heading, media, content, footer
+CSS Parts: au-card-container, heading, media, content, footer
+Form-associated: No
+CSS variables: 0 (styled via ::part())
+
+### au-checkbox
+Tag: `<au-checkbox>`
+Attributes: name, value, checked, disabled, required
+Properties: checked (getter/setter), disabled (getter/setter)
+Events: change (detail: boolean), focus, blur
+Form-associated: Yes (setFormValue: value when checked, null when unchecked)
+CSS variables: 14+ (--au-checkbox-*)
+
+### au-dropdown
+Tags: `<au-dropdown>`, `<au-dropdown-item>`
+Attributes (dropdown-item): value
+Properties: isOpen (getter/setter on au-dropdown)
+Events: selected (detail: { value }) on au-dropdown-item
+Form-associated: No
+CSS variables: 11 (--au-dropdown-menu-*, --au-dropdown-item-*, --au-dropdown-focus-shadow-*)
+
+### au-file-upload
+Tag: `<au-file-upload>`
+Attributes: accept, multiple, name, disabled, required, label, max-files, max-size-mb, max-total-size-mb, msg-* (error messages)
+Properties: value (getter/setter: File[])
+Methods: handleFiles(files), formResetCallback(), checkValidity()
+Events: change, remove-file (detail: File)
+Form-associated: Yes (setFormValue: DataTransfer with files)
+CSS variables: 20+ (--au-file-upload-label-*, --au-file-upload-area-*, --au-file-upload-delete-*, --au-file-upload-file-list-*)
+
+### au-input
+Tag: `<au-input>`
+Attributes: type, name, value, placeholder, required, disabled, readonly, label, min, max, step, pattern, autocomplete, inputmode, maxlength, minlength, list, data-size (small|large), data-layout (vertical), data-clear, data-clear-label, id
+Properties: value (getter/setter), disabled, required, readonly (all getter/setter), validity, validationMessage, willValidate
+Methods: focus(), clear(), suggest(val), checkValidity(), reportValidity()
+Slots: prefix, affix
+Events: input, change (bubbles, composed)
+Form-associated: Yes
+CSS variables: 22 (--au-input-wrapper-bg, --au-input-label-*, --au-input-padding-*, --au-input-text-*, --au-input-border-*, --au-input-bg, --au-input-focus-shadow-*, --au-input-invalid-shadow-*, --au-input-clear-*, --au-input-small-*, --au-input-large-*, --au-input-container-*)
+
+### au-pagination
+Tag: `<au-pagination>`
+Attributes: data-total, data-current-page, data-pager-count, data-page-size, data-page-size-options, data-layout, data-text-* (localization)
+Properties: pageSizeOptions (getter/setter), layout (getter/setter), totalPages (getter), pagers (getter)
+Events: page-change (detail: page number), page-size-change (detail: size)
+Form-associated: No
+CSS variables: inherits --au-btn-* from button styles
+
+### au-radio-group
+Tags: `<au-radio-group>`, `<au-radio>` (slotted children)
+Attributes (au-radio-group): disabled, direction (vertical), aria-label
+Attributes (au-radio): value, checked, disabled
+Properties: value (getter — currently selected), disabled (getter/setter)
+Events: change (detail: { value })
+Form-associated: Yes (au-radio-group)
+CSS variables: 12 (--au-radio-content-gap, --au-radio-input-*, --au-radio-label-*)
+
+### au-rating
+Tag: `<au-rating>`
+Attributes: value, max, labels (JSON), name, show-score, score-info, disabled, readonly
+Properties: value, max, labels, name, showScore, scoreInfo, disabled, readonly (all getter/setter)
+Events: change (detail: { value: number })
+Form-associated: Yes
+CSS variables: 12 (--au-rating-gap, --au-rating-star-*, --au-rating-focus-*, --au-rating-label-*, --au-rating-score-*)
+
+### au-switch
+Tag: `<au-switch>`
+Attributes: name, value, checked, disabled
+Slots: default (label text), on attribute text, off attribute text
+Properties: checked (getter/setter), disabled (getter/setter)
+Events: change (detail: boolean — checked state)
+Form-associated: Yes (setFormValue: value when checked, null when unchecked)
+CSS variables: 17 (--au-switch-gap, --au-switch-padding-*, --au-switch-container-gap, --au-switch-input-*, --au-switch-inner-*, --au-switch-focus-shadow-*)
+
+### au-tabs
+Tag: `<au-tabs>`
+Children: elements with role="tabpanel" (auto-detected via slot)
+Properties: selectedIndex (getter/setter)
+Events: tab-change (detail: { index, label })
+Form-associated: No
+CSS variables: 26 (--au-tabs-*, --au-tabpanels-*, --au-tab-panel-*, --au-tab-badge-*)
+
+### au-textarea
+Tag: `<au-textarea>`
+Attributes: value, placeholder, name, rows, cols, disabled, readonly, required, maxlength, minlength, label, id
+Properties: value (getter/setter), disabled, readonly (getter/setter), validity, validationMessage, willValidate
+Methods: checkValidity(), reportValidity()
+Events: input, change (bubbles, composed)
+Form-associated: Yes
+CSS variables: 15 (--au-textarea-label-*, --au-textarea-container-*, --au-textarea-padding-*, --au-textarea-text-*, --au-textarea-border-*, --au-textarea-bg, --au-textarea-focus-shadow-*, --au-textarea-invalid-shadow-*, --au-textarea-readonly-*)
+
+### au-tree
+Tags: `<au-tree>`, `<au-tree-node>` (auto-created from data)
+Attributes (au-tree): show-checkbox
+Properties (au-tree): data (getter/setter — JS object tree), toggleLabel (getter/setter)
+Events: change (on au-tree, when checkbox state changes)
+Form-associated: No
+CSS variables: 30+ (--au-tree-*, --au-tree-node-*, --au-tree-node-checkbox-*, --au-tree-node-toggle-*)
+
+## Technical Stack
+
+- Runtime: Vanilla Custom Elements v1, Shadow DOM (open), ElementInternals API
+- CSS: Custom Properties, Cascade Layers, CSS Nesting, oklch color space
+- Build: Vite 6 + rollup-plugin-terser
+- Testing: @web/test-runner 0.18, @open-wc/testing 4, Chromium
+- Node.js: 20+ required for development
+
+## Design Decisions
+
+- No framework dependency — components must work from a `<script>` tag alone
+- Shadow DOM mode is always `open` (accessible to testing and DevTools)
+- CSS variables control all visual properties; no inline styles
+- `calc-size()` for accordion animation (progressive enhancement; falls back to instant show/hide)
+- `formAssociated = true` + ElementInternals for native form participation (no hidden inputs)
+- Events always use `{ bubbles: true, composed: true }` to cross Shadow DOM boundaries
+- `generateId()` uses `crypto.getRandomValues()` with `Math.random()` fallback for SSR safety
+- `customElements.define()` is guarded with `typeof customElements !== 'undefined'` for SSR safety
