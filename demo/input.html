@@ -277,7 +277,7 @@
           <tr>
             <td>--au-input-large-padding-horizontal</td>
             <td>Horizontal padding for large size</td>
-            <td>2rem</td>
+            <td>1.625rem</td>
           </tr>
           <tr>
             <td>--au-input-large-text-size</td>
@@ -286,6 +286,70 @@
           </tr>
         </tbody>
       </table>
+    </section>
+    <section>
+      <h2>Properties</h2>
+      <table>
+        <caption>JavaScript properties on <code>&lt;au-input&gt;</code>:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Property</th>
+            <th scope="col">Type</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>value</td>
+            <td>string (getter + setter)</td>
+            <td>Get or set the input value programmatically.</td>
+          </tr>
+          <tr>
+            <td>disabled</td>
+            <td>boolean (getter + setter)</td>
+            <td>Get or set the disabled state. React-safe: <code>el.disabled = false</code> removes the attribute.</td>
+          </tr>
+          <tr>
+            <td>required</td>
+            <td>boolean (getter + setter)</td>
+            <td>Get or set the required constraint.</td>
+          </tr>
+          <tr>
+            <td>readonly</td>
+            <td>boolean (getter + setter)</td>
+            <td>Get or set the read-only state.</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>const input = document.querySelector('au-input');
+input.value = 'Hello';
+input.disabled = true;
+input.required = false; // removes required attribute</code></pre>
+    </section>
+    <section>
+      <h2>Events</h2>
+      <table>
+        <caption>Events dispatched by <code>&lt;au-input&gt;</code>:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Event</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>input</td>
+            <td>Fired on every keystroke. Bubbles and is composed — works across Shadow DOM boundaries in Vue, Angular, React.</td>
+          </tr>
+          <tr>
+            <td>change</td>
+            <td>Fired when the value is committed (blur or Enter). Bubbles and is composed.</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>document.querySelector('au-input').addEventListener('input', (e) => {
+  console.log('Current value:', e.target.value);
+});</code></pre>
     </section>
   </main>
 </body>

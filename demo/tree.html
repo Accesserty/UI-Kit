@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Accesserty UI Kit Accordion</title>
+	<title>Accesserty UI Kit Tree</title>
 	<link rel="stylesheet" href="../src/css/au-style.css" />
 	<link rel="stylesheet" href="demo.css" />
 	<link rel="stylesheet"
@@ -21,7 +21,7 @@
 		<section>
 			<h2>How to use</h2>
 			<ol>
-				<li>Copy file (accordion.js or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
+				<li>Copy file (tree.js or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
 				<li>
 					Add the JavaScript file to HTML using the
 					<code>&lt;script src=&quot;&quot; defer&gt;</code> tag
@@ -57,6 +57,82 @@ customLabelTree.toggleLabel = (node) => {
 			</code>
 		</section>
 
+		<section>
+			<h2>Properties</h2>
+			<table>
+				<caption>JavaScript properties on <code>&lt;au-tree&gt;</code>:</caption>
+				<thead>
+					<tr>
+						<th scope="col">Property</th>
+						<th scope="col">Type</th>
+						<th scope="col">Description</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>data</td>
+						<td>Array of node objects</td>
+						<td>
+							Set the tree data as a JavaScript array. Each node can have <code>label</code> (string),
+							<code>children</code> (array, optional), and <code>disabled</code> (boolean, optional).
+							<pre style="background:#f4f4f4;padding:0.5rem;overflow:auto;"><code>document.querySelector('au-tree').data = [
+  { label: 'Parent', children: [
+    { label: 'Child 1' },
+    { label: 'Child 2', disabled: true }
+  ]},
+  { label: 'Leaf node' }
+];</code></pre>
+						</td>
+					</tr>
+					<tr>
+						<td>toggleLabel</td>
+						<td>Function <code>(node) => string</code></td>
+						<td>
+							Customize the <code>aria-label</code> of each expand/collapse toggle button. Receives the
+							node object and must return a string.
+							<pre style="background:#f4f4f4;padding:0.5rem;overflow:auto;"><code>document.querySelector('au-tree').toggleLabel = (node) => {
+  return `Expand or collapse ${node.label}`;
+};</code></pre>
+						</td>
+					</tr>
+					<tr>
+						<td>show-checkbox <em>(attribute)</em></td>
+						<td>boolean attribute</td>
+						<td>When present, renders checkboxes on each node and enables tri-state (indeterminate) selection.</td>
+					</tr>
+				</tbody>
+			</table>
+		</section>
+		<section>
+			<h2>Events</h2>
+			<table>
+				<caption>Events dispatched by <code>&lt;au-tree&gt;</code>:</caption>
+				<thead>
+					<tr>
+						<th scope="col">Event</th>
+						<th scope="col">Detail</th>
+						<th scope="col">Description</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>change</td>
+						<td><code>{ checkedNodes: node[] }</code></td>
+						<td>Fired when a checkbox selection changes. <code>checkedNodes</code> is the array of all
+							fully-checked node objects. Bubbles and is composed.</td>
+					</tr>
+				</tbody>
+			</table>
+			<pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>document.querySelector('au-tree').addEventListener('change', (e) => {
+  console.log('Checked nodes:', e.detail.checkedNodes);
+});
+
+// Vue
+// &lt;au-tree @change="onTreeChange"&gt;
+
+// Angular
+// &lt;au-tree (change)="onTreeChange($event)"&gt;</code></pre>
+		</section>
 		<section>
 			<h2>CSS Variables</h2>
 			<table>

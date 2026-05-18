@@ -82,6 +82,57 @@
       </au-radio-group>
     </section>
     <section>
+      <h2>Properties</h2>
+      <table>
+        <caption>JavaScript properties on <code>&lt;au-radio-group&gt;</code>:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Property</th>
+            <th scope="col">Type</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>value</td>
+            <td>string | null (getter)</td>
+            <td>Returns the <code>value</code> of the currently checked radio, or <code>null</code> if none is checked.</td>
+          </tr>
+          <tr>
+            <td>disabled</td>
+            <td>boolean (getter + setter)</td>
+            <td>Get or set the disabled state of the whole group.</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>const group = document.querySelector('au-radio-group');
+console.log(group.value); // e.g. "male"
+group.disabled = true;</code></pre>
+    </section>
+    <section>
+      <h2>Events</h2>
+      <table>
+        <caption>Events dispatched by <code>&lt;au-radio-group&gt;</code>:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Event</th>
+            <th scope="col">Detail</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>change</td>
+            <td><code>{ value: string }</code></td>
+            <td>Fired when a radio selection changes. Bubbles and is composed.</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>document.querySelector('au-radio-group').addEventListener('change', (e) => {
+  console.log('Selected:', e.detail.value);
+});</code></pre>
+    </section>
+    <section>
       <h2>CSS Variables</h2>
       <table>
         <tr>

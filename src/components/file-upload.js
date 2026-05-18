@@ -331,7 +331,7 @@ class AuFileUpload extends HTMLElement {
     this.announce(`${filesToAdd.length} file${filesToAdd.length > 1 ? 's' : ''} added.`);
     this.syncFormValue();
     this.checkValidity();
-    this.dispatchEvent(new Event('change', { bubbles: true }));
+    this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
     this.fileInput.value = '';
   }
 
@@ -403,7 +403,7 @@ class AuFileUpload extends HTMLElement {
         this.announce(`${file.name} removed.`);
         this.syncFormValue();
         this.checkValidity();
-        this.dispatchEvent(new CustomEvent('remove-file', { detail: file }));
+        this.dispatchEvent(new CustomEvent('remove-file', { bubbles: true, composed: true, detail: file }));
       });
 
       li.append(preview, removeBtn);
@@ -473,10 +473,15 @@ class AuFileUpload extends HTMLElement {
   }
 
   generateId() {
-    const byteArray = new Uint32Array(1);
-    window.crypto.getRandomValues(byteArray);
-    return `au-file-upload-${byteArray[0].toString(36)}`;
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-file-upload-${byteArray[0].toString(36)}`;
+    }
+    return `au-file-upload-${Math.random().toString(36).slice(2)}`;
   }
 }
 
-customElements.define('au-file-upload', AuFileUpload);
+if (typeof customElements !== 'undefined' && !customElements.get('au-file-upload')) {
+  customElements.define('au-file-upload', AuFileUpload);
+}

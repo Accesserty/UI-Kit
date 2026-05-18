@@ -16,4 +16,6 @@ class AuCard extends HTMLElement {
   }
 }
 
-customElements.define("au-card", AuCard);
+if (typeof customElements !== 'undefined' && !customElements.get('au-card')) {
+  customElements.define("au-card", AuCard);
+}

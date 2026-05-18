@@ -3,16 +3,75 @@ class AuAccordion extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
 
-    const container = document.createElement('div');
-    container.setAttribute('class', 'au-accordion');
+    this._container = document.createElement('div');
+    this._container.setAttribute('class', 'au-accordion');
 
     const slot = document.createElement('slot');
-    container.appendChild(slot);
-    this.shadowRoot.appendChild(container);
+    this._container.appendChild(slot);
+
+    this._exclusiveHint = document.createElement('span');
+    this._exclusiveHint.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;padding:0;';
+    const hintId = `au-accordion-hint-${Math.random().toString(36).slice(2)}`;
+    this._exclusiveHint.id = hintId;
+    this._exclusiveHint.textContent = 'Only one section may be expanded at a time.';
+
+    this.shadowRoot.appendChild(this._exclusiveHint);
+    this.shadowRoot.appendChild(this._container);
+
+    this._onToggle = this._handleToggle.bind(this);
+  }
+
+  connectedCallback() {
+    this.addEventListener('au-toggle', this._onToggle);
+    this._updateExclusiveAria();
+  }
+
+  disconnectedCallback() {
+    this.removeEventListener('au-toggle', this._onToggle);
+  }
+
+  static get observedAttributes() {
+    return ['exclusive'];
+  }
+
+  get exclusive() {
+    return this.hasAttribute('exclusive');
+  }
+
+  set exclusive(val) {
+    if (val) {
+      this.setAttribute('exclusive', '');
+    } else {
+      this.removeAttribute('exclusive');
+    }
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'exclusive' && oldValue !== newValue) {
+      this._updateExclusiveAria();
+    }
+  }
+
+  _updateExclusiveAria() {
+    if (this.exclusive) {
+      this._container.setAttribute('aria-describedby', this._exclusiveHint.id);
+    } else {
+      this._container.removeAttribute('aria-describedby');
+    }
+  }
+
+  _handleToggle(e) {
+    if (!this.exclusive || !e.detail.open) return;
+    const items = [...this.children].filter(
+      el => el.tagName.toLowerCase() === 'au-accordion-item' && el !== e.target
+    );
+    items.forEach(item => { item.open = false; });
   }
 }
 
-customElements.define("au-accordion", AuAccordion);
+if (typeof customElements !== 'undefined' && !customElements.get('au-accordion')) {
+  customElements.define("au-accordion", AuAccordion);
+}
 
 
 class AuAccordionItem extends HTMLElement {
@@ -157,9 +216,28 @@ class AuAccordionItem extends HTMLElement {
     return ["open"];
   }
 
+  get open() {
+    return this.hasAttribute('open');
+  }
+
+  set open(val) {
+    if (val) {
+      this.setAttribute('open', '');
+    } else {
+      this.removeAttribute('open');
+    }
+  }
+
   attributeChangedCallback(name, oldValue, newValue) {
-    if (name === "open") {
+    if (name === "open" && oldValue !== newValue) {
       this.updateExpanded();
+      if (this.isConnected) {
+        this.dispatchEvent(new CustomEvent('au-toggle', {
+          bubbles: true,
+          composed: true,
+          detail: { open: this.open },
+        }));
+      }
     }
   }
 
@@ -175,19 +253,19 @@ class AuAccordionItem extends HTMLElement {
   }
 
   generateId() {
-    const byteArray = new Uint32Array(1);
-    window.crypto.getRandomValues(byteArray);
-    return `au-accordion-item-${byteArray[0].toString(36)}`;
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-accordion-item-${byteArray[0].toString(36)}`;
+    }
+    return `au-accordion-item-${Math.random().toString(36).slice(2)}`;
   }
 
   toggleAccordion() {
-    const isOpen = this.hasAttribute('open');
-    if (isOpen) {
-      this.removeAttribute('open');
-    } else {
-      this.setAttribute('open', '');
-    }
+    this.open = !this.open;
   }
 }
 
-customElements.define("au-accordion-item", AuAccordionItem);
+if (typeof customElements !== 'undefined' && !customElements.get('au-accordion-item')) {
+  customElements.define("au-accordion-item", AuAccordionItem);
+}

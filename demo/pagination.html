@@ -98,6 +98,73 @@
       </table>
     </section>
     <section>
+      <h2>Properties</h2>
+      <table>
+        <caption>JavaScript properties on <code>&lt;au-pagination&gt;</code>:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Property</th>
+            <th scope="col">Type</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>pageSizeOptions</td>
+            <td>number[]</td>
+            <td>
+              Get or set the available page-size choices as a JavaScript array. Equivalent to the
+              <code>data-page-size-options</code> attribute but accepts an array directly without JSON serialization.
+              <pre style="background:#f4f4f4;padding:0.5rem;overflow:auto;"><code>document.querySelector('au-pagination').pageSizeOptions = [5, 10, 25, 50];</code></pre>
+            </td>
+          </tr>
+          <tr>
+            <td>layout</td>
+            <td>string[]</td>
+            <td>
+              Get or set the layout order as a JavaScript array. Equivalent to the <code>data-layout</code> attribute
+              but accepts an array directly.
+              <pre style="background:#f4f4f4;padding:0.5rem;overflow:auto;"><code>document.querySelector('au-pagination').layout = ['prev', 'pages', 'next'];</code></pre>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <section>
+      <h2>Events</h2>
+      <table>
+        <caption>Events dispatched by <code>&lt;au-pagination&gt;</code>:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Event</th>
+            <th scope="col">Detail</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>page-change</td>
+            <td><code>number</code> (the new page number)</td>
+            <td>Fired when the user navigates to a different page. Bubbles and is composed.</td>
+          </tr>
+          <tr>
+            <td>page-size-change</td>
+            <td><code>number</code> (the new page size)</td>
+            <td>Fired when the user selects a different page size. Bubbles and is composed.</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>const pagination = document.querySelector('au-pagination');
+
+pagination.addEventListener('page-change', (e) => {
+  console.log('Current page:', e.detail);
+});
+
+pagination.addEventListener('page-size-change', (e) => {
+  console.log('Page size:', e.detail);
+});</code></pre>
+    </section>
+    <section>
       <h2>Custom Style</h2>
       <p>Using <code>::part</code> style `current-page`</p>
       <au-pagination id="pagination" data-total="1000" data-current-page="1" data-pager-count="5" data-page-size="10"

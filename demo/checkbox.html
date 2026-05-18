@@ -185,6 +185,68 @@
       </table>
     </section>
     <section>
+      <h2>Properties</h2>
+      <table>
+        <caption>JavaScript properties on <code>&lt;au-checkbox&gt;</code>:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Property</th>
+            <th scope="col">Type</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>checked</td>
+            <td>boolean (getter + setter)</td>
+            <td>Get or set the checked state. Setting to <code>false</code> removes the <code>checked</code> attribute — React-safe.</td>
+          </tr>
+          <tr>
+            <td>disabled</td>
+            <td>boolean (getter + setter)</td>
+            <td>Get or set the disabled state. Setting to <code>false</code> removes the <code>disabled</code> attribute — React-safe.</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>const cb = document.querySelector('au-checkbox');
+cb.checked = true;   // sets attribute
+cb.checked = false;  // removes attribute
+cb.disabled = true;</code></pre>
+    </section>
+    <section>
+      <h2>Events</h2>
+      <table>
+        <caption>Events dispatched by <code>&lt;au-checkbox&gt;</code>:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Event</th>
+            <th scope="col">Detail</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>change</td>
+            <td><code>boolean</code> (checked state)</td>
+            <td>Fired when the checked state changes. Bubbles and is composed.</td>
+          </tr>
+          <tr>
+            <td>focus</td>
+            <td>—</td>
+            <td>Fired when the checkbox receives focus. Bubbles and is composed.</td>
+          </tr>
+          <tr>
+            <td>blur</td>
+            <td>—</td>
+            <td>Fired when the checkbox loses focus. Bubbles and is composed.</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>document.querySelector('au-checkbox').addEventListener('change', (e) => {
+  console.log('Checked:', e.detail); // true | false
+});</code></pre>
+    </section>
+    <section>
       <h2>FAQ</h2>
       <h3>How does it compare to native checkboxes?</h3>
       <p>Using the <code>au-checkbox</code> ensures that screen readers correctly interpret the association between the

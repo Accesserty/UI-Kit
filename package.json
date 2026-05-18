@@ -26,7 +26,7 @@
   ],
   "main": "index.js",
   "scripts": {
-    "test": "web-test-runner test/**/*.test.js --node-resolve",
+    "test": "web-test-runner test/**/*.test.js --node-resolve --concurrency 1",
     "build": "vite build"
   },
   "devDependencies": {

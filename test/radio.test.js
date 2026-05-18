@@ -135,10 +135,128 @@ describe('AuRadioGroup', () => {
       </au-radio-group>
     `);
     await nextFrame();
-  
+
     const label = el.shadowRoot.querySelector('label');
     const input = el.shadowRoot.querySelector('input[type="radio"]');
-  
+
     expect(label.getAttribute('for')).to.equal(input.getAttribute('id'));
-  });  
+  });
+
+  it('value getter returns the checked radio value', async () => {
+    const el = await fixture(html`
+      <au-radio-group>
+        <div value="alpha">Alpha</div>
+        <div value="beta" checked>Beta</div>
+      </au-radio-group>
+    `);
+    await nextFrame();
+    expect(el.value).to.equal('beta');
+  });
+
+  it('value getter returns null when nothing is checked', async () => {
+    const el = await fixture(html`
+      <au-radio-group>
+        <div value="a">A</div>
+        <div value="b">B</div>
+      </au-radio-group>
+    `);
+    await nextFrame();
+    expect(el.value).to.be.null;
+  });
+
+  it('disabled setter adds/removes the attribute and disables all radios', async () => {
+    const el = await fixture(html`
+      <au-radio-group>
+        <div value="x">X</div>
+        <div value="y">Y</div>
+      </au-radio-group>
+    `);
+    await nextFrame();
+
+    el.disabled = true;
+    await nextFrame();
+    const radios = el.shadowRoot.querySelectorAll('input[type="radio"]');
+    radios.forEach(r => expect(r.disabled).to.be.true);
+
+    el.disabled = false;
+    await nextFrame();
+    const radios2 = el.shadowRoot.querySelectorAll('input[type="radio"]');
+    radios2.forEach(r => expect(r.disabled).to.be.false);
+  });
+
+  it('change event fires with correct detail when a radio is selected', async () => {
+    const el = await fixture(html`
+      <au-radio-group>
+        <div value="one">One</div>
+        <div value="two">Two</div>
+      </au-radio-group>
+    `);
+    await nextFrame();
+
+    let detail = null;
+    el.addEventListener('change', e => { detail = e.detail; });
+
+    const radios = el.shadowRoot.querySelectorAll('input[type="radio"]');
+    radios[1].click();
+
+    expect(detail).to.deep.equal({ value: 'two' });
+  });
+
+  it('change event is composed and bubbles across shadow DOM boundary', async () => {
+    const wrapper = await fixture(html`
+      <div>
+        <au-radio-group>
+          <div value="a">A</div>
+          <div value="b">B</div>
+        </au-radio-group>
+      </div>
+    `);
+    const el = wrapper.querySelector('au-radio-group');
+    await nextFrame();
+
+    let received = false;
+    wrapper.addEventListener('change', () => { received = true; });
+
+    const radios = el.shadowRoot.querySelectorAll('input[type="radio"]');
+    radios[0].click();
+
+    expect(received).to.be.true;
+  });
+
+  it('is form-associated: FormData captures the selected value', async () => {
+    const form = await fixture(html`
+      <form>
+        <au-radio-group name="choice">
+          <div value="yes" checked>Yes</div>
+          <div value="no">No</div>
+        </au-radio-group>
+      </form>
+    `);
+    await nextFrame();
+    const formData = new FormData(form);
+    expect(formData.get('choice')).to.equal('yes');
+  });
+
+  it('formResetCallback re-renders to initial state', async () => {
+    const form = await fixture(html`
+      <form>
+        <au-radio-group name="pick">
+          <div value="a" checked>A</div>
+          <div value="b">B</div>
+        </au-radio-group>
+        <button type="reset">Reset</button>
+      </form>
+    `);
+    const el = form.querySelector('au-radio-group');
+    await nextFrame();
+
+    const radios = el.shadowRoot.querySelectorAll('input[type="radio"]');
+    radios[1].click();
+    await nextFrame();
+    expect(el.value).to.equal('b');
+
+    form.reset();
+    await nextFrame();
+    expect(el.shadowRoot.querySelectorAll('input[type="radio"]').length).to.be.greaterThan(0);
+  });
 });

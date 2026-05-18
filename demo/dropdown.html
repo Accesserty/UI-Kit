@@ -190,7 +190,7 @@
         <tr>
           <td>--au-dropdown-menu-border-color</td>
           <td>Border color</td>
-          <td>oklch(0.8 0 0)</td>
+          <td>oklch(0.7894 0 0)</td>
         </tr>
         <tr>
           <td>--au-dropdown-menu-border-radius</td>
@@ -226,6 +226,45 @@
           <td>Hover text color</td>
           <td>oklch(0.1 0 0)</td>
         </tr>
+        <tr>
+          <td>--au-dropdown-focus-shadow-width</td>
+          <td>Focus ring width</td>
+          <td>3px</td>
+        </tr>
+        <tr>
+          <td>--au-dropdown-focus-shadow-color</td>
+          <td>Focus ring color</td>
+          <td>oklch(0.8315 0.15681888825079074 78.05241467152487)</td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Properties</h2>
+      <table>
+        <caption>JavaScript properties on <code>&lt;au-dropdown&gt;</code>:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Property</th>
+            <th scope="col">Type</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>isOpen</td>
+            <td>boolean (getter + setter)</td>
+            <td>
+              Reflects whether the dropdown menu is currently open. Setting it to <code>true</code> opens the menu;
+              <code>false</code> closes it.
+              <pre style="background:#f4f4f4;padding:0.5rem;overflow:auto;"><code>const dd = document.querySelector('au-dropdown');
+console.log(dd.isOpen); // false
+
+dd.isOpen = true;  // opens the menu
+dd.isOpen = false; // closes the menu</code></pre>
+            </td>
+          </tr>
+        </tbody>
       </table>
     </section>
 

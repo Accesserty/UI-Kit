@@ -1,4 +1,4 @@
-import { html, fixture, expect } from '@open-wc/testing';
+import { html, fixture, expect, nextFrame } from '@open-wc/testing';
 import '../src/components/checkbox.js';
 
 describe('AuCheckbox', () => {
@@ -94,5 +94,57 @@ describe('AuCheckbox', () => {
     const input2 = el2.shadowRoot.querySelector('input');
 
     expect(input1.id).to.not.equal(input2.id);
+  });
+
+  it('checked property getter returns current checked state', async () => {
+    const el = await fixture(html`<au-checkbox checked></au-checkbox>`);
+    expect(el.checked).to.be.true;
+
+    el.removeAttribute('checked');
+    await nextFrame();
+    expect(el.checked).to.be.false;
+  });
+
+  it('checked property setter updates the attribute', async () => {
+    const el = await fixture(html`<au-checkbox></au-checkbox>`);
+    el.checked = true;
+    expect(el.hasAttribute('checked')).to.be.true;
+    expect(el.shadowRoot.querySelector('input').checked).to.be.true;
+
+    el.checked = false;
+    expect(el.hasAttribute('checked')).to.be.false;
+    expect(el.shadowRoot.querySelector('input').checked).to.be.false;
+  });
+
+  it('disabled property getter returns current disabled state', async () => {
+    const el = await fixture(html`<au-checkbox disabled></au-checkbox>`);
+    expect(el.disabled).to.be.true;
+  });
+
+  it('disabled property setter updates the attribute', async () => {
+    const el = await fixture(html`<au-checkbox></au-checkbox>`);
+    el.disabled = true;
+    expect(el.hasAttribute('disabled')).to.be.true;
+    expect(el.shadowRoot.querySelector('input').disabled).to.be.true;
+
+    el.disabled = false;
+    expect(el.hasAttribute('disabled')).to.be.false;
+    expect(el.shadowRoot.querySelector('input').disabled).to.be.false;
+  });
+
+  it('change event is composed and bubbles across shadow DOM', async () => {
+    const wrapper = await fixture(html`
+      <div>
+        <au-checkbox></au-checkbox>
+      </div>
+    `);
+    const el = wrapper.querySelector('au-checkbox');
+    const input = el.shadowRoot.querySelector('input');
+
+    let received = false;
+    wrapper.addEventListener('change', () => { received = true; });
+    input.click();
+
+    expect(received).to.be.true;
   });
 });

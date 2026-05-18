@@ -68,19 +68,22 @@ describe('AuInput', () => {
 
   it('supports form association and reset', async () => {
     const el = await fixture(html`
-      <form>
-        <au-input name="email" value="default"></au-input>
-        <button type="reset">Reset</button>
-      </form>
-    `);
+    <form>
+      <au-input name="email" value="default"></au-input>
+      <button type="reset">Reset</button>
+    </form>
+  `);
     const auInput = el.querySelector('au-input');
-    const input = auInput.shadowRoot.querySelector('input');
+    let input = auInput.shadowRoot.querySelector('input');
 
     input.value = 'changed';
     auInput.value = 'changed';
 
     el.reset();
     await nextFrame();
+
+    // 重新查詢 input（因為 reset 時會重建元素）
+    input = auInput.shadowRoot.querySelector('input');
 
     expect(auInput.value).to.equal('default');
     expect(input.value).to.equal('default');
@@ -117,5 +120,77 @@ describe('AuInput', () => {
     el.focus();
     const input = el.shadowRoot.querySelector('input');
     expect(document.activeElement === input || input.matches(':focus')).to.be.true;
+  });
+
+  it('disabled property getter/setter works correctly', async () => {
+    const el = await fixture(html`<au-input></au-input>`);
+    expect(el.disabled).to.be.false;
+
+    el.disabled = true;
+    expect(el.hasAttribute('disabled')).to.be.true;
+    expect(el.shadowRoot.querySelector('input').disabled).to.be.true;
+
+    el.disabled = false;
+    expect(el.hasAttribute('disabled')).to.be.false;
+    expect(el.shadowRoot.querySelector('input').disabled).to.be.false;
+  });
+
+  it('required property getter/setter works correctly', async () => {
+    const el = await fixture(html`<au-input></au-input>`);
+    expect(el.required).to.be.false;
+
+    el.required = true;
+    expect(el.hasAttribute('required')).to.be.true;
+    expect(el.shadowRoot.querySelector('input').required).to.be.true;
+
+    el.required = false;
+    expect(el.hasAttribute('required')).to.be.false;
+    expect(el.shadowRoot.querySelector('input').required).to.be.false;
+  });
+
+  it('readonly property getter/setter works correctly', async () => {
+    const el = await fixture(html`<au-input></au-input>`);
+    expect(el.readonly).to.be.false;
+
+    el.readonly = true;
+    expect(el.hasAttribute('readonly')).to.be.true;
+    expect(el.shadowRoot.querySelector('input').readOnly).to.be.true;
+
+    el.readonly = false;
+    expect(el.hasAttribute('readonly')).to.be.false;
+    expect(el.shadowRoot.querySelector('input').readOnly).to.be.false;
+  });
+
+  it('input event is composed and bubbles across shadow DOM', async () => {
+    const wrapper = await fixture(html`
+      <div>
+        <au-input></au-input>
+      </div>
+    `);
+    const el = wrapper.querySelector('au-input');
+    const input = el.shadowRoot.querySelector('input');
+
+    let received = false;
+    wrapper.addEventListener('input', () => { received = true; });
+    input.value = 'hello';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+
+    expect(received).to.be.true;
+  });
+
+  it('change event is composed and bubbles across shadow DOM', async () => {
+    const wrapper = await fixture(html`
+      <div>
+        <au-input></au-input>
+      </div>
+    `);
+    const el = wrapper.querySelector('au-input');
+    const input = el.shadowRoot.querySelector('input');
+
+    let received = false;
+    wrapper.addEventListener('change', () => { received = true; });
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(received).to.be.true;
   });
 });

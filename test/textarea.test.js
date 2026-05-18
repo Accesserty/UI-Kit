@@ -60,20 +60,19 @@ describe('AuTextarea', () => {
 
   it('resets value on form reset', async () => {
     const el = await fixture(html`
-      <form>
-        <au-textarea name="text" value="Initial value"></au-textarea>
-        <button type="reset">Reset</button>
-      </form>
-    `);
+    <form>
+      <au-textarea name="text" value="Initial value"></au-textarea>
+      <button type="reset">Reset</button>
+    </form>
+  `);
     const auTextarea = el.querySelector('au-textarea');
-    const textarea = auTextarea.shadowRoot.querySelector('textarea');
-
+    let textarea = auTextarea.shadowRoot.querySelector('textarea');
     textarea.value = 'Changed';
     auTextarea.value = 'Changed';
-
     el.reset();
     await new Promise(r => setTimeout(r));
-
+    // 重新查詢 textarea（因為 reset 時會重建元素）
+    textarea = auTextarea.shadowRoot.querySelector('textarea');
     expect(auTextarea.value).to.equal('Initial value');
     expect(textarea.value).to.equal('Initial value');
   });
@@ -99,5 +98,64 @@ describe('AuTextarea', () => {
     expect(wrapper).to.exist;
     expect(container).to.exist;
     expect(container.contains(textarea)).to.be.true;
+  });
+
+  it('disabled property getter/setter works correctly', async () => {
+    const el = await fixture(html`<au-textarea></au-textarea>`);
+    expect(el.disabled).to.be.false;
+
+    el.disabled = true;
+    expect(el.hasAttribute('disabled')).to.be.true;
+    expect(el.shadowRoot.querySelector('textarea').disabled).to.be.true;
+
+    el.disabled = false;
+    expect(el.hasAttribute('disabled')).to.be.false;
+    expect(el.shadowRoot.querySelector('textarea').disabled).to.be.false;
+  });
+
+  it('readonly property getter/setter works correctly', async () => {
+    const el = await fixture(html`<au-textarea></au-textarea>`);
+    expect(el.readonly).to.be.false;
+
+    el.readonly = true;
+    expect(el.hasAttribute('readonly')).to.be.true;
+    expect(el.shadowRoot.querySelector('textarea').readOnly).to.be.true;
+
+    el.readonly = false;
+    expect(el.hasAttribute('readonly')).to.be.false;
+    expect(el.shadowRoot.querySelector('textarea').readOnly).to.be.false;
+  });
+
+  it('input event is composed and bubbles across shadow DOM', async () => {
+    const wrapper = await fixture(html`
+      <div>
+        <au-textarea></au-textarea>
+      </div>
+    `);
+    const el = wrapper.querySelector('au-textarea');
+    const textarea = el.shadowRoot.querySelector('textarea');
+
+    let received = false;
+    wrapper.addEventListener('input', () => { received = true; });
+    textarea.value = 'hello';
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+
+    expect(received).to.be.true;
+  });
+
+  it('change event is composed and bubbles across shadow DOM', async () => {
+    const wrapper = await fixture(html`
+      <div>
+        <au-textarea></au-textarea>
+      </div>
+    `);
+    const el = wrapper.querySelector('au-textarea');
+    const textarea = el.shadowRoot.querySelector('textarea');
+
+    let received = false;
+    wrapper.addEventListener('change', () => { received = true; });
+    textarea.dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(received).to.be.true;
   });
 });

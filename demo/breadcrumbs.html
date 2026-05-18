@@ -31,7 +31,7 @@
         filenames are correct to avoid loading errors.</p>
     </section>
     <section>
-      <h2>Attribute</h2>
+      <h2>Attributes &amp; Properties</h2>
       <table>
         The Accesserty UI Kit breadcrumbs inherits attributes, with some custom options available:
         <tr>
@@ -72,7 +72,7 @@
         </tr>
         <tr>
           <td>separator</td>
-          <td>Sets the separator between breadcrumb items.</td>
+          <td>Sets the separator between breadcrumb items. Also settable as a JS property: <code>el.separator = '›'</code></td>
           <td>string</td>
           <td>/</td>
         </tr>
@@ -84,8 +84,20 @@
         </tr>
         <tr>
           <td>items</td>
-          <td>Sets the text and url path of breadcrumb item.</td>
-          <td>{ "text":string, "url":string }</td>
+          <td>
+            Sets the text and url path of breadcrumb items. Accepts a JSON string via attribute or a JavaScript
+            Array via the <code>items</code> property setter.
+            <br><br>
+            <strong>Attribute (HTML / template string):</strong>
+            <pre style="background:#f4f4f4;padding:0.5rem;overflow:auto;"><code>&lt;au-breadcrumbs items='[{"text":"Home","url":"/"},{"text":"About","url":"/about"},{"text":"Contact"}]'&gt;&lt;/au-breadcrumbs&gt;</code></pre>
+            <strong>Property (JS / React / Vue / Angular):</strong>
+            <pre style="background:#f4f4f4;padding:0.5rem;overflow:auto;"><code>document.querySelector('au-breadcrumbs').items = [
+  { text: 'Home', url: '/' },
+  { text: 'About', url: '/about' },
+  { text: 'Contact' }
+];</code></pre>
+          </td>
+          <td>JSON string or Array of <code>{ text: string, url?: string }</code></td>
           <td></td>
         </tr>
       </table>

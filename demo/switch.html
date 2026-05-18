@@ -27,14 +27,82 @@
           <th scope="col">Description</th>
         </tr>
         <tr>
+          <td>name</td>
+          <td>Form field name (used for form submission)</td>
+        </tr>
+        <tr>
+          <td>value</td>
+          <td>Value submitted when the switch is on (default: <code>on</code>)</td>
+        </tr>
+        <tr>
+          <td>checked</td>
+          <td>Sets switch to on state by default</td>
+        </tr>
+        <tr>
+          <td>disabled</td>
+          <td>Disables the switch</td>
+        </tr>
+        <tr>
           <td>off</td>
-          <td>Set "off" Text</td>
+          <td>Set "off" text label</td>
         </tr>
         <tr>
           <td>on</td>
-          <td>Set "on" Text</td>
+          <td>Set "on" text label</td>
         </tr>
       </table>
+    </section>
+    <section>
+      <h2>Properties</h2>
+      <table>
+        <caption>JavaScript properties on <code>&lt;au-switch&gt;</code>:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Property</th>
+            <th scope="col">Type</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>checked</td>
+            <td>boolean (getter + setter)</td>
+            <td>Get or set the switch on/off state. Setting to <code>false</code> removes the <code>checked</code> attribute — React-safe.</td>
+          </tr>
+          <tr>
+            <td>disabled</td>
+            <td>boolean (getter + setter)</td>
+            <td>Get or set the disabled state.</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>const sw = document.querySelector('au-switch');
+sw.checked = true;   // turns on
+sw.checked = false;  // turns off
+console.log(sw.checked); // boolean</code></pre>
+    </section>
+    <section>
+      <h2>Events</h2>
+      <table>
+        <caption>Events dispatched by <code>&lt;au-switch&gt;</code>:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Event</th>
+            <th scope="col">Detail</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>change</td>
+            <td><code>boolean</code> (checked state)</td>
+            <td>Fired when the switch is toggled. Bubbles and is composed.</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>document.querySelector('au-switch').addEventListener('change', (e) => {
+  console.log('Switch is now:', e.detail ? 'On' : 'Off');
+});</code></pre>
     </section>
 
     <section>
@@ -104,13 +172,13 @@
         </tr>
         <tr>
           <td>--au-switch-input-width</td>
-          <td>width of switch</td>
-          <td>4rem(height: 2rem)</td>
+          <td>width of switch (height is always width / 2)</td>
+          <td>4rem</td>
         </tr>
         <tr>
           <td>--au-switch-inner-distance</td>
-          <td>Gap between switch and inner</td>
-          <td>4rem(height: 2rem)</td>
+          <td>Gap between switch border and inner circle</td>
+          <td>0.25rem</td>
         </tr>
         <tr>
           <td>--au-switch-input-border-width</td>
@@ -134,18 +202,18 @@
         </tr>
         <tr>
           <td>--au-switch-inner-border-radius</td>
-          <td>border radius of inner</td>
-          <td>0.875rem</td>
-        </tr>
-        <tr>
-          <td>--au-switch-inner-border-radius</td>
-          <td>border radius of inner</td>
-          <td>0.875rem</td>
+          <td>border radius of inner circle</td>
+          <td>calc((var(--au-switch-input-width, 4rem) / 2 - var(--au-switch-inner-distance, 0.25rem)) / 2)</td>
         </tr>
         <tr>
           <td>--au-switch-input-checked-bg</td>
-          <td>background-color (checked)</td>
+          <td>background-color of switch track (checked)</td>
           <td>oklch(0.1398 0 0)</td>
+        </tr>
+        <tr>
+          <td>--au-switch-inner-checked-bg</td>
+          <td>background-color of inner circle (checked)</td>
+          <td>oklch(0.994 0 0)</td>
         </tr>
         <tr>
           <td>--au-switch-focus-shadow-color</td>

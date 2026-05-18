@@ -80,6 +80,136 @@ describe('AuAccordion and AuAccordionItem', () => {
     expect(region.getAttribute('aria-labelledby')).to.equal(titleId);
   });
 
+  it('open property getter reflects attribute', async () => {
+    const el = await fixture(html`
+      <au-accordion>
+        <au-accordion-item open>
+          <span slot="heading">Title</span>
+          <div slot="content">Content</div>
+        </au-accordion-item>
+      </au-accordion>
+    `);
+    const item = el.querySelector('au-accordion-item');
+    expect(item.open).to.be.true;
+    item.removeAttribute('open');
+    expect(item.open).to.be.false;
+  });
+
+  it('open property setter updates attribute and DOM', async () => {
+    const el = await fixture(html`
+      <au-accordion>
+        <au-accordion-item>
+          <span slot="heading">Title</span>
+          <div slot="content">Content</div>
+        </au-accordion-item>
+      </au-accordion>
+    `);
+    const item = el.querySelector('au-accordion-item');
+    const button = item.shadowRoot.querySelector('button');
+    const region = item.shadowRoot.querySelector('div[role="region"]');
+
+    item.open = true;
+    expect(item.hasAttribute('open')).to.be.true;
+    expect(button.getAttribute('aria-expanded')).to.equal('true');
+    expect(region.getAttribute('hidden')).to.be.null;
+
+    item.open = false;
+    expect(item.hasAttribute('open')).to.be.false;
+    expect(button.getAttribute('aria-expanded')).to.equal('false');
+    expect(region.getAttribute('hidden')).to.equal('');
+  });
+
+  it('dispatches au-toggle event with correct detail on click', async () => {
+    const el = await fixture(html`
+      <au-accordion>
+        <au-accordion-item>
+          <span slot="heading">Title</span>
+          <div slot="content">Content</div>
+        </au-accordion-item>
+      </au-accordion>
+    `);
+    const item = el.querySelector('au-accordion-item');
+    const button = item.shadowRoot.querySelector('button');
+
+    let lastEvent = null;
+    el.addEventListener('au-toggle', (e) => { lastEvent = e; });
+
+    button.click();
+    expect(lastEvent).to.not.be.null;
+    expect(lastEvent.detail.open).to.be.true;
+    expect(lastEvent.bubbles).to.be.true;
+    expect(lastEvent.composed).to.be.true;
+
+    button.click();
+    expect(lastEvent.detail.open).to.be.false;
+  });
+
+  it('exclusive mode closes other items when one opens', async () => {
+    const el = await fixture(html`
+      <au-accordion exclusive>
+        <au-accordion-item>
+          <span slot="heading">Item 1</span>
+          <div slot="content">Content 1</div>
+        </au-accordion-item>
+        <au-accordion-item>
+          <span slot="heading">Item 2</span>
+          <div slot="content">Content 2</div>
+        </au-accordion-item>
+        <au-accordion-item>
+          <span slot="heading">Item 3</span>
+          <div slot="content">Content 3</div>
+        </au-accordion-item>
+      </au-accordion>
+    `);
+    const [item1, item2, item3] = el.querySelectorAll('au-accordion-item');
+
+    item1.shadowRoot.querySelector('button').click();
+    expect(item1.open).to.be.true;
+    expect(item2.open).to.be.false;
+    expect(item3.open).to.be.false;
+
+    item2.shadowRoot.querySelector('button').click();
+    expect(item1.open).to.be.false;
+    expect(item2.open).to.be.true;
+    expect(item3.open).to.be.false;
+  });
+
+  it('exclusive mode sets aria-describedby on container', async () => {
+    const el = await fixture(html`<au-accordion exclusive></au-accordion>`);
+    const container = el.shadowRoot.querySelector('.au-accordion');
+    const hint = el.shadowRoot.querySelector('[id^="au-accordion-hint-"]');
+    expect(hint).to.not.be.null;
+    expect(container.getAttribute('aria-describedby')).to.equal(hint.id);
+    expect(hint.textContent.length).to.be.greaterThan(0);
+  });
+
+  it('non-exclusive mode removes aria-describedby from container', async () => {
+    const el = await fixture(html`<au-accordion></au-accordion>`);
+    const container = el.shadowRoot.querySelector('.au-accordion');
+    expect(container.hasAttribute('aria-describedby')).to.be.false;
+  });
+
+  it('non-exclusive mode allows multiple items open', async () => {
+    const el = await fixture(html`
+      <au-accordion>
+        <au-accordion-item>
+          <span slot="heading">Item 1</span>
+          <div slot="content">Content 1</div>
+        </au-accordion-item>
+        <au-accordion-item>
+          <span slot="heading">Item 2</span>
+          <div slot="content">Content 2</div>
+        </au-accordion-item>
+      </au-accordion>
+    `);
+    const [item1, item2] = el.querySelectorAll('au-accordion-item');
+
+    item1.shadowRoot.querySelector('button').click();
+    item2.shadowRoot.querySelector('button').click();
+    expect(item1.open).to.be.true;
+    expect(item2.open).to.be.true;
+  });
+
   it('displays content in slots correctly', async () => {
     const el = await fixture(html`
       <au-accordion>

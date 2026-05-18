@@ -57,9 +57,12 @@ class AuTree extends HTMLElement {
   }
 
   generateId() {
-    const byteArray = new Uint32Array(1);
-    window.crypto.getRandomValues(byteArray);
-    return `au-tree-${byteArray[0].toString(36)}`;
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-tree-${byteArray[0].toString(36)}`;
+    }
+    return `au-tree-${Math.random().toString(36).slice(2)}`;
   }
 
   render() {
@@ -256,7 +259,7 @@ class AuTree extends HTMLElement {
     // 根節點不需要在此處理特定邏輯，因為節點會處理傳播。
     // 如果需要，我們可以在此發出根層級的 'change' 事件來聚合所有資料。
     const checkedNodes = this.getAllNodes().filter(n => n.checked).map(n => n.data);
-    this.dispatchEvent(new CustomEvent('change', { detail: { checkedNodes } }));
+    this.dispatchEvent(new CustomEvent('change', { bubbles: true, composed: true, detail: { checkedNodes } }));
   }
 }
 
@@ -780,5 +783,7 @@ class AuTreeNode extends HTMLElement {
   }
 }
 
-customElements.define('au-tree', AuTree);
-customElements.define('au-tree-node', AuTreeNode);
+if (typeof customElements !== 'undefined') {
+  if (!customElements.get('au-tree')) customElements.define('au-tree', AuTree);
+  if (!customElements.get('au-tree-node')) customElements.define('au-tree-node', AuTreeNode);
+}

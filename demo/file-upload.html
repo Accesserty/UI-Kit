@@ -226,15 +226,70 @@
           <tr>
             <td>--au-file-upload-delete-focus-shadow-color</td>
             <td>border color(focus) of delete button</td>
-            <td>3px</td>
-          </tr>
-          <tr>
-            <td>--au-file-upload-delete-active-border-color</td>
-            <td>border color(active) of delete button</td>
             <td>oklch(0.8315 0.15681888825079074 78.05241467152487)</td>
           </tr>
         </tbody>
       </table>
+    </section>
+    <section>
+      <h2>Properties</h2>
+      <table>
+        <caption>JavaScript properties on <code>&lt;au-file-upload&gt;</code>:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Property</th>
+            <th scope="col">Type</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>value</td>
+            <td>File[] (getter + setter)</td>
+            <td>
+              Get the current array of selected <code>File</code> objects. Setting it to an array programmatically
+              replaces the current file list and updates the UI.
+              <pre style="background:#f4f4f4;padding:0.5rem;overflow:auto;"><code>const fu = document.querySelector('au-file-upload');
+console.log(fu.value); // File[]
+fu.value = []; // clear files programmatically</code></pre>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <section>
+      <h2>Events</h2>
+      <table>
+        <caption>Events dispatched by <code>&lt;au-file-upload&gt;</code>:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Event</th>
+            <th scope="col">Detail</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>change</td>
+            <td>—</td>
+            <td>Fired when files are added. Bubbles and is composed. Use <code>el.value</code> to read the current file list.</td>
+          </tr>
+          <tr>
+            <td>remove-file</td>
+            <td><code>File</code></td>
+            <td>Fired when a file is removed from the list. <code>e.detail</code> is the removed <code>File</code> object. Bubbles and is composed.</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>const fu = document.querySelector('au-file-upload');
+
+fu.addEventListener('change', () => {
+  console.log('Files:', fu.value.map(f => f.name));
+});
+
+fu.addEventListener('remove-file', (e) => {
+  console.log('Removed:', e.detail.name);
+});</code></pre>
     </section>
   </main>
 </body>

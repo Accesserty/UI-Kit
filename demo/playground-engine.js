@@ -872,7 +872,7 @@ const COMPONENT_CONFIGS = [
   },
 
 
-  // --- TAB 13: Switch ---
+  // --- TAB 14: Switch ---
   {
     id: 'switch',
     label: 'Switch',
@@ -928,7 +928,7 @@ const COMPONENT_CONFIGS = [
     ]
   },
 
-  // --- TAB 14: Textarea ---
+  // --- TAB 15: Textarea ---
   {
     id: 'textarea',
     label: 'Textarea',
@@ -1005,7 +1005,7 @@ const COMPONENT_CONFIGS = [
     ]
   },
 
-  // --- TAB 15: Tree ---
+  // --- TAB 16: Tree ---
   {
     id: 'tree',
     label: 'Tree',

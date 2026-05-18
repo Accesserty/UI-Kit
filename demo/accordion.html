@@ -118,6 +118,30 @@
     </section>
 
     <section>
+      <h2>Exclusive Mode</h2>
+      <p>Add <code>exclusive</code> attribute to <code>&lt;au-accordion&gt;</code>. When one item opens, all others close automatically.</p>
+      <code style="display: block; white-space: pre-wrap;">&lt;au-accordion exclusive&gt;...&lt;/au-accordion&gt;</code>
+      <br>
+      <div role="group" aria-labelledby="group-label-exclusive">
+        <span id="group-label-exclusive" hidden>Exclusive</span>
+        <au-accordion exclusive>
+          <au-accordion-item>
+            <div slot="heading">Heading 1</div>
+            <div slot="content">Content 1 — opening another item will close this one.</div>
+          </au-accordion-item>
+          <au-accordion-item>
+            <div slot="heading">Heading 2</div>
+            <div slot="content">Content 2 — opening another item will close this one.</div>
+          </au-accordion-item>
+          <au-accordion-item>
+            <div slot="heading">Heading 3</div>
+            <div slot="content">Content 3 — opening another item will close this one.</div>
+          </au-accordion-item>
+        </au-accordion>
+      </div>
+    </section>
+
+    <section>
       <h2>Nested</h2>
       <div role="group" aria-labelledby="group-label-nested">
         <span id="group-label-nested" hidden>Nested</span>
@@ -236,6 +260,77 @@
     </section>
 
     <section>
+      <h2>Attributes &amp; Properties</h2>
+      <h3><code>&lt;au-accordion&gt;</code></h3>
+      <table>
+        <tr>
+          <th scope="col">Attribute / Property</th>
+          <th scope="col">Type</th>
+          <th scope="col">Default</th>
+          <th scope="col">Description</th>
+        </tr>
+        <tr>
+          <td>exclusive</td>
+          <td>boolean</td>
+          <td>false</td>
+          <td>When present, only one item can be open at a time. Opening an item closes all siblings.</td>
+        </tr>
+      </table>
+      <br>
+      <h3><code>&lt;au-accordion-item&gt;</code></h3>
+      <table>
+        <tr>
+          <th scope="col">Attribute / Property</th>
+          <th scope="col">Type</th>
+          <th scope="col">Default</th>
+          <th scope="col">Description</th>
+        </tr>
+        <tr>
+          <td>open</td>
+          <td>boolean</td>
+          <td>false</td>
+          <td>Controls the expanded state. Settable via attribute or JS property (<code>element.open = true</code>).</td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Events</h2>
+      <table>
+        <tr>
+          <th scope="col">Event</th>
+          <th scope="col">Dispatched from</th>
+          <th scope="col">Bubbles</th>
+          <th scope="col">Composed</th>
+          <th scope="col">detail</th>
+          <th scope="col">Description</th>
+        </tr>
+        <tr>
+          <td>au-toggle</td>
+          <td><code>&lt;au-accordion-item&gt;</code></td>
+          <td>true</td>
+          <td>true</td>
+          <td><code>{ open: boolean }</code></td>
+          <td>Fires whenever the item's expanded state changes (by user interaction or programmatic property set).</td>
+        </tr>
+      </table>
+      <br>
+      <h3>Framework usage examples</h3>
+      <code style="display: block; white-space: pre-wrap;">
+&lt;!-- Vue --&gt;
+&lt;au-accordion-item @au-toggle="onToggle"&gt;...&lt;/au-accordion-item&gt;
+
+&lt;!-- Angular --&gt;
+&lt;au-accordion-item (au-toggle)="onToggle($event)"&gt;...&lt;/au-accordion-item&gt;
+
+&lt;!-- Vanilla JS --&gt;
+document.querySelector('au-accordion-item').addEventListener('au-toggle', (e) =&gt; {
+  console.log(e.detail.open); // true | false
+});
+      </code>
+    </section>
+
+    <section>
       <h2>CSS Variables</h2>
       <table>
         <tr>
@@ -331,7 +426,7 @@
         <tr>
           <td>--au-accordion-heading-focus-shadow-color</td>
           <td>focus border color(actually box-shadow)</td>
-          <td>3px</td>
+          <td>oklch(0.8315 0.15681888825079074 78.05241467152487)</td>
         </tr>
         <tr>
           <td>--au-accordion-content-bg</td>
@@ -366,11 +461,6 @@
         <tr>
           <td>--au-accordion-content-overscroll-behavior</td>
           <td>content scroll behavior</td>
-          <td>auto</td>
-        </tr>
-        <tr>
-          <td>--au-accordion-content-max-height</td>
-          <td>content max height</td>
           <td>auto</td>
         </tr>
         <tr>
@@ -564,7 +654,7 @@
         <tr>
           <td>--au-summary-focus-shadow-color</td>
           <td>summary focus shadow color</td>
-          <td>...</td>
+          <td>oklch(0.8315 0.15681888825079074 78.05241467152487)</td>
         </tr>
       </table>
     </section>

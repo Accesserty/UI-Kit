@@ -25,7 +25,7 @@
       <h2>Attribute</h2>
       <table>
         <caption>
-          The Accesserty UI Kit Select attributes:
+          The Accesserty UI Kit Tabs tab panel attributes (set on each <code>.au-tab-panel</code> element):
         </caption>
         <tr>
           <th scope="col">Name</th>
@@ -52,6 +52,70 @@
           <td>set custom id of tab</td>
         </tr>
       </table>
+    </section>
+    <section>
+      <h2>Properties</h2>
+      <table>
+        <caption>
+          JavaScript properties on <code>&lt;au-tabs&gt;</code>:
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Property</th>
+            <th scope="col">Type</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>selectedIndex</td>
+            <td>number</td>
+            <td>Get or set the currently selected tab by zero-based index. Setting this property programmatically selects the tab and fires the <code>tab-change</code> event.</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>const tabs = document.querySelector('au-tabs');
+// Get current tab index
+console.log(tabs.selectedIndex); // 0
+
+// Programmatically select the third tab
+tabs.selectedIndex = 2;</code></pre>
+    </section>
+    <section>
+      <h2>Events</h2>
+      <table>
+        <caption>
+          Events dispatched by <code>&lt;au-tabs&gt;</code>:
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Event</th>
+            <th scope="col">Detail</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>tab-change</td>
+            <td><code>{ index: number, label: string }</code></td>
+            <td>Fired when the selected tab changes (by click or keyboard). Bubbles and is composed, so it crosses the Shadow DOM boundary.</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>// Vanilla JS
+document.querySelector('au-tabs').addEventListener('tab-change', (e) => {
+  console.log('Tab index:', e.detail.index);
+  console.log('Tab label:', e.detail.label);
+});
+
+// Vue
+// &lt;au-tabs @tab-change="onTabChange"&gt;
+
+// Angular
+// &lt;au-tabs (tab-change)="onTabChange($event)"&gt;
+
+// React (ref)
+// tabsRef.current.addEventListener('tab-change', handler);</code></pre>
     </section>
     <section>
       <h2>Basic</h2>

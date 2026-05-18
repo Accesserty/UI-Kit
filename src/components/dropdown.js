@@ -161,9 +161,12 @@ class AuDropdown extends HTMLElement {
   }
 
   generateId() {
-    const byteArray = new Uint32Array(1);
-    window.crypto.getRandomValues(byteArray);
-    return `au-dropdown-${byteArray[0].toString(36)}`;
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-dropdown-${byteArray[0].toString(36)}`;
+    }
+    return `au-dropdown-${Math.random().toString(36).slice(2)}`;
   }
 
   // 修正點：移除重複的 open/close，保留這裡的邏輯並加強
@@ -205,6 +208,14 @@ class AuDropdown extends HTMLElement {
 
   get isOpen() {
     return this.menu.matches(':popover-open');
+  }
+
+  set isOpen(val) {
+    if (val) {
+      this.menu.showPopover();
+    } else {
+      this.menu.hidePopover();
+    }
   }
 
   focusItem(index) {
@@ -348,5 +359,7 @@ class AuDropdownItem extends HTMLElement {
   }
 }
 
-customElements.define("au-dropdown", AuDropdown);
-customElements.define("au-dropdown-item", AuDropdownItem);
+if (typeof customElements !== 'undefined') {
+  if (!customElements.get('au-dropdown')) customElements.define("au-dropdown", AuDropdown);
+  if (!customElements.get('au-dropdown-item')) customElements.define("au-dropdown-item", AuDropdownItem);
+}

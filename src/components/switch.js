@@ -1,7 +1,10 @@
 class AuSwitch extends HTMLElement {
+  static formAssociated = true;
+
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+    this.internals = this.attachInternals();
 
     const inputID = this.generateId();
 
@@ -111,14 +114,41 @@ class AuSwitch extends HTMLElement {
     this.inputElement.addEventListener('change', (event) => {
       const checked = event.target.checked;
       this.inputElement.setAttribute('aria-checked', checked.toString());
-      this.dispatchEvent(new CustomEvent('change', { detail: checked }));
+      const formValue = checked ? (this.getAttribute('value') || 'on') : null;
+      this.internals.setFormValue(formValue);
+      this.dispatchEvent(new CustomEvent('change', { bubbles: true, composed: true, detail: checked }));
     });
   }
 
+  get checked() {
+    return this.inputElement?.checked ?? false;
+  }
+
+  set checked(val) {
+    val ? this.setAttribute('checked', '') : this.removeAttribute('checked');
+  }
+
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(val) {
+    val ? this.setAttribute('disabled', '') : this.removeAttribute('disabled');
+  }
+
+  formResetCallback() {
+    this.inputElement.checked = false;
+    this.inputElement.setAttribute('aria-checked', 'false');
+    this.internals.setFormValue(null);
+  }
+
   generateId() {
-    const byteArray = new Uint32Array(1);
-    window.crypto.getRandomValues(byteArray);
-    return `au-switch-${byteArray[0].toString(36)}`;
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-switch-${byteArray[0].toString(36)}`;
+    }
+    return `au-switch-${Math.random().toString(36).slice(2)}`;
   }
 
   static get observedAttributes() {
@@ -170,7 +200,12 @@ class AuSwitch extends HTMLElement {
     } else {
       onText.textContent = '';
     }
+
+    const formValue = input.checked ? (this.getAttribute('value') || 'on') : null;
+    this.internals.setFormValue(formValue);
   }
 }
 
-customElements.define('au-switch', AuSwitch);
+if (typeof customElements !== 'undefined' && !customElements.get('au-switch')) {
+  customElements.define('au-switch', AuSwitch);
+}

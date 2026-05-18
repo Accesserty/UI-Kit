@@ -7,6 +7,8 @@ class AuTextarea extends HTMLElement {
     this.internals = this.attachInternals();
 
     this._id = this.getAttribute('id') || this.generateId();
+    this._initialValue = '';
+    this._initialValueSet = false;
 
     const style = document.createElement('style');
     style.textContent = `
@@ -84,7 +86,7 @@ class AuTextarea extends HTMLElement {
 
     const textareaContainer = document.createElement('div');
     textareaContainer.className = 'textarea-container';
-
+    this.textareaContainer = textareaContainer;
 
     this.textarea = document.createElement('textarea');
     this.textarea.id = this._id;
@@ -95,19 +97,24 @@ class AuTextarea extends HTMLElement {
       this.textarea.setAttribute('aria-label', labelAttr);
     }
 
-    this.textarea.addEventListener('input', () => {
-      this.value = this.textarea.value;
-      this.dispatchEvent(new Event('input', { bubbles: true }));
-      this._syncValidity();
-    });
-
-    this.textarea.addEventListener('change', () => {
-      this.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+    // Bind textarea events
+    this._bindTextareaEvents();
 
     textareaContainer.append(this.textarea);
     wrapper.append(this.labelEl, textareaContainer);
     this.shadowRoot.append(style, wrapper);
+  }
+
+  _bindTextareaEvents() {
+    this.textarea.addEventListener('input', () => {
+      this.value = this.textarea.value;
+      this.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+      this._syncValidity();
+    });
+
+    this.textarea.addEventListener('change', () => {
+      this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+    });
   }
 
   static get observedAttributes() {
@@ -144,7 +151,13 @@ class AuTextarea extends HTMLElement {
       this.textarea.id = newValue;
       this.labelEl?.setAttribute('for', newValue);
     } else if (name === 'value') {
-      this.value = newValue;
+      // 捕捉初始值（第一次設定時）
+      if (!this._initialValueSet) {
+        this._initialValue = newValue || '';
+        this._initialValueSet = true;
+      }
+      this.textarea.value = newValue;
+      this.internals.setFormValue(newValue);
     } else {
       if (newValue === null) {
         this.textarea.removeAttribute(name);
@@ -156,6 +169,11 @@ class AuTextarea extends HTMLElement {
   }
 
   connectedCallback() {
+    // 如果還沒設定初始值，從 attribute 或當前值取得
+    if (!this._initialValueSet) {
+      this._initialValue = this.getAttribute('value') || this.textarea.value || '';
+      this._initialValueSet = true;
+    }
     this.internals.setFormValue(this.textarea.value);
     this._syncValidity();
   }
@@ -171,17 +189,49 @@ class AuTextarea extends HTMLElement {
   }
 
   formResetCallback() {
-    this.value = this.getAttribute('value') || '';
+    const currentValue = this._initialValue || '';
+
+    // 重建 textarea 元素來清除 :user-invalid 狀態
+    const newTextarea = this.textarea.cloneNode(false);
+    newTextarea.value = currentValue;
+    this.textareaContainer.replaceChild(newTextarea, this.textarea);
+    this.textarea = newTextarea;
+
+    // 重新綁定事件
+    this._bindTextareaEvents();
+
+    // 同步狀態
+    this.internals.setFormValue(currentValue);
+    this._syncValidity();
   }
 
   formStateRestoreCallback(state, mode) {
     this.value = state;
   }
 
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(val) {
+    val ? this.setAttribute('disabled', '') : this.removeAttribute('disabled');
+  }
+
+  get readonly() {
+    return this.hasAttribute('readonly');
+  }
+
+  set readonly(val) {
+    val ? this.setAttribute('readonly', '') : this.removeAttribute('readonly');
+  }
+
   generateId() {
-    const byteArray = new Uint32Array(1);
-    window.crypto.getRandomValues(byteArray);
-    return `au-textarea-${byteArray[0].toString(36)}`;
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-textarea-${byteArray[0].toString(36)}`;
+    }
+    return `au-textarea-${Math.random().toString(36).slice(2)}`;
   }
 
   _syncValidity() {
@@ -194,4 +244,6 @@ class AuTextarea extends HTMLElement {
   }
 }
 
-customElements.define('au-textarea', AuTextarea);
+if (typeof customElements !== 'undefined' && !customElements.get('au-textarea')) {
+  customElements.define('au-textarea', AuTextarea);
+}

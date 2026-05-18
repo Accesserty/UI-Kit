@@ -43,7 +43,7 @@ class AuBreadcrumbs extends HTMLElement {
   set items(val) {
     if (typeof val === 'string') {
       // 這裡只需要設定屬性，不需要呼叫 render，因為 setAttribute 會觸發 attributeChangedCallback
-      this.setAttribute('items', val) 
+      this.setAttribute('items', val)
     } else if (Array.isArray(val) || (val && typeof val === 'object')) {
         const newVal = Array.isArray(val) ? val : [val];
         this.setAttribute('items', JSON.stringify(newVal))
@@ -51,6 +51,14 @@ class AuBreadcrumbs extends HTMLElement {
       console.error("Invalid value provided for 'items'. Expected string (JSON) or Array:", val)
       return
     }
+  }
+
+  get separator() {
+    return this.getAttribute('separator') || '/'
+  }
+
+  set separator(val) {
+    this.setAttribute('separator', val)
   }
 
   render() {
@@ -151,4 +159,6 @@ class AuBreadcrumbs extends HTMLElement {
   }
 }
 
-customElements.define('au-breadcrumbs', AuBreadcrumbs)
+if (typeof customElements !== 'undefined' && !customElements.get('au-breadcrumbs')) {
+  customElements.define('au-breadcrumbs', AuBreadcrumbs);
+}

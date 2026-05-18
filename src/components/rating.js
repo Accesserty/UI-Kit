@@ -235,9 +235,12 @@ class AuRating extends HTMLElement {
   }
 
   generateId() {
-    const byteArray = new Uint32Array(1);
-    window.crypto.getRandomValues(byteArray);
-    return byteArray[0].toString(36);
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return byteArray[0].toString(36);
+    }
+    return Math.random().toString(36).slice(2);
   }
 
   getStarSVG(className = '') {
@@ -414,4 +417,6 @@ class AuRating extends HTMLElement {
   }
 }
 
-customElements.define('au-rating', AuRating);
+if (typeof customElements !== 'undefined' && !customElements.get('au-rating')) {
+  customElements.define('au-rating', AuRating);
+}

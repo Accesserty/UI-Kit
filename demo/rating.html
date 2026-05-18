@@ -82,6 +82,40 @@
     </section>
 
     <section>
+      <h2>Properties</h2>
+      <table>
+        <caption>JavaScript properties on <code>&lt;au-rating&gt;</code>:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Property</th>
+            <th scope="col">Type</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>value</td>
+            <td>number (getter + setter)</td>
+            <td>Get or set the current rating value programmatically. Accepts decimals for partial stars.</td>
+          </tr>
+          <tr>
+            <td>disabled</td>
+            <td>boolean (getter + setter)</td>
+            <td>Get or set the disabled state.</td>
+          </tr>
+          <tr>
+            <td>readonly</td>
+            <td>boolean (getter + setter)</td>
+            <td>Get or set the read-only state. Disables interaction but allows focus.</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>const rating = document.querySelector('au-rating');
+rating.value = 3.5;    // set partial star
+console.log(rating.value); // 3.5
+rating.readonly = true;</code></pre>
+    </section>
+    <section>
       <h2>Basic Rating</h2>
       <au-rating id="basic-rating" aria-label="Rate this product" labels="Very Bad,Bad,OK,Good,Excellent"></au-rating>
       <p id="rating-status"></p>
@@ -160,7 +194,6 @@
           <td>oklch(0.75 0.15 85)</td>
         </tr>
         <tr>
-        <tr>
           <td>--au-rating-star-stroke-color</td>
           <td>Star stroke color</td>
           <td>oklch(0.6 0 0)</td>
@@ -177,8 +210,8 @@
         </tr>
         <tr>
           <td>--au-rating-gap</td>
-          <td>Gap between stars</td>
-          <td>0.25rem</td>
+          <td>Gap between stars (0.25rem fallback); also controls gap between star row and score/label (0.5rem fallback)</td>
+          <td>0.25rem / 0.5rem</td>
         </tr>
         <tr>
           <td>--au-rating-focus-width</td>

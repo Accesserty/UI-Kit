@@ -87,6 +87,8 @@ We use [@web/test-runner](https://modern-web.dev/docs/test-runner/overview/) for
 Run `npm ci` and `npm run test` to test.  
 All test files in test folder.
 
+single file test example `npx web-test-runner test/input.test.js --node-resolve`
+
 ### Build  
 
 We use [vite](https://vitejs.dev/guide/) to bundle all components into a single file, resulting in two outputs: Accesserty UI Kit.js and Accesserty UI Kit.min.js. This process involves using Rollup for the integration.

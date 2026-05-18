@@ -136,4 +136,72 @@ describe('<au-file-upload>', () => {
     await el.updateComplete;
     expect(el.files.length).to.equal(1);
   });
+
+  it('value getter returns current file array', async () => {
+    const el = await fixture(html`<au-file-upload></au-file-upload>`);
+    const file = new File(['data'], 'test.txt', { type: 'text/plain' });
+
+    el.handleFiles([file]);
+    await el.updateComplete;
+
+    expect(el.value).to.be.an('array');
+    expect(el.value.length).to.equal(1);
+    expect(el.value[0].name).to.equal('test.txt');
+  });
+
+  it('value setter replaces file list and updates UI', async () => {
+    const el = await fixture(html`<au-file-upload></au-file-upload>`);
+    const file1 = new File(['a'], 'first.txt', { type: 'text/plain' });
+    const file2 = new File(['b'], 'second.txt', { type: 'text/plain' });
+
+    el.handleFiles([file1]);
+    await el.updateComplete;
+    expect(el.files.length).to.equal(1);
+
+    el.value = [file2];
+    await el.updateComplete;
+    expect(el.files.length).to.equal(1);
+    expect(el.files[0].name).to.equal('second.txt');
+  });
+
+  it('change event is composed and bubbles when files are added', async () => {
+    const wrapper = await fixture(html`
+      <div>
+        <au-file-upload></au-file-upload>
+      </div>
+    `);
+    const el = wrapper.querySelector('au-file-upload');
+    const file = new File(['x'], 'x.jpg', { type: 'image/jpeg' });
+
+    let received = false;
+    wrapper.addEventListener('change', () => { received = true; });
+
+    el.handleFiles([file]);
+    await el.updateComplete;
+
+    expect(received).to.be.true;
+  });
+
+  it('remove-file event is composed and bubbles with the removed File as detail', async () => {
+    const wrapper = await fixture(html`
+      <div>
+        <au-file-upload></au-file-upload>
+      </div>
+    `);
+    const el = wrapper.querySelector('au-file-upload');
+    const file = new File(['y'], 'y.jpg', { type: 'image/jpeg' });
+
+    el.handleFiles([file]);
+    await el.updateComplete;
+
+    let removedFile = null;
+    wrapper.addEventListener('remove-file', e => { removedFile = e.detail; });
+
+    const removeBtn = el.shadowRoot.querySelector('button[aria-label^="Remove"]');
+    removeBtn.click();
+    await el.updateComplete;
+
+    expect(removedFile).to.exist;
+    expect(removedFile.name).to.equal('y.jpg');
+  });
 });

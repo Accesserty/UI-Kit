@@ -11,9 +11,12 @@ class AuPagination extends HTMLElement {
 
   // generate unique IDs for input and select
   static generateId() {
-    const byteArray = new Uint32Array(1);
-    window.crypto.getRandomValues(byteArray);
-    return `au-pagination-${byteArray[0].toString(36)}`;
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-pagination-${byteArray[0].toString(36)}`;
+    }
+    return `au-pagination-${Math.random().toString(36).slice(2)}`;
   }
 
   constructor() {
@@ -51,17 +54,17 @@ class AuPagination extends HTMLElement {
     this.pageSize = parseInt(this.getAttribute('data-page-size')) || 10;
     const opts = this.getAttribute('data-page-size-options');
     if (opts) {
-      try { this.pageSizeOptions = JSON.parse(opts); }
-      catch { this.pageSizeOptions = opts.split(',').map(n => parseInt(n.trim())); }
+      try { this._pageSizeOptions = JSON.parse(opts); }
+      catch { this._pageSizeOptions = opts.split(',').map(n => parseInt(n.trim())); }
     } else {
-      this.pageSizeOptions = [10, 30, 50, 100];
+      this._pageSizeOptions = [10, 30, 50, 100];
     }
     const lay = this.getAttribute('data-layout');
     if (lay) {
-      try { this.layout = JSON.parse(lay); }
-      catch { this.layout = lay.replace(/[[\]' ]/g, '').split(','); }
+      try { this._layout = JSON.parse(lay); }
+      catch { this._layout = lay.replace(/[[\]' ]/g, '').split(','); }
     } else {
-      this.layout = ['total_page', 'total_items', 'page_size', 'first', 'prev', 'pages', 'next', 'last', 'jump'];
+      this._layout = ['total_page', 'total_items', 'page_size', 'first', 'prev', 'pages', 'next', 'last', 'jump'];
     }
     this.texts = {
       totalPagesPrefix: this.getAttribute('data-text-total-pages-prefix') || 'Total',
@@ -75,6 +78,24 @@ class AuPagination extends HTMLElement {
       goText: this.getAttribute('data-text-go') || 'go to',
       gotoText: this.getAttribute('data-text-goto') || 'go to'
     };
+  }
+
+  get pageSizeOptions() {
+    return this._pageSizeOptions ?? [10, 30, 50, 100];
+  }
+
+  set pageSizeOptions(val) {
+    this._pageSizeOptions = val;
+    this.setAttribute('data-page-size-options', JSON.stringify(val));
+  }
+
+  get layout() {
+    return this._layout ?? ['total_page', 'total_items', 'page_size', 'first', 'prev', 'pages', 'next', 'last', 'jump'];
+  }
+
+  set layout(val) {
+    this._layout = val;
+    this.setAttribute('data-layout', JSON.stringify(val));
   }
 
   get totalPages() {
@@ -354,4 +375,6 @@ class AuPagination extends HTMLElement {
   }
 }
 
-customElements.define('au-pagination', AuPagination);
+if (typeof customElements !== 'undefined' && !customElements.get('au-pagination')) {
+  customElements.define('au-pagination', AuPagination);
+}

@@ -221,6 +221,14 @@ class AuTabs extends HTMLElement {
     });
     this._tabs[index].focus();
     this._selectedIndex = index;
+    this.dispatchEvent(new CustomEvent('tab-change', {
+      bubbles: true,
+      composed: true,
+      detail: {
+        index,
+        label: this._panels[index]?.getAttribute('label') ?? '',
+      },
+    }));
   }
 
   _onKeydown(e, index) {
@@ -248,11 +256,24 @@ class AuTabs extends HTMLElement {
     this._selectTab(next);
   }
 
+  get selectedIndex() {
+    return this._selectedIndex;
+  }
+
+  set selectedIndex(val) {
+    this._selectTab(val);
+  }
+
   generateId() {
-    const bytes = new Uint32Array(1);
-    window.crypto.getRandomValues(bytes);
-    return bytes[0].toString(36);
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const bytes = new Uint32Array(1);
+      crypto.getRandomValues(bytes);
+      return bytes[0].toString(36);
+    }
+    return Math.random().toString(36).slice(2);
   }
 }
 
-customElements.define("au-tabs", AuTabs);
+if (typeof customElements !== 'undefined' && !customElements.get('au-tabs')) {
+  customElements.define("au-tabs", AuTabs);
+}

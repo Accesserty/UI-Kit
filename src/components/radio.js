@@ -1,7 +1,10 @@
 class AuRadioGroup extends HTMLElement {
+  static formAssociated = true;
+
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
+    this.internals = this.attachInternals();
 
     const style = document.createElement('style');
     style.textContent = `
@@ -124,6 +127,7 @@ class AuRadioGroup extends HTMLElement {
     const slot = this.shadowRoot.querySelector('slot');
     const radios = slot.assignedElements();
     const isDisabled = this.hasAttribute('disabled'); // Check if the group is disabled
+    let initialValue = null;
 
     radios.forEach((radio, index) => {
       const label = document.createElement('label');
@@ -132,12 +136,13 @@ class AuRadioGroup extends HTMLElement {
 
       const input = document.createElement('input');
       input.type = 'radio';
-      input.id =  inputID;
+      input.id = inputID;
       input.name = this.groupName;
       input.value = radio.getAttribute('value') || `radio-${index + 1}`;
 
       if (radio.hasAttribute('checked')) {
         input.checked = true;
+        initialValue = input.value;
       }
 
       if (isDisabled || radio.hasAttribute('disabled')) {
@@ -155,6 +160,8 @@ class AuRadioGroup extends HTMLElement {
       input.addEventListener('change', (event) => this.handleChange(event, input));
       input.addEventListener('keydown', (event) => this.handleKeyDown(event, index));
     });
+
+    this.internals.setFormValue(initialValue);
   }
 
   handleChange(event, input) {
@@ -165,6 +172,12 @@ class AuRadioGroup extends HTMLElement {
           radio.checked = false;
         }
       });
+      this.internals.setFormValue(input.value);
+      this.dispatchEvent(new CustomEvent('change', {
+        bubbles: true,
+        composed: true,
+        detail: { value: input.value },
+      }));
     }
   }
 
@@ -200,11 +213,46 @@ class AuRadioGroup extends HTMLElement {
     }
   }
 
+  static get observedAttributes() {
+    return ['disabled'];
+  }
+
+  attributeChangedCallback(name) {
+    if (name === 'disabled') {
+      const isDisabled = this.hasAttribute('disabled');
+      this.shadowRoot.querySelectorAll('input[type="radio"]').forEach(input => {
+        input.disabled = isDisabled;
+      });
+    }
+  }
+
+  get value() {
+    const checked = Array.from(this.shadowRoot.querySelectorAll('input[type="radio"]')).find(r => r.checked);
+    return checked?.value ?? null;
+  }
+
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(val) {
+    val ? this.setAttribute('disabled', '') : this.removeAttribute('disabled');
+  }
+
+  formResetCallback() {
+    this.renderRadios();
+  }
+
   generateId() {
-    const byteArray = new Uint32Array(1);
-    window.crypto.getRandomValues(byteArray);
-    return `${byteArray[0].toString(36)}`;
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `${byteArray[0].toString(36)}`;
+    }
+    return Math.random().toString(36).slice(2);
   }
 }
 
-customElements.define('au-radio-group', AuRadioGroup);
+if (typeof customElements !== 'undefined' && !customElements.get('au-radio-group')) {
+  customElements.define('au-radio-group', AuRadioGroup);
+}

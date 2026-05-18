@@ -102,23 +102,42 @@ class AuCheckbox extends HTMLElement {
 
     input.addEventListener('change', (event) => {
       this.checked = event.target.checked;
-      this.dispatchEvent(new CustomEvent('change', { detail: event.target.checked }));
+      this.dispatchEvent(new CustomEvent('change', { bubbles: true, composed: true, detail: event.target.checked }));
       this.updateFormValue();
     });
 
     input.addEventListener('focus', () => {
-      this.dispatchEvent(new CustomEvent('focus'));
+      this.dispatchEvent(new CustomEvent('focus', { bubbles: true, composed: true }));
     });
 
     input.addEventListener('blur', () => {
-      this.dispatchEvent(new CustomEvent('blur'));
+      this.dispatchEvent(new CustomEvent('blur', { bubbles: true, composed: true }));
     });
   }
 
+  get checked() {
+    return this.shadowRoot.querySelector('input')?.checked ?? false;
+  }
+
+  set checked(val) {
+    val ? this.setAttribute('checked', '') : this.removeAttribute('checked');
+  }
+
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(val) {
+    val ? this.setAttribute('disabled', '') : this.removeAttribute('disabled');
+  }
+
   generateId() {
-    const byteArray = new Uint32Array(1);
-    window.crypto.getRandomValues(byteArray);
-    return `au-checkbox-${byteArray[0].toString(36)}`;
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-checkbox-${byteArray[0].toString(36)}`;
+    }
+    return `au-checkbox-${Math.random().toString(36).slice(2)}`;
   }
 
   static get observedAttributes() {
@@ -189,5 +208,7 @@ class AuCheckbox extends HTMLElement {
   }
 }
 
-customElements.define('au-checkbox', AuCheckbox);
+if (typeof customElements !== 'undefined' && !customElements.get('au-checkbox')) {
+  customElements.define('au-checkbox', AuCheckbox);
+}
 

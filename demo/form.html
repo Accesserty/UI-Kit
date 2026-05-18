@@ -8,107 +8,795 @@
     <link rel="stylesheet" href="demo.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <script src="../dist/accesserty-ui-kit.js" defer></script>
+    <style>
+      /* Layout */
+      .form-section {
+        border: 1px solid oklch(0.85 0 0);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .form-section > legend {
+        padding: 0 0.5rem;
+        font-weight: 700;
+        font-size: 1.125rem;
+      }
+      .field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+      @media (max-width: 600px) {
+        .field-row { grid-template-columns: 1fr; }
+      }
+      .field {
+        margin-bottom: 1rem;
+      }
+      .group-label {
+        font-size: 1rem;
+        margin: 0 0 0.5rem;
+        font-weight: 600;
+      }
+      .required-mark {
+        color: oklch(0.5 0.22 25);
+        margin-left: 0.2em;
+        aria-hidden: true;
+      }
+      .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+      }
+      .char-count {
+        font-size: 0.8125rem;
+        color: oklch(0.45 0 0);
+        text-align: right;
+        margin-top: 0.25rem;
+      }
+      .char-count.over { color: oklch(0.5 0.22 25); font-weight: 600; }
+
+      /* Error messages */
+      .field-error {
+        display: none;
+        font-size: 0.875rem;
+        color: oklch(0.5 0.22 25);
+        margin-top: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        border-left: 3px solid oklch(0.5 0.22 25);
+        background: oklch(0.97 0.02 25);
+      }
+      .field-error[aria-hidden="false"] {
+        display: block;
+      }
+      /* Mark invalid host elements */
+      au-input[data-invalid],
+      au-textarea[data-invalid],
+      au-rating[data-invalid] {
+        outline: 2px solid oklch(0.5 0.22 25);
+        outline-offset: 2px;
+        border-radius: 0.25rem;
+      }
+      .group-invalid .group-label {
+        color: oklch(0.5 0.22 25);
+      }
+      .group-invalid-border {
+        border: 2px solid oklch(0.5 0.22 25);
+        border-radius: 0.375rem;
+        padding: 0.5rem;
+      }
+
+      /* Error summary banner */
+      .error-summary {
+        display: none;
+        background: oklch(0.97 0.02 25);
+        border: 2px solid oklch(0.5 0.22 25);
+        border-radius: 0.5rem;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        color: oklch(0.3 0.15 25);
+      }
+      .error-summary[aria-hidden="false"] { display: block; }
+      .error-summary h2 {
+        margin: 0 0 0.75rem;
+        font-size: 1rem;
+        color: oklch(0.4 0.2 25);
+      }
+      .error-summary ul {
+        margin: 0;
+        padding-left: 1.25rem;
+      }
+      .error-summary a {
+        color: oklch(0.4 0.2 25);
+        font-weight: 600;
+      }
+
+      /* Success banner */
+      .success-banner {
+        display: none;
+        background: oklch(0.93 0.05 145);
+        border: 1px solid oklch(0.75 0.1 145);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        color: oklch(0.25 0.08 145);
+        font-weight: 600;
+      }
+      .success-banner[aria-hidden="false"] { display: block; }
+
+      .form-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+      }
+      #form-output {
+        background: oklch(0.97 0 0);
+        border: 1px solid oklch(0.85 0 0);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-top: 1.5rem;
+        white-space: pre-wrap;
+        font-family: monospace;
+        font-size: 0.875rem;
+        min-height: 4rem;
+      }
+
+      /* Legend note */
+      .form-legend-note {
+        font-size: 0.875rem;
+        color: oklch(0.4 0 0);
+        margin-bottom: 1.25rem;
+      }
+    </style>
   </head>
   <body>
     <header><a href="../demo/index.html" title="go to home page">Home</a></header>
     <main>
       <h1>Accesserty UI Kit Form</h1>
+      <p>A complex form demonstrating validation for all form components: required fields, format checking, length limits, at-least-one-checkbox rules, and rating requirements. Validation runs on blur per field and shows all errors on submit.</p>
 
-      <h2>Form Demo</h2>
-      <form id="demo-form">
-        <au-input label="Name(required)" data-layout="vertical" required></au-input>
-        <au-input label="Email(required)" type="email"  data-layout="vertical"  required></au-input>
-        <au-textarea id="custom-id" name="textarea" label="Textarea Label(required)" placeholder="Enter..." required></au-textarea>
-        <br />
-        <div role="group" aria-labelledby="fruit-group">
-          <p id="fruit-group">Favorite Fruits</p>
-          <au-checkbox name="fruit" value="apple">Apple</au-checkbox>
-          <au-checkbox name="fruit" value="banana">Banana</au-checkbox>
-          <au-checkbox name="fruit" value="cherry" checked>Cherry</au-checkbox>
-        </div>
-        <br />
-        <div role="group" aria-labelledby="gender-group">
-          <p id="gender-group">Gender</p>
-          <au-radio-group name="gender">
-            <au-radio value="male" checked>Male</au-radio>
-            <au-radio value="female">Female</au-radio>
-            <au-radio value="other">Other</au-radio>
-          </au-radio-group>
-        </div>
-        <au-switch name="subscribe">
-          Subscribe to newsletter
-        </au-switch>
-        <au-file-upload
-          id="fileUpload"
-          label="Upload Files(required)"
-          multiple
-          required
-          max-files="3"
-          max-size-mb="2"
-          max-total-size-mb="2"
-          accept=".txt, .jpg,.png,application/pdf"
-          msg-button-text="Click button or drag & drop files to upload"
-          msg-drop-text="Drag & drop files here"
-          msg-remove-text="Delete"
-          msg-required="You must upload at least one document."
-          msg-type-error="is not a supported file format"
-          msg-size-error="is too large. Limit is"
-          msg-count-error="You can only attach up to"
-          msg-total-size-error="Total Size: "
-        >
-          <button type="button" slot="trigger" class="custom-btn--primary-flat">Choose file...</button>
-          <div slot="hint">.txt, .jpg, .png, application/pdf</div>
-        </au-file-upload>
-        <br />
-        <div>
-          <button type="submit">Submit</button>
+      <p class="form-legend-note">Fields marked with <span aria-hidden="true">*</span><span class="visually-hidden">asterisk</span> are required.</p>
+
+      <!-- Error Summary (populated on submit) -->
+      <div
+        id="error-summary"
+        class="error-summary"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+        aria-hidden="true"
+      >
+        <h2>Please fix the following errors before submitting:</h2>
+        <ul id="error-summary-list"></ul>
+      </div>
+
+      <div id="success-banner" class="success-banner" role="status" aria-hidden="true">
+        ✔ Application submitted successfully!
+      </div>
+
+      <form id="job-form" novalidate>
+
+        <!-- ── Section 1: Personal Information ── -->
+        <fieldset class="form-section">
+          <legend>Personal Information</legend>
+
+          <div class="field-row">
+            <!-- First Name -->
+            <div class="field">
+              <au-input
+                id="field-first-name"
+                name="first_name"
+                label="First Name *"
+                placeholder="Jane"
+                data-layout="vertical"
+                required
+                aria-describedby="err-first-name"
+              ></au-input>
+              <div id="err-first-name" class="field-error" role="alert" aria-hidden="true">
+                First name is required.
+              </div>
+            </div>
+
+            <!-- Last Name -->
+            <div class="field">
+              <au-input
+                id="field-last-name"
+                name="last_name"
+                label="Last Name *"
+                placeholder="Doe"
+                data-layout="vertical"
+                required
+                aria-describedby="err-last-name"
+              ></au-input>
+              <div id="err-last-name" class="field-error" role="alert" aria-hidden="true">
+                Last name is required.
+              </div>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <!-- Email -->
+            <div class="field">
+              <au-input
+                id="field-email"
+                name="email"
+                type="email"
+                label="Email *"
+                placeholder="jane@example.com"
+                data-layout="vertical"
+                required
+                aria-describedby="err-email"
+              ></au-input>
+              <div id="err-email" class="field-error" role="alert" aria-hidden="true">
+                Please enter a valid email address (e.g. jane@example.com).
+              </div>
+            </div>
+
+            <!-- Phone (optional but validated if filled) -->
+            <div class="field">
+              <au-input
+                id="field-phone"
+                name="phone"
+                type="tel"
+                label="Phone"
+                placeholder="+886 912 345 678"
+                data-layout="vertical"
+                pattern="^\+?[\d\s\-\(\)]{7,20}$"
+                aria-describedby="hint-phone err-phone"
+              ></au-input>
+              <div id="hint-phone" style="font-size:0.8125rem;color:oklch(0.45 0 0);margin-top:0.25rem;">
+                Optional. Format: +886 912 345 678
+              </div>
+              <div id="err-phone" class="field-error" role="alert" aria-hidden="true">
+                Please enter a valid phone number (7–20 digits, may include +, spaces, dashes).
+              </div>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <!-- Birth Date -->
+            <div class="field">
+              <au-input
+                id="field-birthdate"
+                name="birthdate"
+                type="date"
+                label="Date of Birth *"
+                data-layout="vertical"
+                required
+                max=""
+                aria-describedby="err-birthdate"
+              ></au-input>
+              <div id="err-birthdate" class="field-error" role="alert" aria-hidden="true">
+                Date of birth is required and must not be a future date.
+              </div>
+            </div>
+
+            <!-- Portfolio URL -->
+            <div class="field">
+              <au-input
+                id="field-portfolio"
+                name="portfolio"
+                type="url"
+                label="Portfolio / GitHub URL"
+                placeholder="https://github.com/yourname"
+                data-layout="vertical"
+                aria-describedby="err-portfolio"
+              ></au-input>
+              <div id="err-portfolio" class="field-error" role="alert" aria-hidden="true">
+                Please enter a valid URL starting with https://.
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- ── Section 2: Professional Background ── -->
+        <fieldset class="form-section">
+          <legend>Professional Background</legend>
+
+          <div class="field-row">
+            <!-- Position -->
+            <div class="field">
+              <au-input
+                id="field-position"
+                name="position"
+                label="Position Applying For *"
+                placeholder="Frontend Engineer"
+                data-layout="vertical"
+                required
+                minlength="2"
+                maxlength="80"
+                aria-describedby="err-position"
+              ></au-input>
+              <div id="err-position" class="field-error" role="alert" aria-hidden="true">
+                Position is required (2–80 characters).
+              </div>
+            </div>
+
+            <!-- Expected Salary -->
+            <div class="field">
+              <au-input
+                id="field-salary"
+                name="expected_salary"
+                type="number"
+                label="Expected Salary (USD/yr)"
+                placeholder="80000"
+                min="10000"
+                max="999999"
+                data-layout="vertical"
+                aria-describedby="err-salary"
+              ></au-input>
+              <div id="err-salary" class="field-error" role="alert" aria-hidden="true">
+                Please enter a salary between $10,000 and $999,999.
+              </div>
+            </div>
+          </div>
+
+          <!-- Years of Experience (required radio) -->
+          <div class="field" id="group-experience">
+            <p class="group-label" id="lbl-experience">
+              Years of Experience <span class="required-mark" aria-hidden="true">*</span>
+            </p>
+            <au-radio-group
+              id="field-experience"
+              name="experience"
+              aria-labelledby="lbl-experience"
+              aria-describedby="err-experience"
+            >
+              <au-radio value="less_than_1">Less than 1 yr</au-radio>
+              <au-radio value="1_to_3">1 – 3 yrs</au-radio>
+              <au-radio value="3_to_5">3 – 5 yrs</au-radio>
+              <au-radio value="5_plus">5+ yrs</au-radio>
+            </au-radio-group>
+            <div id="err-experience" class="field-error" role="alert" aria-hidden="true">
+              Please select your years of experience.
+            </div>
+          </div>
+
+          <!-- Skills (at least 1 required) -->
+          <div class="field" id="group-skills">
+            <p class="group-label" id="lbl-skills">
+              Technical Skills <span class="required-mark" aria-hidden="true">*</span>
+              <small style="font-weight:400;margin-left:0.5rem;">(select at least one)</small>
+            </p>
+            <div class="checkbox-group" role="group" aria-labelledby="lbl-skills" aria-describedby="err-skills">
+              <au-checkbox id="skill-js"  name="skill" value="javascript">JavaScript</au-checkbox>
+              <au-checkbox id="skill-ts"  name="skill" value="typescript">TypeScript</au-checkbox>
+              <au-checkbox id="skill-py"  name="skill" value="python">Python</au-checkbox>
+              <au-checkbox id="skill-go"  name="skill" value="go">Go</au-checkbox>
+              <au-checkbox id="skill-rs"  name="skill" value="rust">Rust</au-checkbox>
+              <au-checkbox id="skill-java" name="skill" value="java">Java</au-checkbox>
+            </div>
+            <div id="err-skills" class="field-error" role="alert" aria-hidden="true">
+              Please select at least one technical skill.
+            </div>
+          </div>
+
+          <!-- Skill Level Rating (required: must select > 0) -->
+          <div class="field" id="group-skill-level">
+            <p class="group-label" id="lbl-skill-level">
+              Self-Rated Skill Level <span class="required-mark" aria-hidden="true">*</span>
+            </p>
+            <au-rating
+              id="field-skill-level"
+              name="skill_level"
+              aria-label="Self-Rated Skill Level"
+              show-score
+              score-info="stars"
+              labels="Beginner,Basic,Intermediate,Advanced,Expert"
+              aria-describedby="err-skill-level"
+            ></au-rating>
+            <div id="err-skill-level" class="field-error" role="alert" aria-hidden="true">
+              Please select a skill level (1–5 stars).
+            </div>
+          </div>
+
+          <!-- Cover Letter (required, 50–1000 chars) -->
+          <div class="field">
+            <au-textarea
+              id="field-cover-letter"
+              name="cover_letter"
+              label="Cover Letter / Self Introduction *"
+              placeholder="Tell us about yourself, your experience, and why you want to join us… (minimum 50 characters)"
+              required
+              minlength="50"
+              maxlength="1000"
+              aria-describedby="hint-cover err-cover"
+            ></au-textarea>
+            <div id="hint-cover" class="char-count">
+              <span id="char-count-cover">0</span> / 1000
+            </div>
+            <div id="err-cover" class="field-error" role="alert" aria-hidden="true">
+              Cover letter is required (minimum 50 characters, maximum 1000).
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- ── Section 3: Work Preferences ── -->
+        <fieldset class="form-section">
+          <legend>Work Preferences</legend>
+
+          <div class="field" id="group-worktype">
+            <p class="group-label" id="lbl-worktype">
+              Preferred Work Type <span class="required-mark" aria-hidden="true">*</span>
+            </p>
+            <au-radio-group
+              id="field-worktype"
+              name="work_type"
+              aria-labelledby="lbl-worktype"
+              aria-describedby="err-worktype"
+            >
+              <au-radio value="remote" checked>Remote</au-radio>
+              <au-radio value="onsite">On-site</au-radio>
+              <au-radio value="hybrid">Hybrid</au-radio>
+            </au-radio-group>
+            <div id="err-worktype" class="field-error" role="alert" aria-hidden="true">
+              Please select a preferred work type.
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <au-input
+                id="field-start-date"
+                name="start_date"
+                type="date"
+                label="Available Start Date *"
+                data-layout="vertical"
+                required
+                min=""
+                aria-describedby="err-start-date"
+              ></au-input>
+              <div id="err-start-date" class="field-error" role="alert" aria-hidden="true">
+                Please enter a valid start date (today or later).
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <au-switch name="relocation" value="yes">Open to relocation</au-switch>
+          </div>
+          <div class="field">
+            <au-switch name="newsletter" value="subscribed">Subscribe to our talent newsletter</au-switch>
+          </div>
+        </fieldset>
+
+        <!-- ── Section 4: Documents ── -->
+        <fieldset class="form-section">
+          <legend>Documents</legend>
+
+          <div class="field">
+            <au-file-upload
+              id="field-resume"
+              name="resume"
+              label="Resume / CV *"
+              required
+              accept=".pdf,.doc,.docx,application/pdf"
+              max-files="1"
+              max-size-mb="5"
+              max-total-size-mb="5"
+              msg-drop-text="Drag & drop your resume here"
+              msg-remove-text="Remove"
+              msg-required="Please upload your resume."
+              msg-type-error="is not a supported format. Please upload PDF or DOC."
+              msg-size-error="exceeds the 5 MB limit."
+              msg-count-error="Only 1 resume file is allowed."
+              msg-total-size-error="Total upload size exceeds"
+              aria-describedby="err-resume"
+            >
+              <button type="button" slot="trigger" class="custom-btn--primary-flat">Choose resume file…</button>
+              <div slot="hint">Accepted: PDF, DOC, DOCX · Max 5 MB</div>
+            </au-file-upload>
+            <div id="err-resume" class="field-error" role="alert" aria-hidden="true">
+              Please upload your resume (PDF or DOC, max 5 MB).
+            </div>
+          </div>
+
+          <div class="field" style="margin-top:1rem;">
+            <au-file-upload
+              id="field-portfolio-files"
+              name="portfolio_files"
+              label="Portfolio Samples (optional)"
+              multiple
+              accept="image/*,.pdf"
+              max-files="5"
+              max-size-mb="5"
+              max-total-size-mb="20"
+              msg-drop-text="Drag & drop portfolio files here"
+              msg-remove-text="Remove"
+              msg-type-error="is not a supported format."
+              msg-size-error="exceeds the 5 MB per-file limit."
+              msg-count-error="You can attach up to 5 files."
+              msg-total-size-error="Total portfolio size exceeds"
+            >
+              <button type="button" slot="trigger" class="custom-btn--primary-flat">Add portfolio files…</button>
+              <div slot="hint">Images or PDF · Up to 5 files · 20 MB total</div>
+            </au-file-upload>
+          </div>
+        </fieldset>
+
+        <div class="form-actions">
+          <button type="submit" class="custom-btn--primary">Submit Application</button>
+          <button type="reset">Reset Form</button>
         </div>
       </form>
-      <script>
-        document.querySelector('#demo-form').addEventListener('submit', (e) => {
-          e.preventDefault();
-          const formData = {};
-      
-          // au-input
-          document.querySelectorAll('au-input').forEach(input => {
-            const name = input.getAttribute('name') || 'input';
-            formData[name] = input.value;
-          });
 
-          document.querySelectorAll('au-textarea').forEach(input => {
-            const name = input.getAttribute('name') || 'textarea';
-            formData[name] = input.value;
-          });
-      
-          // au-checkbox
-          formData.fruit = Array.from(document.querySelectorAll('au-checkbox'))
-            .filter(cb => cb.shadowRoot.querySelector('input')?.checked)
-            .map(cb => cb.getAttribute('value'));
-      
-          // au-radio-group
-          const radioGroup = document.querySelector('au-radio-group');
-          const selectedRadio = Array.from(radioGroup.shadowRoot.querySelectorAll('input[type="radio"]'))
-            .find(r => r.checked);
-          formData.gender = selectedRadio?.value || null;
-      
-          // au-switch
-          const auSwitch = document.querySelector('au-switch');
-          const switchInput = auSwitch.shadowRoot.querySelector('input[type="checkbox"]');
-          formData.subscribe = switchInput?.checked || false;
-
-          // au-file-upload
-          const fileUploadEl = document.getElementById('fileUpload');
-          if (fileUploadEl) {
-            const files = fileUploadEl.value || [];
-            formData.files = files.map(f => f.name);
-          } else {
-            console.warn('au-file-upload element with id=fileUpload not found');
-            formData.files = [];
-          }
-      
-          console.log(formData);
-        });
-      </script>
+      <div style="margin-top:1.5rem;font-weight:600;">Collected Form Data (updates on submit):</div>
+      <div id="form-output">— submit the form to see collected data —</div>
     </main>
+
+    <script>
+      /* ── Helpers ── */
+      function showError(errEl, fieldEl, show) {
+        errEl.setAttribute('aria-hidden', show ? 'false' : 'true');
+        if (fieldEl) {
+          if (show) fieldEl.setAttribute('data-invalid', '');
+          else fieldEl.removeAttribute('data-invalid');
+        }
+      }
+
+      function hide(el) { el.setAttribute('aria-hidden', 'true'); }
+      function show(el) { el.setAttribute('aria-hidden', 'false'); }
+
+      /* ── Date helpers ── */
+      const today = new Date().toISOString().slice(0, 10);
+      document.getElementById('field-birthdate').setAttribute('max', today);
+      document.getElementById('field-start-date').setAttribute('min', today);
+
+      /* ── Character count for Cover Letter ── */
+      const coverField = document.getElementById('field-cover-letter');
+      const charCount = document.getElementById('char-count-cover');
+      const charCountEl = document.getElementById('hint-cover');
+      coverField.addEventListener('input', () => {
+        const len = coverField.value.length;
+        charCount.textContent = len;
+        charCountEl.classList.toggle('over', len > 1000);
+      });
+
+      /* ── Per-field validators ── */
+      // Returns an error string or '' if valid
+      const fieldRules = {
+        'field-first-name': () => {
+          const el = document.getElementById('field-first-name');
+          return el.value.trim() === '' ? 'First name is required.' : '';
+        },
+        'field-last-name': () => {
+          const el = document.getElementById('field-last-name');
+          return el.value.trim() === '' ? 'Last name is required.' : '';
+        },
+        'field-email': () => {
+          const el = document.getElementById('field-email');
+          const v = el.value.trim();
+          if (!v) return 'Email is required.';
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'Please enter a valid email address (e.g. jane@example.com).';
+          return '';
+        },
+        'field-phone': () => {
+          const el = document.getElementById('field-phone');
+          const v = el.value.trim();
+          if (!v) return ''; // optional
+          if (!/^\+?[\d\s\-\(\)]{7,20}$/.test(v)) return 'Please enter a valid phone number (7–20 digits, may include +, spaces, dashes).';
+          return '';
+        },
+        'field-birthdate': () => {
+          const el = document.getElementById('field-birthdate');
+          const v = el.value;
+          if (!v) return 'Date of birth is required.';
+          if (v > today) return 'Date of birth cannot be in the future.';
+          return '';
+        },
+        'field-portfolio': () => {
+          const el = document.getElementById('field-portfolio');
+          const v = el.value.trim();
+          if (!v) return ''; // optional
+          if (!/^https?:\/\/.+/.test(v)) return 'Please enter a valid URL starting with https://.';
+          return '';
+        },
+        'field-position': () => {
+          const el = document.getElementById('field-position');
+          const v = el.value.trim();
+          if (!v) return 'Position is required.';
+          if (v.length < 2) return 'Position must be at least 2 characters.';
+          if (v.length > 80) return 'Position must be 80 characters or fewer.';
+          return '';
+        },
+        'field-salary': () => {
+          const el = document.getElementById('field-salary');
+          const v = el.value;
+          if (!v) return ''; // optional
+          const n = Number(v);
+          if (isNaN(n) || n < 10000 || n > 999999) return 'Please enter a salary between $10,000 and $999,999.';
+          return '';
+        },
+        'field-experience': () => {
+          const el = document.getElementById('field-experience');
+          return el.value === null ? 'Please select your years of experience.' : '';
+        },
+        'group-skills': () => {
+          const checked = Array.from(document.querySelectorAll('au-checkbox[name="skill"]')).some(cb => cb.checked);
+          return checked ? '' : 'Please select at least one technical skill.';
+        },
+        'field-skill-level': () => {
+          const el = document.getElementById('field-skill-level');
+          return (!el.value || Number(el.value) === 0) ? 'Please select a skill level (1–5 stars).' : '';
+        },
+        'field-cover-letter': () => {
+          const el = document.getElementById('field-cover-letter');
+          const v = el.value.trim();
+          if (!v) return 'Cover letter is required.';
+          if (v.length < 50) return `Cover letter is too short (${v.length}/50 minimum characters).`;
+          if (v.length > 1000) return 'Cover letter must be 1000 characters or fewer.';
+          return '';
+        },
+        'field-worktype': () => {
+          const el = document.getElementById('field-worktype');
+          return el.value === null ? 'Please select a preferred work type.' : '';
+        },
+        'field-start-date': () => {
+          const el = document.getElementById('field-start-date');
+          const v = el.value;
+          if (!v) return 'Start date is required.';
+          if (v < today) return 'Start date must be today or later.';
+          return '';
+        },
+        'field-resume': () => {
+          const el = document.getElementById('field-resume');
+          return el.value.length === 0 ? 'Please upload your resume (PDF or DOC, max 5 MB).' : '';
+        },
+      };
+
+      /* Error element mapping (fieldId → errorElId) */
+      const errorMap = {
+        'field-first-name':    'err-first-name',
+        'field-last-name':     'err-last-name',
+        'field-email':         'err-email',
+        'field-phone':         'err-phone',
+        'field-birthdate':     'err-birthdate',
+        'field-portfolio':     'err-portfolio',
+        'field-position':      'err-position',
+        'field-salary':        'err-salary',
+        'field-experience':    'err-experience',
+        'group-skills':        'err-skills',
+        'field-skill-level':   'err-skill-level',
+        'field-cover-letter':  'err-cover',
+        'field-worktype':      'err-worktype',
+        'field-start-date':    'err-start-date',
+        'field-resume':        'err-resume',
+      };
+
+      /* Human-readable field labels for error summary */
+      const fieldLabels = {
+        'field-first-name':   'First Name',
+        'field-last-name':    'Last Name',
+        'field-email':        'Email',
+        'field-phone':        'Phone',
+        'field-birthdate':    'Date of Birth',
+        'field-portfolio':    'Portfolio URL',
+        'field-position':     'Position',
+        'field-salary':       'Expected Salary',
+        'field-experience':   'Years of Experience',
+        'group-skills':       'Technical Skills',
+        'field-skill-level':  'Skill Level',
+        'field-cover-letter': 'Cover Letter',
+        'field-worktype':     'Preferred Work Type',
+        'field-start-date':   'Available Start Date',
+        'field-resume':       'Resume / CV',
+      };
+
+      function validateField(id) {
+        const rule = fieldRules[id];
+        if (!rule) return '';
+        const message = rule();
+        const errEl = document.getElementById(errorMap[id]);
+        const fieldEl = document.getElementById(id);
+
+        if (errEl) {
+          errEl.textContent = message || errEl.textContent; // preserve static text if no dynamic msg
+          showError(errEl, fieldEl, message !== '');
+        }
+        return message;
+      }
+
+      /* ── Blur validation for text-input fields ── */
+      ['field-first-name','field-last-name','field-email','field-phone',
+       'field-birthdate','field-portfolio','field-position','field-salary',
+       'field-cover-letter','field-start-date'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('change', () => validateField(id));
+      });
+
+      /* Checkbox change → re-validate group */
+      document.querySelectorAll('au-checkbox[name="skill"]').forEach(cb => {
+        cb.addEventListener('change', () => validateField('group-skills'));
+      });
+
+      /* Radio change → re-validate */
+      document.getElementById('field-experience').addEventListener('change', () => validateField('field-experience'));
+      document.getElementById('field-worktype').addEventListener('change', () => validateField('field-worktype'));
+
+      /* Rating change → re-validate */
+      document.getElementById('field-skill-level').addEventListener('change', () => validateField('field-skill-level'));
+
+      /* File upload change → re-validate */
+      document.getElementById('field-resume').addEventListener('change', () => validateField('field-resume'));
+
+      /* ── Form Submit ── */
+      const form = document.getElementById('job-form');
+      const errorSummary = document.getElementById('error-summary');
+      const errorSummaryList = document.getElementById('error-summary-list');
+      const successBanner = document.getElementById('success-banner');
+      const output = document.getElementById('form-output');
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        // Validate all fields
+        const errors = [];
+        for (const [id, rule] of Object.entries(fieldRules)) {
+          const message = validateField(id);
+          if (message) {
+            errors.push({ id, message, label: fieldLabels[id] });
+          }
+        }
+
+        if (errors.length > 0) {
+          // Populate error summary
+          errorSummaryList.innerHTML = errors.map(err => {
+            const targetId = errorMap[err.id] || err.id;
+            return `<li><a href="#${targetId}">${err.label}: ${err.message}</a></li>`;
+          }).join('');
+          show(errorSummary);
+          hide(successBanner);
+
+          // Scroll to + focus summary
+          errorSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // Move focus to summary after scroll
+          setTimeout(() => errorSummary.focus?.(), 400);
+          return;
+        }
+
+        // All valid — collect data
+        hide(errorSummary);
+        const fd = new FormData(form);
+        const result = {};
+        for (const [key, value] of fd.entries()) {
+          if (key in result) {
+            if (!Array.isArray(result[key])) result[key] = [result[key]];
+            result[key].push(value instanceof File ? value.name : value);
+          } else {
+            result[key] = value instanceof File ? value.name : value;
+          }
+        }
+
+        // Supplement: rating and file details
+        const rating = document.getElementById('field-skill-level');
+        result.skill_level = rating.value;
+
+        const resumeEl = document.getElementById('field-resume');
+        result.resume_files = (resumeEl?.value || []).map(f => `${f.name} (${(f.size/1024).toFixed(1)} KB)`);
+
+        const pfEl = document.getElementById('field-portfolio-files');
+        result.portfolio_files = (pfEl?.value || []).map(f => `${f.name} (${(f.size/1024).toFixed(1)} KB)`);
+
+        output.textContent = JSON.stringify(result, null, 2);
+        show(successBanner);
+        successBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+
+      /* ── Form Reset ── */
+      form.addEventListener('reset', () => {
+        // Clear all error states
+        Object.keys(errorMap).forEach(id => {
+          const errEl = document.getElementById(errorMap[id]);
+          const fieldEl = document.getElementById(id);
+          if (errEl) showError(errEl, fieldEl, false);
+        });
+        hide(errorSummary);
+        hide(successBanner);
+        output.textContent = '— submit the form to see collected data —';
+        charCount.textContent = '0';
+        charCountEl.classList.remove('over');
+      });
+    </script>
   </body>
 </html>

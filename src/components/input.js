@@ -126,6 +126,7 @@ class AuInput extends HTMLElement {
 
     const inputContainer = document.createElement('div');
     inputContainer.className = 'input-container';
+    this.inputContainer = inputContainer;
 
     this.prefixSlot = document.createElement('slot');
     this.prefixSlot.name = 'prefix';
@@ -163,18 +164,8 @@ class AuInput extends HTMLElement {
     wrapper.append(this.labelEl, inputContainer);
     this.shadowRoot.append(style, wrapper);
 
-    this.input.addEventListener('input', () => {
-      this.value = this.input.value;
-      this.dispatchEvent(new Event('input', { bubbles: true }));
-      this.internals.setFormValue(this.value);
-      this._syncValidity();
-      this._updateClearButton();
-      this._updateColorCode();
-    });
-
-    this.input.addEventListener('change', () => {
-      this.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+    // Bind input events
+    this._bindInputEvents();
 
     this.prefixSlot.addEventListener('slotchange', () => {
       this.prefixSpan.hidden = this.prefixSlot.assignedNodes().length === 0;
@@ -182,6 +173,22 @@ class AuInput extends HTMLElement {
 
     this.affixSlot.addEventListener('slotchange', () => {
       this.affixSpan.hidden = this.affixSlot.assignedNodes().length === 0;
+    });
+  }
+
+  /** 綁定 input 事件（抽出方法以便 formResetCallback 重用） */
+  _bindInputEvents() {
+    this.input.addEventListener('input', () => {
+      this.value = this.input.value;
+      this.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+      this.internals.setFormValue(this.value);
+      this._syncValidity();
+      this._updateClearButton();
+      this._updateColorCode();
+    });
+
+    this.input.addEventListener('change', () => {
+      this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
     });
   }
 
@@ -207,14 +214,16 @@ class AuInput extends HTMLElement {
     } else if (name === 'list') {
       this._handleListAttribute(newValue);
     } else if (this.input) {
-      if (newValue === null && typeof this.input[name] === 'boolean') {
-        this.input[name] = false;
+      if (newValue === null) {
         this.input.removeAttribute(name);
+        const camel = name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+        if (typeof this.input[camel] === 'boolean') this.input[camel] = false;
+        else if (typeof this.input[name] === 'boolean') this.input[name] = false;
       } else {
         this.input.setAttribute(name, newValue);
-        if (typeof this.input[name] === 'boolean') {
-          this.input[name] = true;
-        }
+        const camel = name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+        if (typeof this.input[camel] === 'boolean') this.input[camel] = true;
+        else if (typeof this.input[name] === 'boolean') this.input[name] = true;
       }
       this._syncValidity();
       this._updateColorCode();
@@ -260,8 +269,19 @@ class AuInput extends HTMLElement {
   }
 
   formResetCallback() {
-    this.input.value = this._initialValue || '';
-    this.internals.setFormValue(this.input.value);
+    const currentValue = this._initialValue || '';
+
+    // 重建 input 元素來清除 :user-invalid 狀態
+    const newInput = this.input.cloneNode(false);
+    newInput.value = currentValue;
+    this.inputContainer.replaceChild(newInput, this.input);
+    this.input = newInput;
+
+    // 重新綁定事件
+    this._bindInputEvents();
+
+    // 同步狀態
+    this.internals.setFormValue(currentValue);
     this._syncValidity();
     this._updateClearButton();
     this._updateColorCode();
@@ -287,8 +307,8 @@ class AuInput extends HTMLElement {
     this.input.value = '';
     this.value = '';
     this.internals.setFormValue('');
-    this.dispatchEvent(new Event('input', { bubbles: true }));
-    this.dispatchEvent(new Event('change', { bubbles: true }));
+    this.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+    this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
     this._updateClearButton();
     this._updateColorCode();
   }
@@ -298,9 +318,33 @@ class AuInput extends HTMLElement {
     this.input.value = val;
     this.value = val;
     this.internals.setFormValue(val);
-    this.dispatchEvent(new Event('input', { bubbles: true }));
+    this.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
     this._updateClearButton();
     this._updateColorCode();
+  }
+
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(val) {
+    val ? this.setAttribute('disabled', '') : this.removeAttribute('disabled');
+  }
+
+  get required() {
+    return this.hasAttribute('required');
+  }
+
+  set required(val) {
+    val ? this.setAttribute('required', '') : this.removeAttribute('required');
+  }
+
+  get readonly() {
+    return this.hasAttribute('readonly');
+  }
+
+  set readonly(val) {
+    val ? this.setAttribute('readonly', '') : this.removeAttribute('readonly');
   }
 
   /** ✅ 開發者用：聚焦 input 欄位 */
@@ -309,9 +353,12 @@ class AuInput extends HTMLElement {
   }
 
   generateId() {
-    const byteArray = new Uint32Array(1);
-    window.crypto.getRandomValues(byteArray);
-    return `au-input-${byteArray[0].toString(36)}`;
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-input-${byteArray[0].toString(36)}`;
+    }
+    return `au-input-${Math.random().toString(36).slice(2)}`;
   }
 
   syncAttributes() {
@@ -400,4 +447,6 @@ class AuInput extends HTMLElement {
   }
 }
 
-customElements.define('au-input', AuInput);
+if (typeof customElements !== 'undefined' && !customElements.get('au-input')) {
+  customElements.define('au-input', AuInput);
+}
