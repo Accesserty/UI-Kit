@@ -96,6 +96,7 @@ class AuBreadcrumbs extends HTMLElement {
             display: flex;
             align-items: center;
             li {
+              font-size: 0;
               &:last-child {
                 a {
                   text-decoration: none;

@@ -128,6 +128,7 @@ var z=Object.defineProperty;var I=(g,e,t)=>e in g?z(g,e,{enumerable:!0,configura
             display: flex;
             align-items: center;
             li {
+              font-size: 0;
               &:last-child {
                 a {
                   text-decoration: none;
