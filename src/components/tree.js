@@ -566,7 +566,7 @@ class AuTreeNode extends HTMLElement {
           .icon {
             transition: transform 300ms ease-in;
             display: flex;
-            align-items: middle;
+            align-items: center;
           }
 
           &[aria-expanded="true"] {

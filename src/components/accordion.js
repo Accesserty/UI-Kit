@@ -120,7 +120,21 @@ class AuAccordionItem extends HTMLElement {
             transition: background-color 160ms ease-in;
 
             .heading {
+              min-width: 50px;
+              text-overflow: ellipsis;
+              overflow: hidden;
+              white-space: nowrap;
               flex: 1;
+
+              slot,
+              ::slotted(*),
+              * {
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+                display: block;
+                width: 100%;
+              }
             }
 
             .info {
@@ -128,12 +142,33 @@ class AuAccordionItem extends HTMLElement {
               align-items: center;
               gap: 1rem;
               flex: 0 1 auto;
+              text-overflow: ellipsis;
+              overflow: hidden;
+              white-space: nowrap;
+              min-width: 0;
+              & > *:first-child  {
+                flex: 1;
+                min-width: 20px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+
+                slot, 
+                ::slotted(*),
+                * {
+                  text-overflow: ellipsis;
+                  overflow: hidden;
+                  white-space: nowrap;
+                  display: block;
+                }
+              }
             }
 
             .icon {
               transition: transform 300ms ease-in;
               display: flex;
-              align-items: middle;
+              align-items: center;
+              flex: 0 0 auto;
             }
 
             &[aria-expanded="true"] {

@@ -9,10 +9,21 @@ class AuInput extends HTMLElement {
 
     const style = document.createElement('style');
     style.textContent = `
+    :host {
+      display: block;
+      container-type: inline-size;
+    }
+
     .input-wrapper {
       display: flex;
       align-items: center;
       background: var(--au-input-wrapper-bg, transparent);
+      container-type: inline-size;
+
+      @container (width < 768px) {
+        flex-direction: column;
+        align-items: flex-start;
+      }
 
       label {
         margin: 0;
@@ -20,7 +31,11 @@ class AuInput extends HTMLElement {
         color: var(--au-input-label-text-color, oklch(0.1398 0 0));
         font-size: var(--au-input-label-text-size, 1rem);
         word-break: break-word;
+        @container (width < 768px) {
+          padding-left: 0;
+        }
       }
+
       input {
         -webkit-tap-highlight-color: oklch(0 0 0 / 0);
         margin: 0;
@@ -44,6 +59,11 @@ class AuInput extends HTMLElement {
         &[type="color"] {
          padding: 0;
         }
+
+        @container (width < 768px) {
+          width: 100%;
+          box-sizing: border-box;
+        }
       }
       .input-container {
         display: flex;
@@ -52,6 +72,10 @@ class AuInput extends HTMLElement {
         border-radius: var(--au-input-border-radius, 0.25rem);
         padding: var(--au-input-container-padding-vertical, 0.25rem) var(--au-input-container-padding-horizontal, 0.25rem);
         gap: var(--au-input-container-gap, 0.625rem);
+        @container (width < 768px) {
+          flex-direction: column;
+          align-items: flex-start;
+        }
       }
       .color-code {
         font-family: var(--au-input-text-family);
@@ -95,12 +119,18 @@ class AuInput extends HTMLElement {
       &[data-size="small"] {
         :is(label, input, .color-code) {
           padding: var(--au-input-small-padding-vertical, 0.25rem) var(--au-input-small-padding-horizontal, 0.375rem);
+          @container (width < 768px) {
+            padding-left: 0;
+          }
         }
       }
       &[data-size="large"] {
         :is(label, input, .color-code)  {
           padding: var(--au-input-large-padding-vertical, 1rem) var(--au-input-large-padding-horizontal, 1.625rem);
           font-size: var(--au-input-large-text-size, 1.25rem);
+          @container (width < 768px) {
+            padding-left: 0;
+          }
         }
       }
       &[data-layout="vertical"] {
