@@ -64,6 +64,29 @@ describe('AuRating', () => {
     expect(score.textContent).to.equal('4 / 5 (100 votes)');
   });
 
+  it('uses localized rating label, star labels, and score text', async () => {
+    const rating = await fixture(html`
+      <au-rating
+        value="4"
+        max="5"
+        show-score
+        score-info="(共 128 則評價)"
+        data-text-rating="滿意度評分"
+        data-text-star="{value} 分，共 {max} 分"
+        data-text-score="{value} / {max} 分 {scoreInfo}"
+      ></au-rating>
+    `);
+
+    const fieldset = rating.shadowRoot.querySelector('fieldset');
+    const radios = rating.shadowRoot.querySelectorAll('input[type="radio"]');
+    const score = rating.shadowRoot.querySelector('.score');
+
+    expect(fieldset.getAttribute('aria-label')).to.equal('滿意度評分');
+    expect(radios[0].getAttribute('aria-label')).to.equal('1 分，共 5 分');
+    expect(radios[4].getAttribute('aria-label')).to.equal('5 分，共 5 分');
+    expect(score.textContent).to.equal('4 / 5 分 (共 128 則評價)');
+  });
+
   // --- Keyboard Navigation ---
   it('navigates with ArrowRight key', async () => {
     const radios = el.shadowRoot.querySelectorAll('input[type="radio"]');

@@ -161,7 +161,20 @@ class AuRating extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['value', 'max', 'labels', 'aria-label', 'name', 'show-score', 'score-info', 'disabled', 'readonly'];
+    return [
+      'value',
+      'max',
+      'labels',
+      'aria-label',
+      'name',
+      'show-score',
+      'score-info',
+      'disabled',
+      'readonly',
+      'data-text-rating',
+      'data-text-star',
+      'data-text-score'
+    ];
   }
 
   connectedCallback() {
@@ -212,6 +225,18 @@ class AuRating extends HTMLElement {
     return this.getAttribute('score-info') || '';
   }
 
+  get ratingLabel() {
+    return this.getAttribute('aria-label') || this.getAttribute('data-text-rating') || 'Rating';
+  }
+
+  get starLabelTemplate() {
+    return this.getAttribute('data-text-star') || '{value} Star(s)';
+  }
+
+  get scoreTemplate() {
+    return this.getAttribute('data-text-score') || '{value} / {max} {scoreInfo}';
+  }
+
   get showScore() {
     return this.hasAttribute('show-score');
   }
@@ -249,8 +274,14 @@ class AuRating extends HTMLElement {
     </svg>`;
   }
 
+  formatText(template, values = {}) {
+    return Object.entries(values).reduce((message, [key, value]) => {
+      return message.replaceAll(`{${key}}`, String(value));
+    }, template).trim();
+  }
+
   render() {
-    const ariaLabel = this.getAttribute('aria-label') || 'Rating';
+    const ariaLabel = this.ratingLabel;
     this._legend.textContent = ariaLabel;
     this._fieldset.setAttribute('aria-label', ariaLabel);
 
@@ -286,7 +317,7 @@ class AuRating extends HTMLElement {
       
       const labelTextContent = labels[i - 1];
       if (!labelTextContent) {
-        input.setAttribute('aria-label', `${i} Star${i !== 1 ? 's' : ''}`);
+        input.setAttribute('aria-label', this.formatText(this.starLabelTemplate, { value: i, max: this.max }));
       }
       
       if (this.disabled || this.readonly) {
@@ -333,7 +364,11 @@ class AuRating extends HTMLElement {
 
   updateScoreDisplay(val) {
     if (this.showScore) {
-      this._scoreEl.textContent = `${val} / ${this.max} ${this.scoreInfo}`.trim();
+      this._scoreEl.textContent = this.formatText(this.scoreTemplate, {
+        value: val,
+        max: this.max,
+        scoreInfo: this.scoreInfo
+      });
     } else {
       this._scoreEl.textContent = '';
     }

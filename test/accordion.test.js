@@ -183,6 +183,17 @@ describe('AuAccordion and AuAccordionItem', () => {
     expect(hint.textContent.length).to.be.greaterThan(0);
   });
 
+  it('uses localized exclusive hint text and updates when the attribute changes', async () => {
+    const el = await fixture(html`
+      <au-accordion exclusive data-text-exclusive-hint="一次只能展開一個區塊"></au-accordion>
+    `);
+    const hint = el.shadowRoot.querySelector('[id^="au-accordion-hint-"]');
+    expect(hint.textContent).to.equal('一次只能展開一個區塊');
+
+    el.setAttribute('data-text-exclusive-hint', '一次只能開啟一個項目');
+    expect(hint.textContent).to.equal('一次只能開啟一個項目');
+  });
+
   it('non-exclusive mode removes aria-describedby from container', async () => {
     const el = await fixture(html`<au-accordion></au-accordion>`);
     const container = el.shadowRoot.querySelector('.au-accordion');

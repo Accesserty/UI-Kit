@@ -58,6 +58,30 @@ describe('AuPagination Web Component', () => {
     expect(postSpan.textContent).to.equal(el.texts.totalItemsSuffix);
   });
 
+  it('supports localized accessibility labels and page announcements', async () => {
+    const el = await fixture(html`
+      <au-pagination
+        data-total="50"
+        data-page-size="10"
+        data-current-page="1"
+        data-text-pagination-label="分頁"
+        data-text-page-size="每頁顯示筆數"
+        data-text-page-announcement="目前第 {page} 頁"
+      ></au-pagination>
+    `);
+
+    const nav = el.shadowRoot.querySelector('nav');
+    const hiddenLabel = el.shadowRoot.querySelector('.visually-hidden');
+    expect(nav.getAttribute('aria-label')).to.equal('分頁');
+    expect(hiddenLabel.textContent).to.equal('每頁顯示筆數');
+
+    const pageTwoButton = el.shadowRoot.querySelectorAll('.pagination-buttons li button')[3];
+    pageTwoButton.click();
+    await nextFrame();
+    await nextFrame();
+    expect(el.liveRegion.textContent).to.include('目前第 2 頁');
+  });
+
   it('renders correct number of pagination buttons', async () => {
     const el = await fixture(html`
       <au-pagination

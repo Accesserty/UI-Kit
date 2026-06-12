@@ -226,7 +226,7 @@ class AuInput extends HTMLElement {
     return [
       'type', 'name', 'value', 'placeholder', 'required', 'disabled', 'readonly', 'label',
       'min', 'max', 'step', 'pattern', 'autocomplete', 'autofocus', 'inputmode', 'maxlength', 'minlength',
-      'list', 'data-size', 'data-layout', 'data-clear', 'data-clear-label'
+      'list', 'aria-label', 'aria-labelledby', 'data-size', 'data-layout', 'data-clear', 'data-clear-label'
     ];
   }
 

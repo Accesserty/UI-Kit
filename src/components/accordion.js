@@ -31,7 +31,7 @@ class AuAccordion extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['exclusive'];
+    return ['exclusive', 'data-text-exclusive-hint'];
   }
 
   get exclusive() {
@@ -50,6 +50,14 @@ class AuAccordion extends HTMLElement {
     if (name === 'exclusive' && oldValue !== newValue) {
       this._updateExclusiveAria();
     }
+    if (name === 'data-text-exclusive-hint' && oldValue !== newValue) {
+      this._updateExclusiveHint();
+    }
+  }
+
+  _updateExclusiveHint() {
+    if (!this._exclusiveHint) return;
+    this._exclusiveHint.textContent = this.getAttribute('data-text-exclusive-hint') || 'Only one section may be expanded at a time.';
   }
 
   _updateExclusiveAria() {

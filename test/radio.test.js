@@ -85,6 +85,59 @@ describe('AuRadioGroup', () => {
     expect(group.getAttribute('aria-label')).to.equal('Options');
   });
 
+  it('uses label as fallback aria-label and updates group labeling attributes', async () => {
+    const el = await fixture(html`
+      <au-radio-group label="付款方式">
+        <div value="card">Card</div>
+      </au-radio-group>
+    `);
+    await nextFrame();
+
+    const group = el.shadowRoot.querySelector('.au-radio-group');
+    expect(group.getAttribute('aria-label')).to.equal('付款方式');
+
+    el.setAttribute('aria-label', 'Payment method');
+    await nextFrame();
+    expect(group.getAttribute('aria-label')).to.equal('Payment method');
+
+    el.removeAttribute('aria-label');
+    el.removeAttribute('label');
+    el.setAttribute('aria-labelledby', 'payment-label');
+    await nextFrame();
+    expect(group.hasAttribute('aria-label')).to.be.false;
+    expect(group.getAttribute('aria-labelledby')).to.equal('payment-label');
+  });
+
+  it('uses child label attributes as localized radio option text', async () => {
+    const el = await fixture(html`
+      <au-radio-group aria-label="語言">
+        <div value="zh" label="繁體中文"></div>
+        <div value="en" label="English"></div>
+      </au-radio-group>
+    `);
+    await nextFrame();
+
+    const labels = el.shadowRoot.querySelectorAll('.text');
+    expect(labels[0].textContent).to.equal('繁體中文');
+    expect(labels[1].textContent).to.equal('English');
+  });
+
+  it('updates radio option text when a child label attribute changes', async () => {
+    const el = await fixture(html`
+      <au-radio-group aria-label="語言">
+        <div value="zh" label="繁體中文"></div>
+      </au-radio-group>
+    `);
+    await nextFrame();
+
+    const option = el.querySelector('[value="zh"]');
+    option.setAttribute('label', 'Traditional Chinese');
+    await nextFrame();
+
+    const label = el.shadowRoot.querySelector('.text');
+    expect(label.textContent).to.equal('Traditional Chinese');
+  });
+
   it('adds vertical class when direction="vertical"', async () => {
     const el = await fixture(html`
       <au-radio-group direction="vertical">

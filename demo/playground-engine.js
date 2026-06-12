@@ -182,7 +182,7 @@ const COMPONENT_CONFIGS = [
     label: 'Accordion',
     previewHTML: `
       <div class="your-custom-accordion-classname">
-        <au-accordion>
+        <au-accordion data-text-exclusive-hint="Only one section may be expanded at a time.">
           <au-accordion-item>
             <div slot="heading">Accordion Item 1</div>
             <div slot="sub">Subtitle or helper text</div>
@@ -281,10 +281,10 @@ const COMPONENT_CONFIGS = [
     previewHTML: `
       <div class="your-custom-breadcrumbs-classname">
         <h3>With Separator Attribute</h3>
-        <au-breadcrumbs separator="/" items='[{"text":"Home","href":"/"},{"text":"Library","href":"/library"},{"text":"Data"}]'></au-breadcrumbs>
+        <au-breadcrumbs separator="/" data-link-title-template="Go to {text}" items='[{"text":"Home","url":"/"},{"text":"Library","url":"/library"},{"text":"Data"}]'></au-breadcrumbs>
 
         <h3>With Slotted Icons</h3>
-        <au-breadcrumbs items='[{"text":"Home","href":"/"},{"text":"Category","href":"/category"},{"text":"Subcategory"}]'>
+        <au-breadcrumbs data-link-title-template="Go to {text}" items='[{"text":"Home","url":"/"},{"text":"Category","url":"/category"},{"text":"Subcategory"}]'>
           <span slot="icon-0">🏠</span>
           <span slot="icon-1">📂</span>
           <span slot="icon-2">📄</span>
@@ -331,10 +331,10 @@ const COMPONENT_CONFIGS = [
       <div class="your-custom-checkbox-classname">
         <h3>States</h3>
         <div style="display: flex; flex-direction: column; gap: 1rem;">
-          <au-checkbox name="demo-cb" value="1">Unchecked</au-checkbox>
-          <au-checkbox name="demo-cb" value="2" checked>Checked</au-checkbox>
-          <au-checkbox name="demo-cb" value="3" disabled>Disabled</au-checkbox>
-          <au-checkbox name="demo-cb" value="4" checked disabled>Checked & Disabled</au-checkbox>
+          <au-checkbox name="demo-cb" value="1" label="Unchecked"></au-checkbox>
+          <au-checkbox name="demo-cb" value="2" label="Checked" checked></au-checkbox>
+          <au-checkbox name="demo-cb" value="3" label="Disabled" disabled></au-checkbox>
+          <au-checkbox name="demo-cb" value="4" label="Checked & Disabled" checked disabled></au-checkbox>
         </div>
       </div>
     `,
@@ -392,7 +392,7 @@ const COMPONENT_CONFIGS = [
     label: 'Tabs',
     previewHTML: `
       <div class="your-custom-tab-classname">
-        <au-tabs id="preview-tabs">
+        <au-tabs id="preview-tabs" data-text-tab="Tab {index}" data-text-badge-label-prefix="Additional information:">
           <div class="au-tab-panel" slot="panel" label="Home" data-prefix="🏠">
             <p>Welcome to the Home tab.</p>
           </div>
@@ -544,7 +544,7 @@ const COMPONENT_CONFIGS = [
     label: 'Dropdown',
     previewHTML: `
       <p>CSS Variables = Button Styles</p>
-      <au-dropdown class="your-custom-dropdown-classname">
+      <au-dropdown class="your-custom-dropdown-classname" data-text-trigger="Dropdown">
         <span slot="trigger">Custom Dropdown</span>
         <au-dropdown-item value="1">Action 1</au-dropdown-item>
         <au-dropdown-item value="2">Action 2</au-dropdown-item>
@@ -584,11 +584,11 @@ const COMPONENT_CONFIGS = [
     previewHTML: `
       <div class="your-custom-file-upload-classname" style="padding: 1rem;">
         <au-file-upload label="Upload Files" multiple required max-files="3" max-size-mb="2" max-total-size-mb="2"
-          accept=".txt, .jpg,.png,application/pdf" msg-button-text="Click button or drag & drop files to upload"
-          msg-drop-text="Drag & drop files here" msg-remove-text="Delete"
+          accept=".txt, .jpg,.png,application/pdf" msg-drop-text="Drag & drop files here" msg-remove-text="Delete"
           msg-required="You must upload at least one document." msg-type-error="is not a supported file format"
           msg-size-error="is too large. Limit is" msg-count-error="You can only attach up to"
-          msg-total-size-error="Total Size: ">
+          msg-total-size-error="Total Size: " msg-added="{count} file(s) added."
+          msg-removed="{fileName} removed." msg-remove-file-label="Remove {fileName}">
           <button slot="trigger" class="btn">Choose file...</button>
           <div slot="hint">.txt, .jpg, .png, application/pdf</div>
         </au-file-upload>
@@ -658,7 +658,7 @@ const COMPONENT_CONFIGS = [
     label: 'Input',
     previewHTML: `
       <div class="your-custom-input-classname">
-        <au-input label="Input Label" placeholder="Placeholder text" data-clear data-clear-label="Clear">
+        <au-input label="Input Label" placeholder="Placeholder text" data-clear data-clear-label="Clear input">
           <span slot="prefix">Prefix</span>
         </au-input>
       </div>
@@ -745,7 +745,11 @@ const COMPONENT_CONFIGS = [
         data-text-prev="Prev" 
         data-text-next="Next"
         data-text-last="Last" 
-        data-text-go="Go to" class="your-custom-pagination-current-classname your-custom-button-classname">
+        data-text-go="Go to"
+        data-text-pagination-label="pagination"
+        data-text-page-size="Page size"
+        data-text-page-announcement="Page {page}"
+        class="your-custom-pagination-current-classname your-custom-button-classname">
       </au-pagination>
     `,
     groups: [
@@ -768,10 +772,10 @@ const COMPONENT_CONFIGS = [
     previewHTML: `
       <div class="your-custom-radio-classname">
         <h3>Basic Radio Group</h3>
-        <au-radio-group aria-label="Basic Radio Group">
-          <au-radio checked>Option 1</au-radio>
-          <au-radio>Option 2</au-radio>
-          <au-radio disabled>Option 3 (Disabled)</au-radio>
+        <au-radio-group label="Basic Radio Group">
+          <au-radio label="Option 1" checked></au-radio>
+          <au-radio label="Option 2"></au-radio>
+          <au-radio label="Option 3 (Disabled)" disabled></au-radio>
         </au-radio-group>
       </div>
     `,
@@ -832,10 +836,12 @@ const COMPONENT_CONFIGS = [
     previewHTML: `
       <div class="your-custom-rating-classname">
         <h3>Basic Rating</h3>
-        <au-rating aria-label="Rate this product" labels="Very Bad,Bad,OK,Good,Excellent"></au-rating>
+        <au-rating aria-label="Rate this product" labels="Very Bad,Bad,OK,Good,Excellent"
+          data-text-star="{value} Star(s)" data-text-score="{value} / {max} {scoreInfo}"></au-rating>
         <hr/>
         <h3>With Score</h3>
-        <au-rating aria-label="Product rating" value="4" show-score></au-rating>
+        <au-rating aria-label="Product rating" value="4" show-score
+          data-text-star="{value} Star(s)" data-text-score="{value} / {max} {scoreInfo}"></au-rating>
       </div>
     `,
     groups: [
@@ -879,10 +885,10 @@ const COMPONENT_CONFIGS = [
     previewHTML: `
       <div class="your-custom-switch-classname">
         <h3>Basic Switch</h3>
-        <au-switch name="demo-switch" value="1">Off</au-switch>
-        <au-switch name="demo-switch" value="2" checked>On</au-switch>
-        <au-switch name="demo-switch" value="3" disabled>Disabled Off</au-switch>
-        <au-switch name="demo-switch" value="4" checked disabled>Disabled On</au-switch>
+        <au-switch name="demo-switch" value="1" label="Off" off="Off" on="On"></au-switch>
+        <au-switch name="demo-switch" value="2" label="On" off="Off" on="On" checked></au-switch>
+        <au-switch name="demo-switch" value="3" label="Disabled Off" off="Off" on="On" disabled></au-switch>
+        <au-switch name="demo-switch" value="4" label="Disabled On" off="Off" on="On" checked disabled></au-switch>
       </div>
     `,
     groups: [
@@ -1012,10 +1018,10 @@ const COMPONENT_CONFIGS = [
     previewHTML: `
       <div class="your-custom-tree-classname">
         <h3>Basic Tree</h3>
-        <au-tree id="tree-demo-basic"></au-tree>
+        <au-tree id="tree-demo-basic" data-text-node="Node" data-text-toggle="Expand or collapse {label}"></au-tree>
         
         <h3>Checkbox Tree</h3>
-        <au-tree id="tree-demo-check" show-checkbox></au-tree>
+        <au-tree id="tree-demo-check" show-checkbox data-text-node="Node" data-text-toggle="Expand or collapse {label}"></au-tree>
       </div>    
     `,
     onLoad: (container) => {

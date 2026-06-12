@@ -17,7 +17,8 @@ class AuBreadcrumbs extends HTMLElement {
       'label',
       'items',
       'separator',
-      'data-link-title-prefix'
+      'data-link-title-prefix',
+      'data-link-title-template'
     ]
   }
 
@@ -61,6 +62,21 @@ class AuBreadcrumbs extends HTMLElement {
     this.setAttribute('separator', val)
   }
 
+  formatText(template, values = {}) {
+    return Object.entries(values).reduce((message, [key, value]) => {
+      return message.replaceAll(`{${key}}`, String(value))
+    }, template)
+  }
+
+  escapeHTML(value) {
+    return String(value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;')
+  }
+
   render() {
     if (!this.shadowRoot) return;
     const id = this.getAttribute('id')
@@ -70,15 +86,19 @@ class AuBreadcrumbs extends HTMLElement {
     const labelAttr = this.getAttribute('label')
     const items = this.items // This should always be an array now
     const separator = this.getAttribute('separator') || '/'
+    const escapedSeparator = this.escapeHTML(separator)
     const prefix = this.getAttribute('data-link-title-prefix') || 'go to';
+    const titleTemplate = this.getAttribute('data-link-title-template');
+    const escapedId = id !== null ? this.escapeHTML(id) : ''
+    const escapedClassname = classname !== null ? this.escapeHTML(classname) : ''
 
     let navAccessibleAttr = ''
     if (ariaLabel !== null) {
-      navAccessibleAttr = `aria-label="${ariaLabel}"`
+      navAccessibleAttr = `aria-label="${this.escapeHTML(ariaLabel)}"`
     } else if (ariaLabelledby !== null) {
-      navAccessibleAttr = `aria-labelledby="${ariaLabelledby}"`
+      navAccessibleAttr = `aria-labelledby="${this.escapeHTML(ariaLabelledby)}"`
     } else if (labelAttr !== null) {
-      navAccessibleAttr = `aria-label="${labelAttr}"`
+      navAccessibleAttr = `aria-label="${this.escapeHTML(labelAttr)}"`
     }
 
     this.shadowRoot.innerHTML = `
@@ -136,22 +156,31 @@ class AuBreadcrumbs extends HTMLElement {
         }
       </style>
       <nav
-        ${id !== null ? `id="` + id + `"` : ''}
-        ${classname !== null ? `class="` + classname + `"` : ''}
+        ${id !== null ? `id="` + escapedId + `"` : ''}
+        ${classname !== null ? `class="` + escapedClassname + `"` : ''}
         ${navAccessibleAttr}
       >
         <ol>
           ${items
         .map(
-          (item, index) => `
+          (item, index) => {
+            const text = this.escapeHTML(item.text || '')
+            const url = this.escapeHTML(item.url || '')
+            const title = this.escapeHTML(
+              titleTemplate
+                ? this.formatText(titleTemplate, { text: item.text || '', index: index + 1 })
+                : `${prefix} ${item.text || ''}`
+            )
+            return `
                 <li>
                   ${index === items.length - 1
-              ? `<span aria-current="page"><slot name="icon-${index + 1}"></slot><span>${item.text}</span></span>`
-              : `<a href="${item.url || ''}" title="${prefix} ${item.text}"><slot name="icon-${index + 1}"></slot><span>${item.text}</span></a>`
+              ? `<span aria-current="page"><slot name="icon-${index + 1}"></slot><span>${text}</span></span>`
+              : `<a href="${url}" title="${title}"><slot name="icon-${index + 1}"></slot><span>${text}</span></a>`
             }
-                  ${index !== items.length - 1 ? `<span aria-hidden="true">` + separator + `</span>` : ''}
+                  ${index !== items.length - 1 ? `<span aria-hidden="true">` + escapedSeparator + `</span>` : ''}
                 </li>
               `
+          }
         )
         .join('')}
         </ol>

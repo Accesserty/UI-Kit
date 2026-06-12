@@ -207,6 +207,20 @@ describe('AuDropdown', () => {
     await new Promise(r => setTimeout(r, 50));
     expect(el.items[2].shadowRoot.activeElement).to.not.be.null;
   });
+
+  it('uses localized fallback trigger text when no trigger slot is provided', async () => {
+    const dropdown = await fixture(html`
+      <au-dropdown data-text-trigger="更多操作">
+        <au-dropdown-item value="edit">Edit</au-dropdown-item>
+      </au-dropdown>
+    `);
+
+    const fallback = dropdown.shadowRoot.querySelector('.trigger-fallback');
+    expect(fallback.textContent).to.equal('更多操作');
+
+    dropdown.setAttribute('data-text-trigger', '更多選項');
+    expect(fallback.textContent).to.equal('更多選項');
+  });
 });
 
 describe('AuDropdownItem', () => {

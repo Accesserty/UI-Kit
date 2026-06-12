@@ -122,6 +122,39 @@ describe('AuTabs with <div class="au-tab-panel">', () => {
     expect(affix?.textContent).to.equal('End');
   });
 
+  it('supports localized fallback tab labels and badge aria-label prefix', async () => {
+    const el = await fixture(html`
+      <au-tabs data-text-tab="頁籤 {index}" data-text-badge-label-prefix="補充資訊：">
+        <div class="au-tab-panel" slot="panel" data-badge="3">Panel 1</div>
+      </au-tabs>
+    `);
+
+    const tab = el.shadowRoot.querySelector('[role="tab"]');
+    const label = tab.querySelector('.label');
+    const badge = tab.querySelector('.badge');
+
+    expect(label.textContent).to.equal('頁籤 1');
+    expect(badge.getAttribute('aria-label')).to.equal('補充資訊： 3');
+  });
+
+  it('preserves selected tab when localization attributes change', async () => {
+    const el = await fixture(html`
+      <au-tabs>
+        <div class="au-tab-panel" slot="panel" label="First">1</div>
+        <div class="au-tab-panel" slot="panel" label="Second">2</div>
+      </au-tabs>
+    `);
+
+    el.selectedIndex = 1;
+    await new Promise(r => setTimeout(r));
+    el.setAttribute('data-text-badge-label-prefix', 'Info:');
+    await new Promise(r => setTimeout(r));
+
+    const tabs = el.shadowRoot.querySelectorAll('[role="tab"]');
+    expect(el.selectedIndex).to.equal(1);
+    expect(tabs[1].getAttribute('aria-selected')).to.equal('true');
+  });
+
   it('does not render prefix, badge, or affix if they are empty', async () => {
     const el = await fixture(html`
       <au-tabs>

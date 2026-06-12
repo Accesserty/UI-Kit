@@ -1,4 +1,8 @@
 class AuDropdown extends HTMLElement {
+  static get observedAttributes() {
+    return ['data-text-trigger'];
+  }
+
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
@@ -123,7 +127,7 @@ class AuDropdown extends HTMLElement {
         popovertarget="${this.menuId}"
         aria-haspopup="menu" 
       >
-        <slot name="trigger">Dropdown</slot>
+        <slot name="trigger"><span class="trigger-fallback"></span></slot>
         <svg class="icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="m6 9 6 6 6-6"/>
         </svg>
@@ -142,6 +146,7 @@ class AuDropdown extends HTMLElement {
     this.shadowRoot.appendChild(template.content.cloneNode(true));
     this.trigger = this.shadowRoot.getElementById(this.triggerId);
     this.menu = this.shadowRoot.getElementById(this.menuId);
+    this.triggerFallback = this.shadowRoot.querySelector('.trigger-fallback');
 
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleMenuKeyDown = this.handleMenuKeyDown.bind(this);
@@ -149,9 +154,16 @@ class AuDropdown extends HTMLElement {
   }
 
   connectedCallback() {
+    this.updateTriggerFallback();
     this.trigger.addEventListener('keydown', this.handleKeyDown);
     this.menu.addEventListener('keydown', this.handleMenuKeyDown);
     this.menu.addEventListener('toggle', this.handleToggle);
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'data-text-trigger' && oldValue !== newValue) {
+      this.updateTriggerFallback();
+    }
   }
 
   disconnectedCallback() {
@@ -167,6 +179,11 @@ class AuDropdown extends HTMLElement {
       return `au-dropdown-${byteArray[0].toString(36)}`;
     }
     return `au-dropdown-${Math.random().toString(36).slice(2)}`;
+  }
+
+  updateTriggerFallback() {
+    if (!this.triggerFallback) return;
+    this.triggerFallback.textContent = this.getAttribute('data-text-trigger') || 'Dropdown';
   }
 
   // 修正點：移除重複的 open/close，保留這裡的邏輯並加強

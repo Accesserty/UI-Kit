@@ -59,6 +59,21 @@
           <td>Rating</td>
         </tr>
         <tr>
+          <td>data-text-rating</td>
+          <td>Fallback accessible label for the group when <code>aria-label</code> is not set.</td>
+          <td>Rating</td>
+        </tr>
+        <tr>
+          <td>data-text-star</td>
+          <td>Accessible label template for each score option when <code>labels</code> is not set. Supports <code>{value}</code> and <code>{max}</code>.</td>
+          <td>{value} Star(s)</td>
+        </tr>
+        <tr>
+          <td>data-text-score</td>
+          <td>Visible score template when <code>show-score</code> is set. Supports <code>{value}</code>, <code>{max}</code>, and <code>{scoreInfo}</code>.</td>
+          <td>{value} / {max} {scoreInfo}</td>
+        </tr>
+        <tr>
           <td>score-info</td>
           <td>Additional text displayed after the score</td>
           <td>-</td>
@@ -135,6 +150,12 @@ rating.readonly = true;</code></pre>
     <section>
       <h2>10-Star Rating with Score</h2>
       <au-rating aria-label="Rate 1 to 10" max="10" value="7" show-score></au-rating>
+    </section>
+
+    <section>
+      <h2>Localized Rating Text</h2>
+      <au-rating value="4" show-score data-text-rating="滿意度評分" data-text-star="{value} 分，共 {max} 分"
+        data-text-score="{value} / {max} 分 {scoreInfo}" score-info="(共 128 則評價)"></au-rating>
     </section>
 
     <section>

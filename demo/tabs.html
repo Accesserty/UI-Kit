@@ -52,6 +52,28 @@
           <td>set custom id of tab</td>
         </tr>
       </table>
+      <table>
+        <caption>
+          Attributes on <code>&lt;au-tabs&gt;</code> for localization:
+        </caption>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Description</th>
+        </tr>
+        <tr>
+          <td>data-text-tab</td>
+          <td>Fallback tab label template when a panel does not provide <code>label</code>. Supports <code>{index}</code>.</td>
+        </tr>
+        <tr>
+          <td>data-text-badge-label-prefix</td>
+          <td>Accessible label prefix for <code>data-badge</code>.</td>
+        </tr>
+      </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>&lt;au-tabs
+  data-text-tab="頁籤 {index}"
+  data-text-badge-label-prefix="補充資訊："&gt;
+  &lt;div class="au-tab-panel" slot="panel" data-badge="3"&gt;Content&lt;/div&gt;
+&lt;/au-tabs&gt;</code></pre>
     </section>
     <section>
       <h2>Properties</h2>
@@ -119,7 +141,7 @@ document.querySelector('au-tabs').addEventListener('tab-change', (e) => {
     </section>
     <section>
       <h2>Basic</h2>
-      <au-tabs>
+      <au-tabs data-text-tab="Tab {index}" data-text-badge-label-prefix="Additional information:">
         <div class="au-tab-panel" slot="panel" id="custom-id" label="Tab1" data-prefix="data-prefix"
           data-badge="data-badge" data-affix="data-affix"><button>123</button></div>
         <div class="au-tab-panel" slot="panel" label="Tab2">Content 2</div>
@@ -134,19 +156,19 @@ document.querySelector('au-tabs').addEventListener('tab-change', (e) => {
     </section>
     <section>
       <h2>Nested</h2>
-      <au-tabs>
-        <div class="au-tab-panel" slot="panel" label="Tab1"">
-          <au-tabs>
-            <div class=" au-tab-panel" slot="panel" label="Tab3"">Content 3</div>
-            <div class=" au-tab-panel" slot="panel" label="Tab4">Content 4</div>
-      </au-tabs>
-      </div>
-      <div class="au-tab-panel" slot="panel" label="Tab2">Content 2</div>
+      <au-tabs data-text-tab="Tab {index}" data-text-badge-label-prefix="Additional information:">
+        <div class="au-tab-panel" slot="panel" label="Tab1">
+          <au-tabs data-text-tab="Tab {index}" data-text-badge-label-prefix="Additional information:">
+            <div class="au-tab-panel" slot="panel" label="Tab3">Content 3</div>
+            <div class="au-tab-panel" slot="panel" label="Tab4">Content 4</div>
+          </au-tabs>
+        </div>
+        <div class="au-tab-panel" slot="panel" label="Tab2">Content 2</div>
       </au-tabs>
     </section>
     <section>
       <h2>Custom Style</h2>
-      <au-tabs class="custom-tabs">
+      <au-tabs class="custom-tabs" data-text-tab="Tab {index}" data-text-badge-label-prefix="Additional information:">
         <div class="au-tab-panel" slot="panel" label="Tab1" data-prefix="data-prefix" data-badge="data-badge"
           data-affix="data-affix">Content 1</div>
         <div class="au-tab-panel" slot="panel" label="Tab2">Content 2</div>

@@ -109,6 +109,9 @@ class AuSwitch extends HTMLElement {
     this.shadowRoot.append(style, switchElement);
 
     const slot = document.createElement('slot');
+    this.labelFallback = document.createElement('span');
+    this.labelFallback.textContent = this.getAttribute('label') || '';
+    slot.appendChild(this.labelFallback);
     switchElement.prepend(slot);
 
     this.inputElement.addEventListener('change', (event) => {
@@ -118,6 +121,8 @@ class AuSwitch extends HTMLElement {
       this.internals.setFormValue(formValue);
       this.dispatchEvent(new CustomEvent('change', { bubbles: true, composed: true, detail: checked }));
     });
+
+    this.syncAccessibleLabel();
   }
 
   get checked() {
@@ -152,7 +157,7 @@ class AuSwitch extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['name', 'value', 'checked', 'disabled', 'off', 'on'];
+    return ['name', 'value', 'checked', 'disabled', 'off', 'on', 'label', 'aria-label', 'aria-labelledby'];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -171,14 +176,42 @@ class AuSwitch extends HTMLElement {
         input.disabled = newValue !== null;
         break;
       case 'off':
-        offText.textContent = newValue || 'Off';
+        offText.textContent = newValue || '';
         break;
       case 'on':
-        onText.textContent = newValue || 'On';
+        onText.textContent = newValue || '';
+        break;
+      case 'label':
+        if (this.labelFallback) this.labelFallback.textContent = newValue || '';
+        this.syncAccessibleLabel();
+        break;
+      case 'aria-label':
+      case 'aria-labelledby':
+        this.syncAccessibleLabel();
         break;
       default:
-        input.setAttribute(name, newValue);
+        if (newValue === null) {
+          input.removeAttribute(name);
+        } else {
+          input.setAttribute(name, newValue);
+        }
         break;
+    }
+  }
+
+  syncAccessibleLabel() {
+    if (!this.inputElement) return;
+
+    if (this.hasAttribute('aria-label')) {
+      this.inputElement.setAttribute('aria-label', this.getAttribute('aria-label'));
+    } else {
+      this.inputElement.removeAttribute('aria-label');
+    }
+
+    if (this.hasAttribute('aria-labelledby')) {
+      this.inputElement.setAttribute('aria-labelledby', this.getAttribute('aria-labelledby'));
+    } else {
+      this.inputElement.removeAttribute('aria-labelledby');
     }
   }
 

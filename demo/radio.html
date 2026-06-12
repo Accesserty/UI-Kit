@@ -44,6 +44,18 @@
           <td>direction</td>
           <td>horizontal / vertical</td>
         </tr>
+        <tr>
+          <td>label</td>
+          <td>Fallback accessible name for <code>&lt;au-radio-group&gt;</code>. Also supported on child radio items as visible option text.</td>
+        </tr>
+        <tr>
+          <td>aria-label</td>
+          <td>Accessible name for the radio group.</td>
+        </tr>
+        <tr>
+          <td>aria-labelledby</td>
+          <td>Accessible label reference for the radio group.</td>
+        </tr>
       </table>
     </section>
     <section>
@@ -71,6 +83,14 @@
         <au-radio checked>Radio 1</au-radio>
         <au-radio>Radio 2</au-radio>
         <au-radio>Radio 3</au-radio>
+      </au-radio-group>
+    </section>
+    <section>
+      <h2>Localized Labels</h2>
+      <au-radio-group label="付款方式">
+        <au-radio value="card" label="信用卡" checked></au-radio>
+        <au-radio value="transfer" label="轉帳"></au-radio>
+        <au-radio value="cash" label="現金"></au-radio>
       </au-radio-group>
     </section>
     <section>

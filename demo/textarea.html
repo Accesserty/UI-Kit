@@ -17,8 +17,42 @@
   <main>
     <h1>Accesserty UI Kit Textarea</h1>
     <section>
+      <h2>Attributes</h2>
+      <table>
+        <caption>The Accesserty UI Kit textarea text and accessibility attributes:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>label</td>
+            <td>Visible label text. Used as fallback accessible name when <code>aria-label</code> and <code>aria-labelledby</code> are not set.</td>
+          </tr>
+          <tr>
+            <td>placeholder</td>
+            <td>Textarea placeholder text.</td>
+          </tr>
+          <tr>
+            <td>aria-label</td>
+            <td>Accessible name passed to the internal textarea.</td>
+          </tr>
+          <tr>
+            <td>aria-labelledby</td>
+            <td>Accessible label reference passed to the internal textarea.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <section>
       <h2>Basic</h2>
       <au-textarea id="custom-id" label="Textarea Label" placeholder="Enter..." required></au-textarea>
+    </section>
+    <section>
+      <h2>Localized Text Attributes</h2>
+      <au-textarea label="意見內容" placeholder="請輸入你的意見"></au-textarea>
     </section>
     <section>
       <h2>CSS Variables</h2>

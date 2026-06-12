@@ -94,8 +94,25 @@
             <td>data-text-goto</td>
             <td>Visually-hidden prefix for pager buttons (e.g. “go to”).</td>
           </tr>
+          <tr>
+            <td>data-text-pagination-label</td>
+            <td>Accessible name for the pagination navigation landmark.</td>
+          </tr>
+          <tr>
+            <td>data-text-page-size</td>
+            <td>Visually-hidden label for the page-size selector.</td>
+          </tr>
+          <tr>
+            <td>data-text-page-announcement</td>
+            <td>Live region message when the current page changes. Supports <code>{page}</code>.</td>
+          </tr>
         </tbody>
       </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>&lt;au-pagination
+  data-text-pagination-label="分頁"
+  data-text-page-size="每頁顯示筆數"
+  data-text-page-announcement="目前第 {page} 頁"&gt;
+&lt;/au-pagination&gt;</code></pre>
     </section>
     <section>
       <h2>Properties</h2>
@@ -172,7 +189,9 @@ pagination.addEventListener('page-size-change', (e) => {
         data-layout='["total_page","total_items","page_size","first","prev","pages","next","last","jump"]'
         data-text-per="each page" data-text-total-pages-prefix="Total" data-text-goto="Jump" data-text-page="page(s)"
         data-text-total-items-suffix="item(s)" data-text-first="First" data-text-prev="Prev" data-text-next="Next"
-        data-text-last="Last" data-text-go="Go to" class="custom-btn--primary-outline"></au-pagination>
+        data-text-last="Last" data-text-go="Go to" data-text-pagination-label="pagination"
+        data-text-page-size="Page size" data-text-page-announcement="Page {page}"
+        class="custom-btn--primary-outline"></au-pagination>
 
       <div id="output">Result</div>
       <!-- 列表容器 -->

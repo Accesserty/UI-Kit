@@ -29,6 +29,31 @@ describe('AuSwitch', () => {
     expect(onText.textContent).to.equal('Active');
   });
 
+  it('uses label attribute as fallback slot text and updates it', async () => {
+    const el = await fixture(html`<au-switch label="啟用通知"></au-switch>`);
+    const slot = el.shadowRoot.querySelector('slot');
+    const fallback = slot.querySelector('span');
+
+    expect(fallback.textContent).to.equal('啟用通知');
+
+    el.setAttribute('label', '接收通知');
+    await nextFrame();
+    expect(fallback.textContent).to.equal('接收通知');
+  });
+
+  it('passes aria-label and aria-labelledby to the internal switch input', async () => {
+    const el = await fixture(html`<au-switch aria-label="啟用通知"></au-switch>`);
+    const input = el.shadowRoot.querySelector('input');
+
+    expect(input.getAttribute('aria-label')).to.equal('啟用通知');
+
+    el.removeAttribute('aria-label');
+    el.setAttribute('aria-labelledby', 'notification-label');
+    await nextFrame();
+    expect(input.hasAttribute('aria-label')).to.be.false;
+    expect(input.getAttribute('aria-labelledby')).to.equal('notification-label');
+  });
+
   it('sets the default off and on text when attributes are not provided', async () => {
     const el = await fixture(html`
       <au-switch>
@@ -115,6 +140,19 @@ describe('AuSwitch', () => {
 
     expect(offText.textContent).to.equal('Inactive');
     expect(onText.textContent).to.equal('Active');
+  });
+
+  it('clears on and off text when attributes are removed', async () => {
+    const el = await fixture(html`<au-switch off="關閉" on="開啟">Label</au-switch>`);
+    const offText = el.shadowRoot.querySelector('.off-text');
+    const onText = el.shadowRoot.querySelector('.on-text');
+
+    el.removeAttribute('off');
+    el.removeAttribute('on');
+    await nextFrame();
+
+    expect(offText.textContent).to.equal('');
+    expect(onText.textContent).to.equal('');
   });
 
   it('checked property getter reflects internal input state', async () => {

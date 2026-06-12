@@ -94,6 +94,9 @@ class AuCheckbox extends HTMLElement {
     const textSlot = document.createElement('div');
     textSlot.setAttribute('class', 'text');
     const slot = document.createElement('slot');
+    this.labelFallback = document.createElement('span');
+    this.labelFallback.textContent = this.getAttribute('label') || '';
+    slot.appendChild(this.labelFallback);
     textSlot.appendChild(slot);
 
     label.append(input, textSlot);
@@ -113,6 +116,8 @@ class AuCheckbox extends HTMLElement {
     input.addEventListener('blur', () => {
       this.dispatchEvent(new CustomEvent('blur', { bubbles: true, composed: true }));
     });
+
+    this.syncAccessibleLabel();
   }
 
   get checked() {
@@ -141,7 +146,7 @@ class AuCheckbox extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['name', 'value', 'checked', 'disabled', 'required'];
+    return ['name', 'value', 'checked', 'disabled', 'required', 'label', 'aria-label', 'aria-labelledby'];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -163,7 +168,32 @@ class AuCheckbox extends HTMLElement {
         case 'required':
           input.required = newValue !== null;
           break;
+        case 'label':
+          if (this.labelFallback) this.labelFallback.textContent = newValue || '';
+          this.syncAccessibleLabel();
+          break;
+        case 'aria-label':
+        case 'aria-labelledby':
+          this.syncAccessibleLabel();
+          break;
       }
+    }
+  }
+
+  syncAccessibleLabel() {
+    const input = this.shadowRoot.querySelector('input');
+    if (!input) return;
+
+    if (this.hasAttribute('aria-label')) {
+      input.setAttribute('aria-label', this.getAttribute('aria-label'));
+    } else {
+      input.removeAttribute('aria-label');
+    }
+
+    if (this.hasAttribute('aria-labelledby')) {
+      input.setAttribute('aria-labelledby', this.getAttribute('aria-labelledby'));
+    } else {
+      input.removeAttribute('aria-labelledby');
     }
   }
 
@@ -211,4 +241,3 @@ class AuCheckbox extends HTMLElement {
 if (typeof customElements !== 'undefined' && !customElements.get('au-checkbox')) {
   customElements.define('au-checkbox', AuCheckbox);
 }
-

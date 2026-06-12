@@ -1,4 +1,8 @@
 class AuTabs extends HTMLElement {
+  static get observedAttributes() {
+    return ['data-text-tab', 'data-text-badge-label-prefix'];
+  }
+
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
@@ -133,6 +137,18 @@ class AuTabs extends HTMLElement {
     this._attachEvents();
   }
 
+  attributeChangedCallback() {
+    if (!this.isConnected) return;
+    this._renderTabs();
+    this._attachEvents();
+  }
+
+  formatText(template, values = {}) {
+    return Object.entries(values).reduce((message, [key, value]) => {
+      return message.replaceAll(`{${key}}`, String(value));
+    }, template);
+  }
+
   _renderTabs() {
     const slot = this.shadowRoot.querySelector('slot[name="panel"]');
     const tabPanels = slot.assignedElements().filter(el => el.classList.contains('au-tab-panel'));
@@ -140,9 +156,10 @@ class AuTabs extends HTMLElement {
     this._tabs = [];
     this._panels = [];
     this.tabsList.innerHTML = "";
+    const selectedIndex = Math.min(this._selectedIndex, Math.max(tabPanels.length - 1, 0));
 
     tabPanels.forEach((panel, index) => {
-      const label = panel.getAttribute("label") || `Tab ${index + 1}`;
+      const label = panel.getAttribute("label") || this.formatText(this.getAttribute("data-text-tab") || "Tab {index}", { index: index + 1 });
       const prefix = panel.getAttribute("data-prefix") || "";
       const badge = panel.getAttribute("data-badge") || "";
       const affix = panel.getAttribute("data-affix") || "";
@@ -153,18 +170,18 @@ class AuTabs extends HTMLElement {
       panel.setAttribute("id", panelId);
       panel.setAttribute("role", "tabpanel");
       panel.setAttribute("aria-labelledby", tabId);
-      panel.setAttribute("aria-hidden", index === 0 ? "false" : "true");
+      panel.setAttribute("aria-hidden", index === selectedIndex ? "false" : "true");
 
       const li = document.createElement("li");
       li.setAttribute("role", "presentation");
-      li.className = "au-tablist-item" + (index === 0 ? " au-tablist-item--selected" : "");
+      li.className = "au-tablist-item" + (index === selectedIndex ? " au-tablist-item--selected" : "");
 
       const button = document.createElement("button");
       button.setAttribute("role", "tab");
       button.setAttribute("id", tabId);
       button.setAttribute("aria-controls", panelId);
-      button.setAttribute("aria-selected", index === 0 ? "true" : "false");
-      button.setAttribute("tabindex", index === 0 ? "0" : "-1");
+      button.setAttribute("aria-selected", index === selectedIndex ? "true" : "false");
+      button.setAttribute("tabindex", index === selectedIndex ? "0" : "-1");
 
       const frag = document.createDocumentFragment();
 
@@ -183,7 +200,8 @@ class AuTabs extends HTMLElement {
       if (badge) {
         const span = document.createElement("span");
         span.className = "badge";
-        span.setAttribute("aria-label", `補充資訊：${badge}`);
+        const badgeLabelPrefix = this.getAttribute("data-text-badge-label-prefix") || "Additional information:";
+        span.setAttribute("aria-label", `${badgeLabelPrefix} ${badge}`);
         span.textContent = badge;
         frag.appendChild(span);
       }
@@ -202,6 +220,7 @@ class AuTabs extends HTMLElement {
       this._tabs.push(button);
       this._panels.push(panel);
     });
+    this._selectedIndex = selectedIndex;
   }
 
   _attachEvents() {

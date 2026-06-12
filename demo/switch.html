@@ -50,6 +50,18 @@
           <td>on</td>
           <td>Set "on" text label</td>
         </tr>
+        <tr>
+          <td>label</td>
+          <td>Fallback visible label text when no slotted label is supplied.</td>
+        </tr>
+        <tr>
+          <td>aria-label</td>
+          <td>Accessible name passed to the internal switch input.</td>
+        </tr>
+        <tr>
+          <td>aria-labelledby</td>
+          <td>Accessible label reference passed to the internal switch input.</td>
+        </tr>
       </table>
     </section>
     <section>
@@ -110,6 +122,10 @@ console.log(sw.checked); // boolean</code></pre>
       <au-switch>
         Default
       </au-switch>
+    </section>
+    <section>
+      <h2>Localized Label Attribute</h2>
+      <au-switch label="接收通知" on="開啟" off="關閉"></au-switch>
     </section>
     <section>
       <h2>Custom Label and Text</h2>

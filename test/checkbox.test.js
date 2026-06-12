@@ -42,6 +42,31 @@ describe('AuCheckbox', () => {
     expect(assignedNodes[0].textContent).to.equal('Checkbox Label');
   });
 
+  it('uses label attribute as fallback slot text and updates it', async () => {
+    const el = await fixture(html`<au-checkbox label="訂閱電子報"></au-checkbox>`);
+    const slot = el.shadowRoot.querySelector('slot');
+    const fallback = slot.querySelector('span');
+
+    expect(fallback.textContent).to.equal('訂閱電子報');
+
+    el.setAttribute('label', '接收通知');
+    await nextFrame();
+    expect(fallback.textContent).to.equal('接收通知');
+  });
+
+  it('passes aria-label and aria-labelledby to the internal checkbox', async () => {
+    const el = await fixture(html`<au-checkbox aria-label="同意條款"></au-checkbox>`);
+    const input = el.shadowRoot.querySelector('input');
+
+    expect(input.getAttribute('aria-label')).to.equal('同意條款');
+
+    el.removeAttribute('aria-label');
+    el.setAttribute('aria-labelledby', 'terms-label');
+    await nextFrame();
+    expect(input.hasAttribute('aria-label')).to.be.false;
+    expect(input.getAttribute('aria-labelledby')).to.equal('terms-label');
+  });
+
   it('dispatches a change event when the checkbox is clicked', async () => {
     const el = await fixture(html`
       <au-checkbox></au-checkbox>

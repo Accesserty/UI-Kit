@@ -105,19 +105,24 @@ class AuRadioGroup extends HTMLElement {
     slot.addEventListener('slotchange', () => {
       this.renderRadios();
     });
+    this._mutationObserver = new MutationObserver(() => {
+      this.renderRadios();
+      this.updateGroupAttributes();
+    });
+    this._mutationObserver.observe(this, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['label', 'value', 'checked', 'disabled']
+    });
     
     this.renderRadios();
+    this.updateGroupAttributes();
+  }
 
-    const ariaLabel = this.getAttribute('aria-label');
-    if (ariaLabel) {
-      const container = this.shadowRoot.querySelector('.au-radio-group');
-      container.setAttribute('aria-label', ariaLabel);
-    }
-    const direction = this.getAttribute('direction');
-    if (direction === 'vertical') {
-      const container = this.shadowRoot.querySelector('.au-radio-group');
-      container.classList.add('au-radio-group--vertical');
-    }
+  disconnectedCallback() {
+    this._mutationObserver?.disconnect();
   }
 
   renderRadios() {
@@ -151,7 +156,7 @@ class AuRadioGroup extends HTMLElement {
 
       const textSlot = document.createElement('div');
       textSlot.setAttribute('class', 'text');
-      textSlot.textContent = radio.textContent.trim();
+      textSlot.textContent = radio.getAttribute('label') || radio.textContent.trim();
 
       label.append(input, textSlot);
       container.appendChild(label);
@@ -214,7 +219,7 @@ class AuRadioGroup extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['disabled'];
+    return ['disabled', 'direction', 'aria-label', 'aria-labelledby', 'label'];
   }
 
   attributeChangedCallback(name) {
@@ -223,7 +228,29 @@ class AuRadioGroup extends HTMLElement {
       this.shadowRoot.querySelectorAll('input[type="radio"]').forEach(input => {
         input.disabled = isDisabled;
       });
+    } else if (['direction', 'aria-label', 'aria-labelledby', 'label'].includes(name)) {
+      this.updateGroupAttributes();
     }
+  }
+
+  updateGroupAttributes() {
+    const container = this.shadowRoot.querySelector('.au-radio-group');
+    if (!container) return;
+
+    const ariaLabel = this.getAttribute('aria-label') || this.getAttribute('label');
+    if (ariaLabel) {
+      container.setAttribute('aria-label', ariaLabel);
+    } else {
+      container.removeAttribute('aria-label');
+    }
+
+    if (this.hasAttribute('aria-labelledby')) {
+      container.setAttribute('aria-labelledby', this.getAttribute('aria-labelledby'));
+    } else {
+      container.removeAttribute('aria-labelledby');
+    }
+
+    container.classList.toggle('au-radio-group--vertical', this.getAttribute('direction') === 'vertical');
   }
 
   get value() {

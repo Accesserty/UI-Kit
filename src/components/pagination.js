@@ -5,7 +5,8 @@ class AuPagination extends HTMLElement {
       'data-page-size', 'data-page-size-options', 'data-layout',
       'data-text-total-pages-prefix', 'data-text-page', 'data-text-total-items-suffix',
       'data-text-per', 'data-text-first', 'data-text-prev',
-      'data-text-next', 'data-text-last', 'data-text-go', 'data-text-goto'
+      'data-text-next', 'data-text-last', 'data-text-go', 'data-text-goto',
+      'data-text-pagination-label', 'data-text-page-size', 'data-text-page-announcement'
     ];
   }
 
@@ -76,8 +77,17 @@ class AuPagination extends HTMLElement {
       nextText: this.getAttribute('data-text-next') || 'Next',
       lastText: this.getAttribute('data-text-last') || 'Last',
       goText: this.getAttribute('data-text-go') || 'go to',
-      gotoText: this.getAttribute('data-text-goto') || 'go to'
+      gotoText: this.getAttribute('data-text-goto') || 'go to',
+      paginationLabel: this.getAttribute('data-text-pagination-label') || 'pagination',
+      pageSizeText: this.getAttribute('data-text-page-size') || 'Page size',
+      pageAnnouncement: this.getAttribute('data-text-page-announcement') || 'Page {page}'
     };
+  }
+
+  formatText(template, values = {}) {
+    return Object.entries(values).reduce((message, [key, value]) => {
+      return message.replaceAll(`{${key}}`, String(value));
+    }, template);
   }
 
   get pageSizeOptions() {
@@ -267,7 +277,7 @@ class AuPagination extends HTMLElement {
       // hidden label + existing text spans preserved
       const hiddenLbl = document.createElement('span');
       hiddenLbl.className = 'visually-hidden';
-      hiddenLbl.textContent = 'Page size';
+      hiddenLbl.textContent = t.pageSizeText;
       grp1.appendChild(hiddenLbl);
 
       const lbl = document.createElement('label');
@@ -327,7 +337,7 @@ class AuPagination extends HTMLElement {
     if (layout.includes('last')) {
       const li = document.createElement('li'); const btn = document.createElement('button'); btn.textContent = t.lastText; btn.disabled = this.currentPage >= totalPages; btn.addEventListener('click', () => this._goto(totalPages)); li.appendChild(btn); ul.appendChild(li);
     }
-    const nav = document.createElement('nav'); nav.setAttribute('aria-label', 'pagination'); nav.appendChild(ul);
+    const nav = document.createElement('nav'); nav.setAttribute('aria-label', t.paginationLabel); nav.appendChild(ul);
     grp2.appendChild(nav); container.appendChild(grp2);
 
     // 第三組: 跳轉
@@ -362,7 +372,7 @@ class AuPagination extends HTMLElement {
     this.currentPage = page;
     this.setAttribute('data-current-page', String(page));
     this.dispatchEvent(new CustomEvent('page-change', { detail: page, bubbles: true, composed: true }));
-    this.announce(`Page ${page}`);
+    this.announce(this.formatText(this.texts.pageAnnouncement, { page }));
   }
 
   announce(message) {

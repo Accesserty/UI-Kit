@@ -36,20 +36,22 @@
 
 		<section>
 			<h2>Basic</h2>
-			<au-tree id="tree-basic"></au-tree>
+			<au-tree id="tree-basic" data-text-node="Node" data-text-toggle="Expand or collapse {label}"></au-tree>
 		</section>
 
 		<section>
 			<h2>Checkbox Tree</h2>
 			<p>Supports tri-state selection (Indeterminate).</p>
-			<au-tree id="tree-check" show-checkbox></au-tree>
+			<au-tree id="tree-check" show-checkbox data-text-node="Node" data-text-toggle="Expand or collapse {label}"></au-tree>
 		</section>
 
 		<section>
 			<h2>Custom Toggle Label</h2>
-			<p>Customize the aria-label of toggle buttons.</p>
-			<au-tree id="tree-custom-label"></au-tree>
+			<p>Customize the aria-label of toggle buttons with an attribute template or JavaScript function.</p>
+			<au-tree id="tree-custom-label" data-text-node="Node" data-text-toggle="Expand or collapse {label}"></au-tree>
 			<code style="display: block; white-space: pre-wrap; background: #f4f4f4; padding: 1rem; border-radius: 4px;">
+&lt;au-tree data-text-node="Node" data-text-toggle="Expand or collapse {label}"&gt;&lt;/au-tree&gt;
+
 const customLabelTree = document.getElementById('tree-custom-label');
 customLabelTree.toggleLabel = (node) => {	
 	return `Expand or collapse ${node.label}`;
@@ -99,6 +101,16 @@ customLabelTree.toggleLabel = (node) => {
 						<td>show-checkbox <em>(attribute)</em></td>
 						<td>boolean attribute</td>
 						<td>When present, renders checkboxes on each node and enables tri-state (indeterminate) selection.</td>
+					</tr>
+					<tr>
+						<td>data-text-node <em>(attribute)</em></td>
+						<td>string</td>
+						<td>Fallback node label when a node object does not provide <code>label</code>.</td>
+					</tr>
+					<tr>
+						<td>data-text-toggle <em>(attribute)</em></td>
+						<td>string template</td>
+						<td>Accessible label template for expand/collapse buttons. Supports <code>{label}</code>.</td>
 					</tr>
 				</tbody>
 			</table>

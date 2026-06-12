@@ -19,11 +19,11 @@
     <section>
       <h2>Basic</h2>
       <au-file-upload label="Upload Files" multiple required max-files="3" max-size-mb="2" max-total-size-mb="2"
-        accept=".txt, .jpg,.png,application/pdf" msg-button-text="Click button or drag & drop files to upload"
-        msg-drop-text="Drag & drop files here" msg-remove-text="Delete"
+        accept=".txt, .jpg,.png,application/pdf" msg-drop-text="Drag & drop files here" msg-remove-text="Delete"
         msg-required="You must upload at least one document." msg-type-error="is not a supported file format"
         msg-size-error="is too large. Limit is" msg-count-error="You can only attach up to"
-        msg-total-size-error="Total Size: ">
+        msg-total-size-error="Total Size: " msg-added="{count} file(s) added."
+        msg-removed="{fileName} removed." msg-remove-file-label="Remove {fileName}">
         <button slot="trigger" class="custom-btn--primary-flat">Choose file...</button>
         <div slot="hint">.txt, .jpg, .png, application/pdf</div>
       </au-file-upload>
@@ -33,14 +33,106 @@
       <h2>Custom Style</h2>
       <p>Using <code>::part</code> style delete button(or css variables)</p>
       <au-file-upload class="custom-file-upload" label="Upload Files" multiple required max-files="3" max-size-mb="2"
-        max-total-size-mb="2" accept=".txt, .jpg,.png,application/pdf"
-        msg-button-text="Click button or drag & drop files to upload" msg-drop-text="Drag & drop files here"
+        max-total-size-mb="2" accept=".txt, .jpg,.png,application/pdf" msg-drop-text="Drag & drop files here"
         msg-remove-text="Delete" msg-required="You must upload at least one document."
         msg-type-error="is not a supported file format" msg-size-error="is too large. Limit is"
-        msg-count-error="You can only attach up to" msg-total-size-error="Total Size: ">
+        msg-count-error="You can only attach up to" msg-total-size-error="Total Size: "
+        msg-added="{count} file(s) added." msg-removed="{fileName} removed."
+        msg-remove-file-label="Remove {fileName}">
         <button slot="trigger" class="custom-btn--primary-flat">Choose file...</button>
         <div slot="hint">.txt, .jpg, .png, application/pdf</div>
       </au-file-upload>
+    </section>
+    <section>
+      <h2>Attributes</h2>
+      <table>
+        <caption>The Accesserty UI Kit file upload attributes:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>label</td>
+            <td>Visible label for the file upload control.</td>
+          </tr>
+          <tr>
+            <td>accept</td>
+            <td>Accepted file types, forwarded to the native file input.</td>
+          </tr>
+          <tr>
+            <td>multiple</td>
+            <td>Allows selecting more than one file.</td>
+          </tr>
+          <tr>
+            <td>max-files</td>
+            <td>Maximum number of files allowed.</td>
+          </tr>
+          <tr>
+            <td>max-size-mb</td>
+            <td>Maximum size per file in MB.</td>
+          </tr>
+          <tr>
+            <td>max-total-size-mb</td>
+            <td>Maximum total size across all selected files in MB.</td>
+          </tr>
+          <tr>
+            <td>msg-drop-text</td>
+            <td>Drag-and-drop area text.</td>
+          </tr>
+          <tr>
+            <td>msg-remove-text</td>
+            <td>Visible text for each remove button.</td>
+          </tr>
+          <tr>
+            <td>msg-remove-file-label</td>
+            <td>Accessible name template for each remove button. Supports <code>{fileName}</code>.</td>
+          </tr>
+          <tr>
+            <td>msg-added</td>
+            <td>Live region message when files are added. Supports <code>{count}</code>.</td>
+          </tr>
+          <tr>
+            <td>msg-removed</td>
+            <td>Live region message when a file is removed. Supports <code>{fileName}</code>.</td>
+          </tr>
+          <tr>
+            <td>msg-required</td>
+            <td>Validation message shown when the component is required but empty.</td>
+          </tr>
+          <tr>
+            <td>msg-type-error</td>
+            <td>File type error message. Supports either a legacy suffix or a template with <code>{fileName}</code>.</td>
+          </tr>
+          <tr>
+            <td>msg-size-error</td>
+            <td>File size error message. Supports either a legacy suffix or a template with <code>{fileName}</code> and <code>{maxSize}</code>.</td>
+          </tr>
+          <tr>
+            <td>msg-count-error</td>
+            <td>File count error message. Supports either a legacy suffix or a template with <code>{fileName}</code> and <code>{maxFiles}</code>.</td>
+          </tr>
+          <tr>
+            <td>msg-total-size-error</td>
+            <td>Total file size error message. Supports either a legacy prefix or a template with <code>{maxTotalSize}</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>&lt;au-file-upload
+  label="上傳檔案"
+  msg-drop-text="將檔案拖曳到這裡"
+  msg-remove-text="刪除"
+  msg-remove-file-label="刪除 {fileName}"
+  msg-added="已新增 {count} 個檔案"
+  msg-removed="已移除 {fileName}"
+  msg-required="請至少上傳一個檔案"
+  msg-type-error="{fileName} 的檔案格式不支援"
+  msg-size-error="{fileName} 超過 {maxSize}MB"
+  msg-count-error="{fileName} 無法新增，最多只能上傳 {maxFiles} 個檔案"
+  msg-total-size-error="檔案總大小不可超過 {maxTotalSize}MB"&gt;
+&lt;/au-file-upload&gt;</code></pre>
     </section>
     <section>
       <h2>CSS Variables</h2>

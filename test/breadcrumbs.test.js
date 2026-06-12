@@ -108,4 +108,35 @@ describe("AuBreadcrumbs", () => {
     const nav = el.shadowRoot.querySelector('nav');
     expect(nav.getAttribute('aria-label')).to.equal('My crumbs');
   });
+
+  it('uses localized link title template when provided', async () => {
+    const el = await fixture(html`
+      <au-breadcrumbs
+        data-link-title-template="前往{text}"
+        items='[{"text":"首頁","url":"/"}, {"text":"目前頁"}]'
+      ></au-breadcrumbs>
+    `);
+    const anchor = el.shadowRoot.querySelector('a');
+    expect(anchor.getAttribute('title')).to.equal('前往首頁');
+  });
+
+  it('escapes rendered text, separator, link title, and inherited nav labels', async () => {
+    const el = await fixture(html`
+      <au-breadcrumbs
+        aria-label='Breadcrumb "trail"'
+        separator="<"
+        data-link-title-template="前往{text}"
+        items='[{"text":"<Home>","url":"/"}, {"text":"Current"}]'
+      ></au-breadcrumbs>
+    `);
+    const nav = el.shadowRoot.querySelector('nav');
+    const anchor = el.shadowRoot.querySelector('a');
+    const separator = el.shadowRoot.querySelector('li span[aria-hidden="true"]');
+
+    expect(nav.getAttribute('aria-label')).to.equal('Breadcrumb "trail"');
+    expect(anchor.textContent).to.include('<Home>');
+    expect(anchor.getAttribute('title')).to.equal('前往<Home>');
+    expect(separator.textContent).to.equal('<');
+    expect(el.shadowRoot.querySelector('a span').innerHTML).to.equal('&lt;Home&gt;');
+  });
 });

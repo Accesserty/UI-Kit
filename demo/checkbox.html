@@ -42,6 +42,18 @@
           <td>disabled</td>
           <td>checkbox disabled</td>
         </tr>
+        <tr>
+          <td>label</td>
+          <td>Fallback visible label text when no slotted label is supplied.</td>
+        </tr>
+        <tr>
+          <td>aria-label</td>
+          <td>Accessible name passed to the internal checkbox input.</td>
+        </tr>
+        <tr>
+          <td>aria-labelledby</td>
+          <td>Accessible label reference passed to the internal checkbox input.</td>
+        </tr>
       </table>
     </section>
     <section>
@@ -58,6 +70,10 @@
       <au-checkbox name="basic-checkbox" value="Checkbox_value4" checked disabled>
         Checkbox4(disabled, checked)
       </au-checkbox>
+    </section>
+    <section>
+      <h2>Localized Label Attribute</h2>
+      <au-checkbox name="localized-checkbox" value="agree" label="我同意服務條款"></au-checkbox>
     </section>
     <section>
       <h2>Custom Style</h2>

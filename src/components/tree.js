@@ -9,10 +9,12 @@ class AuTree extends HTMLElement {
     this.handleNodeExpand = this.handleNodeExpand.bind(this);
     this.handleNodeCheckChange = this.handleNodeCheckChange.bind(this);
     this._toggleLabel = null;
+    this._fallbackNodeLabel = 'Node';
+    this._toggleLabelTemplate = null;
   }
 
   static get observedAttributes() {
-    return ['show-checkbox'];
+    return ['show-checkbox', 'data-text-node', 'data-text-toggle'];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -24,6 +26,18 @@ class AuTree extends HTMLElement {
         else node.removeAttribute('show-checkbox');
       });
     }
+    if (name === 'data-text-node') {
+      this._fallbackNodeLabel = newValue || 'Node';
+      this.getAllNodes().forEach(node => {
+        node.fallbackNodeLabel = this._fallbackNodeLabel;
+      });
+    }
+    if (name === 'data-text-toggle') {
+      this._toggleLabelTemplate = newValue;
+      this.getAllNodes().forEach(node => {
+        node.toggleLabelTemplate = this._toggleLabelTemplate;
+      });
+    }
   }
 
   get toggleLabel() { return this._toggleLabel; }
@@ -32,6 +46,19 @@ class AuTree extends HTMLElement {
     this.getAllNodes().forEach(node => {
       node.toggleLabel = val;
     });
+  }
+
+  get fallbackNodeLabel() { return this._fallbackNodeLabel; }
+  set fallbackNodeLabel(val) {
+    this._fallbackNodeLabel = val || 'Node';
+    this.setAttribute('data-text-node', this._fallbackNodeLabel);
+  }
+
+  get toggleLabelTemplate() { return this._toggleLabelTemplate; }
+  set toggleLabelTemplate(val) {
+    this._toggleLabelTemplate = val;
+    if (val === null || val === undefined) this.removeAttribute('data-text-toggle');
+    else this.setAttribute('data-text-toggle', val);
   }
 
   get data() { return this._data; }
@@ -91,6 +118,8 @@ class AuTree extends HTMLElement {
         const node = document.createElement('au-tree-node');
         node.data = item; // 傳遞資料物件
         node.toggleLabel = this._toggleLabel; // 傳遞 toggleLabel 設定
+        node.fallbackNodeLabel = this._fallbackNodeLabel;
+        node.toggleLabelTemplate = this._toggleLabelTemplate;
         if (this._showCheckbox) node.setAttribute('show-checkbox', '');
         rootContainer.appendChild(node);
       });
@@ -274,6 +303,8 @@ class AuTreeNode extends HTMLElement {
     this._initialized = false;
     this._uid = `au-tree-node-${Math.random().toString(36).substr(2, 9)}`;
     this._toggleLabel = null;
+    this._fallbackNodeLabel = 'Node';
+    this._toggleLabelTemplate = null;
   }
 
   static get observedAttributes() {
@@ -289,6 +320,24 @@ class AuTreeNode extends HTMLElement {
     }
   }
 
+  get fallbackNodeLabel() { return this._fallbackNodeLabel; }
+  set fallbackNodeLabel(val) {
+    this._fallbackNodeLabel = val || 'Node';
+    this.renderContent();
+    if (this.shadowRoot) {
+      this.shadowRoot.querySelectorAll('au-tree-node').forEach(n => n.fallbackNodeLabel = this._fallbackNodeLabel);
+    }
+  }
+
+  get toggleLabelTemplate() { return this._toggleLabelTemplate; }
+  set toggleLabelTemplate(val) {
+    this._toggleLabelTemplate = val;
+    this.renderContent();
+    if (this.shadowRoot) {
+      this.shadowRoot.querySelectorAll('au-tree-node').forEach(n => n.toggleLabelTemplate = val);
+    }
+  }
+
   get data() { return this._data; }
   set data(val) {
     this._data = val;
@@ -297,6 +346,25 @@ class AuTreeNode extends HTMLElement {
 
   get label() { return this._data.label || ''; }
   get hasChildren() { return this._data.children && this._data.children.length > 0; }
+
+  getLabelText() {
+    return this._data.label || this._fallbackNodeLabel;
+  }
+
+  formatText(template, values = {}) {
+    return Object.entries(values).reduce((message, [key, value]) => {
+      return message.replaceAll(`{${key}}`, String(value));
+    }, template);
+  }
+
+  escapeHTML(value) {
+    return String(value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
 
 
   connectedCallback() {
@@ -717,6 +785,8 @@ class AuTreeNode extends HTMLElement {
         const childNode = document.createElement('au-tree-node');
         childNode.data = childData;
         childNode.toggleLabel = this._toggleLabel;
+        childNode.fallbackNodeLabel = this._fallbackNodeLabel;
+        childNode.toggleLabelTemplate = this._toggleLabelTemplate;
         if (showCheckbox) childNode.setAttribute('show-checkbox', '');
         group.appendChild(childNode);
       });
@@ -736,19 +806,21 @@ class AuTreeNode extends HTMLElement {
     const container = this.shadowRoot.querySelector('.node-content');
     if (!container) return;
     const showCheckbox = this.hasAttribute('show-checkbox');
-    const labelText = this._data.label || 'Node'; // 取得純文字標籤
+    const labelText = this.getLabelText(); // 取得純文字標籤
+    const escapedLabelText = this.escapeHTML(labelText);
 
     // 1. 修正：直接在 Host 上設定 aria-label，解決 Shadow DOM 邊界問題
     this.setAttribute('aria-label', labelText);
-    const arrowIcon = `<svg class="toggle-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" aria-hidden="true"/></svg><span class="visually-hidden">${this._data.label || 'Node'}</span>`;
+    const arrowIcon = `<svg class="toggle-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" aria-hidden="true"/></svg><span class="visually-hidden">${escapedLabelText}</span>`;
 
     const toggleLabelText = typeof this._toggleLabel === 'function'
       ? this._toggleLabel(this._data)
-      : `Toggle ${this._data.label || 'Node'}`;
+      : this.formatText(this._toggleLabelTemplate || 'Toggle {label}', { label: labelText });
+    const escapedToggleLabelText = this.escapeHTML(toggleLabelText);
 
     // 切換按鈕
     const buttonHtml = this.hasChildren
-      ? `<button class="toggle-btn" tabindex="-1" aria-label="${toggleLabelText}">${arrowIcon}</button>`
+      ? `<button class="toggle-btn" tabindex="-1" aria-label="${escapedToggleLabelText}">${arrowIcon}</button>`
       : `<button class="toggle-btn hidden" tabindex="-1" aria-hidden="true">${arrowIcon}</button>`; // 佔位符
 
     // 核取方塊
@@ -761,8 +833,8 @@ class AuTreeNode extends HTMLElement {
 
     const labelId = `${this._uid}-label`;
     const labelHtml = showCheckbox
-      ? `<label id="${labelId}" for="${this._uid}">${this._data.label || 'Node'}</label></div>`
-      : `<span>${this._data.label || 'Node'}</span>`;
+      ? `<label id="${labelId}" for="${this._uid}">${escapedLabelText}</label></div>`
+      : `<span>${escapedLabelText}</span>`;
     // 更好：如果沒有核取方塊， label 表現為文字。
     // 如果我們想要在沒有核取方塊時點擊標籤展開，我們需要監聽器。
 

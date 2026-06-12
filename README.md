@@ -179,6 +179,70 @@ Wrap usage in `<ClientOnly>` to prevent SSR hydration mismatches:
 </ClientOnly>
 ```
 
+## Localization
+
+Accesserty UI Kit components are framework-agnostic Web Components. Pass translated text through attributes, slots, or JavaScript properties from your application i18n layer.
+
+```html
+<au-file-upload
+  label="上傳檔案"
+  msg-drop-text="將檔案拖曳到這裡"
+  msg-remove-text="刪除"
+  msg-remove-file-label="刪除 {fileName}"
+  msg-added="已新增 {count} 個檔案"
+  msg-removed="已移除 {fileName}">
+</au-file-upload>
+
+<au-pagination
+  data-text-pagination-label="分頁"
+  data-text-page-size="每頁顯示筆數"
+  data-text-page-announcement="目前第 {page} 頁">
+</au-pagination>
+
+<au-tabs
+  data-text-tab="頁籤 {index}"
+  data-text-badge-label-prefix="補充資訊：">
+</au-tabs>
+
+<au-tree
+  data-text-node="節點"
+  data-text-toggle="展開或收合 {label}">
+</au-tree>
+
+<au-accordion
+  exclusive
+  data-text-exclusive-hint="一次只能展開一個區塊">
+</au-accordion>
+
+<au-breadcrumbs
+  label="網站導覽"
+  data-link-title-template="前往{text}">
+</au-breadcrumbs>
+
+<au-dropdown data-text-trigger="更多操作"></au-dropdown>
+
+<au-rating
+  data-text-rating="滿意度評分"
+  data-text-star="{value} 分，共 {max} 分"
+  data-text-score="{value} / {max} 分 {scoreInfo}">
+</au-rating>
+
+<au-input label="電子信箱" placeholder="請輸入電子信箱" data-clear-label="清除內容"></au-input>
+
+<au-textarea label="意見內容" placeholder="請輸入你的意見"></au-textarea>
+
+<au-checkbox label="我同意服務條款"></au-checkbox>
+
+<au-radio-group label="付款方式">
+  <au-radio value="card" label="信用卡"></au-radio>
+  <au-radio value="transfer" label="轉帳"></au-radio>
+</au-radio-group>
+
+<au-switch label="接收通知" on="開啟" off="關閉"></au-switch>
+```
+
+For framework use, bind these attributes to your normal i18n strings, such as `:label="t('upload.label')"`, `data-text-page-announcement={t('pagination.announcement')}`, or `[attr.data-text-toggle]="treeToggleLabel"`.
+
 
 ## CSS Theming
 

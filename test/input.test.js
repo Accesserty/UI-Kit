@@ -37,6 +37,23 @@ describe('AuInput', () => {
     expect(el.value).to.equal('');
   });
 
+  it('updates aria-label and aria-labelledby on the internal input', async () => {
+    const el = await fixture(html`<au-input aria-label="搜尋"></au-input>`);
+    const input = el.shadowRoot.querySelector('input');
+
+    expect(input.getAttribute('aria-label')).to.equal('搜尋');
+
+    el.setAttribute('aria-label', 'Search');
+    await nextFrame();
+    expect(input.getAttribute('aria-label')).to.equal('Search');
+
+    el.removeAttribute('aria-label');
+    el.setAttribute('aria-labelledby', 'search-label');
+    await nextFrame();
+    expect(input.hasAttribute('aria-label')).to.be.false;
+    expect(input.getAttribute('aria-labelledby')).to.equal('search-label');
+  });
+
   it('hides clear button if no value or no data-clear attr', async () => {
     const el = await fixture(html`<au-input value=""></au-input>`);
     const clearBtn = el.shadowRoot.querySelector('.clear-input');

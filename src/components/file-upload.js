@@ -1,5 +1,27 @@
 class AuFileUpload extends HTMLElement {
   static formAssociated = true;
+  static get observedAttributes() {
+    return [
+      'accept',
+      'disabled',
+      'form',
+      'id',
+      'label',
+      'multiple',
+      'msg-drop-text',
+      'msg-total-size-error',
+      'msg-type-error',
+      'msg-size-error',
+      'msg-count-error',
+      'msg-added',
+      'msg-removed',
+      'msg-remove-text',
+      'msg-remove-file-label',
+      'msg-required',
+      'name',
+      'required',
+    ];
+  }
 
   constructor() {
     super();
@@ -240,7 +262,50 @@ class AuFileUpload extends HTMLElement {
     this.shadowRoot.append(style, this.wrapper);
   }
 
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue) return;
+    if (!this.shadowRoot) return;
+
+    switch (name) {
+      case 'id':
+        this._id = newValue || this.generateId();
+        if (this.labelEl) this.labelEl.setAttribute('for', this._id);
+        if (this.fileInput) this.fileInput.id = this._id;
+        break;
+      case 'label':
+        this.updateLabelText();
+        break;
+      case 'msg-drop-text':
+        this.updateDropText();
+        break;
+      case 'msg-remove-text':
+      case 'msg-remove-file-label':
+        this.updateFileList();
+        break;
+      case 'msg-required':
+        this.checkValidity();
+        break;
+      case 'disabled':
+        this.syncBooleanAttributeToInput('disabled');
+        break;
+      case 'multiple':
+        this.syncBooleanAttributeToInput('multiple');
+        break;
+      case 'required':
+        this.syncBooleanAttributeToInput('required');
+        this.checkValidity();
+        break;
+      case 'accept':
+      case 'form':
+      case 'name':
+        this.syncAttributeToInput(name);
+        break;
+    }
+  }
+
   connectedCallback() {
+    this.updateLabelText();
+    this.updateDropText();
     document.addEventListener('dragover', this._preventDefault);
     document.addEventListener('drop', this._preventDefault);
   }
@@ -252,6 +317,46 @@ class AuFileUpload extends HTMLElement {
   }
 
   _preventDefault = e => e.preventDefault();
+
+  updateLabelText() {
+    if (this.labelEl) this.labelEl.textContent = this.getAttribute('label') || 'Upload files';
+  }
+
+  updateDropText() {
+    if (this.dropZone) this.dropZone.textContent = this.getAttribute('msg-drop-text') || 'Drop files here';
+  }
+
+  getText(name, fallback) {
+    return this.getAttribute(name) || fallback;
+  }
+
+  formatMessage(name, fallback, values = {}) {
+    const template = this.getText(name, fallback);
+    return Object.entries(values).reduce((message, [key, value]) => {
+      return message.replaceAll(`{${key}}`, String(value));
+    }, template);
+  }
+
+  formatFileError(name, fallbackTemplate, legacySuffix, fileName, values = {}) {
+    const customMessage = this.getAttribute(name);
+    if (customMessage && customMessage.includes('{')) {
+      return this.formatMessage(name, fallbackTemplate, { fileName, ...values });
+    }
+    return `${fileName} ${customMessage || legacySuffix}`;
+  }
+
+  syncAttributeToInput(name) {
+    if (!this.fileInput) return;
+    const value = this.getAttribute(name);
+    if (value === null) this.fileInput.removeAttribute(name);
+    else this.fileInput.setAttribute(name, value);
+  }
+
+  syncBooleanAttributeToInput(name) {
+    if (!this.fileInput) return;
+    if (this.hasAttribute(name)) this.fileInput.setAttribute(name, '');
+    else this.fileInput.removeAttribute(name);
+  }
 
   revokePreviewUrl(file) {
     const url = this.previewUrls.get(file);
@@ -269,10 +374,6 @@ class AuFileUpload extends HTMLElement {
   handleFiles(fileList) {
     if (this.hasAttribute('disabled')) return;
     const maxTotalSizeMB = parseFloat(this.getAttribute('max-total-size-mb') || '20');
-    const msgTotalSizeError = this.getAttribute('msg-total-size-error') || 'Total file size exceeds limit of';
-    const msgTypeError = this.getAttribute('msg-type-error') || 'is not an accepted file type.';
-    const msgSizeError = this.getAttribute('msg-size-error') || 'exceeds the maximum size of';
-    const msgCountError = this.getAttribute('msg-count-error') || 'You can only upload up to';
     const maxFiles = parseInt(this.getAttribute('max-files') || '5', 10);
     const maxSizeMB = parseFloat(this.getAttribute('max-size-mb') || '5');
     const acceptAttr = this.getAttribute('accept');
@@ -290,11 +391,22 @@ class AuFileUpload extends HTMLElement {
         return file.type === type || file.name.endsWith(type);
       });
       if (!isValidType) {
-        errorMessages.push(`${file.name} ${msgTypeError}`);
+        errorMessages.push(this.formatFileError(
+          'msg-type-error',
+          '{fileName} is not an accepted file type.',
+          'is not an accepted file type.',
+          file.name
+        ));
         return;
       }
       if (file.size > maxSizeMB * 1024 * 1024) {
-        errorMessages.push(`${file.name} ${msgSizeError} ${maxSizeMB}MB.`);
+        errorMessages.push(this.formatFileError(
+          'msg-size-error',
+          '{fileName} exceeds the maximum size of {maxSize}MB.',
+          `exceeds the maximum size of ${maxSizeMB}MB.`,
+          file.name,
+          { maxSize: maxSizeMB }
+        ));
         return;
       }
       validFiles.push(file);
@@ -309,13 +421,22 @@ class AuFileUpload extends HTMLElement {
     const dropped = uniqueFiles.slice(slotsLeft);
 
     dropped.forEach(file => {
-      errorMessages.push(`${file.name} ${msgCountError} ${maxFiles} files.`);
+      errorMessages.push(this.formatFileError(
+        'msg-count-error',
+        '{fileName} cannot be added. You can only upload up to {maxFiles} files.',
+        `You can only upload up to ${maxFiles} files.`,
+        file.name,
+        { maxFiles }
+      ));
     });
 
     const totalSize = this.files.reduce((sum, f) => sum + f.size, 0) +
                       filesToAdd.reduce((sum, f) => sum + f.size, 0);
     if (totalSize > maxTotalSizeMB * 1024 * 1024) {
-      errorMessages.push(`${msgTotalSizeError} ${maxTotalSizeMB}MB.`);
+      const totalSizeMessage = this.getAttribute('msg-total-size-error')?.includes('{')
+        ? this.formatMessage('msg-total-size-error', 'Total file size exceeds limit of {maxTotalSize}MB.', { maxTotalSize: maxTotalSizeMB })
+        : `${this.getText('msg-total-size-error', 'Total file size exceeds limit of')} ${maxTotalSizeMB}MB.`;
+      errorMessages.push(totalSizeMessage);
       filesToAdd.length = 0;
     }
 
@@ -328,7 +449,7 @@ class AuFileUpload extends HTMLElement {
     this.files.push(...filesToAdd);
     this.updateFileList();
     this.updateUsage();
-    this.announce(`${filesToAdd.length} file${filesToAdd.length > 1 ? 's' : ''} added.`);
+    this.announce(this.formatMessage('msg-added', '{count} file(s) added.', { count: filesToAdd.length }));
     this.syncFormValue();
     this.checkValidity();
     this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
@@ -392,7 +513,7 @@ class AuFileUpload extends HTMLElement {
       removeBtn.type = 'button';
       removeBtn.className = 'delete';
       removeBtn.textContent = this.getAttribute('msg-remove-text') || 'Remove';
-      removeBtn.setAttribute('aria-label', `Remove ${file.name}`);
+      removeBtn.setAttribute('aria-label', this.formatMessage('msg-remove-file-label', 'Remove {fileName}', { fileName: file.name }));
       removeBtn.setAttribute('part', 'delete');
       removeBtn.addEventListener('click', () => {
         if (this.hasAttribute('disabled')) return;
@@ -400,7 +521,7 @@ class AuFileUpload extends HTMLElement {
         this.files = this.files.filter(f => f.name !== file.name || f.size !== file.size);
         this.updateFileList();
         this.updateUsage();
-        this.announce(`${file.name} removed.`);
+        this.announce(this.formatMessage('msg-removed', '{fileName} removed.', { fileName: file.name }));
         this.syncFormValue();
         this.checkValidity();
         this.dispatchEvent(new CustomEvent('remove-file', { bubbles: true, composed: true, detail: file }));
@@ -417,7 +538,7 @@ class AuFileUpload extends HTMLElement {
     this.files = this.files.filter(f => f.name !== file.name || f.size !== file.size);
     this.updateFileList();
     this.updateUsage();
-    this.announce(`${file.name} removed.`);
+    this.announce(this.formatMessage('msg-removed', '{fileName} removed.', { fileName: file.name }));
     this.syncFormValue();
     this.checkValidity();
     this.dispatchEvent(new CustomEvent('remove-file', { detail: file }));
@@ -439,7 +560,7 @@ class AuFileUpload extends HTMLElement {
     if (this.hasAttribute('required') && this.files.length === 0) {
       this.internals.setValidity(
         { valueMissing: true },
-        this.getAttribute('msg-required') || 'Please select at least one file.',
+        this.getText('msg-required', 'Please select at least one file.'),
         this.fileInput
       );
       return false;

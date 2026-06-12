@@ -65,6 +65,33 @@ describe('AuTree', () => {
       expect(btn.getAttribute('aria-label')).to.equal('Custom Root 1');
     });
 
+    it('uses localized toggle label template from attribute', async () => {
+      const el = await fixture(html`
+        <au-tree
+          data-text-node="節點"
+          data-text-toggle="展開或收合 {label}"
+          .data=${sampleData}
+        ></au-tree>
+      `);
+      const node = el.shadowRoot.querySelector('au-tree-node');
+      const btn = node.shadowRoot.querySelector('.toggle-btn');
+      expect(btn.getAttribute('aria-label')).to.equal('展開或收合 Root 1');
+    });
+
+    it('uses localized fallback node label when data label is missing', async () => {
+      const el = await fixture(html`
+        <au-tree
+          data-text-node="未命名節點"
+          data-text-toggle="展開或收合 {label}"
+          .data=${[{ children: [{ label: 'Child' }] }]}
+        ></au-tree>
+      `);
+      const node = el.shadowRoot.querySelector('au-tree-node');
+      const btn = node.shadowRoot.querySelector('.toggle-btn');
+      expect(node.getAttribute('aria-label')).to.equal('未命名節點');
+      expect(btn.getAttribute('aria-label')).to.equal('展開或收合 未命名節點');
+    });
+
     it('propagates toggleLabel to children', async () => {
       const el = await fixture(html`<au-tree .data=${sampleData}></au-tree>`);
       el.toggleLabel = (node) => `Children ${node.label}`;

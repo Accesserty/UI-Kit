@@ -24,6 +24,7 @@
 
 ### au-accordion
 Tag: `<au-accordion>`, `<au-accordion-item>`
+Attributes (au-accordion): exclusive, data-text-exclusive-hint
 Attributes (accordion-item): open
 Properties: open (boolean getter/setter), exclusive (on au-accordion)
 Events: au-toggle (detail: { open })
@@ -32,7 +33,7 @@ CSS variables: 15+ (--au-accordion-heading-*, --au-accordion-content-*)
 
 ### au-breadcrumbs
 Tag: `<au-breadcrumbs>`
-Attributes: items (JSON array), separator, aria-label, label
+Attributes: items (JSON array), separator, aria-label, aria-labelledby, label, data-link-title-prefix, data-link-title-template (`{text}`, `{index}`)
 Properties: items (getter/setter), separator (getter/setter)
 Events: none
 Form-associated: No
@@ -47,7 +48,7 @@ CSS variables: 0 (styled via ::part())
 
 ### au-checkbox
 Tag: `<au-checkbox>`
-Attributes: name, value, checked, disabled, required
+Attributes: name, value, checked, disabled, required, label, aria-label, aria-labelledby
 Properties: checked (getter/setter), disabled (getter/setter)
 Events: change (detail: boolean), focus, blur
 Form-associated: Yes (setFormValue: value when checked, null when unchecked)
@@ -55,6 +56,7 @@ CSS variables: 14+ (--au-checkbox-*)
 
 ### au-dropdown
 Tags: `<au-dropdown>`, `<au-dropdown-item>`
+Attributes (au-dropdown): data-text-trigger
 Attributes (dropdown-item): value
 Properties: isOpen (getter/setter on au-dropdown)
 Events: selected (detail: { value }) on au-dropdown-item
@@ -63,7 +65,8 @@ CSS variables: 11 (--au-dropdown-menu-*, --au-dropdown-item-*, --au-dropdown-foc
 
 ### au-file-upload
 Tag: `<au-file-upload>`
-Attributes: accept, multiple, name, disabled, required, label, max-files, max-size-mb, max-total-size-mb, msg-* (error messages)
+Attributes: accept, multiple, name, disabled, required, label, max-files, max-size-mb, max-total-size-mb, msg-drop-text, msg-remove-text, msg-remove-file-label, msg-added, msg-removed, msg-required, msg-type-error, msg-size-error, msg-count-error, msg-total-size-error
+Localization templates: msg-remove-file-label and msg-removed support `{fileName}`; msg-added supports `{count}`; msg-size-error supports `{fileName}` and `{maxSize}`; msg-count-error supports `{fileName}` and `{maxFiles}`; msg-total-size-error supports `{maxTotalSize}`
 Properties: value (getter/setter: File[])
 Methods: handleFiles(files), formResetCallback(), checkValidity()
 Events: change, remove-file (detail: File)
@@ -72,7 +75,7 @@ CSS variables: 20+ (--au-file-upload-label-*, --au-file-upload-area-*, --au-file
 
 ### au-input
 Tag: `<au-input>`
-Attributes: type, name, value, placeholder, required, disabled, readonly, label, min, max, step, pattern, autocomplete, inputmode, maxlength, minlength, list, data-size (small|large), data-layout (vertical), data-clear, data-clear-label, id
+Attributes: type, name, value, placeholder, required, disabled, readonly, label, aria-label, aria-labelledby, min, max, step, pattern, autocomplete, inputmode, maxlength, minlength, list, data-size (small|large), data-layout (vertical), data-clear, data-clear-label, id
 Properties: value (getter/setter), disabled, required, readonly (all getter/setter), validity, validationMessage, willValidate
 Methods: focus(), clear(), suggest(val), checkValidity(), reportValidity()
 Slots: prefix, affix
@@ -83,6 +86,7 @@ CSS variables: 22 (--au-input-wrapper-bg, --au-input-label-*, --au-input-padding
 ### au-pagination
 Tag: `<au-pagination>`
 Attributes: data-total, data-current-page, data-pager-count, data-page-size, data-page-size-options, data-layout, data-text-* (localization)
+Localization attributes: data-text-total-pages-prefix, data-text-page, data-text-total-items-suffix, data-text-per, data-text-first, data-text-prev, data-text-next, data-text-last, data-text-go, data-text-goto, data-text-pagination-label, data-text-page-size, data-text-page-announcement (`{page}`)
 Properties: pageSizeOptions (getter/setter), layout (getter/setter), totalPages (getter), pagers (getter)
 Events: page-change (detail: page number), page-size-change (detail: size)
 Form-associated: No
@@ -90,8 +94,8 @@ CSS variables: inherits --au-btn-* from button styles
 
 ### au-radio-group
 Tags: `<au-radio-group>`, `<au-radio>` (slotted children)
-Attributes (au-radio-group): disabled, direction (vertical), aria-label
-Attributes (au-radio): value, checked, disabled
+Attributes (au-radio-group): disabled, direction (vertical), aria-label, aria-labelledby, label
+Attributes (au-radio): value, checked, disabled, label
 Properties: value (getter — currently selected), disabled (getter/setter)
 Events: change (detail: { value })
 Form-associated: Yes (au-radio-group)
@@ -99,7 +103,7 @@ CSS variables: 12 (--au-radio-content-gap, --au-radio-input-*, --au-radio-label-
 
 ### au-rating
 Tag: `<au-rating>`
-Attributes: value, max, labels (JSON), name, show-score, score-info, disabled, readonly
+Attributes: value, max, labels (comma-separated), name, show-score, score-info, disabled, readonly, aria-label, data-text-rating, data-text-star (`{value}`, `{max}`), data-text-score (`{value}`, `{max}`, `{scoreInfo}`)
 Properties: value, max, labels, name, showScore, scoreInfo, disabled, readonly (all getter/setter)
 Events: change (detail: { value: number })
 Form-associated: Yes
@@ -107,8 +111,8 @@ CSS variables: 12 (--au-rating-gap, --au-rating-star-*, --au-rating-focus-*, --a
 
 ### au-switch
 Tag: `<au-switch>`
-Attributes: name, value, checked, disabled
-Slots: default (label text), on attribute text, off attribute text
+Attributes: name, value, checked, disabled, label, aria-label, aria-labelledby, on, off
+Slots: default (label text). `label` provides fallback label text when no slotted label is supplied.
 Properties: checked (getter/setter), disabled (getter/setter)
 Events: change (detail: boolean — checked state)
 Form-associated: Yes (setFormValue: value when checked, null when unchecked)
@@ -117,6 +121,7 @@ CSS variables: 17 (--au-switch-gap, --au-switch-padding-*, --au-switch-container
 ### au-tabs
 Tag: `<au-tabs>`
 Children: elements with role="tabpanel" (auto-detected via slot)
+Localization attributes: data-text-tab (`{index}` fallback tab label), data-text-badge-label-prefix
 Properties: selectedIndex (getter/setter)
 Events: tab-change (detail: { index, label })
 Form-associated: No
@@ -124,7 +129,7 @@ CSS variables: 26 (--au-tabs-*, --au-tabpanels-*, --au-tab-panel-*, --au-tab-bad
 
 ### au-textarea
 Tag: `<au-textarea>`
-Attributes: value, placeholder, name, rows, cols, disabled, readonly, required, maxlength, minlength, label, id
+Attributes: value, placeholder, name, rows, cols, disabled, readonly, required, maxlength, minlength, label, aria-label, aria-labelledby, id
 Properties: value (getter/setter), disabled, readonly (getter/setter), validity, validationMessage, willValidate
 Methods: checkValidity(), reportValidity()
 Events: input, change (bubbles, composed)
@@ -133,8 +138,8 @@ CSS variables: 15 (--au-textarea-label-*, --au-textarea-container-*, --au-textar
 
 ### au-tree
 Tags: `<au-tree>`, `<au-tree-node>` (auto-created from data)
-Attributes (au-tree): show-checkbox
-Properties (au-tree): data (getter/setter — JS object tree), toggleLabel (getter/setter)
+Attributes (au-tree): show-checkbox, data-text-node, data-text-toggle (`{label}`)
+Properties (au-tree): data (getter/setter — JS object tree), toggleLabel (getter/setter), fallbackNodeLabel (getter/setter), toggleLabelTemplate (getter/setter)
 Events: change (on au-tree, when checkbox state changes)
 Form-associated: No
 CSS variables: 30+ (--au-tree-*, --au-tree-node-*, --au-tree-node-checkbox-*, --au-tree-node-toggle-*)

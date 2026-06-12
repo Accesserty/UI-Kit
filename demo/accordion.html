@@ -86,6 +86,37 @@
     </section>
 
     <section>
+      <h2>Attributes</h2>
+      <table>
+        <caption>The Accesserty UI Kit accordion attributes:</caption>
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>exclusive</td>
+            <td>When present on <code>&lt;au-accordion&gt;</code>, only one item can stay open at a time.</td>
+          </tr>
+          <tr>
+            <td>data-text-exclusive-hint</td>
+            <td>Visually-hidden text that describes exclusive accordion behavior to assistive technologies.</td>
+          </tr>
+          <tr>
+            <td>open</td>
+            <td>When present on <code>&lt;au-accordion-item&gt;</code>, the item is open by default.</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>&lt;au-accordion
+  exclusive
+  data-text-exclusive-hint="一次只能展開一個區塊"&gt;
+&lt;/au-accordion&gt;</code></pre>
+    </section>
+
+    <section>
       <h2>Default Open</h2>
       <p>Add `open` attribute <code>&lt;au-accordion-item open&gt;</code> </p>
       <div role="group" aria-labelledby="group-label-default-open">
@@ -122,7 +153,7 @@
       <br>
       <div role="group" aria-labelledby="group-label-exclusive">
         <span id="group-label-exclusive" hidden>Exclusive</span>
-        <au-accordion exclusive>
+        <au-accordion exclusive data-text-exclusive-hint="Only one section may be expanded at a time.">
           <au-accordion-item>
             <div slot="heading">Heading 1</div>
             <div slot="content">Content 1 — opening another item will close this one.</div>

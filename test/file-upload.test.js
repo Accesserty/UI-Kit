@@ -1,7 +1,7 @@
 /**
  * @open-wc/testing
  */
-import { fixture, html, expect } from '@open-wc/testing';
+import { fixture, html, expect, nextFrame } from '@open-wc/testing';
 import '../src/components/file-upload.js';
 
 describe('<au-file-upload>', () => {
@@ -65,6 +65,37 @@ describe('<au-file-upload>', () => {
 
     const error = el.shadowRoot.querySelector('.error-list');
     expect(error.textContent).to.include('not an accepted');
+  });
+
+  it('supports localized file upload messages and templates', async () => {
+    const el = await fixture(html`
+      <au-file-upload
+        accept=".jpg"
+        msg-type-error="{fileName} 的檔案格式不支援"
+        msg-added="已新增 {count} 個檔案"
+        msg-removed="已移除 {fileName}"
+        msg-remove-file-label="刪除 {fileName}"
+      ></au-file-upload>
+    `);
+    const invalidFile = new File([''], 'bad.pdf', { type: 'application/pdf' });
+    const validFile = new File([''], 'good.jpg', { type: 'image/jpeg' });
+
+    el.handleFiles([invalidFile]);
+    await nextFrame();
+    expect(el.shadowRoot.querySelector('.error-list').textContent).to.include('bad.pdf 的檔案格式不支援');
+
+    el.handleFiles([validFile]);
+    await nextFrame();
+    await nextFrame();
+    expect(el.liveRegion.textContent).to.include('已新增 1 個檔案');
+
+    const removeBtn = el.shadowRoot.querySelector('button.delete');
+    expect(removeBtn.getAttribute('aria-label')).to.equal('刪除 good.jpg');
+
+    removeBtn.click();
+    await nextFrame();
+    await nextFrame();
+    expect(el.liveRegion.textContent).to.include('已移除 good.jpg');
   });
 
   it('shows error if file is too large', async () => {

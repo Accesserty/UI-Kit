@@ -78,9 +78,15 @@
         </tr>
         <tr>
           <td>data-link-title-prefix</td>
-          <td>link title prefix</td>
+          <td>Link title prefix. Ignored when <code>data-link-title-template</code> is set.</td>
           <td>string</td>
           <td>go to</td>
+        </tr>
+        <tr>
+          <td>data-link-title-template</td>
+          <td>Link title template. Supports <code>{text}</code> and <code>{index}</code>.</td>
+          <td>string</td>
+          <td></td>
         </tr>
         <tr>
           <td>items</td>
@@ -131,6 +137,22 @@
             }, 
             { 
               "text":"Contact"
+            }
+          ]'></au-breadcrumbs>
+    </section>
+    <section>
+      <h2>Link title template</h2>
+      <au-breadcrumbs data-link-title-template="前往{text}" items='[
+            { 
+              "text":"首頁",
+              "url":"/"
+            }, 
+            {
+              "text":"關於我們",
+              "url":"/about"
+            }, 
+            { 
+              "text":"聯絡我們"
             }
           ]'></au-breadcrumbs>
     </section>

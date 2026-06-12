@@ -60,6 +60,21 @@
           <td>Content of the menu item</td>
         </tr>
       </table>
+
+      <h3>Attributes</h3>
+      <table>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Description</th>
+        </tr>
+        <tr>
+          <td>data-text-trigger</td>
+          <td>Fallback trigger text when no <code>slot="trigger"</code> content is provided.</td>
+        </tr>
+      </table>
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>&lt;au-dropdown data-text-trigger="更多操作"&gt;
+  &lt;au-dropdown-item value="edit"&gt;編輯&lt;/au-dropdown-item&gt;
+&lt;/au-dropdown&gt;</code></pre>
     </section>
 
     <section>
@@ -76,6 +91,14 @@
         <br>
         <p id="basic-status"></p>
       </div>
+    </section>
+
+    <section>
+      <h2>Fallback Trigger Text</h2>
+      <au-dropdown data-text-trigger="More actions">
+        <au-dropdown-item value="1">Action 1</au-dropdown-item>
+        <au-dropdown-item value="2">Action 2</au-dropdown-item>
+      </au-dropdown>
     </section>
 
     <section>
