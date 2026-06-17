@@ -210,4 +210,47 @@ describe('AuInput', () => {
 
     expect(received).to.be.true;
   });
+
+  it('clones an external datalist into the shadow root', async () => {
+    const wrapper = await fixture(html`
+      <div>
+        <au-input label="Flavor" list="flavors"></au-input>
+        <datalist id="flavors">
+          <option value="Vanilla"></option>
+          <option value="Chocolate"></option>
+        </datalist>
+      </div>
+    `);
+    const el = wrapper.querySelector('au-input');
+    await nextFrame(); // connectedCallback defers list handling via rAF
+
+    const internal = el.shadowRoot.querySelector('datalist');
+    expect(internal).to.exist;
+    expect(internal.querySelectorAll('option').length).to.equal(2);
+  });
+
+  it('keeps the internal datalist in sync when the external one changes', async () => {
+    const wrapper = await fixture(html`
+      <div>
+        <au-input label="Flavor" list="flavors-dynamic"></au-input>
+        <datalist id="flavors-dynamic">
+          <option value="Vanilla"></option>
+        </datalist>
+      </div>
+    `);
+    const el = wrapper.querySelector('au-input');
+    await nextFrame();
+
+    const external = wrapper.querySelector('#flavors-dynamic');
+    const opt = document.createElement('option');
+    opt.value = 'Matcha';
+    external.appendChild(opt);
+
+    await nextFrame(); // allow the MutationObserver to fire
+
+    const internal = el.shadowRoot.querySelector('datalist');
+    const values = [...internal.querySelectorAll('option')].map(o => o.value);
+    expect(values).to.include('Matcha');
+    expect(internal.querySelectorAll('option').length).to.equal(2);
+  });
 });

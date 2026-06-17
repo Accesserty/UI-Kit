@@ -429,51 +429,77 @@ class AuInput extends HTMLElement {
   }
 
   /**
-   * Syncs the external datalist to an internal shadow DOM datalist
-   * because list attributes do not cross shadow DOM boundaries.
+   * Binds the external datalist to an internal shadow DOM datalist because
+   * `list` attributes do not cross shadow DOM boundaries.
+   *
+   * A MutationObserver keeps the internal copy in sync, so dynamically updated
+   * datalists (e.g. fetch-as-you-type autocomplete) stay current. The observer
+   * is torn down on re-target and in disconnectedCallback to avoid leaks.
    */
   _handleListAttribute(listId) {
     if (!this.shadowRoot || !this.input) return;
 
-    // Remove existing internal datalist if any
-    const existingDotted = this.shadowRoot.querySelector('datalist');
-    if (existingDotted) {
-      existingDotted.remove();
-    }
+    this._disconnectDatalistObserver();
+
+    const existingInternal = this.shadowRoot.querySelector('datalist');
+    if (existingInternal) existingInternal.remove();
 
     if (!listId) {
       this.input.removeAttribute('list');
       return;
     }
 
-    // Find external datalist in the root node (document or parent shadow root)
+    // Find the external datalist in the root node (document or parent shadow root)
     const root = this.getRootNode();
     const externalDatalist = root instanceof Document || root instanceof ShadowRoot
       ? root.getElementById(listId)
       : document.getElementById(listId);
 
     if (externalDatalist && externalDatalist.tagName === 'DATALIST') {
-      // Create internal datalist
-      const internalDatalist = document.createElement('datalist');
-      internalDatalist.id = listId; // Use same ID, scoped to shadow root
+      this._syncInternalDatalist(externalDatalist, listId);
 
-      // Clone options
-      // Note: We clone the children deep to get options
-      Array.from(externalDatalist.options).forEach(opt => {
-        internalDatalist.appendChild(opt.cloneNode(true));
+      // Keep the internal copy in sync with later changes to the external list.
+      this._datalistObserver = new MutationObserver(() => {
+        this._syncInternalDatalist(externalDatalist, listId);
       });
-
-      this.shadowRoot.appendChild(internalDatalist);
-      this.input.setAttribute('list', listId);
-
-      // Optional: Observer for changes in external datalist could be added here
-      // for full reactivity, but simple clone is often sufficient for static lists.
+      this._datalistObserver.observe(externalDatalist, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+      });
     } else {
-      // If not found, just pass the attribute anyway (maybe it will exist later?)
-      // But purely inside shadow DOM, it won't resolve to outer ID.
-      // We accept that limitation for now if not found immediately.
+      // Not found yet; pass the attribute through (it cannot resolve inside the
+      // shadow root by outer id, but we keep the author's intent).
       this.input.setAttribute('list', listId);
     }
+  }
+
+  /** Rebuilds the shadow-scoped datalist from the current external datalist. */
+  _syncInternalDatalist(externalDatalist, listId) {
+    if (!this.shadowRoot || !this.input) return;
+
+    const existingInternal = this.shadowRoot.querySelector('datalist');
+    if (existingInternal) existingInternal.remove();
+
+    const internalDatalist = document.createElement('datalist');
+    internalDatalist.id = listId; // same id, scoped to this shadow root
+    Array.from(externalDatalist.options).forEach(opt => {
+      internalDatalist.appendChild(opt.cloneNode(true));
+    });
+
+    this.shadowRoot.appendChild(internalDatalist);
+    this.input.setAttribute('list', listId);
+  }
+
+  _disconnectDatalistObserver() {
+    if (this._datalistObserver) {
+      this._datalistObserver.disconnect();
+      this._datalistObserver = null;
+    }
+  }
+
+  disconnectedCallback() {
+    this._disconnectDatalistObserver();
   }
 }
 

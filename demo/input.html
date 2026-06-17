@@ -88,6 +88,8 @@
         <au-input label="week" type="week"></au-input>
         <au-input label="time" type="time"></au-input>
         <au-input label="Color" type="color" value="#3b82f6"></au-input>
+        <!-- The external datalist is mirrored into the component's shadow root and
+             stays in sync if its options change at runtime (e.g. fetch-as-you-type). -->
         <au-input label="Datalist" list="ice-cream-flavors" name="ice-cream-choice"></au-input>
         <datalist id="ice-cream-flavors">
           <option value="Chocolate">
