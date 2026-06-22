@@ -106,7 +106,7 @@ class AuAccordionItem extends HTMLElement {
             /* spacing */
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             gap: 1rem;
             word-break: break-word;
             width: 100%;
@@ -128,18 +128,13 @@ class AuAccordionItem extends HTMLElement {
             transition: background-color 160ms ease-in;
 
             .heading {
-              min-width: 50px;
-              text-overflow: ellipsis;
-              overflow: hidden;
-              white-space: nowrap;
-              flex: 1;
+              min-width: 0;
+              flex: 1 1 auto;
+              overflow-wrap: break-word;
 
               slot,
               ::slotted(*),
               * {
-                text-overflow: ellipsis;
-                overflow: hidden;
-                white-space: nowrap;
                 display: block;
                 width: 100%;
               }
@@ -150,10 +145,8 @@ class AuAccordionItem extends HTMLElement {
               align-items: center;
               gap: 1rem;
               flex: 0 1 auto;
-              text-overflow: ellipsis;
-              overflow: hidden;
-              white-space: nowrap;
               min-width: 0;
+              max-width: 50%;
               & > *:first-child  {
                 flex: 1;
                 min-width: 20px;
@@ -161,13 +154,14 @@ class AuAccordionItem extends HTMLElement {
                 overflow: hidden;
                 white-space: nowrap;
 
-                slot, 
+                slot,
                 ::slotted(*),
                 * {
                   text-overflow: ellipsis;
                   overflow: hidden;
                   white-space: nowrap;
                   display: block;
+                  width: 100%;
                 }
               }
             }

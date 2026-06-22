@@ -11,7 +11,7 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
             /* spacing */
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             gap: 1rem;
             word-break: break-word;
             width: 100%;
@@ -33,18 +33,13 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
             transition: background-color 160ms ease-in;
 
             .heading {
-              min-width: 50px;
-              text-overflow: ellipsis;
-              overflow: hidden;
-              white-space: nowrap;
-              flex: 1;
+              min-width: 0;
+              flex: 1 1 auto;
+              overflow-wrap: break-word;
 
               slot,
               ::slotted(*),
               * {
-                text-overflow: ellipsis;
-                overflow: hidden;
-                white-space: nowrap;
                 display: block;
                 width: 100%;
               }
@@ -55,10 +50,8 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
               align-items: center;
               gap: 1rem;
               flex: 0 1 auto;
-              text-overflow: ellipsis;
-              overflow: hidden;
-              white-space: nowrap;
               min-width: 0;
+              max-width: 50%;
               & > *:first-child  {
                 flex: 1;
                 min-width: 20px;
@@ -66,13 +59,14 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
                 overflow: hidden;
                 white-space: nowrap;
 
-                slot, 
+                slot,
                 ::slotted(*),
                 * {
                   text-overflow: ellipsis;
                   overflow: hidden;
                   white-space: nowrap;
                   display: block;
+                  width: 100%;
                 }
               }
             }
