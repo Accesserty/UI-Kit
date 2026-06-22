@@ -160,6 +160,7 @@ class AuTabs extends HTMLElement {
 
     tabPanels.forEach((panel, index) => {
       const label = panel.getAttribute("label") || this.formatText(this.getAttribute("data-text-tab") || "Tab {index}", { index: index + 1 });
+      const labelLang = panel.getAttribute("label-lang") || this.getAttribute("data-text-tab-lang") || "";
       const prefix = panel.getAttribute("data-prefix") || "";
       const badge = panel.getAttribute("data-badge") || "";
       const affix = panel.getAttribute("data-affix") || "";
@@ -194,6 +195,7 @@ class AuTabs extends HTMLElement {
 
       const labelSpan = document.createElement("span");
       labelSpan.className = "label";
+      if (labelLang) labelSpan.setAttribute("lang", labelLang);
       labelSpan.textContent = label;
       frag.appendChild(labelSpan);
 

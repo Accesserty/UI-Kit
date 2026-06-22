@@ -201,7 +201,9 @@ Accesserty UI Kit components are framework-agnostic Web Components. Pass transla
 
 <au-tabs
   data-text-tab="頁籤 {index}"
+  data-text-tab-lang="zh-Hant-TW"
   data-text-badge-label-prefix="補充資訊：">
+  <div class="au-tab-panel" slot="panel" label="Settings" label-lang="en"></div>
 </au-tabs>
 
 <au-tree

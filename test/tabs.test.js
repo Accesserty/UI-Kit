@@ -137,6 +137,19 @@ describe('AuTabs with <div class="au-tab-panel">', () => {
     expect(badge.getAttribute('aria-label')).to.equal('補充資訊： 3');
   });
 
+  it('applies panel and fallback label language to generated tab labels', async () => {
+    const el = await fixture(html`
+      <au-tabs data-text-tab="頁籤 {index}" data-text-tab-lang="zh-Hant-TW">
+        <div class="au-tab-panel" slot="panel" label="Settings" label-lang="en">Panel 1</div>
+        <div class="au-tab-panel" slot="panel">Panel 2</div>
+      </au-tabs>
+    `);
+
+    const labels = el.shadowRoot.querySelectorAll('.label');
+    expect(labels[0].getAttribute('lang')).to.equal('en');
+    expect(labels[1].getAttribute('lang')).to.equal('zh-Hant-TW');
+  });
+
   it('preserves selected tab when localization attributes change', async () => {
     const el = await fixture(html`
       <au-tabs>

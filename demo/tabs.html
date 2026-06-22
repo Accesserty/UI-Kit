@@ -65,14 +65,19 @@
           <td>Fallback tab label template when a panel does not provide <code>label</code>. Supports <code>{index}</code>.</td>
         </tr>
         <tr>
+          <td>data-text-tab-lang</td>
+          <td>Language code applied to generated fallback tab labels.</td>
+        </tr>
+        <tr>
           <td>data-text-badge-label-prefix</td>
           <td>Accessible label prefix for <code>data-badge</code>.</td>
         </tr>
       </table>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>&lt;au-tabs
   data-text-tab="頁籤 {index}"
+  data-text-tab-lang="zh-Hant-TW"
   data-text-badge-label-prefix="補充資訊："&gt;
-  &lt;div class="au-tab-panel" slot="panel" data-badge="3"&gt;Content&lt;/div&gt;
+  &lt;div class="au-tab-panel" slot="panel" label="Settings" label-lang="en" data-badge="3"&gt;Content&lt;/div&gt;
 &lt;/au-tabs&gt;</code></pre>
     </section>
     <section>
