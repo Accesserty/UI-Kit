@@ -85,7 +85,7 @@ describe('AuTabs with <div class="au-tab-panel">', () => {
     expect(panel.textContent).to.include('Content 1');
   });
 
-  it('associates tab and panel with correct ARIA attributes', async () => {
+  it('names the panel with aria-label and omits cross-shadow idrefs', async () => {
     const el = await fixture(html`
       <au-tabs>
         <div class="au-tab-panel" slot="panel" id="my-panel" label="My Tab">My Content</div>
@@ -95,8 +95,11 @@ describe('AuTabs with <div class="au-tab-panel">', () => {
     const tab = el.shadowRoot.querySelector('[role="tab"]');
     const panel = el.querySelector('.au-tab-panel');
 
-    expect(panel.getAttribute('aria-labelledby')).to.equal(tab.id);
-    expect(tab.getAttribute('aria-controls')).to.equal(panel.id);
+    // Panels (light DOM) and tabs (shadow DOM) can't share idrefs across the
+    // boundary, so the panel is named via aria-label and aria-controls is omitted.
+    expect(panel.getAttribute('aria-label')).to.equal('My Tab');
+    expect(panel.hasAttribute('aria-labelledby')).to.equal(false);
+    expect(tab.hasAttribute('aria-controls')).to.equal(false);
   });
 
   it('renders prefix, badge, and affix content correctly', async () => {

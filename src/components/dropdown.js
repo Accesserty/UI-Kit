@@ -206,14 +206,15 @@ class AuDropdown extends HTMLElement {
     this.trigger.setAttribute('aria-expanded', isOpen);
 
     if (isOpen) {
-      requestAnimationFrame(() => {
-        // 優先使用 open() 指定的 index，如果沒有指定（例如滑鼠點擊），預設為 0
-        const indexToFocus = this._focusIndex ?? 0;
-        this.focusItem(indexToFocus);
-
-        // 重置狀態，避免下次開啟時誤用舊的 index
-        this._focusIndex = null;
-      });
+      // Only pull focus into the menu when it was opened from the keyboard —
+      // open() sets _focusIndex. Pointer/mouse opens (native popovertarget)
+      // leave _focusIndex null, so we keep focus on the trigger and avoid a
+      // jarring focus round-trip (trigger → item → trigger) on every click.
+      const indexToFocus = this._focusIndex;
+      this._focusIndex = null;
+      if (indexToFocus !== null && indexToFocus !== undefined) {
+        requestAnimationFrame(() => this.focusItem(indexToFocus));
+      }
     } else {
       // 確保關閉時焦點回到 Trigger
       if (document.activeElement?.closest('au-dropdown') === this) {

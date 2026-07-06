@@ -170,7 +170,10 @@ class AuTabs extends HTMLElement {
 
       panel.setAttribute("id", panelId);
       panel.setAttribute("role", "tabpanel");
-      panel.setAttribute("aria-labelledby", tabId);
+      // Panels are slotted (light DOM) while the tab buttons live in this
+      // component's shadow DOM, so an aria-labelledby idref to the button cannot
+      // resolve across the boundary. Name the panel with the label string instead.
+      panel.setAttribute("aria-label", label);
       panel.setAttribute("aria-hidden", index === selectedIndex ? "false" : "true");
 
       const li = document.createElement("li");
@@ -180,7 +183,8 @@ class AuTabs extends HTMLElement {
       const button = document.createElement("button");
       button.setAttribute("role", "tab");
       button.setAttribute("id", tabId);
-      button.setAttribute("aria-controls", panelId);
+      // No aria-controls: the panel lives in light DOM, so a shadow→light idref
+      // would not resolve. Tab and panel relate via role + DOM order.
       button.setAttribute("aria-selected", index === selectedIndex ? "true" : "false");
       button.setAttribute("tabindex", index === selectedIndex ? "0" : "-1");
 
