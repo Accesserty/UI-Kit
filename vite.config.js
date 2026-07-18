@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vite';
-import { terser } from 'rollup-plugin-terser'; // 使用 import 而不是 require
+import terser from '@rollup/plugin-terser';
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
@@ -9,6 +9,8 @@ const banner = `/*! Accesserty UI Kit v${pkg.version} | built ${new Date().toISO
 
 export default defineConfig({
   build: {
+    // esbuild minify 會剝掉所有註解(包含 /*! banner),改由第二個 output 的 terser 負責壓縮
+    minify: false,
     rollupOptions: {
       input: './src/accesserty-ui-kit.js',
       output: [

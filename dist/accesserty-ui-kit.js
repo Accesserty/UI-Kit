@@ -1,4 +1,85 @@
-var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configurable:!0,writable:!0,value:t}):f[e]=t;var x=(f,e,t)=>T(f,typeof e!="symbol"?e+"":e,t);/*! Accesserty UI Kit v1.0.3 | built 2026-07-07 */class z extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"}),this._container=document.createElement("div"),this._container.setAttribute("class","au-accordion");const e=document.createElement("slot");this._container.appendChild(e),this._exclusiveHint=document.createElement("span"),this._exclusiveHint.style.cssText="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;padding:0;";const t=`au-accordion-hint-${Math.random().toString(36).slice(2)}`;this._exclusiveHint.id=t,this._exclusiveHint.textContent="Only one section may be expanded at a time.",this.shadowRoot.appendChild(this._exclusiveHint),this.shadowRoot.appendChild(this._container),this._onToggle=this._handleToggle.bind(this)}connectedCallback(){this.addEventListener("au-toggle",this._onToggle),this._updateExclusiveAria()}disconnectedCallback(){this.removeEventListener("au-toggle",this._onToggle)}static get observedAttributes(){return["exclusive","data-text-exclusive-hint"]}get exclusive(){return this.hasAttribute("exclusive")}set exclusive(e){e?this.setAttribute("exclusive",""):this.removeAttribute("exclusive")}attributeChangedCallback(e,t,a){e==="exclusive"&&t!==a&&this._updateExclusiveAria(),e==="data-text-exclusive-hint"&&t!==a&&this._updateExclusiveHint()}_updateExclusiveHint(){this._exclusiveHint&&(this._exclusiveHint.textContent=this.getAttribute("data-text-exclusive-hint")||"Only one section may be expanded at a time.")}_updateExclusiveAria(){this.exclusive?this._container.setAttribute("aria-describedby",this._exclusiveHint.id):this._container.removeAttribute("aria-describedby")}_handleToggle(e){if(!this.exclusive||!e.detail.open)return;[...this.children].filter(a=>a.tagName.toLowerCase()==="au-accordion-item"&&a!==e.target).forEach(a=>{a.open=!1})}}typeof customElements<"u"&&!customElements.get("au-accordion")&&customElements.define("au-accordion",z);class I extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"});const e=this.generateId(),t=this.generateId(),a=document.createElement("div");a.setAttribute("class","au-accordion-item"),a.innerHTML=`
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+/*! Accesserty UI Kit v1.0.3 | built 2026-07-18 */
+class AuAccordion extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this._container = document.createElement("div");
+    this._container.setAttribute("class", "au-accordion");
+    const slot = document.createElement("slot");
+    this._container.appendChild(slot);
+    this._exclusiveHint = document.createElement("span");
+    this._exclusiveHint.style.cssText = "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;padding:0;";
+    const hintId = `au-accordion-hint-${Math.random().toString(36).slice(2)}`;
+    this._exclusiveHint.id = hintId;
+    this._exclusiveHint.textContent = "Only one section may be expanded at a time.";
+    this.shadowRoot.appendChild(this._exclusiveHint);
+    this.shadowRoot.appendChild(this._container);
+    this._onToggle = this._handleToggle.bind(this);
+  }
+  connectedCallback() {
+    this.addEventListener("au-toggle", this._onToggle);
+    this._updateExclusiveAria();
+  }
+  disconnectedCallback() {
+    this.removeEventListener("au-toggle", this._onToggle);
+  }
+  static get observedAttributes() {
+    return ["exclusive", "data-text-exclusive-hint"];
+  }
+  get exclusive() {
+    return this.hasAttribute("exclusive");
+  }
+  set exclusive(val) {
+    if (val) {
+      this.setAttribute("exclusive", "");
+    } else {
+      this.removeAttribute("exclusive");
+    }
+  }
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === "exclusive" && oldValue !== newValue) {
+      this._updateExclusiveAria();
+    }
+    if (name === "data-text-exclusive-hint" && oldValue !== newValue) {
+      this._updateExclusiveHint();
+    }
+  }
+  _updateExclusiveHint() {
+    if (!this._exclusiveHint) return;
+    this._exclusiveHint.textContent = this.getAttribute("data-text-exclusive-hint") || "Only one section may be expanded at a time.";
+  }
+  _updateExclusiveAria() {
+    if (this.exclusive) {
+      this._container.setAttribute("aria-describedby", this._exclusiveHint.id);
+    } else {
+      this._container.removeAttribute("aria-describedby");
+    }
+  }
+  _handleToggle(e) {
+    if (!this.exclusive || !e.detail.open) return;
+    const items = [...this.children].filter(
+      (el) => el.tagName.toLowerCase() === "au-accordion-item" && el !== e.target
+    );
+    items.forEach((item) => {
+      item.open = false;
+    });
+  }
+}
+if (typeof customElements !== "undefined" && !customElements.get("au-accordion")) {
+  customElements.define("au-accordion", AuAccordion);
+}
+class AuAccordionItem extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    const regionId = this.generateId();
+    const titleId = this.generateId();
+    const content = document.createElement("div");
+    content.setAttribute("class", "au-accordion-item");
+    content.innerHTML = `
         <style>
           .au-accordion-item {
             margin-bottom: var(--au-accordion-item-margin-bottom, 1rem);
@@ -128,8 +209,8 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
             }
           }
         </style>
-        <button type="button" aria-expanded="false" aria-controls="${e}" part="button">
-            <div class="heading" id="${t}"><slot name="heading"></slot></div>
+        <button type="button" aria-expanded="false" aria-controls="${regionId}" part="button">
+            <div class="heading" id="${titleId}"><slot name="heading"></slot></div>
             <div class="info">
               <div>
                 <slot name="sub"></slot>
@@ -139,10 +220,151 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
               </div>
             </div>
         </button>
-        <div role="region" id="${e}" aria-labelledby="${t}" hidden part="region">
+        <div role="region" id="${regionId}" aria-labelledby="${titleId}" hidden part="region">
             <slot name="content"></slot>
         </div>
-      `,this.shadowRoot.append(a),this.button=this.shadowRoot.querySelector("button"),this.button.addEventListener("click",()=>this.toggleAccordion())}connectedCallback(){this.updateExpanded()}static get observedAttributes(){return["open"]}get open(){return this.hasAttribute("open")}set open(e){e?this.setAttribute("open",""):this.removeAttribute("open")}attributeChangedCallback(e,t,a){e==="open"&&t!==a&&(this.updateExpanded(),this.isConnected&&this.dispatchEvent(new CustomEvent("au-toggle",{bubbles:!0,composed:!0,detail:{open:this.open}})))}updateExpanded(){const e=this.hasAttribute("open");this.button.setAttribute("aria-expanded",e);const t=this.shadowRoot.querySelector('div[role="region"]');e?t.removeAttribute("hidden"):t.setAttribute("hidden","")}generateId(){if(typeof crypto<"u"&&crypto.getRandomValues){const e=new Uint32Array(1);return crypto.getRandomValues(e),`au-accordion-item-${e[0].toString(36)}`}return`au-accordion-item-${Math.random().toString(36).slice(2)}`}toggleAccordion(){this.open=!this.open}}typeof customElements<"u"&&!customElements.get("au-accordion-item")&&customElements.define("au-accordion-item",I);class N extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"})}connectedCallback(){this.render()}static get observedAttributes(){return["id","class","aria-label","aria-labelledby","label","items","separator","data-link-title-prefix","data-link-title-template"]}attributeChangedCallback(e,t,a){t!==a&&this.render()}get items(){const e=this.getAttribute("items");if(!e)return[];try{return JSON.parse(e)}catch(t){return console.error("Error parsing 'items':",t),[]}}set items(e){if(typeof e=="string")this.setAttribute("items",e);else if(Array.isArray(e)||e&&typeof e=="object"){const t=Array.isArray(e)?e:[e];this.setAttribute("items",JSON.stringify(t))}else{console.error("Invalid value provided for 'items'. Expected string (JSON) or Array:",e);return}}get separator(){return this.getAttribute("separator")||"/"}set separator(e){this.setAttribute("separator",e)}formatText(e,t={}){return Object.entries(t).reduce((a,[i,r])=>a.replaceAll(`{${i}}`,String(r)),e)}escapeHTML(e){return String(e).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}render(){if(!this.shadowRoot)return;const e=this.getAttribute("id"),t=this.getAttribute("class"),a=this.getAttribute("aria-label"),i=this.getAttribute("aria-labelledby"),r=this.getAttribute("label"),s=this.items,o=this.getAttribute("separator")||"/",n=this.escapeHTML(o),v=this.getAttribute("data-link-title-prefix")||"go to",c=this.getAttribute("data-link-title-template"),p=e!==null?this.escapeHTML(e):"",l=t!==null?this.escapeHTML(t):"";let d="";a!==null?d=`aria-label="${this.escapeHTML(a)}"`:i!==null?d=`aria-labelledby="${this.escapeHTML(i)}"`:r!==null&&(d=`aria-label="${this.escapeHTML(r)}"`),this.shadowRoot.innerHTML=`
+      `;
+    this.shadowRoot.append(content);
+    this.button = this.shadowRoot.querySelector("button");
+    this.button.addEventListener("click", () => this.toggleAccordion());
+  }
+  connectedCallback() {
+    this.updateExpanded();
+  }
+  static get observedAttributes() {
+    return ["open"];
+  }
+  get open() {
+    return this.hasAttribute("open");
+  }
+  set open(val) {
+    if (val) {
+      this.setAttribute("open", "");
+    } else {
+      this.removeAttribute("open");
+    }
+  }
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === "open" && oldValue !== newValue) {
+      this.updateExpanded();
+      if (this.isConnected) {
+        this.dispatchEvent(new CustomEvent("au-toggle", {
+          bubbles: true,
+          composed: true,
+          detail: { open: this.open }
+        }));
+      }
+    }
+  }
+  updateExpanded() {
+    const isOpen = this.hasAttribute("open");
+    this.button.setAttribute("aria-expanded", isOpen);
+    const region = this.shadowRoot.querySelector('div[role="region"]');
+    if (isOpen) {
+      region.removeAttribute("hidden");
+    } else {
+      region.setAttribute("hidden", "");
+    }
+  }
+  generateId() {
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-accordion-item-${byteArray[0].toString(36)}`;
+    }
+    return `au-accordion-item-${Math.random().toString(36).slice(2)}`;
+  }
+  toggleAccordion() {
+    this.open = !this.open;
+  }
+}
+if (typeof customElements !== "undefined" && !customElements.get("au-accordion-item")) {
+  customElements.define("au-accordion-item", AuAccordionItem);
+}
+class AuBreadcrumbs extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
+  connectedCallback() {
+    this.render();
+  }
+  static get observedAttributes() {
+    return [
+      "id",
+      "class",
+      "aria-label",
+      "aria-labelledby",
+      "label",
+      "items",
+      "separator",
+      "data-link-title-prefix",
+      "data-link-title-template"
+    ];
+  }
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      this.render();
+    }
+  }
+  get items() {
+    const attr = this.getAttribute("items");
+    if (!attr) return [];
+    try {
+      return JSON.parse(attr);
+    } catch (e) {
+      console.error("Error parsing 'items':", e);
+      return [];
+    }
+  }
+  set items(val) {
+    if (typeof val === "string") {
+      this.setAttribute("items", val);
+    } else if (Array.isArray(val) || val && typeof val === "object") {
+      const newVal = Array.isArray(val) ? val : [val];
+      this.setAttribute("items", JSON.stringify(newVal));
+    } else {
+      console.error("Invalid value provided for 'items'. Expected string (JSON) or Array:", val);
+      return;
+    }
+  }
+  get separator() {
+    return this.getAttribute("separator") || "/";
+  }
+  set separator(val) {
+    this.setAttribute("separator", val);
+  }
+  formatText(template, values = {}) {
+    return Object.entries(values).reduce((message, [key, value]) => {
+      return message.replaceAll(`{${key}}`, String(value));
+    }, template);
+  }
+  escapeHTML(value) {
+    return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+  }
+  render() {
+    if (!this.shadowRoot) return;
+    const id = this.getAttribute("id");
+    const classname = this.getAttribute("class");
+    const ariaLabel = this.getAttribute("aria-label");
+    const ariaLabelledby = this.getAttribute("aria-labelledby");
+    const labelAttr = this.getAttribute("label");
+    const items = this.items;
+    const separator = this.getAttribute("separator") || "/";
+    const escapedSeparator = this.escapeHTML(separator);
+    const prefix = this.getAttribute("data-link-title-prefix") || "go to";
+    const titleTemplate = this.getAttribute("data-link-title-template");
+    const escapedId = id !== null ? this.escapeHTML(id) : "";
+    const escapedClassname = classname !== null ? this.escapeHTML(classname) : "";
+    let navAccessibleAttr = "";
+    if (ariaLabel !== null) {
+      navAccessibleAttr = `aria-label="${this.escapeHTML(ariaLabel)}"`;
+    } else if (ariaLabelledby !== null) {
+      navAccessibleAttr = `aria-labelledby="${this.escapeHTML(ariaLabelledby)}"`;
+    } else if (labelAttr !== null) {
+      navAccessibleAttr = `aria-label="${this.escapeHTML(labelAttr)}"`;
+    }
+    this.shadowRoot.innerHTML = `
       <style>
         nav {
           background-color: var(--au-breadcrumbs-bg, transparent);
@@ -197,27 +419,62 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
         }
       </style>
       <nav
-        ${e!==null?'id="'+p+'"':""}
-        ${t!==null?'class="'+l+'"':""}
-        ${d}
+        ${id !== null ? `id="` + escapedId + `"` : ""}
+        ${classname !== null ? `class="` + escapedClassname + `"` : ""}
+        ${navAccessibleAttr}
       >
         <ol>
-          ${s.map((h,b)=>{const g=this.escapeHTML(h.text||""),u=this.escapeHTML(h.url||""),m=this.escapeHTML(c?this.formatText(c,{text:h.text||"",index:b+1}):`${v} ${h.text||""}`);return`
+          ${items.map(
+      (item, index) => {
+        const text = this.escapeHTML(item.text || "");
+        const url = this.escapeHTML(item.url || "");
+        const title = this.escapeHTML(
+          titleTemplate ? this.formatText(titleTemplate, { text: item.text || "", index: index + 1 }) : `${prefix} ${item.text || ""}`
+        );
+        return `
                 <li>
-                  ${b===s.length-1?`<span aria-current="page"><slot name="icon-${b+1}"></slot><span>${g}</span></span>`:`<a href="${u}" title="${m}"><slot name="icon-${b+1}"></slot><span>${g}</span></a>`}
-                  ${b!==s.length-1?'<span aria-hidden="true">'+n+"</span>":""}
+                  ${index === items.length - 1 ? `<span aria-current="page"><slot name="icon-${index + 1}"></slot><span>${text}</span></span>` : `<a href="${url}" title="${title}"><slot name="icon-${index + 1}"></slot><span>${text}</span></a>`}
+                  ${index !== items.length - 1 ? `<span aria-hidden="true">` + escapedSeparator + `</span>` : ""}
                 </li>
-              `}).join("")}
+              `;
+      }
+    ).join("")}
         </ol>
       </nav>
-    `}}typeof customElements<"u"&&!customElements.get("au-breadcrumbs")&&customElements.define("au-breadcrumbs",N);class M extends HTMLElement{constructor(){super(),this.shadow=this.attachShadow({mode:"open"}),this.render()}render(){this.shadowRoot.innerHTML=`
+    `;
+  }
+}
+if (typeof customElements !== "undefined" && !customElements.get("au-breadcrumbs")) {
+  customElements.define("au-breadcrumbs", AuBreadcrumbs);
+}
+class AuCard extends HTMLElement {
+  constructor() {
+    super();
+    this.shadow = this.attachShadow({ mode: "open" });
+    this.render();
+  }
+  render() {
+    this.shadowRoot.innerHTML = `
       <div class="au-card-container" part="au-card-container">
         <slot name="heading" part="heading"></slot>
         <slot name="media" part="media"></slot>
         <slot name="content" part="content"></slot>
         <slot name="footer" part="footer"></slot>
       </div>
-    `}}typeof customElements<"u"&&!customElements.get("au-card")&&customElements.define("au-card",M);class A extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"}),this.internals=this.attachInternals();const e=this.generateId(),t=document.createElement("style");t.textContent=`
+    `;
+  }
+}
+if (typeof customElements !== "undefined" && !customElements.get("au-card")) {
+  customElements.define("au-card", AuCard);
+}
+class AuCheckbox extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this.internals = this.attachInternals();
+    const inputID = this.generateId();
+    const style = document.createElement("style");
+    style.textContent = `
       .au-checkbox {
         display: inline-block;
         vertical-align: middle;
@@ -284,7 +541,158 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
           }
         }
       }
-    `;const a=document.createElement("div");a.setAttribute("class","au-checkbox");const i=document.createElement("label");i.setAttribute("for",e);const r=document.createElement("input");r.type="checkbox",r.id=e,r.name=this.getAttribute("name")||"default-checkbox",r.value=this.getAttribute("value")||"default";const s=document.createElement("div");s.setAttribute("class","text");const o=document.createElement("slot");this.labelFallback=document.createElement("span"),this.labelFallback.textContent=this.getAttribute("label")||"",o.appendChild(this.labelFallback),s.appendChild(o),i.append(r,s),a.appendChild(i),this.shadowRoot.append(t,a),r.addEventListener("change",n=>{this.checked=n.target.checked,this.dispatchEvent(new CustomEvent("change",{bubbles:!0,composed:!0,detail:n.target.checked})),this.updateFormValue()}),r.addEventListener("focus",()=>{this.dispatchEvent(new CustomEvent("focus",{bubbles:!0,composed:!0}))}),r.addEventListener("blur",()=>{this.dispatchEvent(new CustomEvent("blur",{bubbles:!0,composed:!0}))}),this.syncAccessibleLabel()}get checked(){var e;return((e=this.shadowRoot.querySelector("input"))==null?void 0:e.checked)??!1}set checked(e){e?this.setAttribute("checked",""):this.removeAttribute("checked")}get disabled(){return this.hasAttribute("disabled")}set disabled(e){e?this.setAttribute("disabled",""):this.removeAttribute("disabled")}generateId(){if(typeof crypto<"u"&&crypto.getRandomValues){const e=new Uint32Array(1);return crypto.getRandomValues(e),`au-checkbox-${e[0].toString(36)}`}return`au-checkbox-${Math.random().toString(36).slice(2)}`}static get observedAttributes(){return["name","value","checked","disabled","required","label","aria-label","aria-labelledby"]}attributeChangedCallback(e,t,a){const i=this.shadowRoot.querySelector("input");if(i)switch(e){case"checked":i.checked=a!==null;break;case"disabled":i.disabled=a!==null;break;case"name":i.name=a;break;case"value":i.value=a;break;case"required":i.required=a!==null;break;case"label":this.labelFallback&&(this.labelFallback.textContent=a||""),this.syncAccessibleLabel();break;case"aria-label":case"aria-labelledby":this.syncAccessibleLabel();break}}syncAccessibleLabel(){const e=this.shadowRoot.querySelector("input");e&&(this.hasAttribute("aria-label")?e.setAttribute("aria-label",this.getAttribute("aria-label")):e.removeAttribute("aria-label"),this.hasAttribute("aria-labelledby")?e.setAttribute("aria-labelledby",this.getAttribute("aria-labelledby")):e.removeAttribute("aria-labelledby"))}connectedCallback(){this.updateCheckedState(),this.updateFormValue()}updateCheckedState(){const e=this.shadowRoot.querySelector("input");e&&(e.checked=this.hasAttribute("checked"))}updateFormValue(){const e=this.shadowRoot.querySelector("input"),t=e.checked?this.getAttribute("value")||"on":null;this.internals.setFormValue(t),e.validity.valid?this.internals.setValidity({}):this.internals.setValidity(e.validity,e.validationMessage,e)}formDisabledCallback(e){const t=this.shadowRoot.querySelector("input");t&&(t.disabled=e)}formResetCallback(){const e=this.shadowRoot.querySelector("input");e&&(e.checked=!1,this.checked=!1,this.updateFormValue())}}x(A,"formAssociated",!0);typeof customElements<"u"&&!customElements.get("au-checkbox")&&customElements.define("au-checkbox",A);class V extends HTMLElement{static get observedAttributes(){return["data-text-trigger"]}constructor(){super(),this.attachShadow({mode:"open"}),this.triggerId=this.generateId("trigger"),this.menuId=this.generateId("menu"),this._focusIndex=null;const e=document.createElement("template");e.innerHTML=`
+    `;
+    const container = document.createElement("div");
+    container.setAttribute("class", "au-checkbox");
+    const label = document.createElement("label");
+    label.setAttribute("for", inputID);
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.id = inputID;
+    input.name = this.getAttribute("name") || "default-checkbox";
+    input.value = this.getAttribute("value") || "default";
+    const textSlot = document.createElement("div");
+    textSlot.setAttribute("class", "text");
+    const slot = document.createElement("slot");
+    this.labelFallback = document.createElement("span");
+    this.labelFallback.textContent = this.getAttribute("label") || "";
+    slot.appendChild(this.labelFallback);
+    textSlot.appendChild(slot);
+    label.append(input, textSlot);
+    container.appendChild(label);
+    this.shadowRoot.append(style, container);
+    input.addEventListener("change", (event) => {
+      this.checked = event.target.checked;
+      this.dispatchEvent(new CustomEvent("change", { bubbles: true, composed: true, detail: event.target.checked }));
+      this.updateFormValue();
+    });
+    input.addEventListener("focus", () => {
+      this.dispatchEvent(new CustomEvent("focus", { bubbles: true, composed: true }));
+    });
+    input.addEventListener("blur", () => {
+      this.dispatchEvent(new CustomEvent("blur", { bubbles: true, composed: true }));
+    });
+    this.syncAccessibleLabel();
+  }
+  get checked() {
+    var _a;
+    return ((_a = this.shadowRoot.querySelector("input")) == null ? void 0 : _a.checked) ?? false;
+  }
+  set checked(val) {
+    val ? this.setAttribute("checked", "") : this.removeAttribute("checked");
+  }
+  get disabled() {
+    return this.hasAttribute("disabled");
+  }
+  set disabled(val) {
+    val ? this.setAttribute("disabled", "") : this.removeAttribute("disabled");
+  }
+  generateId() {
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-checkbox-${byteArray[0].toString(36)}`;
+    }
+    return `au-checkbox-${Math.random().toString(36).slice(2)}`;
+  }
+  static get observedAttributes() {
+    return ["name", "value", "checked", "disabled", "required", "label", "aria-label", "aria-labelledby"];
+  }
+  attributeChangedCallback(name, oldValue, newValue) {
+    const input = this.shadowRoot.querySelector("input");
+    if (input) {
+      switch (name) {
+        case "checked":
+          input.checked = newValue !== null;
+          break;
+        case "disabled":
+          input.disabled = newValue !== null;
+          break;
+        case "name":
+          input.name = newValue;
+          break;
+        case "value":
+          input.value = newValue;
+          break;
+        case "required":
+          input.required = newValue !== null;
+          break;
+        case "label":
+          if (this.labelFallback) this.labelFallback.textContent = newValue || "";
+          this.syncAccessibleLabel();
+          break;
+        case "aria-label":
+        case "aria-labelledby":
+          this.syncAccessibleLabel();
+          break;
+      }
+    }
+  }
+  syncAccessibleLabel() {
+    const input = this.shadowRoot.querySelector("input");
+    if (!input) return;
+    if (this.hasAttribute("aria-label")) {
+      input.setAttribute("aria-label", this.getAttribute("aria-label"));
+    } else {
+      input.removeAttribute("aria-label");
+    }
+    if (this.hasAttribute("aria-labelledby")) {
+      input.setAttribute("aria-labelledby", this.getAttribute("aria-labelledby"));
+    } else {
+      input.removeAttribute("aria-labelledby");
+    }
+  }
+  connectedCallback() {
+    this.updateCheckedState();
+    this.updateFormValue();
+  }
+  updateCheckedState() {
+    const input = this.shadowRoot.querySelector("input");
+    if (input) {
+      input.checked = this.hasAttribute("checked");
+    }
+  }
+  updateFormValue() {
+    const input = this.shadowRoot.querySelector("input");
+    const value = input.checked ? this.getAttribute("value") || "on" : null;
+    this.internals.setFormValue(value);
+    if (input.validity.valid) {
+      this.internals.setValidity({});
+    } else {
+      this.internals.setValidity(input.validity, input.validationMessage, input);
+    }
+  }
+  formDisabledCallback(disabled) {
+    const input = this.shadowRoot.querySelector("input");
+    if (input) {
+      input.disabled = disabled;
+    }
+  }
+  formResetCallback() {
+    const input = this.shadowRoot.querySelector("input");
+    if (input) {
+      input.checked = false;
+      this.checked = false;
+      this.updateFormValue();
+    }
+  }
+}
+__publicField(AuCheckbox, "formAssociated", true);
+if (typeof customElements !== "undefined" && !customElements.get("au-checkbox")) {
+  customElements.define("au-checkbox", AuCheckbox);
+}
+class AuDropdown extends HTMLElement {
+  static get observedAttributes() {
+    return ["data-text-trigger"];
+  }
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this.triggerId = this.generateId("trigger");
+    this.menuId = this.generateId("menu");
+    this._focusIndex = null;
+    const template = document.createElement("template");
+    template.innerHTML = `
       <style>
         :host {
           display: inline-block;
@@ -413,7 +821,145 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
       >
         <slot></slot>
       </div>
-    `,this.shadowRoot.appendChild(e.content.cloneNode(!0)),this.trigger=this.shadowRoot.getElementById(this.triggerId),this.menu=this.shadowRoot.getElementById(this.menuId),this.triggerFallback=this.shadowRoot.querySelector(".trigger-fallback"),this.handleKeyDown=this.handleKeyDown.bind(this),this.handleMenuKeyDown=this.handleMenuKeyDown.bind(this),this.handleToggle=this.handleToggle.bind(this)}connectedCallback(){this.updateTriggerFallback(),this.trigger.addEventListener("keydown",this.handleKeyDown),this.menu.addEventListener("keydown",this.handleMenuKeyDown),this.menu.addEventListener("toggle",this.handleToggle)}attributeChangedCallback(e,t,a){e==="data-text-trigger"&&t!==a&&this.updateTriggerFallback()}disconnectedCallback(){this.trigger.removeEventListener("keydown",this.handleKeyDown),this.menu.removeEventListener("keydown",this.handleMenuKeyDown),this.menu.removeEventListener("toggle",this.handleToggle)}generateId(){if(typeof crypto<"u"&&crypto.getRandomValues){const e=new Uint32Array(1);return crypto.getRandomValues(e),`au-dropdown-${e[0].toString(36)}`}return`au-dropdown-${Math.random().toString(36).slice(2)}`}updateTriggerFallback(){this.triggerFallback&&(this.triggerFallback.textContent=this.getAttribute("data-text-trigger")||"Dropdown")}open(e=0){this.isOpen?this.focusItem(e):(this._focusIndex=e,this.menu.showPopover())}close(){this.menu.hidePopover()}handleToggle(e){var a;const t=e.newState==="open";if(this.trigger.setAttribute("aria-expanded",t),t){const i=this._focusIndex;this._focusIndex=null,i!=null&&requestAnimationFrame(()=>this.focusItem(i))}else((a=document.activeElement)==null?void 0:a.closest("au-dropdown"))===this&&this.trigger.focus(),this._focusIndex=null}get isOpen(){return this.menu.matches(":popover-open")}set isOpen(e){e?this.menu.showPopover():this.menu.hidePopover()}focusItem(e){const t=this.items;if(t.length>0){let a=e;a<0&&(a=t.length-1),a>=t.length&&(a=0),t[a].focus()}}get items(){return Array.from(this.querySelectorAll("au-dropdown-item"))}handleKeyDown(e){switch(e.key){case"Enter":case" ":case"Spacebar":case"ArrowDown":e.preventDefault(),this.open(0);break;case"ArrowUp":e.preventDefault(),this.open(this.items.length-1);break}}handleMenuKeyDown(e){const t=this.items,a=t.indexOf(document.activeElement);switch(e.key){case"ArrowDown":e.preventDefault(),this.focusItem(a+1);break;case"ArrowUp":e.preventDefault(),this.focusItem(a-1);break;case"Home":e.preventDefault(),this.focusItem(0);break;case"End":e.preventDefault(),this.focusItem(t.length-1);break;case"Tab":this.close();break;case"Escape":e.preventDefault(),this.close();break}}}class $ extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"});const e=document.createElement("template");e.innerHTML=`
+    `;
+    this.shadowRoot.appendChild(template.content.cloneNode(true));
+    this.trigger = this.shadowRoot.getElementById(this.triggerId);
+    this.menu = this.shadowRoot.getElementById(this.menuId);
+    this.triggerFallback = this.shadowRoot.querySelector(".trigger-fallback");
+    this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.handleMenuKeyDown = this.handleMenuKeyDown.bind(this);
+    this.handleToggle = this.handleToggle.bind(this);
+  }
+  connectedCallback() {
+    this.updateTriggerFallback();
+    this.trigger.addEventListener("keydown", this.handleKeyDown);
+    this.menu.addEventListener("keydown", this.handleMenuKeyDown);
+    this.menu.addEventListener("toggle", this.handleToggle);
+  }
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === "data-text-trigger" && oldValue !== newValue) {
+      this.updateTriggerFallback();
+    }
+  }
+  disconnectedCallback() {
+    this.trigger.removeEventListener("keydown", this.handleKeyDown);
+    this.menu.removeEventListener("keydown", this.handleMenuKeyDown);
+    this.menu.removeEventListener("toggle", this.handleToggle);
+  }
+  generateId() {
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-dropdown-${byteArray[0].toString(36)}`;
+    }
+    return `au-dropdown-${Math.random().toString(36).slice(2)}`;
+  }
+  updateTriggerFallback() {
+    if (!this.triggerFallback) return;
+    this.triggerFallback.textContent = this.getAttribute("data-text-trigger") || "Dropdown";
+  }
+  // 修正點：移除重複的 open/close，保留這裡的邏輯並加強
+  open(index = 0) {
+    if (this.isOpen) {
+      this.focusItem(index);
+    } else {
+      this._focusIndex = index;
+      this.menu.showPopover();
+    }
+  }
+  close() {
+    this.menu.hidePopover();
+  }
+  handleToggle(e) {
+    var _a;
+    const isOpen = e.newState === "open";
+    this.trigger.setAttribute("aria-expanded", isOpen);
+    if (isOpen) {
+      const indexToFocus = this._focusIndex;
+      this._focusIndex = null;
+      if (indexToFocus !== null && indexToFocus !== void 0) {
+        requestAnimationFrame(() => this.focusItem(indexToFocus));
+      }
+    } else {
+      if (((_a = document.activeElement) == null ? void 0 : _a.closest("au-dropdown")) === this) {
+        this.trigger.focus();
+      }
+      this._focusIndex = null;
+    }
+  }
+  get isOpen() {
+    return this.menu.matches(":popover-open");
+  }
+  set isOpen(val) {
+    if (val) {
+      this.menu.showPopover();
+    } else {
+      this.menu.hidePopover();
+    }
+  }
+  focusItem(index) {
+    const items = this.items;
+    if (items.length > 0) {
+      let idx = index;
+      if (idx < 0) idx = items.length - 1;
+      if (idx >= items.length) idx = 0;
+      items[idx].focus();
+    }
+  }
+  get items() {
+    return Array.from(this.querySelectorAll("au-dropdown-item"));
+  }
+  handleKeyDown(e) {
+    switch (e.key) {
+      case "Enter":
+      case " ":
+      case "Spacebar":
+      case "ArrowDown":
+        e.preventDefault();
+        this.open(0);
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        this.open(this.items.length - 1);
+        break;
+    }
+  }
+  handleMenuKeyDown(e) {
+    const items = this.items;
+    const currentIndex = items.indexOf(document.activeElement);
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        this.focusItem(currentIndex + 1);
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        this.focusItem(currentIndex - 1);
+        break;
+      case "Home":
+        e.preventDefault();
+        this.focusItem(0);
+        break;
+      case "End":
+        e.preventDefault();
+        this.focusItem(items.length - 1);
+        break;
+      case "Tab":
+        this.close();
+        break;
+      case "Escape":
+        e.preventDefault();
+        this.close();
+        break;
+    }
+  }
+}
+class AuDropdownItem extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    const template = document.createElement("template");
+    template.innerHTML = `
       <style>
         :host {
           display: block;
@@ -444,7 +990,52 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
       <div class="item" role="menuitem" tabindex="-1">
         <slot></slot>
       </div>
-    `,this.shadowRoot.appendChild(e.content.cloneNode(!0)),this.item=this.shadowRoot.querySelector(".item")}connectedCallback(){this.setAttribute("tabindex","-1"),this.setAttribute("role","none"),this.addEventListener("click",()=>{this.dispatchEvent(new CustomEvent("selected",{bubbles:!0,composed:!0,detail:{value:this.getAttribute("value")}}));const e=this.closest("au-dropdown");e&&e.close()}),this.item.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "||e.key==="Spacebar"){e.preventDefault();const t=this.querySelector("a");t?t.click():this.click()}})}focus(){this.item.focus()}}typeof customElements<"u"&&(customElements.get("au-dropdown")||customElements.define("au-dropdown",V),customElements.get("au-dropdown-item")||customElements.define("au-dropdown-item",$));class E extends HTMLElement{constructor(){super();x(this,"_preventDefault",t=>t.preventDefault());this.attachShadow({mode:"open"}),this.internals=this.attachInternals(),this.files=[],this.previewUrls=new Map;const t=document.createElement("style");t.textContent=`
+    `;
+    this.shadowRoot.appendChild(template.content.cloneNode(true));
+    this.item = this.shadowRoot.querySelector(".item");
+  }
+  connectedCallback() {
+    this.setAttribute("tabindex", "-1");
+    this.setAttribute("role", "none");
+    this.addEventListener("click", () => {
+      this.dispatchEvent(new CustomEvent("selected", {
+        bubbles: true,
+        composed: true,
+        detail: { value: this.getAttribute("value") }
+      }));
+      const dropdown = this.closest("au-dropdown");
+      if (dropdown) dropdown.close();
+    });
+    this.item.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+        e.preventDefault();
+        const link = this.querySelector("a");
+        if (link) {
+          link.click();
+        } else {
+          this.click();
+        }
+      }
+    });
+  }
+  focus() {
+    this.item.focus();
+  }
+}
+if (typeof customElements !== "undefined") {
+  if (!customElements.get("au-dropdown")) customElements.define("au-dropdown", AuDropdown);
+  if (!customElements.get("au-dropdown-item")) customElements.define("au-dropdown-item", AuDropdownItem);
+}
+class AuFileUpload extends HTMLElement {
+  constructor() {
+    super();
+    __publicField(this, "_preventDefault", (e) => e.preventDefault());
+    this.attachShadow({ mode: "open" });
+    this.internals = this.attachInternals();
+    this.files = [];
+    this.previewUrls = /* @__PURE__ */ new Map();
+    const style = document.createElement("style");
+    style.textContent = `
       .file-upload-container {
         position: relative;
         :is(ul, ol) {
@@ -568,7 +1159,425 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
           z-index: -9999;
         }
       }
-    `,this.wrapper=document.createElement("div"),this.wrapper.className="file-upload-wrapper",this.container=document.createElement("div"),this.container.className="file-upload-container",this._id=this.getAttribute("id")||this.generateId(),this.labelEl=document.createElement("label"),this.labelEl.textContent=this.getAttribute("label")||"Upload files",this.labelEl.setAttribute("for",this._id),this.fileInput=document.createElement("input"),this.fileInput.type="file",this.fileInput.hidden=!0,this.fileInput.id=this._id,["accept","multiple","name","disabled","required","form"].forEach(o=>{this.hasAttribute(o)&&this.fileInput.setAttribute(o,this.getAttribute(o))});const a=document.createElement("slot");a.name="trigger",a.addEventListener("click",()=>{this.hasAttribute("disabled")||this.fileInput.click()}),a.addEventListener("keydown",o=>{if(o.key==="Enter"||o.key===" "||o.key==="Spacebar"){if(o.preventDefault(),this.hasAttribute("disabled"))return;this.fileInput.click()}}),this.dropZone=document.createElement("div"),this.dropZone.className="drop-zone",this.dropZone.textContent=this.getAttribute("msg-drop-text")||"Drop files here",this.usageDisplay=document.createElement("div"),this.usageDisplay.className="usage",this.usageDisplay.setAttribute("aria-live","polite"),this.fileList=document.createElement("ul"),this.fileList.className="file-list",this.fileList.setAttribute("role","list"),this.fileList.setAttribute("aria-live","polite"),this.fileList.setAttribute("aria-atomic","true");const i=document.createElement("slot");i.name="hint",this.errorMessage=document.createElement("div"),this.errorMessage.className="error-area",this.errorList=document.createElement("ul"),this.errorList.className="error-list",this.errorMessage.append(i,this.usageDisplay,this.errorList),this.liveRegion=document.createElement("div"),this.liveRegion.setAttribute("aria-live","polite"),this.liveRegion.setAttribute("role","status"),this.liveRegion.setAttribute("aria-atomic","true"),this.fileInput.addEventListener("change",()=>this.handleFiles(this.fileInput.files)),this.dropZone.addEventListener("dragover",o=>{o.preventDefault(),!this.hasAttribute("disabled")&&this.dropZone.classList.add("dragover")}),this.dropZone.addEventListener("dragleave",()=>{this.hasAttribute("disabled")||this.dropZone.classList.remove("dragover")}),this.dropZone.addEventListener("drop",o=>{if(o.preventDefault(),this.hasAttribute("disabled"))return;this.dropZone.classList.remove("dragover");const n=o.dataTransfer;n!=null&&n.files&&this.handleFiles(n.files)});const r=document.createElement("div");r.className="actions";const s=document.createElement("div");s.className="upload-area",s.append(a,this.dropZone),r.append(s),this.container.append(this.labelEl,r,this.errorMessage,this.fileList,this.liveRegion,this.fileInput),this.wrapper.append(this.container),this.shadowRoot.append(t,this.wrapper)}static get observedAttributes(){return["accept","disabled","form","id","label","multiple","msg-drop-text","msg-total-size-error","msg-type-error","msg-size-error","msg-count-error","msg-added","msg-removed","msg-remove-text","msg-remove-file-label","msg-required","name","required"]}attributeChangedCallback(t,a,i){if(a!==i&&this.shadowRoot)switch(t){case"id":this._id=i||this.generateId(),this.labelEl&&this.labelEl.setAttribute("for",this._id),this.fileInput&&(this.fileInput.id=this._id);break;case"label":this.updateLabelText();break;case"msg-drop-text":this.updateDropText();break;case"msg-remove-text":case"msg-remove-file-label":this.updateFileList();break;case"msg-required":this.checkValidity();break;case"disabled":this.syncBooleanAttributeToInput("disabled");break;case"multiple":this.syncBooleanAttributeToInput("multiple");break;case"required":this.syncBooleanAttributeToInput("required"),this.checkValidity();break;case"accept":case"form":case"name":this.syncAttributeToInput(t);break}}connectedCallback(){this.updateLabelText(),this.updateDropText(),document.addEventListener("dragover",this._preventDefault),document.addEventListener("drop",this._preventDefault)}disconnectedCallback(){document.removeEventListener("dragover",this._preventDefault),document.removeEventListener("drop",this._preventDefault),this.revokeAllPreviewUrls()}updateLabelText(){this.labelEl&&(this.labelEl.textContent=this.getAttribute("label")||"Upload files")}updateDropText(){this.dropZone&&(this.dropZone.textContent=this.getAttribute("msg-drop-text")||"Drop files here")}getText(t,a){return this.getAttribute(t)||a}formatMessage(t,a,i={}){const r=this.getText(t,a);return Object.entries(i).reduce((s,[o,n])=>s.replaceAll(`{${o}}`,String(n)),r)}formatFileError(t,a,i,r,s={}){const o=this.getAttribute(t);return o&&o.includes("{")?this.formatMessage(t,a,{fileName:r,...s}):`${r} ${o||i}`}syncAttributeToInput(t){if(!this.fileInput)return;const a=this.getAttribute(t);a===null?this.fileInput.removeAttribute(t):this.fileInput.setAttribute(t,a)}syncBooleanAttributeToInput(t){this.fileInput&&(this.hasAttribute(t)?this.fileInput.setAttribute(t,""):this.fileInput.removeAttribute(t))}revokePreviewUrl(t){const a=this.previewUrls.get(t);a&&(URL.revokeObjectURL(a),this.previewUrls.delete(t))}revokeAllPreviewUrls(){this.previewUrls.forEach(t=>URL.revokeObjectURL(t)),this.previewUrls.clear()}handleFiles(t){var g;if(this.hasAttribute("disabled"))return;const a=parseFloat(this.getAttribute("max-total-size-mb")||"20"),i=parseInt(this.getAttribute("max-files")||"5",10),r=parseFloat(this.getAttribute("max-size-mb")||"5"),s=this.getAttribute("accept"),o=s?s.split(",").map(u=>u.trim()):[],n=Array.from(t),v=[],c=[];n.forEach(u=>{if(!(o.length===0||o.some(y=>y.endsWith("/*")?u.type.startsWith(y.replace("/*","")):u.type===y||u.name.endsWith(y)))){c.push(this.formatFileError("msg-type-error","{fileName} is not an accepted file type.","is not an accepted file type.",u.name));return}if(u.size>r*1024*1024){c.push(this.formatFileError("msg-size-error","{fileName} exceeds the maximum size of {maxSize}MB.",`exceeds the maximum size of ${r}MB.`,u.name,{maxSize:r}));return}v.push(u)});const p=v.filter(u=>!this.files.some(m=>m.name===u.name&&m.size===u.size)),l=i-this.files.length,d=p.slice(0,l);if(p.slice(l).forEach(u=>{c.push(this.formatFileError("msg-count-error","{fileName} cannot be added. You can only upload up to {maxFiles} files.",`You can only upload up to ${i} files.`,u.name,{maxFiles:i}))}),this.files.reduce((u,m)=>u+m.size,0)+d.reduce((u,m)=>u+m.size,0)>a*1024*1024){const u=(g=this.getAttribute("msg-total-size-error"))!=null&&g.includes("{")?this.formatMessage("msg-total-size-error","Total file size exceeds limit of {maxTotalSize}MB.",{maxTotalSize:a}):`${this.getText("msg-total-size-error","Total file size exceeds limit of")} ${a}MB.`;c.push(u),d.length=0}c.length>0&&this.showErrors(c),d.length!==0&&(this.files.push(...d),this.updateFileList(),this.updateUsage(),this.announce(this.formatMessage("msg-added","{count} file(s) added.",{count:d.length})),this.syncFormValue(),this.checkValidity(),this.dispatchEvent(new Event("change",{bubbles:!0,composed:!0})),this.fileInput.value="")}showErrors(t){this.errorList.innerHTML="",t.forEach(a=>{const i=document.createElement("li");i.textContent=a,this.errorList.appendChild(i)}),this.announce(t.join(" "))}announce(t){for(;this.liveRegion.firstChild;)this.liveRegion.removeChild(this.liveRegion.firstChild);requestAnimationFrame(()=>{const a=document.createElement("span");a.textContent=t,this.liveRegion.appendChild(a)})}updateFileList(){this.fileList.innerHTML="",this.files.forEach(t=>{const a=document.createElement("li");a.setAttribute("role","listitem");const i=document.createElement("div");if(t.type.startsWith("image/")){const o=document.createElement("img");o.className="preview";let n=this.previewUrls.get(t);n||(n=URL.createObjectURL(t),this.previewUrls.set(t,n)),o.src=n,o.alt=t.name,o.width=40,o.height=40,i.appendChild(o)}else{const o=document.createElement("span");o.className="preview",o.textContent="📄",o.setAttribute("aria-hidden","true"),i.appendChild(o)}const r=document.createElement("span");r.className="file-name",r.textContent=t.name,i.appendChild(r);const s=document.createElement("button");s.type="button",s.className="delete",s.textContent=this.getAttribute("msg-remove-text")||"Remove",s.setAttribute("aria-label",this.formatMessage("msg-remove-file-label","Remove {fileName}",{fileName:t.name})),s.setAttribute("part","delete"),s.addEventListener("click",()=>{this.hasAttribute("disabled")||(this.revokePreviewUrl(t),this.files=this.files.filter(o=>o.name!==t.name||o.size!==t.size),this.updateFileList(),this.updateUsage(),this.announce(this.formatMessage("msg-removed","{fileName} removed.",{fileName:t.name})),this.syncFormValue(),this.checkValidity(),this.dispatchEvent(new CustomEvent("remove-file",{bubbles:!0,composed:!0,detail:t})))}),a.append(i,s),this.fileList.appendChild(a)})}removeFile(t){this.hasAttribute("disabled")||(this.revokePreviewUrl(t),this.files=this.files.filter(a=>a.name!==t.name||a.size!==t.size),this.updateFileList(),this.updateUsage(),this.announce(this.formatMessage("msg-removed","{fileName} removed.",{fileName:t.name})),this.syncFormValue(),this.checkValidity(),this.dispatchEvent(new CustomEvent("remove-file",{detail:t})))}updateUsage(){const t=parseFloat(this.getAttribute("max-total-size-mb")||"20"),a=this.files.reduce((i,r)=>i+r.size,0)/(1024*1024);this.usageDisplay.textContent=`${a.toFixed(1)}MB / ${t}MB`}syncFormValue(){const t=new DataTransfer;this.files.forEach(a=>t.items.add(a)),this.internals.setFormValue(t.files)}checkValidity(){return this.hasAttribute("required")&&this.files.length===0?(this.internals.setValidity({valueMissing:!0},this.getText("msg-required","Please select at least one file."),this.fileInput),!1):(this.internals.setValidity({}),!0)}formResetCallback(){this.revokeAllPreviewUrls(),this.files=[],this.updateFileList(),this.updateUsage(),this.syncFormValue(),this.checkValidity()}get value(){return this.files}set value(t){Array.isArray(t)&&(this.revokeAllPreviewUrls(),this.files=t,this.updateFileList(),this.updateUsage(),this.syncFormValue(),this.checkValidity())}generateId(){if(typeof crypto<"u"&&crypto.getRandomValues){const t=new Uint32Array(1);return crypto.getRandomValues(t),`au-file-upload-${t[0].toString(36)}`}return`au-file-upload-${Math.random().toString(36).slice(2)}`}}x(E,"formAssociated",!0);typeof customElements<"u"&&!customElements.get("au-file-upload")&&customElements.define("au-file-upload",E);class C extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"}),this.internals=this.attachInternals(),this._id=this.getAttribute("id")||this.generateId();const e=document.createElement("style");e.textContent=`
+    `;
+    this.wrapper = document.createElement("div");
+    this.wrapper.className = "file-upload-wrapper";
+    this.container = document.createElement("div");
+    this.container.className = "file-upload-container";
+    this._id = this.getAttribute("id") || this.generateId();
+    this.labelEl = document.createElement("label");
+    this.labelEl.textContent = this.getAttribute("label") || "Upload files";
+    this.labelEl.setAttribute("for", this._id);
+    this.fileInput = document.createElement("input");
+    this.fileInput.type = "file";
+    this.fileInput.hidden = true;
+    this.fileInput.id = this._id;
+    ["accept", "multiple", "name", "disabled", "required", "form"].forEach((attr) => {
+      if (this.hasAttribute(attr)) {
+        this.fileInput.setAttribute(attr, this.getAttribute(attr));
+      }
+    });
+    const triggerSlot = document.createElement("slot");
+    triggerSlot.name = "trigger";
+    triggerSlot.addEventListener("click", () => {
+      if (this.hasAttribute("disabled")) return;
+      this.fileInput.click();
+    });
+    triggerSlot.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+        e.preventDefault();
+        if (this.hasAttribute("disabled")) return;
+        this.fileInput.click();
+      }
+    });
+    this.dropZone = document.createElement("div");
+    this.dropZone.className = "drop-zone";
+    this.dropZone.textContent = this.getAttribute("msg-drop-text") || "Drop files here";
+    this.usageDisplay = document.createElement("div");
+    this.usageDisplay.className = "usage";
+    this.usageDisplay.setAttribute("aria-live", "polite");
+    this.fileList = document.createElement("ul");
+    this.fileList.className = "file-list";
+    this.fileList.setAttribute("role", "list");
+    this.fileList.setAttribute("aria-live", "polite");
+    this.fileList.setAttribute("aria-atomic", "true");
+    const hintSlot = document.createElement("slot");
+    hintSlot.name = "hint";
+    this.errorMessage = document.createElement("div");
+    this.errorMessage.className = "error-area";
+    this.errorList = document.createElement("ul");
+    this.errorList.className = "error-list";
+    this.errorMessage.append(hintSlot, this.usageDisplay, this.errorList);
+    this.liveRegion = document.createElement("div");
+    this.liveRegion.setAttribute("aria-live", "polite");
+    this.liveRegion.setAttribute("role", "status");
+    this.liveRegion.setAttribute("aria-atomic", "true");
+    this.fileInput.addEventListener("change", () => this.handleFiles(this.fileInput.files));
+    this.dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      if (this.hasAttribute("disabled")) return;
+      this.dropZone.classList.add("dragover");
+    });
+    this.dropZone.addEventListener("dragleave", () => {
+      if (this.hasAttribute("disabled")) return;
+      this.dropZone.classList.remove("dragover");
+    });
+    this.dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      if (this.hasAttribute("disabled")) return;
+      this.dropZone.classList.remove("dragover");
+      const dt = e.dataTransfer;
+      if (dt == null ? void 0 : dt.files) this.handleFiles(dt.files);
+    });
+    const actionGroup = document.createElement("div");
+    actionGroup.className = "actions";
+    const fileArea = document.createElement("div");
+    fileArea.className = "upload-area";
+    fileArea.append(triggerSlot, this.dropZone);
+    actionGroup.append(fileArea);
+    this.container.append(
+      this.labelEl,
+      actionGroup,
+      this.errorMessage,
+      this.fileList,
+      this.liveRegion,
+      this.fileInput
+    );
+    this.wrapper.append(this.container);
+    this.shadowRoot.append(style, this.wrapper);
+  }
+  static get observedAttributes() {
+    return [
+      "accept",
+      "disabled",
+      "form",
+      "id",
+      "label",
+      "multiple",
+      "msg-drop-text",
+      "msg-total-size-error",
+      "msg-type-error",
+      "msg-size-error",
+      "msg-count-error",
+      "msg-added",
+      "msg-removed",
+      "msg-remove-text",
+      "msg-remove-file-label",
+      "msg-required",
+      "name",
+      "required"
+    ];
+  }
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue) return;
+    if (!this.shadowRoot) return;
+    switch (name) {
+      case "id":
+        this._id = newValue || this.generateId();
+        if (this.labelEl) this.labelEl.setAttribute("for", this._id);
+        if (this.fileInput) this.fileInput.id = this._id;
+        break;
+      case "label":
+        this.updateLabelText();
+        break;
+      case "msg-drop-text":
+        this.updateDropText();
+        break;
+      case "msg-remove-text":
+      case "msg-remove-file-label":
+        this.updateFileList();
+        break;
+      case "msg-required":
+        this.checkValidity();
+        break;
+      case "disabled":
+        this.syncBooleanAttributeToInput("disabled");
+        break;
+      case "multiple":
+        this.syncBooleanAttributeToInput("multiple");
+        break;
+      case "required":
+        this.syncBooleanAttributeToInput("required");
+        this.checkValidity();
+        break;
+      case "accept":
+      case "form":
+      case "name":
+        this.syncAttributeToInput(name);
+        break;
+    }
+  }
+  connectedCallback() {
+    this.updateLabelText();
+    this.updateDropText();
+    document.addEventListener("dragover", this._preventDefault);
+    document.addEventListener("drop", this._preventDefault);
+  }
+  disconnectedCallback() {
+    document.removeEventListener("dragover", this._preventDefault);
+    document.removeEventListener("drop", this._preventDefault);
+    this.revokeAllPreviewUrls();
+  }
+  updateLabelText() {
+    if (this.labelEl) this.labelEl.textContent = this.getAttribute("label") || "Upload files";
+  }
+  updateDropText() {
+    if (this.dropZone) this.dropZone.textContent = this.getAttribute("msg-drop-text") || "Drop files here";
+  }
+  getText(name, fallback) {
+    return this.getAttribute(name) || fallback;
+  }
+  formatMessage(name, fallback, values = {}) {
+    const template = this.getText(name, fallback);
+    return Object.entries(values).reduce((message, [key, value]) => {
+      return message.replaceAll(`{${key}}`, String(value));
+    }, template);
+  }
+  formatFileError(name, fallbackTemplate, legacySuffix, fileName, values = {}) {
+    const customMessage = this.getAttribute(name);
+    if (customMessage && customMessage.includes("{")) {
+      return this.formatMessage(name, fallbackTemplate, { fileName, ...values });
+    }
+    return `${fileName} ${customMessage || legacySuffix}`;
+  }
+  syncAttributeToInput(name) {
+    if (!this.fileInput) return;
+    const value = this.getAttribute(name);
+    if (value === null) this.fileInput.removeAttribute(name);
+    else this.fileInput.setAttribute(name, value);
+  }
+  syncBooleanAttributeToInput(name) {
+    if (!this.fileInput) return;
+    if (this.hasAttribute(name)) this.fileInput.setAttribute(name, "");
+    else this.fileInput.removeAttribute(name);
+  }
+  revokePreviewUrl(file) {
+    const url = this.previewUrls.get(file);
+    if (url) {
+      URL.revokeObjectURL(url);
+      this.previewUrls.delete(file);
+    }
+  }
+  revokeAllPreviewUrls() {
+    this.previewUrls.forEach((url) => URL.revokeObjectURL(url));
+    this.previewUrls.clear();
+  }
+  handleFiles(fileList) {
+    var _a;
+    if (this.hasAttribute("disabled")) return;
+    const maxTotalSizeMB = parseFloat(this.getAttribute("max-total-size-mb") || "20");
+    const maxFiles = parseInt(this.getAttribute("max-files") || "5", 10);
+    const maxSizeMB = parseFloat(this.getAttribute("max-size-mb") || "5");
+    const acceptAttr = this.getAttribute("accept");
+    const acceptList = acceptAttr ? acceptAttr.split(",").map((type) => type.trim()) : [];
+    const newFiles = Array.from(fileList);
+    const validFiles = [];
+    const errorMessages = [];
+    newFiles.forEach((file) => {
+      const isValidType = acceptList.length === 0 || acceptList.some((type) => {
+        if (type.endsWith("/*")) {
+          return file.type.startsWith(type.replace("/*", ""));
+        }
+        return file.type === type || file.name.endsWith(type);
+      });
+      if (!isValidType) {
+        errorMessages.push(this.formatFileError(
+          "msg-type-error",
+          "{fileName} is not an accepted file type.",
+          "is not an accepted file type.",
+          file.name
+        ));
+        return;
+      }
+      if (file.size > maxSizeMB * 1024 * 1024) {
+        errorMessages.push(this.formatFileError(
+          "msg-size-error",
+          "{fileName} exceeds the maximum size of {maxSize}MB.",
+          `exceeds the maximum size of ${maxSizeMB}MB.`,
+          file.name,
+          { maxSize: maxSizeMB }
+        ));
+        return;
+      }
+      validFiles.push(file);
+    });
+    const uniqueFiles = validFiles.filter(
+      (file) => !this.files.some((f) => f.name === file.name && f.size === file.size)
+    );
+    const slotsLeft = maxFiles - this.files.length;
+    const filesToAdd = uniqueFiles.slice(0, slotsLeft);
+    const dropped = uniqueFiles.slice(slotsLeft);
+    dropped.forEach((file) => {
+      errorMessages.push(this.formatFileError(
+        "msg-count-error",
+        "{fileName} cannot be added. You can only upload up to {maxFiles} files.",
+        `You can only upload up to ${maxFiles} files.`,
+        file.name,
+        { maxFiles }
+      ));
+    });
+    const totalSize = this.files.reduce((sum, f) => sum + f.size, 0) + filesToAdd.reduce((sum, f) => sum + f.size, 0);
+    if (totalSize > maxTotalSizeMB * 1024 * 1024) {
+      const totalSizeMessage = ((_a = this.getAttribute("msg-total-size-error")) == null ? void 0 : _a.includes("{")) ? this.formatMessage("msg-total-size-error", "Total file size exceeds limit of {maxTotalSize}MB.", { maxTotalSize: maxTotalSizeMB }) : `${this.getText("msg-total-size-error", "Total file size exceeds limit of")} ${maxTotalSizeMB}MB.`;
+      errorMessages.push(totalSizeMessage);
+      filesToAdd.length = 0;
+    }
+    if (errorMessages.length > 0) {
+      this.showErrors(errorMessages);
+    }
+    if (filesToAdd.length === 0) return;
+    this.files.push(...filesToAdd);
+    this.updateFileList();
+    this.updateUsage();
+    this.announce(this.formatMessage("msg-added", "{count} file(s) added.", { count: filesToAdd.length }));
+    this.syncFormValue();
+    this.checkValidity();
+    this.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
+    this.fileInput.value = "";
+  }
+  showErrors(messages) {
+    this.errorList.innerHTML = "";
+    messages.forEach((msg) => {
+      const li = document.createElement("li");
+      li.textContent = msg;
+      this.errorList.appendChild(li);
+    });
+    this.announce(messages.join(" "));
+  }
+  announce(message) {
+    while (this.liveRegion.firstChild) this.liveRegion.removeChild(this.liveRegion.firstChild);
+    requestAnimationFrame(() => {
+      const span = document.createElement("span");
+      span.textContent = message;
+      this.liveRegion.appendChild(span);
+    });
+  }
+  updateFileList() {
+    this.fileList.innerHTML = "";
+    this.files.forEach((file) => {
+      const li = document.createElement("li");
+      li.setAttribute("role", "listitem");
+      const preview = document.createElement("div");
+      if (file.type.startsWith("image/")) {
+        const img = document.createElement("img");
+        img.className = "preview";
+        let url = this.previewUrls.get(file);
+        if (!url) {
+          url = URL.createObjectURL(file);
+          this.previewUrls.set(file, url);
+        }
+        img.src = url;
+        img.alt = file.name;
+        img.width = 40;
+        img.height = 40;
+        preview.appendChild(img);
+      } else {
+        const icon = document.createElement("span");
+        icon.className = "preview";
+        icon.textContent = "📄";
+        icon.setAttribute("aria-hidden", "true");
+        preview.appendChild(icon);
+      }
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "file-name";
+      nameSpan.textContent = file.name;
+      preview.appendChild(nameSpan);
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "delete";
+      removeBtn.textContent = this.getAttribute("msg-remove-text") || "Remove";
+      removeBtn.setAttribute("aria-label", this.formatMessage("msg-remove-file-label", "Remove {fileName}", { fileName: file.name }));
+      removeBtn.setAttribute("part", "delete");
+      removeBtn.addEventListener("click", () => {
+        if (this.hasAttribute("disabled")) return;
+        this.revokePreviewUrl(file);
+        this.files = this.files.filter((f) => f.name !== file.name || f.size !== file.size);
+        this.updateFileList();
+        this.updateUsage();
+        this.announce(this.formatMessage("msg-removed", "{fileName} removed.", { fileName: file.name }));
+        this.syncFormValue();
+        this.checkValidity();
+        this.dispatchEvent(new CustomEvent("remove-file", { bubbles: true, composed: true, detail: file }));
+      });
+      li.append(preview, removeBtn);
+      this.fileList.appendChild(li);
+    });
+  }
+  removeFile(file) {
+    if (this.hasAttribute("disabled")) return;
+    this.revokePreviewUrl(file);
+    this.files = this.files.filter((f) => f.name !== file.name || f.size !== file.size);
+    this.updateFileList();
+    this.updateUsage();
+    this.announce(this.formatMessage("msg-removed", "{fileName} removed.", { fileName: file.name }));
+    this.syncFormValue();
+    this.checkValidity();
+    this.dispatchEvent(new CustomEvent("remove-file", { detail: file }));
+  }
+  updateUsage() {
+    const maxMB = parseFloat(this.getAttribute("max-total-size-mb") || "20");
+    const totalMB = this.files.reduce((sum, f) => sum + f.size, 0) / (1024 * 1024);
+    this.usageDisplay.textContent = `${totalMB.toFixed(1)}MB / ${maxMB}MB`;
+  }
+  syncFormValue() {
+    const dt = new DataTransfer();
+    this.files.forEach((file) => dt.items.add(file));
+    this.internals.setFormValue(dt.files);
+  }
+  checkValidity() {
+    if (this.hasAttribute("required") && this.files.length === 0) {
+      this.internals.setValidity(
+        { valueMissing: true },
+        this.getText("msg-required", "Please select at least one file."),
+        this.fileInput
+      );
+      return false;
+    }
+    this.internals.setValidity({});
+    return true;
+  }
+  formResetCallback() {
+    this.revokeAllPreviewUrls();
+    this.files = [];
+    this.updateFileList();
+    this.updateUsage();
+    this.syncFormValue();
+    this.checkValidity();
+  }
+  get value() {
+    return this.files;
+  }
+  set value(val) {
+    if (Array.isArray(val)) {
+      this.revokeAllPreviewUrls();
+      this.files = val;
+      this.updateFileList();
+      this.updateUsage();
+      this.syncFormValue();
+      this.checkValidity();
+    }
+  }
+  generateId() {
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-file-upload-${byteArray[0].toString(36)}`;
+    }
+    return `au-file-upload-${Math.random().toString(36).slice(2)}`;
+  }
+}
+__publicField(AuFileUpload, "formAssociated", true);
+if (typeof customElements !== "undefined" && !customElements.get("au-file-upload")) {
+  customElements.define("au-file-upload", AuFileUpload);
+}
+class AuInput extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this.internals = this.attachInternals();
+    this._id = this.getAttribute("id") || this.generateId();
+    const style = document.createElement("style");
+    style.textContent = `
     :host {
       display: block;
       container-type: inline-size;
@@ -704,7 +1713,460 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
         }
       }
     }
-  `;const t=document.createElement("div");t.className="input-wrapper",this.wrapper=t,this.labelEl=document.createElement("label"),this.labelEl.setAttribute("for",this._id),this.labelEl.textContent=this.getAttribute("label")||"";const a=document.createElement("div");a.className="input-container",this.inputContainer=a,this.prefixSlot=document.createElement("slot"),this.prefixSlot.name="prefix",this.prefixSpan=document.createElement("span"),this.prefixSpan.className="prefix",this.prefixSpan.appendChild(this.prefixSlot),this.prefixSpan.hidden=!0,this.input=document.createElement("input"),this.input.id=this._id,this.syncAttributes(),this.colorCodeSpan=document.createElement("span"),this.colorCodeSpan.className="color-code",this.colorCodeSpan.hidden=!0,this.clearButton=document.createElement("button"),this.clearButton.type="button",this.clearButton.className="clear-input",this.clearButton.textContent="✖",this.clearButton.hidden=!0,this.clearButton.setAttribute("part","clear"),this.clearButton.addEventListener("click",()=>{this.clear()}),this.affixSlot=document.createElement("slot"),this.affixSlot.name="affix",this.affixSpan=document.createElement("span"),this.affixSpan.className="affix",this.affixSpan.appendChild(this.affixSlot),this.affixSpan.hidden=!0,a.append(this.prefixSpan,this.input,this.colorCodeSpan,this.clearButton,this.affixSpan),t.append(this.labelEl,a),this.shadowRoot.append(e,t),this._bindInputEvents(),this.prefixSlot.addEventListener("slotchange",()=>{this.prefixSpan.hidden=this.prefixSlot.assignedNodes().length===0}),this.affixSlot.addEventListener("slotchange",()=>{this.affixSpan.hidden=this.affixSlot.assignedNodes().length===0})}_bindInputEvents(){this.input.addEventListener("input",()=>{this.value=this.input.value,this.dispatchEvent(new Event("input",{bubbles:!0,composed:!0})),this.internals.setFormValue(this.value),this._syncValidity(),this._updateClearButton(),this._updateColorCode()}),this.input.addEventListener("change",()=>{this.dispatchEvent(new Event("change",{bubbles:!0,composed:!0}))})}static get observedAttributes(){return["type","name","value","placeholder","required","disabled","readonly","label","min","max","step","pattern","autocomplete","autofocus","inputmode","maxlength","minlength","list","aria-label","aria-labelledby","data-size","data-layout","data-clear","data-clear-label"]}attributeChangedCallback(e,t,a){if(e==="label"&&this.labelEl)this.labelEl.textContent=a;else if((e==="data-size"||e==="data-layout")&&this.wrapper)a===null?this.wrapper.removeAttribute(e):this.wrapper.setAttribute(e,a);else if(e==="data-clear"||e==="data-clear-label")this._updateClearButton();else if(e==="list")this._handleListAttribute(a);else if(this.input){if(a===null){this.input.removeAttribute(e);const i=e.replace(/-([a-z])/g,(r,s)=>s.toUpperCase());typeof this.input[i]=="boolean"?this.input[i]=!1:typeof this.input[e]=="boolean"&&(this.input[e]=!1)}else{this.input.setAttribute(e,a);const i=e.replace(/-([a-z])/g,(r,s)=>s.toUpperCase());typeof this.input[i]=="boolean"?this.input[i]=!0:typeof this.input[e]=="boolean"&&(this.input[e]=!0)}this._syncValidity(),this._updateColorCode()}}get validity(){return this.internals.validity}get validationMessage(){return this.internals.validationMessage}get willValidate(){return this.internals.willValidate}checkValidity(){return this.internals.checkValidity()}reportValidity(){return this.internals.reportValidity()}connectedCallback(){this._initialValueSet||(this._initialValue=this.input.value,this._initialValueSet=!0),this.internals.setFormValue(this.input.value),this._syncValidity(),this._updateClearButton(),this._updateColorCode(),this.hasAttribute("list")&&requestAnimationFrame(()=>{this._handleListAttribute(this.getAttribute("list"))})}formResetCallback(){const e=this._initialValue||"",t=this.input.cloneNode(!1);t.value=e,this.inputContainer.replaceChild(t,this.input),this.input=t,this._bindInputEvents(),this.internals.setFormValue(e),this._syncValidity(),this._updateClearButton(),this._updateColorCode()}get value(){var e;return(e=this.input)==null?void 0:e.value}set value(e){this.input&&(this.input.value=e,this.setAttribute("value",e),this.internals.setFormValue(e),this._syncValidity(),this._updateClearButton(),this._updateColorCode())}clear(){this.input.value="",this.value="",this.internals.setFormValue(""),this.dispatchEvent(new Event("input",{bubbles:!0,composed:!0})),this.dispatchEvent(new Event("change",{bubbles:!0,composed:!0})),this._updateClearButton(),this._updateColorCode()}suggest(e=""){this.input.value=e,this.value=e,this.internals.setFormValue(e),this.dispatchEvent(new Event("input",{bubbles:!0,composed:!0})),this._updateClearButton(),this._updateColorCode()}get disabled(){return this.hasAttribute("disabled")}set disabled(e){e?this.setAttribute("disabled",""):this.removeAttribute("disabled")}get required(){return this.hasAttribute("required")}set required(e){e?this.setAttribute("required",""):this.removeAttribute("required")}get readonly(){return this.hasAttribute("readonly")}set readonly(e){e?this.setAttribute("readonly",""):this.removeAttribute("readonly")}focus(){var e;(e=this.input)==null||e.focus()}generateId(){if(typeof crypto<"u"&&crypto.getRandomValues){const e=new Uint32Array(1);return crypto.getRandomValues(e),`au-input-${e[0].toString(36)}`}return`au-input-${Math.random().toString(36).slice(2)}`}syncAttributes(){Array.from(this.attributes).forEach(e=>{["data-size","data-layout","data-clear","data-clear-label"].includes(e.name)||(this.input.setAttribute(e.name,e.value),e.name==="value"&&(this.input.defaultValue=e.value))})}_syncValidity(){this.input&&(this.input.validity.valid?this.internals.setValidity({}):this.internals.setValidity(this.input.validity,this.input.validationMessage,this.input))}_updateClearButton(){const e=this.hasAttribute("data-clear"),t=this.input.value.length>0,a=this.getAttribute("data-clear-label")||"Clear input";this.clearButton.setAttribute("aria-label",a),this.clearButton.hidden=!(e&&t)}_updateColorCode(){this.input.type==="color"?(this.colorCodeSpan.textContent=this.input.value,this.colorCodeSpan.hidden=!1):this.colorCodeSpan.hidden=!0}_handleListAttribute(e){if(!this.shadowRoot||!this.input)return;this._disconnectDatalistObserver();const t=this.shadowRoot.querySelector("datalist");if(t&&t.remove(),!e){this.input.removeAttribute("list");return}const a=this.getRootNode(),i=a instanceof Document||a instanceof ShadowRoot?a.getElementById(e):document.getElementById(e);i&&i.tagName==="DATALIST"?(this._syncInternalDatalist(i,e),this._datalistObserver=new MutationObserver(()=>{this._syncInternalDatalist(i,e)}),this._datalistObserver.observe(i,{childList:!0,subtree:!0,attributes:!0})):this.input.setAttribute("list",e)}_syncInternalDatalist(e,t){if(!this.shadowRoot||!this.input)return;const a=this.shadowRoot.querySelector("datalist");a&&a.remove();const i=document.createElement("datalist");i.id=t,Array.from(e.options).forEach(r=>{i.appendChild(r.cloneNode(!0))}),this.shadowRoot.appendChild(i),this.input.setAttribute("list",t)}_disconnectDatalistObserver(){this._datalistObserver&&(this._datalistObserver.disconnect(),this._datalistObserver=null)}disconnectedCallback(){this._disconnectDatalistObserver()}}x(C,"formAssociated",!0);typeof customElements<"u"&&!customElements.get("au-input")&&customElements.define("au-input",C);class w extends HTMLElement{static get observedAttributes(){return["data-total","data-current-page","data-pager-count","data-page-size","data-page-size-options","data-layout","data-text-total-pages-prefix","data-text-page","data-text-total-items-suffix","data-text-per","data-text-first","data-text-prev","data-text-next","data-text-last","data-text-go","data-text-goto","data-text-pagination-label","data-text-page-size","data-text-page-announcement"]}static generateId(){if(typeof crypto<"u"&&crypto.getRandomValues){const e=new Uint32Array(1);return crypto.getRandomValues(e),`au-pagination-${e[0].toString(36)}`}return`au-pagination-${Math.random().toString(36).slice(2)}`}constructor(){super(),this.attachShadow({mode:"open"}),this._selectId=w.generateId(),this._jumpId=w.generateId(),this.liveRegion=document.createElement("div"),this.liveRegion.setAttribute("aria-live","polite"),this.liveRegion.setAttribute("role","status"),this.liveRegion.setAttribute("aria-atomic","true"),this._parseAttributes(),this._render()}attributeChangedCallback(){this._parseAttributes(),this._requestRender()}_requestRender(){this._updatePending||(this._updatePending=!0,requestAnimationFrame(()=>{this._render(),this._updatePending=!1}))}_parseAttributes(){this.total=parseInt(this.getAttribute("data-total"))||0,this.currentPage=parseInt(this.getAttribute("data-current-page"))||1,this.pagerCount=parseInt(this.getAttribute("data-pager-count"))||5,this.pageSize=parseInt(this.getAttribute("data-page-size"))||10;const e=this.getAttribute("data-page-size-options");if(e)try{this._pageSizeOptions=JSON.parse(e)}catch{this._pageSizeOptions=e.split(",").map(a=>parseInt(a.trim()))}else this._pageSizeOptions=[10,30,50,100];const t=this.getAttribute("data-layout");if(t)try{this._layout=JSON.parse(t)}catch{this._layout=t.replace(/[[\]' ]/g,"").split(",")}else this._layout=["total_page","total_items","page_size","first","prev","pages","next","last","jump"];this.texts={totalPagesPrefix:this.getAttribute("data-text-total-pages-prefix")||"Total",pageSuffix:this.getAttribute("data-text-page")||"page(s)",totalItemsSuffix:this.getAttribute("data-text-total-items-suffix")||"item(s)",perText:this.getAttribute("data-text-per")||"each page",firstText:this.getAttribute("data-text-first")||"First",prevText:this.getAttribute("data-text-prev")||"Prev",nextText:this.getAttribute("data-text-next")||"Next",lastText:this.getAttribute("data-text-last")||"Last",goText:this.getAttribute("data-text-go")||"go to",gotoText:this.getAttribute("data-text-goto")||"go to",paginationLabel:this.getAttribute("data-text-pagination-label")||"pagination",pageSizeText:this.getAttribute("data-text-page-size")||"Page size",pageAnnouncement:this.getAttribute("data-text-page-announcement")||"Page {page}"}}formatText(e,t={}){return Object.entries(t).reduce((a,[i,r])=>a.replaceAll(`{${i}}`,String(r)),e)}get pageSizeOptions(){return this._pageSizeOptions??[10,30,50,100]}set pageSizeOptions(e){this._pageSizeOptions=e,this.setAttribute("data-page-size-options",JSON.stringify(e))}get layout(){return this._layout??["total_page","total_items","page_size","first","prev","pages","next","last","jump"]}set layout(e){this._layout=e,this.setAttribute("data-layout",JSON.stringify(e))}get totalPages(){return Math.ceil(this.total/this.pageSize)||1}get pagers(){const t=Math.floor((this.currentPage-1)/this.pagerCount)*this.pagerCount+1,a=Math.min(t+this.pagerCount-1,this.totalPages),i=[];for(let r=t;r<=a;r++)i.push(r);return i}_render(){const e=this.texts,t=this.layout,a=this.totalPages,i=this.total;this.shadowRoot.innerHTML="";const r=document.createElement("style");r.textContent=`
+  `;
+    const wrapper = document.createElement("div");
+    wrapper.className = "input-wrapper";
+    this.wrapper = wrapper;
+    this.labelEl = document.createElement("label");
+    this.labelEl.setAttribute("for", this._id);
+    this.labelEl.textContent = this.getAttribute("label") || "";
+    const inputContainer = document.createElement("div");
+    inputContainer.className = "input-container";
+    this.inputContainer = inputContainer;
+    this.prefixSlot = document.createElement("slot");
+    this.prefixSlot.name = "prefix";
+    this.prefixSpan = document.createElement("span");
+    this.prefixSpan.className = "prefix";
+    this.prefixSpan.appendChild(this.prefixSlot);
+    this.prefixSpan.hidden = true;
+    this.input = document.createElement("input");
+    this.input.id = this._id;
+    this.syncAttributes();
+    this.colorCodeSpan = document.createElement("span");
+    this.colorCodeSpan.className = "color-code";
+    this.colorCodeSpan.hidden = true;
+    this.clearButton = document.createElement("button");
+    this.clearButton.type = "button";
+    this.clearButton.className = "clear-input";
+    this.clearButton.textContent = "✖";
+    this.clearButton.hidden = true;
+    this.clearButton.setAttribute("part", "clear");
+    this.clearButton.addEventListener("click", () => {
+      this.clear();
+    });
+    this.affixSlot = document.createElement("slot");
+    this.affixSlot.name = "affix";
+    this.affixSpan = document.createElement("span");
+    this.affixSpan.className = "affix";
+    this.affixSpan.appendChild(this.affixSlot);
+    this.affixSpan.hidden = true;
+    inputContainer.append(this.prefixSpan, this.input, this.colorCodeSpan, this.clearButton, this.affixSpan);
+    wrapper.append(this.labelEl, inputContainer);
+    this.shadowRoot.append(style, wrapper);
+    this._bindInputEvents();
+    this.prefixSlot.addEventListener("slotchange", () => {
+      this.prefixSpan.hidden = this.prefixSlot.assignedNodes().length === 0;
+    });
+    this.affixSlot.addEventListener("slotchange", () => {
+      this.affixSpan.hidden = this.affixSlot.assignedNodes().length === 0;
+    });
+  }
+  /** 綁定 input 事件（抽出方法以便 formResetCallback 重用） */
+  _bindInputEvents() {
+    this.input.addEventListener("input", () => {
+      this.value = this.input.value;
+      this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+      this.internals.setFormValue(this.value);
+      this._syncValidity();
+      this._updateClearButton();
+      this._updateColorCode();
+    });
+    this.input.addEventListener("change", () => {
+      this.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
+    });
+  }
+  static get observedAttributes() {
+    return [
+      "type",
+      "name",
+      "value",
+      "placeholder",
+      "required",
+      "disabled",
+      "readonly",
+      "label",
+      "min",
+      "max",
+      "step",
+      "pattern",
+      "autocomplete",
+      "autofocus",
+      "inputmode",
+      "maxlength",
+      "minlength",
+      "list",
+      "aria-label",
+      "aria-labelledby",
+      "data-size",
+      "data-layout",
+      "data-clear",
+      "data-clear-label"
+    ];
+  }
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === "label" && this.labelEl) {
+      this.labelEl.textContent = newValue;
+    } else if ((name === "data-size" || name === "data-layout") && this.wrapper) {
+      if (newValue === null) {
+        this.wrapper.removeAttribute(name);
+      } else {
+        this.wrapper.setAttribute(name, newValue);
+      }
+    } else if (name === "data-clear" || name === "data-clear-label") {
+      this._updateClearButton();
+    } else if (name === "list") {
+      this._handleListAttribute(newValue);
+    } else if (this.input) {
+      if (newValue === null) {
+        this.input.removeAttribute(name);
+        const camel = name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+        if (typeof this.input[camel] === "boolean") this.input[camel] = false;
+        else if (typeof this.input[name] === "boolean") this.input[name] = false;
+      } else {
+        this.input.setAttribute(name, newValue);
+        const camel = name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+        if (typeof this.input[camel] === "boolean") this.input[camel] = true;
+        else if (typeof this.input[name] === "boolean") this.input[name] = true;
+      }
+      this._syncValidity();
+      this._updateColorCode();
+    }
+  }
+  get validity() {
+    return this.internals.validity;
+  }
+  get validationMessage() {
+    return this.internals.validationMessage;
+  }
+  get willValidate() {
+    return this.internals.willValidate;
+  }
+  checkValidity() {
+    return this.internals.checkValidity();
+  }
+  reportValidity() {
+    return this.internals.reportValidity();
+  }
+  connectedCallback() {
+    if (!this._initialValueSet) {
+      this._initialValue = this.input.value;
+      this._initialValueSet = true;
+    }
+    this.internals.setFormValue(this.input.value);
+    this._syncValidity();
+    this._updateClearButton();
+    this._updateColorCode();
+    if (this.hasAttribute("list")) {
+      requestAnimationFrame(() => {
+        this._handleListAttribute(this.getAttribute("list"));
+      });
+    }
+  }
+  formResetCallback() {
+    const currentValue = this._initialValue || "";
+    const newInput = this.input.cloneNode(false);
+    newInput.value = currentValue;
+    this.inputContainer.replaceChild(newInput, this.input);
+    this.input = newInput;
+    this._bindInputEvents();
+    this.internals.setFormValue(currentValue);
+    this._syncValidity();
+    this._updateClearButton();
+    this._updateColorCode();
+  }
+  get value() {
+    var _a;
+    return (_a = this.input) == null ? void 0 : _a.value;
+  }
+  set value(val) {
+    if (this.input) {
+      this.input.value = val;
+      this.setAttribute("value", val);
+      this.internals.setFormValue(val);
+      this._syncValidity();
+      this._updateClearButton();
+      this._updateColorCode();
+    }
+  }
+  /** ✅ 開發者用：清空 input 值 */
+  clear() {
+    this.input.value = "";
+    this.value = "";
+    this.internals.setFormValue("");
+    this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+    this.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
+    this._updateClearButton();
+    this._updateColorCode();
+  }
+  /** ✅ 開發者用：注入建議值 */
+  suggest(val = "") {
+    this.input.value = val;
+    this.value = val;
+    this.internals.setFormValue(val);
+    this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+    this._updateClearButton();
+    this._updateColorCode();
+  }
+  get disabled() {
+    return this.hasAttribute("disabled");
+  }
+  set disabled(val) {
+    val ? this.setAttribute("disabled", "") : this.removeAttribute("disabled");
+  }
+  get required() {
+    return this.hasAttribute("required");
+  }
+  set required(val) {
+    val ? this.setAttribute("required", "") : this.removeAttribute("required");
+  }
+  get readonly() {
+    return this.hasAttribute("readonly");
+  }
+  set readonly(val) {
+    val ? this.setAttribute("readonly", "") : this.removeAttribute("readonly");
+  }
+  /** ✅ 開發者用：聚焦 input 欄位 */
+  focus() {
+    var _a;
+    (_a = this.input) == null ? void 0 : _a.focus();
+  }
+  generateId() {
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-input-${byteArray[0].toString(36)}`;
+    }
+    return `au-input-${Math.random().toString(36).slice(2)}`;
+  }
+  syncAttributes() {
+    Array.from(this.attributes).forEach((attr) => {
+      if (!["data-size", "data-layout", "data-clear", "data-clear-label"].includes(attr.name)) {
+        this.input.setAttribute(attr.name, attr.value);
+        if (attr.name === "value") {
+          this.input.defaultValue = attr.value;
+        }
+      }
+    });
+  }
+  _syncValidity() {
+    if (!this.input) return;
+    if (this.input.validity.valid) {
+      this.internals.setValidity({});
+    } else {
+      this.internals.setValidity(this.input.validity, this.input.validationMessage, this.input);
+    }
+  }
+  _updateClearButton() {
+    const hasClear = this.hasAttribute("data-clear");
+    const hasValue = this.input.value.length > 0;
+    const label = this.getAttribute("data-clear-label") || "Clear input";
+    this.clearButton.setAttribute("aria-label", label);
+    this.clearButton.hidden = !(hasClear && hasValue);
+  }
+  _updateColorCode() {
+    if (this.input.type === "color") {
+      this.colorCodeSpan.textContent = this.input.value;
+      this.colorCodeSpan.hidden = false;
+    } else {
+      this.colorCodeSpan.hidden = true;
+    }
+  }
+  /**
+   * Binds the external datalist to an internal shadow DOM datalist because
+   * `list` attributes do not cross shadow DOM boundaries.
+   *
+   * A MutationObserver keeps the internal copy in sync, so dynamically updated
+   * datalists (e.g. fetch-as-you-type autocomplete) stay current. The observer
+   * is torn down on re-target and in disconnectedCallback to avoid leaks.
+   */
+  _handleListAttribute(listId) {
+    if (!this.shadowRoot || !this.input) return;
+    this._disconnectDatalistObserver();
+    const existingInternal = this.shadowRoot.querySelector("datalist");
+    if (existingInternal) existingInternal.remove();
+    if (!listId) {
+      this.input.removeAttribute("list");
+      return;
+    }
+    const root = this.getRootNode();
+    const externalDatalist = root instanceof Document || root instanceof ShadowRoot ? root.getElementById(listId) : document.getElementById(listId);
+    if (externalDatalist && externalDatalist.tagName === "DATALIST") {
+      this._syncInternalDatalist(externalDatalist, listId);
+      this._datalistObserver = new MutationObserver(() => {
+        this._syncInternalDatalist(externalDatalist, listId);
+      });
+      this._datalistObserver.observe(externalDatalist, {
+        childList: true,
+        subtree: true,
+        attributes: true
+      });
+    } else {
+      this.input.setAttribute("list", listId);
+    }
+  }
+  /** Rebuilds the shadow-scoped datalist from the current external datalist. */
+  _syncInternalDatalist(externalDatalist, listId) {
+    if (!this.shadowRoot || !this.input) return;
+    const existingInternal = this.shadowRoot.querySelector("datalist");
+    if (existingInternal) existingInternal.remove();
+    const internalDatalist = document.createElement("datalist");
+    internalDatalist.id = listId;
+    Array.from(externalDatalist.options).forEach((opt) => {
+      internalDatalist.appendChild(opt.cloneNode(true));
+    });
+    this.shadowRoot.appendChild(internalDatalist);
+    this.input.setAttribute("list", listId);
+  }
+  _disconnectDatalistObserver() {
+    if (this._datalistObserver) {
+      this._datalistObserver.disconnect();
+      this._datalistObserver = null;
+    }
+  }
+  disconnectedCallback() {
+    this._disconnectDatalistObserver();
+  }
+}
+__publicField(AuInput, "formAssociated", true);
+if (typeof customElements !== "undefined" && !customElements.get("au-input")) {
+  customElements.define("au-input", AuInput);
+}
+class AuPagination extends HTMLElement {
+  static get observedAttributes() {
+    return [
+      "data-total",
+      "data-current-page",
+      "data-pager-count",
+      "data-page-size",
+      "data-page-size-options",
+      "data-layout",
+      "data-text-total-pages-prefix",
+      "data-text-page",
+      "data-text-total-items-suffix",
+      "data-text-per",
+      "data-text-first",
+      "data-text-prev",
+      "data-text-next",
+      "data-text-last",
+      "data-text-go",
+      "data-text-goto",
+      "data-text-pagination-label",
+      "data-text-page-size",
+      "data-text-page-announcement"
+    ];
+  }
+  // generate unique IDs for input and select
+  static generateId() {
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-pagination-${byteArray[0].toString(36)}`;
+    }
+    return `au-pagination-${Math.random().toString(36).slice(2)}`;
+  }
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this._selectId = AuPagination.generateId();
+    this._jumpId = AuPagination.generateId();
+    this.liveRegion = document.createElement("div");
+    this.liveRegion.setAttribute("aria-live", "polite");
+    this.liveRegion.setAttribute("role", "status");
+    this.liveRegion.setAttribute("aria-atomic", "true");
+    this._parseAttributes();
+    this._render();
+  }
+  attributeChangedCallback() {
+    this._parseAttributes();
+    this._requestRender();
+  }
+  _requestRender() {
+    if (this._updatePending) return;
+    this._updatePending = true;
+    requestAnimationFrame(() => {
+      this._render();
+      this._updatePending = false;
+    });
+  }
+  _parseAttributes() {
+    this.total = parseInt(this.getAttribute("data-total")) || 0;
+    this.currentPage = parseInt(this.getAttribute("data-current-page")) || 1;
+    this.pagerCount = parseInt(this.getAttribute("data-pager-count")) || 5;
+    this.pageSize = parseInt(this.getAttribute("data-page-size")) || 10;
+    const opts = this.getAttribute("data-page-size-options");
+    if (opts) {
+      try {
+        this._pageSizeOptions = JSON.parse(opts);
+      } catch {
+        this._pageSizeOptions = opts.split(",").map((n) => parseInt(n.trim()));
+      }
+    } else {
+      this._pageSizeOptions = [10, 30, 50, 100];
+    }
+    const lay = this.getAttribute("data-layout");
+    if (lay) {
+      try {
+        this._layout = JSON.parse(lay);
+      } catch {
+        this._layout = lay.replace(/[[\]' ]/g, "").split(",");
+      }
+    } else {
+      this._layout = ["total_page", "total_items", "page_size", "first", "prev", "pages", "next", "last", "jump"];
+    }
+    this.texts = {
+      totalPagesPrefix: this.getAttribute("data-text-total-pages-prefix") || "Total",
+      pageSuffix: this.getAttribute("data-text-page") || "page(s)",
+      totalItemsSuffix: this.getAttribute("data-text-total-items-suffix") || "item(s)",
+      perText: this.getAttribute("data-text-per") || "each page",
+      firstText: this.getAttribute("data-text-first") || "First",
+      prevText: this.getAttribute("data-text-prev") || "Prev",
+      nextText: this.getAttribute("data-text-next") || "Next",
+      lastText: this.getAttribute("data-text-last") || "Last",
+      goText: this.getAttribute("data-text-go") || "go to",
+      gotoText: this.getAttribute("data-text-goto") || "go to",
+      paginationLabel: this.getAttribute("data-text-pagination-label") || "pagination",
+      pageSizeText: this.getAttribute("data-text-page-size") || "Page size",
+      pageAnnouncement: this.getAttribute("data-text-page-announcement") || "Page {page}"
+    };
+  }
+  formatText(template, values = {}) {
+    return Object.entries(values).reduce((message, [key, value]) => {
+      return message.replaceAll(`{${key}}`, String(value));
+    }, template);
+  }
+  get pageSizeOptions() {
+    return this._pageSizeOptions ?? [10, 30, 50, 100];
+  }
+  set pageSizeOptions(val) {
+    this._pageSizeOptions = val;
+    this.setAttribute("data-page-size-options", JSON.stringify(val));
+  }
+  get layout() {
+    return this._layout ?? ["total_page", "total_items", "page_size", "first", "prev", "pages", "next", "last", "jump"];
+  }
+  set layout(val) {
+    this._layout = val;
+    this.setAttribute("data-layout", JSON.stringify(val));
+  }
+  get totalPages() {
+    return Math.ceil(this.total / this.pageSize) || 1;
+  }
+  get pagers() {
+    const groupIndex = Math.floor((this.currentPage - 1) / this.pagerCount);
+    const start = groupIndex * this.pagerCount + 1;
+    const end = Math.min(start + this.pagerCount - 1, this.totalPages);
+    const arr = [];
+    for (let i = start; i <= end; i++) arr.push(i);
+    return arr;
+  }
+  _render() {
+    const t = this.texts;
+    const layout = this.layout;
+    const totalPages = this.totalPages;
+    const totalItems = this.total;
+    this.shadowRoot.innerHTML = "";
+    const style = document.createElement("style");
+    style.textContent = `
       :is(ul, ol) {
         list-style: none;
         margin: 0;
@@ -831,7 +2293,174 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
           }
         }
       }
-    `,this.shadowRoot.appendChild(r);const s=document.createElement("div");s.className="au-pagination";const o=document.createElement("div");o.className="au-pagination-container";const n=document.createElement("div");if(n.className="au-pagination-group",t.includes("total_page")){const l=document.createElement("span");l.textContent=`${e.totalPagesPrefix}${a}${e.pageSuffix}`,n.appendChild(l)}if(t.includes("total_items")){const l=document.createElement("span");l.textContent=`${i}${e.totalItemsSuffix}`,n.appendChild(l)}if(t.includes("page_size")){const l=document.createElement("span");l.className="visually-hidden",l.textContent=e.pageSizeText,n.appendChild(l);const d=document.createElement("label");d.setAttribute("for",this._selectId),d.textContent=e.perText,n.appendChild(d);const h=document.createElement("select");h.id=this._selectId,this.pageSizeOptions.forEach(g=>{const u=document.createElement("option");u.value=g,u.textContent=g,g===this.pageSize&&(u.selected=!0),h.appendChild(u)}),h.addEventListener("change",g=>{this.pageSize=+g.target.value,this.setAttribute("data-page-size",this.pageSize),this.dispatchEvent(new CustomEvent("page-size-change",{detail:this.pageSize,bubbles:!0,composed:!0})),this.currentPage=1,this.setAttribute("data-current-page","1")}),n.appendChild(h);const b=document.createElement("span");b.textContent=e.totalItemsSuffix,n.appendChild(b)}o.appendChild(n);const v=document.createElement("div");v.className="au-pagination-group";const c=document.createElement("ul");if(c.className="pagination-buttons",t.includes("first")){const l=document.createElement("li"),d=document.createElement("button");d.textContent=e.firstText,d.disabled=this.currentPage===1,d.addEventListener("click",()=>this._goto(1)),l.appendChild(d),c.appendChild(l)}if(t.includes("prev")){const l=document.createElement("li"),d=document.createElement("button");d.textContent=e.prevText,d.disabled=this.currentPage===1,d.addEventListener("click",()=>this._goto(this.currentPage-1)),l.appendChild(d),c.appendChild(l)}if(t.includes("pages")&&this.pagers.forEach(l=>{const d=document.createElement("li"),h=document.createElement("button");h.className="pager",l===this.currentPage?(h.setAttribute("aria-current","page"),h.setAttribute("part","current-page")):(h.removeAttribute("aria-current"),h.removeAttribute("part")),h.textContent=l,h.addEventListener("click",()=>this._goto(l)),d.appendChild(h),c.appendChild(d)}),t.includes("next")){const l=document.createElement("li"),d=document.createElement("button");d.textContent=e.nextText,d.disabled=this.currentPage>=a,d.addEventListener("click",()=>this._goto(this.currentPage+1)),l.appendChild(d),c.appendChild(l)}if(t.includes("last")){const l=document.createElement("li"),d=document.createElement("button");d.textContent=e.lastText,d.disabled=this.currentPage>=a,d.addEventListener("click",()=>this._goto(a)),l.appendChild(d),c.appendChild(l)}const p=document.createElement("nav");if(p.setAttribute("aria-label",e.paginationLabel),p.appendChild(c),v.appendChild(p),o.appendChild(v),t.includes("jump")){const l=document.createElement("div");l.className="au-pagination-group";const d=document.createElement("label");d.setAttribute("for",this._jumpId),d.textContent=e.goText,l.appendChild(d);const h=document.createElement("input");h.type="number",h.id=this._jumpId,h.min="1",h.max=String(a),h.value=String(this.currentPage),h.addEventListener("keyup",u=>{u.key==="Enter"&&this._goto(+h.value)}),l.appendChild(h);const b=document.createElement("span");b.textContent=e.pageSuffix,l.appendChild(b);const g=document.createElement("button");g.type="button",g.textContent=e.gotoText,g.addEventListener("click",()=>this._goto(+h.value)),l.appendChild(g),o.appendChild(l)}s.appendChild(o),this.shadowRoot.append(s,this.liveRegion)}_goto(e){e<1&&(e=1),e>this.totalPages&&(e=this.totalPages),e!==this.currentPage&&(this.currentPage=e,this.setAttribute("data-current-page",String(e)),this.dispatchEvent(new CustomEvent("page-change",{detail:e,bubbles:!0,composed:!0})),this.announce(this.formatText(this.texts.pageAnnouncement,{page:e})))}announce(e){for(;this.liveRegion.firstChild;)this.liveRegion.removeChild(this.liveRegion.firstChild);requestAnimationFrame(()=>{const t=document.createElement("span");t.textContent=e,this.liveRegion.appendChild(t)})}}typeof customElements<"u"&&!customElements.get("au-pagination")&&customElements.define("au-pagination",w);class _ extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"}),this.internals=this.attachInternals();const e=document.createElement("style");e.textContent=`
+    `;
+    this.shadowRoot.appendChild(style);
+    const root = document.createElement("div");
+    root.className = "au-pagination";
+    const container = document.createElement("div");
+    container.className = "au-pagination-container";
+    const grp1 = document.createElement("div");
+    grp1.className = "au-pagination-group";
+    if (layout.includes("total_page")) {
+      const el = document.createElement("span");
+      el.textContent = `${t.totalPagesPrefix}${totalPages}${t.pageSuffix}`;
+      grp1.appendChild(el);
+    }
+    if (layout.includes("total_items")) {
+      const el = document.createElement("span");
+      el.textContent = `${totalItems}${t.totalItemsSuffix}`;
+      grp1.appendChild(el);
+    }
+    if (layout.includes("page_size")) {
+      const hiddenLbl = document.createElement("span");
+      hiddenLbl.className = "visually-hidden";
+      hiddenLbl.textContent = t.pageSizeText;
+      grp1.appendChild(hiddenLbl);
+      const lbl = document.createElement("label");
+      lbl.setAttribute("for", this._selectId);
+      lbl.textContent = t.perText;
+      grp1.appendChild(lbl);
+      const select = document.createElement("select");
+      select.id = this._selectId;
+      this.pageSizeOptions.forEach((opt) => {
+        const o = document.createElement("option");
+        o.value = opt;
+        o.textContent = opt;
+        if (opt === this.pageSize) o.selected = true;
+        select.appendChild(o);
+      });
+      select.addEventListener("change", (e) => {
+        this.pageSize = +e.target.value;
+        this.setAttribute("data-page-size", this.pageSize);
+        this.dispatchEvent(new CustomEvent("page-size-change", { detail: this.pageSize, bubbles: true, composed: true }));
+        this.currentPage = 1;
+        this.setAttribute("data-current-page", "1");
+      });
+      grp1.appendChild(select);
+      const postSpan = document.createElement("span");
+      postSpan.textContent = t.totalItemsSuffix;
+      grp1.appendChild(postSpan);
+    }
+    container.appendChild(grp1);
+    const grp2 = document.createElement("div");
+    grp2.className = "au-pagination-group";
+    const ul = document.createElement("ul");
+    ul.className = "pagination-buttons";
+    if (layout.includes("first")) {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.textContent = t.firstText;
+      btn.disabled = this.currentPage === 1;
+      btn.addEventListener("click", () => this._goto(1));
+      li.appendChild(btn);
+      ul.appendChild(li);
+    }
+    if (layout.includes("prev")) {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.textContent = t.prevText;
+      btn.disabled = this.currentPage === 1;
+      btn.addEventListener("click", () => this._goto(this.currentPage - 1));
+      li.appendChild(btn);
+      ul.appendChild(li);
+    }
+    if (layout.includes("pages")) this.pagers.forEach((page) => {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.className = "pager";
+      if (page === this.currentPage) {
+        btn.setAttribute("aria-current", "page");
+        btn.setAttribute("part", "current-page");
+      } else {
+        btn.removeAttribute("aria-current");
+        btn.removeAttribute("part");
+      }
+      btn.textContent = page;
+      btn.addEventListener("click", () => this._goto(page));
+      li.appendChild(btn);
+      ul.appendChild(li);
+    });
+    if (layout.includes("next")) {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.textContent = t.nextText;
+      btn.disabled = this.currentPage >= totalPages;
+      btn.addEventListener("click", () => this._goto(this.currentPage + 1));
+      li.appendChild(btn);
+      ul.appendChild(li);
+    }
+    if (layout.includes("last")) {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.textContent = t.lastText;
+      btn.disabled = this.currentPage >= totalPages;
+      btn.addEventListener("click", () => this._goto(totalPages));
+      li.appendChild(btn);
+      ul.appendChild(li);
+    }
+    const nav = document.createElement("nav");
+    nav.setAttribute("aria-label", t.paginationLabel);
+    nav.appendChild(ul);
+    grp2.appendChild(nav);
+    container.appendChild(grp2);
+    if (layout.includes("jump")) {
+      const grp3 = document.createElement("div");
+      grp3.className = "au-pagination-group";
+      const lbl = document.createElement("label");
+      lbl.setAttribute("for", this._jumpId);
+      lbl.textContent = t.goText;
+      grp3.appendChild(lbl);
+      const input = document.createElement("input");
+      input.type = "number";
+      input.id = this._jumpId;
+      input.min = "1";
+      input.max = String(totalPages);
+      input.value = String(this.currentPage);
+      input.addEventListener("keyup", (e) => {
+        if (e.key === "Enter") this._goto(+input.value);
+      });
+      grp3.appendChild(input);
+      const suf = document.createElement("span");
+      suf.textContent = t.pageSuffix;
+      grp3.appendChild(suf);
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = t.gotoText;
+      btn.addEventListener("click", () => this._goto(+input.value));
+      grp3.appendChild(btn);
+      container.appendChild(grp3);
+    }
+    root.appendChild(container);
+    this.shadowRoot.append(root, this.liveRegion);
+  }
+  _goto(page) {
+    if (page < 1) page = 1;
+    if (page > this.totalPages) page = this.totalPages;
+    if (page === this.currentPage) return;
+    this.currentPage = page;
+    this.setAttribute("data-current-page", String(page));
+    this.dispatchEvent(new CustomEvent("page-change", { detail: page, bubbles: true, composed: true }));
+    this.announce(this.formatText(this.texts.pageAnnouncement, { page }));
+  }
+  announce(message) {
+    while (this.liveRegion.firstChild) this.liveRegion.removeChild(this.liveRegion.firstChild);
+    requestAnimationFrame(() => {
+      const span = document.createElement("span");
+      span.textContent = message;
+      this.liveRegion.appendChild(span);
+    });
+  }
+}
+if (typeof customElements !== "undefined" && !customElements.get("au-pagination")) {
+  customElements.define("au-pagination", AuPagination);
+}
+class AuRadioGroup extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this.internals = this.attachInternals();
+    const style = document.createElement("style");
+    style.textContent = `
       .au-radio-group {
         display: flex;
         flex-wrap: wrap;
@@ -909,7 +2538,176 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
           }
         }
       }
-    `;const t=document.createElement("div");t.setAttribute("class","au-radio-group"),t.setAttribute("role","radiogroup"),this.groupName="radio-group-name-"+this.generateId();const a=document.createElement("slot");a.style.display="none",this.shadowRoot.append(e,t,a)}connectedCallback(){this.shadowRoot.querySelector("slot").addEventListener("slotchange",()=>{this.renderRadios()}),this._mutationObserver=new MutationObserver(()=>{this.renderRadios(),this.updateGroupAttributes()}),this._mutationObserver.observe(this,{childList:!0,subtree:!0,characterData:!0,attributes:!0,attributeFilter:["label","value","checked","disabled"]}),this.renderRadios(),this.updateGroupAttributes()}disconnectedCallback(){var e;(e=this._mutationObserver)==null||e.disconnect()}renderRadios(){const e=this.shadowRoot.querySelector(".au-radio-group");e.innerHTML="";const a=this.shadowRoot.querySelector("slot").assignedElements(),i=this.hasAttribute("disabled");let r=null;a.forEach((s,o)=>{const n=document.createElement("label"),v="radio-"+this.generateId();n.setAttribute("for",v);const c=document.createElement("input");c.type="radio",c.id=v,c.name=this.groupName,c.value=s.getAttribute("value")||`radio-${o+1}`,s.hasAttribute("checked")&&(c.checked=!0,r=c.value),(i||s.hasAttribute("disabled"))&&(c.disabled=!0);const p=document.createElement("div");p.setAttribute("class","text"),p.textContent=s.getAttribute("label")||s.textContent.trim(),n.append(c,p),e.appendChild(n),c.addEventListener("change",l=>this.handleChange(l,c)),c.addEventListener("keydown",l=>this.handleKeyDown(l,o))}),this.internals.setFormValue(r)}handleChange(e,t){t.checked&&(this.shadowRoot.querySelectorAll(`input[name="${this.groupName}"]`).forEach(i=>{i!==t&&(i.checked=!1)}),this.internals.setFormValue(t.value),this.dispatchEvent(new CustomEvent("change",{bubbles:!0,composed:!0,detail:{value:t.value}})))}handleKeyDown(e,t){const a=Array.from(this.shadowRoot.querySelectorAll(`input[name="${this.groupName}"]`));let i;switch(e.key){case"ArrowRight":case"ArrowDown":for(e.preventDefault(),i=(t+1)%a.length;a[i].disabled;)i=(i+1)%a.length;a[i].focus(),a[i].click();break;case"ArrowLeft":case"ArrowUp":for(e.preventDefault(),i=(t-1+a.length)%a.length;a[i].disabled;)i=(i-1+a.length)%a.length;a[i].focus(),a[i].click();break}}static get observedAttributes(){return["disabled","direction","aria-label","aria-labelledby","label"]}attributeChangedCallback(e){if(e==="disabled"){const t=this.hasAttribute("disabled");this.shadowRoot.querySelectorAll('input[type="radio"]').forEach(a=>{a.disabled=t})}else["direction","aria-label","aria-labelledby","label"].includes(e)&&this.updateGroupAttributes()}updateGroupAttributes(){const e=this.shadowRoot.querySelector(".au-radio-group");if(!e)return;const t=this.getAttribute("aria-label")||this.getAttribute("label");t?e.setAttribute("aria-label",t):e.removeAttribute("aria-label"),this.hasAttribute("aria-labelledby")?e.setAttribute("aria-labelledby",this.getAttribute("aria-labelledby")):e.removeAttribute("aria-labelledby"),e.classList.toggle("au-radio-group--vertical",this.getAttribute("direction")==="vertical")}get value(){const e=Array.from(this.shadowRoot.querySelectorAll('input[type="radio"]')).find(t=>t.checked);return(e==null?void 0:e.value)??null}get disabled(){return this.hasAttribute("disabled")}set disabled(e){e?this.setAttribute("disabled",""):this.removeAttribute("disabled")}formResetCallback(){this.renderRadios()}generateId(){if(typeof crypto<"u"&&crypto.getRandomValues){const e=new Uint32Array(1);return crypto.getRandomValues(e),`${e[0].toString(36)}`}return Math.random().toString(36).slice(2)}}x(_,"formAssociated",!0);typeof customElements<"u"&&!customElements.get("au-radio-group")&&customElements.define("au-radio-group",_);class D extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"}),this._groupName="rating-"+this.generateId(),this._skipRender=!1;const e=document.createElement("template");e.innerHTML=`
+    `;
+    const container = document.createElement("div");
+    container.setAttribute("class", "au-radio-group");
+    container.setAttribute("role", "radiogroup");
+    this.groupName = "radio-group-name-" + this.generateId();
+    const slot = document.createElement("slot");
+    slot.style.display = "none";
+    this.shadowRoot.append(style, container, slot);
+  }
+  connectedCallback() {
+    const slot = this.shadowRoot.querySelector("slot");
+    slot.addEventListener("slotchange", () => {
+      this.renderRadios();
+    });
+    this._mutationObserver = new MutationObserver(() => {
+      this.renderRadios();
+      this.updateGroupAttributes();
+    });
+    this._mutationObserver.observe(this, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["label", "value", "checked", "disabled"]
+    });
+    this.renderRadios();
+    this.updateGroupAttributes();
+  }
+  disconnectedCallback() {
+    var _a;
+    (_a = this._mutationObserver) == null ? void 0 : _a.disconnect();
+  }
+  renderRadios() {
+    const container = this.shadowRoot.querySelector(".au-radio-group");
+    container.innerHTML = "";
+    const slot = this.shadowRoot.querySelector("slot");
+    const radios = slot.assignedElements();
+    const isDisabled = this.hasAttribute("disabled");
+    let initialValue = null;
+    radios.forEach((radio, index) => {
+      const label = document.createElement("label");
+      const inputID = "radio-" + this.generateId();
+      label.setAttribute("for", inputID);
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.id = inputID;
+      input.name = this.groupName;
+      input.value = radio.getAttribute("value") || `radio-${index + 1}`;
+      if (radio.hasAttribute("checked")) {
+        input.checked = true;
+        initialValue = input.value;
+      }
+      if (isDisabled || radio.hasAttribute("disabled")) {
+        input.disabled = true;
+      }
+      const textSlot = document.createElement("div");
+      textSlot.setAttribute("class", "text");
+      textSlot.textContent = radio.getAttribute("label") || radio.textContent.trim();
+      label.append(input, textSlot);
+      container.appendChild(label);
+      input.addEventListener("change", (event) => this.handleChange(event, input));
+      input.addEventListener("keydown", (event) => this.handleKeyDown(event, index));
+    });
+    this.internals.setFormValue(initialValue);
+  }
+  handleChange(event, input) {
+    if (input.checked) {
+      const radios = this.shadowRoot.querySelectorAll(`input[name="${this.groupName}"]`);
+      radios.forEach((radio) => {
+        if (radio !== input) {
+          radio.checked = false;
+        }
+      });
+      this.internals.setFormValue(input.value);
+      this.dispatchEvent(new CustomEvent("change", {
+        bubbles: true,
+        composed: true,
+        detail: { value: input.value }
+      }));
+    }
+  }
+  handleKeyDown(event, currentIndex) {
+    const radios = Array.from(this.shadowRoot.querySelectorAll(`input[name="${this.groupName}"]`));
+    let nextIndex;
+    switch (event.key) {
+      case "ArrowRight":
+      case "ArrowDown":
+        event.preventDefault();
+        nextIndex = (currentIndex + 1) % radios.length;
+        while (radios[nextIndex].disabled) {
+          nextIndex = (nextIndex + 1) % radios.length;
+        }
+        radios[nextIndex].focus();
+        radios[nextIndex].click();
+        break;
+      case "ArrowLeft":
+      case "ArrowUp":
+        event.preventDefault();
+        nextIndex = (currentIndex - 1 + radios.length) % radios.length;
+        while (radios[nextIndex].disabled) {
+          nextIndex = (nextIndex - 1 + radios.length) % radios.length;
+        }
+        radios[nextIndex].focus();
+        radios[nextIndex].click();
+        break;
+    }
+  }
+  static get observedAttributes() {
+    return ["disabled", "direction", "aria-label", "aria-labelledby", "label"];
+  }
+  attributeChangedCallback(name) {
+    if (name === "disabled") {
+      const isDisabled = this.hasAttribute("disabled");
+      this.shadowRoot.querySelectorAll('input[type="radio"]').forEach((input) => {
+        input.disabled = isDisabled;
+      });
+    } else if (["direction", "aria-label", "aria-labelledby", "label"].includes(name)) {
+      this.updateGroupAttributes();
+    }
+  }
+  updateGroupAttributes() {
+    const container = this.shadowRoot.querySelector(".au-radio-group");
+    if (!container) return;
+    const ariaLabel = this.getAttribute("aria-label") || this.getAttribute("label");
+    if (ariaLabel) {
+      container.setAttribute("aria-label", ariaLabel);
+    } else {
+      container.removeAttribute("aria-label");
+    }
+    if (this.hasAttribute("aria-labelledby")) {
+      container.setAttribute("aria-labelledby", this.getAttribute("aria-labelledby"));
+    } else {
+      container.removeAttribute("aria-labelledby");
+    }
+    container.classList.toggle("au-radio-group--vertical", this.getAttribute("direction") === "vertical");
+  }
+  get value() {
+    const checked = Array.from(this.shadowRoot.querySelectorAll('input[type="radio"]')).find((r) => r.checked);
+    return (checked == null ? void 0 : checked.value) ?? null;
+  }
+  get disabled() {
+    return this.hasAttribute("disabled");
+  }
+  set disabled(val) {
+    val ? this.setAttribute("disabled", "") : this.removeAttribute("disabled");
+  }
+  formResetCallback() {
+    this.renderRadios();
+  }
+  generateId() {
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `${byteArray[0].toString(36)}`;
+    }
+    return Math.random().toString(36).slice(2);
+  }
+}
+__publicField(AuRadioGroup, "formAssociated", true);
+if (typeof customElements !== "undefined" && !customElements.get("au-radio-group")) {
+  customElements.define("au-radio-group", AuRadioGroup);
+}
+class AuRating extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this._groupName = "rating-" + this.generateId();
+    this._skipRender = false;
+    const template = document.createElement("template");
+    template.innerHTML = `
       <style>
         :host {
           display: inline-flex;
@@ -1050,12 +2848,270 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
         <legend class="visually-hidden"></legend>
       </fieldset>
       <span class="score"></span>
-    `,this.shadowRoot.appendChild(e.content.cloneNode(!0)),this._fieldset=this.shadowRoot.querySelector(".au-rating"),this._legend=this.shadowRoot.querySelector("legend"),this._scoreEl=this.shadowRoot.querySelector(".score"),this._internals=this.attachInternals()}static get formAssociated(){return!0}static get observedAttributes(){return["value","max","labels","aria-label","name","show-score","score-info","disabled","readonly","data-text-rating","data-text-star","data-text-score"]}connectedCallback(){this.render(),this._fieldset.addEventListener("change",e=>this.handleChange(e)),this._fieldset.addEventListener("keydown",e=>this.handleKeyDown(e))}attributeChangedCallback(e,t,a){if(t!==a&&this.isConnected&&!this._skipRender)if(e==="value"){const i=parseFloat(a);this.updateStars(i),this.updateScoreDisplay(i),this._internals.setFormValue(a)}else this.render()}get max(){return parseInt(this.getAttribute("max"))||5}get value(){const e=this.getAttribute("value");return e?parseFloat(e):0}set value(e){this.setAttribute("value",e)}get labels(){const e=this.getAttribute("labels");return e?e.split(",").map(t=>t.trim()):[]}get name(){return this.getAttribute("name")||"rating"}get scoreInfo(){return this.getAttribute("score-info")||""}get ratingLabel(){return this.getAttribute("aria-label")||this.getAttribute("data-text-rating")||"Rating"}get starLabelTemplate(){return this.getAttribute("data-text-star")||"{value} Star(s)"}get scoreTemplate(){return this.getAttribute("data-text-score")||"{value} / {max} {scoreInfo}"}get showScore(){return this.hasAttribute("show-score")}get disabled(){return this.hasAttribute("disabled")}set disabled(e){e?this.setAttribute("disabled",""):this.removeAttribute("disabled")}get readonly(){return this.hasAttribute("readonly")}set readonly(e){e?this.setAttribute("readonly",""):this.removeAttribute("readonly")}generateId(){if(typeof crypto<"u"&&crypto.getRandomValues){const e=new Uint32Array(1);return crypto.getRandomValues(e),e[0].toString(36)}return Math.random().toString(36).slice(2)}getStarSVG(e=""){return`<svg class="star ${e}" viewBox="0 0 24 24" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+    `;
+    this.shadowRoot.appendChild(template.content.cloneNode(true));
+    this._fieldset = this.shadowRoot.querySelector(".au-rating");
+    this._legend = this.shadowRoot.querySelector("legend");
+    this._scoreEl = this.shadowRoot.querySelector(".score");
+    this._internals = this.attachInternals();
+  }
+  static get formAssociated() {
+    return true;
+  }
+  static get observedAttributes() {
+    return [
+      "value",
+      "max",
+      "labels",
+      "aria-label",
+      "name",
+      "show-score",
+      "score-info",
+      "disabled",
+      "readonly",
+      "data-text-rating",
+      "data-text-star",
+      "data-text-score"
+    ];
+  }
+  connectedCallback() {
+    this.render();
+    this._fieldset.addEventListener("change", (e) => this.handleChange(e));
+    this._fieldset.addEventListener("keydown", (e) => this.handleKeyDown(e));
+  }
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue !== newValue && this.isConnected && !this._skipRender) {
+      if (name === "value") {
+        const val = parseFloat(newValue);
+        this.updateStars(val);
+        this.updateScoreDisplay(val);
+        this._internals.setFormValue(newValue);
+      } else {
+        this.render();
+      }
+    }
+  }
+  get max() {
+    return parseInt(this.getAttribute("max")) || 5;
+  }
+  get value() {
+    const val = this.getAttribute("value");
+    return val ? parseFloat(val) : 0;
+  }
+  set value(val) {
+    this.setAttribute("value", val);
+  }
+  get labels() {
+    const labelsAttr = this.getAttribute("labels");
+    if (labelsAttr) {
+      return labelsAttr.split(",").map((l) => l.trim());
+    }
+    return [];
+  }
+  get name() {
+    return this.getAttribute("name") || "rating";
+  }
+  get scoreInfo() {
+    return this.getAttribute("score-info") || "";
+  }
+  get ratingLabel() {
+    return this.getAttribute("aria-label") || this.getAttribute("data-text-rating") || "Rating";
+  }
+  get starLabelTemplate() {
+    return this.getAttribute("data-text-star") || "{value} Star(s)";
+  }
+  get scoreTemplate() {
+    return this.getAttribute("data-text-score") || "{value} / {max} {scoreInfo}";
+  }
+  get showScore() {
+    return this.hasAttribute("show-score");
+  }
+  get disabled() {
+    return this.hasAttribute("disabled");
+  }
+  set disabled(val) {
+    if (val) this.setAttribute("disabled", "");
+    else this.removeAttribute("disabled");
+  }
+  get readonly() {
+    return this.hasAttribute("readonly");
+  }
+  set readonly(val) {
+    if (val) this.setAttribute("readonly", "");
+    else this.removeAttribute("readonly");
+  }
+  generateId() {
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return byteArray[0].toString(36);
+    }
+    return Math.random().toString(36).slice(2);
+  }
+  getStarSVG(className = "") {
+    return `<svg class="star ${className}" viewBox="0 0 24 24" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-    </svg>`}formatText(e,t={}){return Object.entries(t).reduce((a,[i,r])=>a.replaceAll(`{${i}}`,String(r)),e).trim()}render(){const e=this.ratingLabel;this._legend.textContent=e,this._fieldset.setAttribute("aria-label",e),this._fieldset.innerHTML='<legend class="visually-hidden"></legend>',this._legend=this._fieldset.querySelector("legend"),this._legend.textContent=e,this.readonly&&this._fieldset.setAttribute("aria-readonly","true"),this.disabled&&this._fieldset.setAttribute("aria-disabled","true");const t=this.labels,a=this.value,i=Math.round(a);for(let r=1;r<=this.max;r++){const s=document.createElement("div");s.className="rating-option";const o=`${this._groupName}-${r}`,n=document.createElement("input");n.type="radio",n.name=this._groupName,n.value=r,n.id=o,r===i&&(n.checked=!0),t[r-1]||n.setAttribute("aria-label",this.formatText(this.starLabelTemplate,{value:r,max:this.max})),(this.disabled||this.readonly)&&(n.disabled=!0);const c=document.createElement("label");c.setAttribute("for",o);const p=document.createElement("span");p.className="star-wrapper";const l=Math.floor(a),d=a-l;let h=100;r<=l?h=0:r===l+1&&d>0&&(h=100-d*100),p.style.setProperty("--au-rating-clip",`${h}%`),p.innerHTML=`
+    </svg>`;
+  }
+  formatText(template, values = {}) {
+    return Object.entries(values).reduce((message, [key, value]) => {
+      return message.replaceAll(`{${key}}`, String(value));
+    }, template).trim();
+  }
+  render() {
+    const ariaLabel = this.ratingLabel;
+    this._legend.textContent = ariaLabel;
+    this._fieldset.setAttribute("aria-label", ariaLabel);
+    this._fieldset.innerHTML = '<legend class="visually-hidden"></legend>';
+    this._legend = this._fieldset.querySelector("legend");
+    this._legend.textContent = ariaLabel;
+    if (this.readonly) {
+      this._fieldset.setAttribute("aria-readonly", "true");
+    }
+    if (this.disabled) {
+      this._fieldset.setAttribute("aria-disabled", "true");
+    }
+    const labels = this.labels;
+    const currentValue = this.value;
+    const intValue = Math.round(currentValue);
+    for (let i = 1; i <= this.max; i++) {
+      const option = document.createElement("div");
+      option.className = "rating-option";
+      const inputId = `${this._groupName}-${i}`;
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = this._groupName;
+      input.value = i;
+      input.id = inputId;
+      if (i === intValue) {
+        input.checked = true;
+      }
+      const labelTextContent = labels[i - 1];
+      if (!labelTextContent) {
+        input.setAttribute("aria-label", this.formatText(this.starLabelTemplate, { value: i, max: this.max }));
+      }
+      if (this.disabled || this.readonly) {
+        input.disabled = true;
+      }
+      const label = document.createElement("label");
+      label.setAttribute("for", inputId);
+      const starWrapper = document.createElement("span");
+      starWrapper.className = "star-wrapper";
+      const fullStars = Math.floor(currentValue);
+      const partialFill = currentValue - fullStars;
+      let clipRight = 100;
+      if (i <= fullStars) {
+        clipRight = 0;
+      } else if (i === fullStars + 1 && partialFill > 0) {
+        clipRight = 100 - partialFill * 100;
+      }
+      starWrapper.style.setProperty("--au-rating-clip", `${clipRight}%`);
+      starWrapper.innerHTML = `
         ${this.getStarSVG("star-bg")}
         ${this.getStarSVG("star-fill")}
-      `,c.appendChild(p);const b=document.createElement("span");b.className="label-text",b.textContent=t[r-1]||"",c.appendChild(b),s.appendChild(n),s.appendChild(c),this._fieldset.appendChild(s)}this.updateScoreDisplay(a),this._internals.setFormValue(a.toString())}updateScoreDisplay(e){this.showScore?this._scoreEl.textContent=this.formatText(this.scoreTemplate,{value:e,max:this.max,scoreInfo:this.scoreInfo}):this._scoreEl.textContent=""}handleChange(e){if(e.target.type==="radio"){const t=parseInt(e.target.value);this.value=t,this.updateStars(t),this.updateScoreDisplay(t),this.dispatchEvent(new CustomEvent("change",{bubbles:!0,composed:!0,detail:{value:t}}))}}updateStars(e){const t=this._fieldset.querySelectorAll(".star-wrapper"),a=Math.floor(e),i=e-a;t.forEach((r,s)=>{const o=s+1;r.classList.remove("animate");let n=100;o<=a?(n=0,o===a&&i===0&&r.classList.add("animate")):o===a+1&&i>0&&(n=100-i*100,r.classList.add("animate")),r.style.setProperty("--au-rating-clip",`${n}%`)})}handleKeyDown(e){const t=Array.from(this._fieldset.querySelectorAll('input[type="radio"]')),a=t.findIndex(r=>r===this.shadowRoot.activeElement||r.checked);let i;switch(e.key){case"ArrowRight":case"ArrowDown":e.preventDefault(),this.value===0&&a===0?i=0:i=(a+1)%t.length,t[i].focus(),t[i].click();break;case"ArrowLeft":case"ArrowUp":e.preventDefault(),i=(a-1+t.length)%t.length,t[i].focus(),t[i].click();break}}formResetCallback(){this.value=this.getAttribute("value")||0,this._internals.setFormValue(this.value?this.value.toString():null)}formStateRestoreCallback(e,t){e&&(this.value=e)}}typeof customElements<"u"&&!customElements.get("au-rating")&&customElements.define("au-rating",D);class L extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"}),this.internals=this.attachInternals();const e=this.generateId(),t=document.createElement("style");t.textContent=`
+      `;
+      label.appendChild(starWrapper);
+      const labelText = document.createElement("span");
+      labelText.className = "label-text";
+      labelText.textContent = labels[i - 1] || "";
+      label.appendChild(labelText);
+      option.appendChild(input);
+      option.appendChild(label);
+      this._fieldset.appendChild(option);
+    }
+    this.updateScoreDisplay(currentValue);
+    this._internals.setFormValue(currentValue.toString());
+  }
+  updateScoreDisplay(val) {
+    if (this.showScore) {
+      this._scoreEl.textContent = this.formatText(this.scoreTemplate, {
+        value: val,
+        max: this.max,
+        scoreInfo: this.scoreInfo
+      });
+    } else {
+      this._scoreEl.textContent = "";
+    }
+  }
+  handleChange(e) {
+    if (e.target.type === "radio") {
+      const newValue = parseInt(e.target.value);
+      this.value = newValue;
+      this.updateStars(newValue);
+      this.updateScoreDisplay(newValue);
+      this.dispatchEvent(new CustomEvent("change", {
+        bubbles: true,
+        composed: true,
+        detail: { value: newValue }
+      }));
+    }
+  }
+  updateStars(selectedValue) {
+    const starWrappers = this._fieldset.querySelectorAll(".star-wrapper");
+    const fullStars = Math.floor(selectedValue);
+    const partialFill = selectedValue - fullStars;
+    starWrappers.forEach((wrapper, index) => {
+      const starValue = index + 1;
+      wrapper.classList.remove("animate");
+      let clipRight = 100;
+      if (starValue <= fullStars) {
+        clipRight = 0;
+        if (starValue === fullStars && partialFill === 0) {
+          wrapper.classList.add("animate");
+        }
+      } else if (starValue === fullStars + 1 && partialFill > 0) {
+        clipRight = 100 - partialFill * 100;
+        wrapper.classList.add("animate");
+      }
+      wrapper.style.setProperty("--au-rating-clip", `${clipRight}%`);
+    });
+  }
+  handleKeyDown(e) {
+    const radios = Array.from(this._fieldset.querySelectorAll('input[type="radio"]'));
+    const currentIndex = radios.findIndex((r) => r === this.shadowRoot.activeElement || r.checked);
+    let nextIndex;
+    switch (e.key) {
+      case "ArrowRight":
+      case "ArrowDown":
+        e.preventDefault();
+        if (this.value === 0 && currentIndex === 0) {
+          nextIndex = 0;
+        } else {
+          nextIndex = (currentIndex + 1) % radios.length;
+        }
+        radios[nextIndex].focus();
+        radios[nextIndex].click();
+        break;
+      case "ArrowLeft":
+      case "ArrowUp":
+        e.preventDefault();
+        nextIndex = (currentIndex - 1 + radios.length) % radios.length;
+        radios[nextIndex].focus();
+        radios[nextIndex].click();
+        break;
+    }
+  }
+  formResetCallback() {
+    this.value = this.getAttribute("value") || 0;
+    this._internals.setFormValue(this.value ? this.value.toString() : null);
+  }
+  formStateRestoreCallback(state, mode) {
+    if (state) {
+      this.value = state;
+    }
+  }
+}
+if (typeof customElements !== "undefined" && !customElements.get("au-rating")) {
+  customElements.define("au-rating", AuRating);
+}
+class AuSwitch extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this.internals = this.attachInternals();
+    const inputID = this.generateId();
+    const style = document.createElement("style");
+    style.textContent = `
       .au-switch {
         display: inline-flex;
         flex-wrap: wrap;
@@ -1124,7 +3180,158 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
         }
       }
      
-    `;const a=document.createElement("label");a.classList.add("au-switch"),a.setAttribute("for",e);const i=document.createElement("div");i.classList.add("container");const r=document.createElement("span");r.classList.add("off-text"),r.setAttribute("aria-hidden","true");const s=document.createElement("div");s.classList.add("input"),this.inputElement=document.createElement("input"),this.inputElement.id=e,this.inputElement.type="checkbox",this.inputElement.setAttribute("role","switch"),this.inputElement.setAttribute("aria-checked","false"),s.appendChild(this.inputElement);const o=document.createElement("span");o.classList.add("on-text"),o.setAttribute("aria-hidden","true"),i.append(r,s,o),a.append(i),this.shadowRoot.append(t,a);const n=document.createElement("slot");this.labelFallback=document.createElement("span"),this.labelFallback.textContent=this.getAttribute("label")||"",n.appendChild(this.labelFallback),a.prepend(n),this.inputElement.addEventListener("change",v=>{const c=v.target.checked;this.inputElement.setAttribute("aria-checked",c.toString());const p=c?this.getAttribute("value")||"on":null;this.internals.setFormValue(p),this.dispatchEvent(new CustomEvent("change",{bubbles:!0,composed:!0,detail:c}))}),this.syncAccessibleLabel()}get checked(){var e;return((e=this.inputElement)==null?void 0:e.checked)??!1}set checked(e){e?this.setAttribute("checked",""):this.removeAttribute("checked")}get disabled(){return this.hasAttribute("disabled")}set disabled(e){e?this.setAttribute("disabled",""):this.removeAttribute("disabled")}formResetCallback(){this.inputElement.checked=!1,this.inputElement.setAttribute("aria-checked","false"),this.internals.setFormValue(null)}generateId(){if(typeof crypto<"u"&&crypto.getRandomValues){const e=new Uint32Array(1);return crypto.getRandomValues(e),`au-switch-${e[0].toString(36)}`}return`au-switch-${Math.random().toString(36).slice(2)}`}static get observedAttributes(){return["name","value","checked","disabled","off","on","label","aria-label","aria-labelledby"]}attributeChangedCallback(e,t,a){const i=this.shadowRoot.querySelector("input"),r=this.shadowRoot.querySelector(".off-text"),s=this.shadowRoot.querySelector(".on-text");if(!(!i||!r||!s))switch(e){case"checked":i.checked=a!==null,i.setAttribute("aria-checked",i.checked.toString());break;case"disabled":i.disabled=a!==null;break;case"off":r.textContent=a||"";break;case"on":s.textContent=a||"";break;case"label":this.labelFallback&&(this.labelFallback.textContent=a||""),this.syncAccessibleLabel();break;case"aria-label":case"aria-labelledby":this.syncAccessibleLabel();break;default:a===null?i.removeAttribute(e):i.setAttribute(e,a);break}}syncAccessibleLabel(){this.inputElement&&(this.hasAttribute("aria-label")?this.inputElement.setAttribute("aria-label",this.getAttribute("aria-label")):this.inputElement.removeAttribute("aria-label"),this.hasAttribute("aria-labelledby")?this.inputElement.setAttribute("aria-labelledby",this.getAttribute("aria-labelledby")):this.inputElement.removeAttribute("aria-labelledby"))}connectedCallback(){const e=this.shadowRoot.querySelector("input"),t=this.shadowRoot.querySelector(".off-text"),a=this.shadowRoot.querySelector(".on-text");e.setAttribute("aria-checked",e.checked.toString()),this.hasAttribute("off")?t.textContent=this.getAttribute("off"):t.textContent="",this.hasAttribute("on")?a.textContent=this.getAttribute("on"):a.textContent="";const i=e.checked?this.getAttribute("value")||"on":null;this.internals.setFormValue(i)}}x(L,"formAssociated",!0);typeof customElements<"u"&&!customElements.get("au-switch")&&customElements.define("au-switch",L);class F extends HTMLElement{static get observedAttributes(){return["data-text-tab","data-text-badge-label-prefix"]}constructor(){super(),this.attachShadow({mode:"open"}),this._tabs=[],this._panels=[],this._selectedIndex=0,this.container=document.createElement("div"),this.container.classList.add("au-tabs");const e=document.createElement("style");e.textContent=`
+    `;
+    const switchElement = document.createElement("label");
+    switchElement.classList.add("au-switch");
+    switchElement.setAttribute("for", inputID);
+    const container = document.createElement("div");
+    container.classList.add("container");
+    const offTextSpan = document.createElement("span");
+    offTextSpan.classList.add("off-text");
+    offTextSpan.setAttribute("aria-hidden", "true");
+    const inputDiv = document.createElement("div");
+    inputDiv.classList.add("input");
+    this.inputElement = document.createElement("input");
+    this.inputElement.id = inputID;
+    this.inputElement.type = "checkbox";
+    this.inputElement.setAttribute("role", "switch");
+    this.inputElement.setAttribute("aria-checked", "false");
+    inputDiv.appendChild(this.inputElement);
+    const onTextSpan = document.createElement("span");
+    onTextSpan.classList.add("on-text");
+    onTextSpan.setAttribute("aria-hidden", "true");
+    container.append(offTextSpan, inputDiv, onTextSpan);
+    switchElement.append(container);
+    this.shadowRoot.append(style, switchElement);
+    const slot = document.createElement("slot");
+    this.labelFallback = document.createElement("span");
+    this.labelFallback.textContent = this.getAttribute("label") || "";
+    slot.appendChild(this.labelFallback);
+    switchElement.prepend(slot);
+    this.inputElement.addEventListener("change", (event) => {
+      const checked = event.target.checked;
+      this.inputElement.setAttribute("aria-checked", checked.toString());
+      const formValue = checked ? this.getAttribute("value") || "on" : null;
+      this.internals.setFormValue(formValue);
+      this.dispatchEvent(new CustomEvent("change", { bubbles: true, composed: true, detail: checked }));
+    });
+    this.syncAccessibleLabel();
+  }
+  get checked() {
+    var _a;
+    return ((_a = this.inputElement) == null ? void 0 : _a.checked) ?? false;
+  }
+  set checked(val) {
+    val ? this.setAttribute("checked", "") : this.removeAttribute("checked");
+  }
+  get disabled() {
+    return this.hasAttribute("disabled");
+  }
+  set disabled(val) {
+    val ? this.setAttribute("disabled", "") : this.removeAttribute("disabled");
+  }
+  formResetCallback() {
+    this.inputElement.checked = false;
+    this.inputElement.setAttribute("aria-checked", "false");
+    this.internals.setFormValue(null);
+  }
+  generateId() {
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-switch-${byteArray[0].toString(36)}`;
+    }
+    return `au-switch-${Math.random().toString(36).slice(2)}`;
+  }
+  static get observedAttributes() {
+    return ["name", "value", "checked", "disabled", "off", "on", "label", "aria-label", "aria-labelledby"];
+  }
+  attributeChangedCallback(name, oldValue, newValue) {
+    const input = this.shadowRoot.querySelector("input");
+    const offText = this.shadowRoot.querySelector(".off-text");
+    const onText = this.shadowRoot.querySelector(".on-text");
+    if (!input || !offText || !onText) return;
+    switch (name) {
+      case "checked":
+        input.checked = newValue !== null;
+        input.setAttribute("aria-checked", input.checked.toString());
+        break;
+      case "disabled":
+        input.disabled = newValue !== null;
+        break;
+      case "off":
+        offText.textContent = newValue || "";
+        break;
+      case "on":
+        onText.textContent = newValue || "";
+        break;
+      case "label":
+        if (this.labelFallback) this.labelFallback.textContent = newValue || "";
+        this.syncAccessibleLabel();
+        break;
+      case "aria-label":
+      case "aria-labelledby":
+        this.syncAccessibleLabel();
+        break;
+      default:
+        if (newValue === null) {
+          input.removeAttribute(name);
+        } else {
+          input.setAttribute(name, newValue);
+        }
+        break;
+    }
+  }
+  syncAccessibleLabel() {
+    if (!this.inputElement) return;
+    if (this.hasAttribute("aria-label")) {
+      this.inputElement.setAttribute("aria-label", this.getAttribute("aria-label"));
+    } else {
+      this.inputElement.removeAttribute("aria-label");
+    }
+    if (this.hasAttribute("aria-labelledby")) {
+      this.inputElement.setAttribute("aria-labelledby", this.getAttribute("aria-labelledby"));
+    } else {
+      this.inputElement.removeAttribute("aria-labelledby");
+    }
+  }
+  connectedCallback() {
+    const input = this.shadowRoot.querySelector("input");
+    const offText = this.shadowRoot.querySelector(".off-text");
+    const onText = this.shadowRoot.querySelector(".on-text");
+    input.setAttribute("aria-checked", input.checked.toString());
+    if (this.hasAttribute("off")) {
+      offText.textContent = this.getAttribute("off");
+    } else {
+      offText.textContent = "";
+    }
+    if (this.hasAttribute("on")) {
+      onText.textContent = this.getAttribute("on");
+    } else {
+      onText.textContent = "";
+    }
+    const formValue = input.checked ? this.getAttribute("value") || "on" : null;
+    this.internals.setFormValue(formValue);
+  }
+}
+__publicField(AuSwitch, "formAssociated", true);
+if (typeof customElements !== "undefined" && !customElements.get("au-switch")) {
+  customElements.define("au-switch", AuSwitch);
+}
+class AuTabs extends HTMLElement {
+  static get observedAttributes() {
+    return ["data-text-tab", "data-text-badge-label-prefix"];
+  }
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this._tabs = [];
+    this._panels = [];
+    this._selectedIndex = 0;
+    this.container = document.createElement("div");
+    this.container.classList.add("au-tabs");
+    const style = document.createElement("style");
+    style.textContent = `
       .au-tablist {
         list-style: none;
         margin: 0;
@@ -1223,7 +3430,174 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
       ::slotted(.au-tab-panel[aria-hidden="false"]) {
         display: block;
       }
-    `,this.tabsList=document.createElement("ul"),this.tabsList.setAttribute("role","tablist"),this.tabsList.classList.add("au-tablist");const t=document.createElement("slot");t.name="panel",this.container.append(e,this.tabsList,t),this.shadowRoot.appendChild(this.container)}connectedCallback(){this.shadowRoot.querySelector('slot[name="panel"]').addEventListener("slotchange",()=>{this._renderTabs(),this._attachEvents()}),this._renderTabs(),this._attachEvents()}attributeChangedCallback(){this.isConnected&&(this._renderTabs(),this._attachEvents())}formatText(e,t={}){return Object.entries(t).reduce((a,[i,r])=>a.replaceAll(`{${i}}`,String(r)),e)}_renderTabs(){const t=this.shadowRoot.querySelector('slot[name="panel"]').assignedElements().filter(i=>i.classList.contains("au-tab-panel"));this._tabs=[],this._panels=[],this.tabsList.innerHTML="";const a=Math.min(this._selectedIndex,Math.max(t.length-1,0));t.forEach((i,r)=>{const s=i.getAttribute("label")||this.formatText(this.getAttribute("data-text-tab")||"Tab {index}",{index:r+1}),o=i.getAttribute("label-lang")||this.getAttribute("data-text-tab-lang")||"",n=i.getAttribute("data-prefix")||"",v=i.getAttribute("data-badge")||"",c=i.getAttribute("data-affix")||"",p=i.id||this.generateId(),l=`tab-${p}`,d=`panel-${p}`;i.setAttribute("id",d),i.setAttribute("role","tabpanel"),i.setAttribute("aria-label",s),i.setAttribute("aria-hidden",r===a?"false":"true");const h=document.createElement("li");h.setAttribute("role","presentation"),h.className="au-tablist-item"+(r===a?" au-tablist-item--selected":"");const b=document.createElement("button");b.setAttribute("role","tab"),b.setAttribute("id",l),b.setAttribute("aria-selected",r===a?"true":"false"),b.setAttribute("tabindex",r===a?"0":"-1");const g=document.createDocumentFragment();if(n){const m=document.createElement("span");m.className="prefix",m.textContent=n,g.appendChild(m)}const u=document.createElement("span");if(u.className="label",o&&u.setAttribute("lang",o),u.textContent=s,g.appendChild(u),v){const m=document.createElement("span");m.className="badge";const y=this.getAttribute("data-text-badge-label-prefix")||"Additional information:";m.setAttribute("aria-label",`${y} ${v}`),m.textContent=v,g.appendChild(m)}if(c){const m=document.createElement("span");m.className="affix",m.textContent=c,g.appendChild(m)}b.appendChild(g),h.appendChild(b),this.tabsList.appendChild(h),this._tabs.push(b),this._panels.push(i)}),this._selectedIndex=a}_attachEvents(){this._tabs.forEach((e,t)=>{e.addEventListener("click",()=>this._selectTab(t)),e.addEventListener("keydown",a=>this._onKeydown(a,t))})}_selectTab(e){var t;this._tabs.forEach((a,i)=>{const r=i===e;a.setAttribute("aria-selected",r),a.setAttribute("tabindex",r?"0":"-1"),a.parentElement.classList.toggle("au-tablist-item--selected",r),this._panels[i].setAttribute("aria-hidden",!r)}),this._tabs[e].focus(),this._selectedIndex=e,this.dispatchEvent(new CustomEvent("tab-change",{bubbles:!0,composed:!0,detail:{index:e,label:((t=this._panels[e])==null?void 0:t.getAttribute("label"))??""}}))}_onKeydown(e,t){const a=this._tabs.length-1;let i=t;switch(e.key){case"ArrowRight":case"ArrowDown":i=t===a?0:t+1;break;case"ArrowLeft":case"ArrowUp":i=t===0?a:t-1;break;case"Home":i=0;break;case"End":i=a;break;default:return}e.preventDefault(),this._selectTab(i)}get selectedIndex(){return this._selectedIndex}set selectedIndex(e){this._selectTab(e)}generateId(){if(typeof crypto<"u"&&crypto.getRandomValues){const e=new Uint32Array(1);return crypto.getRandomValues(e),e[0].toString(36)}return Math.random().toString(36).slice(2)}}typeof customElements<"u"&&!customElements.get("au-tabs")&&customElements.define("au-tabs",F);class S extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"}),this.internals=this.attachInternals(),this._id=this.getAttribute("id")||this.generateId(),this._initialValue="",this._initialValueSet=!1;const e=document.createElement("style");e.textContent=`
+    `;
+    this.tabsList = document.createElement("ul");
+    this.tabsList.setAttribute("role", "tablist");
+    this.tabsList.classList.add("au-tablist");
+    const slot = document.createElement("slot");
+    slot.name = "panel";
+    this.container.append(style, this.tabsList, slot);
+    this.shadowRoot.appendChild(this.container);
+  }
+  connectedCallback() {
+    const slot = this.shadowRoot.querySelector('slot[name="panel"]');
+    slot.addEventListener("slotchange", () => {
+      this._renderTabs();
+      this._attachEvents();
+    });
+    this._renderTabs();
+    this._attachEvents();
+  }
+  attributeChangedCallback() {
+    if (!this.isConnected) return;
+    this._renderTabs();
+    this._attachEvents();
+  }
+  formatText(template, values = {}) {
+    return Object.entries(values).reduce((message, [key, value]) => {
+      return message.replaceAll(`{${key}}`, String(value));
+    }, template);
+  }
+  _renderTabs() {
+    const slot = this.shadowRoot.querySelector('slot[name="panel"]');
+    const tabPanels = slot.assignedElements().filter((el) => el.classList.contains("au-tab-panel"));
+    this._tabs = [];
+    this._panels = [];
+    this.tabsList.innerHTML = "";
+    const selectedIndex = Math.min(this._selectedIndex, Math.max(tabPanels.length - 1, 0));
+    tabPanels.forEach((panel, index) => {
+      const label = panel.getAttribute("label") || this.formatText(this.getAttribute("data-text-tab") || "Tab {index}", { index: index + 1 });
+      const labelLang = panel.getAttribute("label-lang") || this.getAttribute("data-text-tab-lang") || "";
+      const prefix = panel.getAttribute("data-prefix") || "";
+      const badge = panel.getAttribute("data-badge") || "";
+      const affix = panel.getAttribute("data-affix") || "";
+      const id = panel.id || this.generateId();
+      const tabId = `tab-${id}`;
+      const panelId = `panel-${id}`;
+      panel.setAttribute("id", panelId);
+      panel.setAttribute("role", "tabpanel");
+      panel.setAttribute("aria-label", label);
+      panel.setAttribute("aria-hidden", index === selectedIndex ? "false" : "true");
+      const li = document.createElement("li");
+      li.setAttribute("role", "presentation");
+      li.className = "au-tablist-item" + (index === selectedIndex ? " au-tablist-item--selected" : "");
+      const button = document.createElement("button");
+      button.setAttribute("role", "tab");
+      button.setAttribute("id", tabId);
+      button.setAttribute("aria-selected", index === selectedIndex ? "true" : "false");
+      button.setAttribute("tabindex", index === selectedIndex ? "0" : "-1");
+      const frag = document.createDocumentFragment();
+      if (prefix) {
+        const span = document.createElement("span");
+        span.className = "prefix";
+        span.textContent = prefix;
+        frag.appendChild(span);
+      }
+      const labelSpan = document.createElement("span");
+      labelSpan.className = "label";
+      if (labelLang) labelSpan.setAttribute("lang", labelLang);
+      labelSpan.textContent = label;
+      frag.appendChild(labelSpan);
+      if (badge) {
+        const span = document.createElement("span");
+        span.className = "badge";
+        const badgeLabelPrefix = this.getAttribute("data-text-badge-label-prefix") || "Additional information:";
+        span.setAttribute("aria-label", `${badgeLabelPrefix} ${badge}`);
+        span.textContent = badge;
+        frag.appendChild(span);
+      }
+      if (affix) {
+        const span = document.createElement("span");
+        span.className = "affix";
+        span.textContent = affix;
+        frag.appendChild(span);
+      }
+      button.appendChild(frag);
+      li.appendChild(button);
+      this.tabsList.appendChild(li);
+      this._tabs.push(button);
+      this._panels.push(panel);
+    });
+    this._selectedIndex = selectedIndex;
+  }
+  _attachEvents() {
+    this._tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => this._selectTab(index));
+      tab.addEventListener("keydown", (e) => this._onKeydown(e, index));
+    });
+  }
+  _selectTab(index) {
+    var _a;
+    this._tabs.forEach((tab, i) => {
+      const selected = i === index;
+      tab.setAttribute("aria-selected", selected);
+      tab.setAttribute("tabindex", selected ? "0" : "-1");
+      tab.parentElement.classList.toggle("au-tablist-item--selected", selected);
+      this._panels[i].setAttribute("aria-hidden", !selected);
+    });
+    this._tabs[index].focus();
+    this._selectedIndex = index;
+    this.dispatchEvent(new CustomEvent("tab-change", {
+      bubbles: true,
+      composed: true,
+      detail: {
+        index,
+        label: ((_a = this._panels[index]) == null ? void 0 : _a.getAttribute("label")) ?? ""
+      }
+    }));
+  }
+  _onKeydown(e, index) {
+    const last = this._tabs.length - 1;
+    let next = index;
+    switch (e.key) {
+      case "ArrowRight":
+      case "ArrowDown":
+        next = index === last ? 0 : index + 1;
+        break;
+      case "ArrowLeft":
+      case "ArrowUp":
+        next = index === 0 ? last : index - 1;
+        break;
+      case "Home":
+        next = 0;
+        break;
+      case "End":
+        next = last;
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+    this._selectTab(next);
+  }
+  get selectedIndex() {
+    return this._selectedIndex;
+  }
+  set selectedIndex(val) {
+    this._selectTab(val);
+  }
+  generateId() {
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+      const bytes = new Uint32Array(1);
+      crypto.getRandomValues(bytes);
+      return bytes[0].toString(36);
+    }
+    return Math.random().toString(36).slice(2);
+  }
+}
+if (typeof customElements !== "undefined" && !customElements.get("au-tabs")) {
+  customElements.define("au-tabs", AuTabs);
+}
+class AuTextarea extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this.internals = this.attachInternals();
+    this._id = this.getAttribute("id") || this.generateId();
+    this._initialValue = "";
+    this._initialValueSet = false;
+    const style = document.createElement("style");
+    style.textContent = `
       .textarea-wrapper {
         display: flex;
         flex-direction: column;
@@ -1287,7 +3661,236 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
         }        
       }
         
-    `;const t=document.createElement("div");t.className="textarea-wrapper",this.labelEl=document.createElement("label"),this.labelEl.setAttribute("for",this._id),this.labelEl.textContent=this.getAttribute("label")||"";const a=document.createElement("div");a.className="textarea-container",this.textareaContainer=a,this.textarea=document.createElement("textarea"),this.textarea.id=this._id;const i=this.getAttribute("label");i&&!this.hasAttribute("aria-label")&&!this.hasAttribute("aria-labelledby")&&this.textarea.setAttribute("aria-label",i),this._bindTextareaEvents(),a.append(this.textarea),t.append(this.labelEl,a),this.shadowRoot.append(e,t)}_bindTextareaEvents(){this.textarea.addEventListener("input",()=>{this.value=this.textarea.value,this.dispatchEvent(new Event("input",{bubbles:!0,composed:!0})),this._syncValidity()}),this.textarea.addEventListener("change",()=>{this.dispatchEvent(new Event("change",{bubbles:!0,composed:!0}))})}static get observedAttributes(){return["value","placeholder","name","rows","cols","disabled","readonly","required","maxlength","minlength","aria-label","aria-labelledby","label","id"]}get validity(){return this.internals.validity}get validationMessage(){return this.internals.validationMessage}get willValidate(){return this.internals.willValidate}checkValidity(){return this.internals.checkValidity()}reportValidity(){return this.internals.reportValidity()}attributeChangedCallback(e,t,a){var i;e==="label"&&this.labelEl?(this.labelEl.textContent=a,!this.hasAttribute("aria-label")&&!this.hasAttribute("aria-labelledby")&&this.textarea.setAttribute("aria-label",a)):e==="id"&&a?(this.textarea.id=a,(i=this.labelEl)==null||i.setAttribute("for",a)):e==="value"?(this._initialValueSet||(this._initialValue=a||"",this._initialValueSet=!0),this.textarea.value=a,this.internals.setFormValue(a)):a===null?this.textarea.removeAttribute(e):this.textarea.setAttribute(e,a),this._syncValidity()}connectedCallback(){this._initialValueSet||(this._initialValue=this.getAttribute("value")||this.textarea.value||"",this._initialValueSet=!0),this.internals.setFormValue(this.textarea.value),this._syncValidity()}get value(){return this.textarea.value}set value(e){this.textarea.value=e,this.internals.setFormValue(e),this._syncValidity()}formResetCallback(){const e=this._initialValue||"",t=this.textarea.cloneNode(!1);t.value=e,this.textareaContainer.replaceChild(t,this.textarea),this.textarea=t,this._bindTextareaEvents(),this.internals.setFormValue(e),this._syncValidity()}formStateRestoreCallback(e,t){this.value=e}get disabled(){return this.hasAttribute("disabled")}set disabled(e){e?this.setAttribute("disabled",""):this.removeAttribute("disabled")}get readonly(){return this.hasAttribute("readonly")}set readonly(e){e?this.setAttribute("readonly",""):this.removeAttribute("readonly")}generateId(){if(typeof crypto<"u"&&crypto.getRandomValues){const e=new Uint32Array(1);return crypto.getRandomValues(e),`au-textarea-${e[0].toString(36)}`}return`au-textarea-${Math.random().toString(36).slice(2)}`}_syncValidity(){this.textarea&&(this.textarea.validity.valid?this.internals.setValidity({}):this.internals.setValidity(this.textarea.validity,this.textarea.validationMessage,this.textarea))}}x(S,"formAssociated",!0);typeof customElements<"u"&&!customElements.get("au-textarea")&&customElements.define("au-textarea",S);class q extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"}),this._data=[],this._nodeRegistry=[],this._showCheckbox=!1,this.handleKeyDown=this.handleKeyDown.bind(this),this.handleNodeExpand=this.handleNodeExpand.bind(this),this.handleNodeCheckChange=this.handleNodeCheckChange.bind(this),this._toggleLabel=null,this._fallbackNodeLabel="Node",this._toggleLabelTemplate=null}static get observedAttributes(){return["show-checkbox","data-text-node","data-text-toggle"]}attributeChangedCallback(e,t,a){e==="show-checkbox"&&(this._showCheckbox=a!==null,this.getAllNodes().forEach(i=>{this._showCheckbox?i.setAttribute("show-checkbox",""):i.removeAttribute("show-checkbox")})),e==="data-text-node"&&(this._fallbackNodeLabel=a||"Node",this.getAllNodes().forEach(i=>{i.fallbackNodeLabel=this._fallbackNodeLabel})),e==="data-text-toggle"&&(this._toggleLabelTemplate=a,this.getAllNodes().forEach(i=>{i.toggleLabelTemplate=this._toggleLabelTemplate}))}get toggleLabel(){return this._toggleLabel}set toggleLabel(e){this._toggleLabel=e,this.getAllNodes().forEach(t=>{t.toggleLabel=e})}get fallbackNodeLabel(){return this._fallbackNodeLabel}set fallbackNodeLabel(e){this._fallbackNodeLabel=e||"Node",this.setAttribute("data-text-node",this._fallbackNodeLabel)}get toggleLabelTemplate(){return this._toggleLabelTemplate}set toggleLabelTemplate(e){this._toggleLabelTemplate=e,e==null?this.removeAttribute("data-text-toggle"):this.setAttribute("data-text-toggle",e)}get data(){return this._data}set data(e){this._data=e,this.render()}connectedCallback(){this._upgradeProperty("data"),this.shadowRoot.innerHTML===""&&this.render(),this.addEventListener("keydown",this.handleKeyDown),this.addEventListener("au-tree-node-expand",this.handleNodeExpand),this.addEventListener("au-tree-node-check-change",this.handleNodeCheckChange)}_upgradeProperty(e){if(this.hasOwnProperty(e)){let t=this[e];delete this[e],this[e]=t}}generateId(){if(typeof crypto<"u"&&crypto.getRandomValues){const e=new Uint32Array(1);return crypto.getRandomValues(e),`au-tree-${e[0].toString(36)}`}return`au-tree-${Math.random().toString(36).slice(2)}`}render(){const e=this.generateId();this.shadowRoot.innerHTML=`
+    `;
+    const wrapper = document.createElement("div");
+    wrapper.className = "textarea-wrapper";
+    this.labelEl = document.createElement("label");
+    this.labelEl.setAttribute("for", this._id);
+    this.labelEl.textContent = this.getAttribute("label") || "";
+    const textareaContainer = document.createElement("div");
+    textareaContainer.className = "textarea-container";
+    this.textareaContainer = textareaContainer;
+    this.textarea = document.createElement("textarea");
+    this.textarea.id = this._id;
+    const labelAttr = this.getAttribute("label");
+    if (labelAttr && !this.hasAttribute("aria-label") && !this.hasAttribute("aria-labelledby")) {
+      this.textarea.setAttribute("aria-label", labelAttr);
+    }
+    this._bindTextareaEvents();
+    textareaContainer.append(this.textarea);
+    wrapper.append(this.labelEl, textareaContainer);
+    this.shadowRoot.append(style, wrapper);
+  }
+  _bindTextareaEvents() {
+    this.textarea.addEventListener("input", () => {
+      this.value = this.textarea.value;
+      this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+      this._syncValidity();
+    });
+    this.textarea.addEventListener("change", () => {
+      this.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
+    });
+  }
+  static get observedAttributes() {
+    return ["value", "placeholder", "name", "rows", "cols", "disabled", "readonly", "required", "maxlength", "minlength", "aria-label", "aria-labelledby", "label", "id"];
+  }
+  get validity() {
+    return this.internals.validity;
+  }
+  get validationMessage() {
+    return this.internals.validationMessage;
+  }
+  get willValidate() {
+    return this.internals.willValidate;
+  }
+  checkValidity() {
+    return this.internals.checkValidity();
+  }
+  reportValidity() {
+    return this.internals.reportValidity();
+  }
+  attributeChangedCallback(name, oldValue, newValue) {
+    var _a;
+    if (name === "label" && this.labelEl) {
+      this.labelEl.textContent = newValue;
+      if (!this.hasAttribute("aria-label") && !this.hasAttribute("aria-labelledby")) {
+        this.textarea.setAttribute("aria-label", newValue);
+      }
+    } else if (name === "id" && newValue) {
+      this.textarea.id = newValue;
+      (_a = this.labelEl) == null ? void 0 : _a.setAttribute("for", newValue);
+    } else if (name === "value") {
+      if (!this._initialValueSet) {
+        this._initialValue = newValue || "";
+        this._initialValueSet = true;
+      }
+      this.textarea.value = newValue;
+      this.internals.setFormValue(newValue);
+    } else {
+      if (newValue === null) {
+        this.textarea.removeAttribute(name);
+      } else {
+        this.textarea.setAttribute(name, newValue);
+      }
+    }
+    this._syncValidity();
+  }
+  connectedCallback() {
+    if (!this._initialValueSet) {
+      this._initialValue = this.getAttribute("value") || this.textarea.value || "";
+      this._initialValueSet = true;
+    }
+    this.internals.setFormValue(this.textarea.value);
+    this._syncValidity();
+  }
+  get value() {
+    return this.textarea.value;
+  }
+  set value(val) {
+    this.textarea.value = val;
+    this.internals.setFormValue(val);
+    this._syncValidity();
+  }
+  formResetCallback() {
+    const currentValue = this._initialValue || "";
+    const newTextarea = this.textarea.cloneNode(false);
+    newTextarea.value = currentValue;
+    this.textareaContainer.replaceChild(newTextarea, this.textarea);
+    this.textarea = newTextarea;
+    this._bindTextareaEvents();
+    this.internals.setFormValue(currentValue);
+    this._syncValidity();
+  }
+  formStateRestoreCallback(state, mode) {
+    this.value = state;
+  }
+  get disabled() {
+    return this.hasAttribute("disabled");
+  }
+  set disabled(val) {
+    val ? this.setAttribute("disabled", "") : this.removeAttribute("disabled");
+  }
+  get readonly() {
+    return this.hasAttribute("readonly");
+  }
+  set readonly(val) {
+    val ? this.setAttribute("readonly", "") : this.removeAttribute("readonly");
+  }
+  generateId() {
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-textarea-${byteArray[0].toString(36)}`;
+    }
+    return `au-textarea-${Math.random().toString(36).slice(2)}`;
+  }
+  _syncValidity() {
+    if (!this.textarea) return;
+    if (this.textarea.validity.valid) {
+      this.internals.setValidity({});
+    } else {
+      this.internals.setValidity(this.textarea.validity, this.textarea.validationMessage, this.textarea);
+    }
+  }
+}
+__publicField(AuTextarea, "formAssociated", true);
+if (typeof customElements !== "undefined" && !customElements.get("au-textarea")) {
+  customElements.define("au-textarea", AuTextarea);
+}
+class AuTree extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this._data = [];
+    this._nodeRegistry = [];
+    this._showCheckbox = false;
+    this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.handleNodeExpand = this.handleNodeExpand.bind(this);
+    this.handleNodeCheckChange = this.handleNodeCheckChange.bind(this);
+    this._toggleLabel = null;
+    this._fallbackNodeLabel = "Node";
+    this._toggleLabelTemplate = null;
+  }
+  static get observedAttributes() {
+    return ["show-checkbox", "data-text-node", "data-text-toggle"];
+  }
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === "show-checkbox") {
+      this._showCheckbox = newValue !== null;
+      this.getAllNodes().forEach((node) => {
+        if (this._showCheckbox) node.setAttribute("show-checkbox", "");
+        else node.removeAttribute("show-checkbox");
+      });
+    }
+    if (name === "data-text-node") {
+      this._fallbackNodeLabel = newValue || "Node";
+      this.getAllNodes().forEach((node) => {
+        node.fallbackNodeLabel = this._fallbackNodeLabel;
+      });
+    }
+    if (name === "data-text-toggle") {
+      this._toggleLabelTemplate = newValue;
+      this.getAllNodes().forEach((node) => {
+        node.toggleLabelTemplate = this._toggleLabelTemplate;
+      });
+    }
+  }
+  get toggleLabel() {
+    return this._toggleLabel;
+  }
+  set toggleLabel(val) {
+    this._toggleLabel = val;
+    this.getAllNodes().forEach((node) => {
+      node.toggleLabel = val;
+    });
+  }
+  get fallbackNodeLabel() {
+    return this._fallbackNodeLabel;
+  }
+  set fallbackNodeLabel(val) {
+    this._fallbackNodeLabel = val || "Node";
+    this.setAttribute("data-text-node", this._fallbackNodeLabel);
+  }
+  get toggleLabelTemplate() {
+    return this._toggleLabelTemplate;
+  }
+  set toggleLabelTemplate(val) {
+    this._toggleLabelTemplate = val;
+    if (val === null || val === void 0) this.removeAttribute("data-text-toggle");
+    else this.setAttribute("data-text-toggle", val);
+  }
+  get data() {
+    return this._data;
+  }
+  set data(val) {
+    this._data = val;
+    this.render();
+  }
+  connectedCallback() {
+    this._upgradeProperty("data");
+    if (this.shadowRoot.innerHTML === "") this.render();
+    this.addEventListener("keydown", this.handleKeyDown);
+    this.addEventListener("au-tree-node-expand", this.handleNodeExpand);
+    this.addEventListener("au-tree-node-check-change", this.handleNodeCheckChange);
+  }
+  _upgradeProperty(prop) {
+    if (this.hasOwnProperty(prop)) {
+      let value = this[prop];
+      delete this[prop];
+      this[prop] = value;
+    }
+  }
+  generateId() {
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+      const byteArray = new Uint32Array(1);
+      crypto.getRandomValues(byteArray);
+      return `au-tree-${byteArray[0].toString(36)}`;
+    }
+    return `au-tree-${Math.random().toString(36).slice(2)}`;
+  }
+  render() {
+    const treeId = this.generateId();
+    this.shadowRoot.innerHTML = `
       <style>
         :host {
           display: block;
@@ -1301,8 +3904,362 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
           padding: 0;
         }
       </style>
-      <div role="tree" id="${e}"></div>
-    `;const t=this.shadowRoot.getElementById(e);Array.isArray(this._data)&&this._data.forEach(a=>{const i=document.createElement("au-tree-node");i.data=a,i.toggleLabel=this._toggleLabel,i.fallbackNodeLabel=this._fallbackNodeLabel,i.toggleLabelTemplate=this._toggleLabelTemplate,this._showCheckbox&&i.setAttribute("show-checkbox",""),t.appendChild(i)}),requestAnimationFrame(()=>this.updateNodeRegistry())}getAllNodes(){return this.collectNodes(this.shadowRoot)}collectNodes(e,t=!1){let a=[];return Array.from(e.querySelectorAll("au-tree-node")).forEach(r=>{a.push(r),(!t||r.expanded)&&r.shadowRoot&&(a=a.concat(this.collectNodes(r.shadowRoot,t)))}),a}updateNodeRegistry(){this._nodeRegistry=this.collectNodes(this.shadowRoot,!0),this._nodeRegistry=this.collectNodes(this.shadowRoot,!0);const e=this.findActiveNode();this._nodeRegistry.forEach(t=>t.tabIndex=-1),e.activeNode&&this._nodeRegistry.includes(e.activeNode)?e.activeNode.tabIndex=0:this._nodeRegistry.length>0&&(this._nodeRegistry[0].tabIndex=0)}findActiveNode(){let e=this.shadowRoot.activeElement;for(;e&&e.shadowRoot&&e.shadowRoot.activeElement;)e=e.shadowRoot.activeElement;return{activeNode:e instanceof k?e:null}}handleKeyDown(e){const t=e.composedPath().find(r=>r instanceof k);if(!t)return;this.updateNodeRegistry();const a=this._nodeRegistry.indexOf(t);let i=null;switch(e.key){case"ArrowDown":e.preventDefault(),a<this._nodeRegistry.length-1&&(i=this._nodeRegistry[a+1]);break;case"ArrowUp":e.preventDefault(),a>0&&(i=this._nodeRegistry[a-1]);break;case"ArrowRight":e.preventDefault(),t.hasChildren&&(t.expanded?a<this._nodeRegistry.length-1&&(i=this._nodeRegistry[a+1]):(t.setExpanded(!0),this.updateNodeRegistry()));break;case"ArrowLeft":if(e.preventDefault(),t.hasChildren&&t.expanded)t.setExpanded(!1),this.updateNodeRegistry(),t.setExpanded(!1),this.updateNodeRegistry(),i=t;else{const s=t.getRootNode().host;s instanceof k&&(i=s)}break;case"Home":e.preventDefault(),this._nodeRegistry.length>0&&(i=this._nodeRegistry[0]);break;case"End":e.preventDefault(),this._nodeRegistry.length>0&&(i=this._nodeRegistry[this._nodeRegistry.length-1]);break;case"*":e.preventDefault();const r=t.getRootNode().host;r&&r instanceof k?r.expandAllChildren():this.expandAllChildren(),this.updateNodeRegistry();break;default:e.key.length===1&&e.key.match(/\S/)&&this.handleTypeAhead(e.key,a);break}i&&(this._nodeRegistry.forEach(r=>r.tabIndex=-1),i.tabIndex=0,i.focus())}handleTypeAhead(e,t){e=e.toLowerCase();const a=this._nodeRegistry.slice(t+1).find(r=>r.label.toLowerCase().startsWith(e));if(a){this.focusNode(a);return}const i=this._nodeRegistry.slice(0,t).find(r=>r.label.toLowerCase().startsWith(e));i&&this.focusNode(i)}focusNode(e){this._nodeRegistry.forEach(t=>t.tabIndex=-1),e.tabIndex=0,e.focus()}expandAllChildren(){Array.from(this.shadowRoot.querySelectorAll("au-tree-node")).forEach(e=>e.setExpanded(!0))}handleNodeExpand(){}handleNodeCheckChange(e){const t=this.getAllNodes().filter(a=>a.checked).map(a=>a.data);this.dispatchEvent(new CustomEvent("change",{bubbles:!0,composed:!0,detail:{checkedNodes:t}}))}}class k extends HTMLElement{constructor(){super(),this.attachShadow({mode:"open"}),this._data={},this.expanded=!1,this.checked=!1,this.indeterminate=!1,this._initialized=!1,this._uid=`au-tree-node-${Math.random().toString(36).substr(2,9)}`,this._toggleLabel=null,this._fallbackNodeLabel="Node",this._toggleLabelTemplate=null}static get observedAttributes(){return["expanded","show-checkbox","checked","indeterminate"]}get toggleLabel(){return this._toggleLabel}set toggleLabel(e){this._toggleLabel=e,this.renderContent(),this.shadowRoot&&this.shadowRoot.querySelectorAll("au-tree-node").forEach(t=>t.toggleLabel=e)}get fallbackNodeLabel(){return this._fallbackNodeLabel}set fallbackNodeLabel(e){this._fallbackNodeLabel=e||"Node",this.renderContent(),this.shadowRoot&&this.shadowRoot.querySelectorAll("au-tree-node").forEach(t=>t.fallbackNodeLabel=this._fallbackNodeLabel)}get toggleLabelTemplate(){return this._toggleLabelTemplate}set toggleLabelTemplate(e){this._toggleLabelTemplate=e,this.renderContent(),this.shadowRoot&&this.shadowRoot.querySelectorAll("au-tree-node").forEach(t=>t.toggleLabelTemplate=e)}get data(){return this._data}set data(e){this._data=e,this.render()}get label(){return this._data.label||""}get hasChildren(){return this._data.children&&this._data.children.length>0}getLabelText(){return this._data.label||this._fallbackNodeLabel}formatText(e,t={}){return Object.entries(t).reduce((a,[i,r])=>a.replaceAll(`{${i}}`,String(r)),e)}escapeHTML(e){return String(e).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}connectedCallback(){this.shadowRoot.addEventListener("au-tree-node-check-change",this.handleChildCheckChange.bind(this)),this.addEventListener("click",e=>{e.stopPropagation()}),this.shadowRoot.addEventListener("click",e=>{e.stopPropagation();const t=e.target,a=t.closest(".toggle-btn");if(a&&!a.classList.contains("hidden")){this.setExpanded(!this.expanded),this.focus();return}t.closest(".node-content")}),this.shadowRoot.addEventListener("change",e=>{const t=e.target;t.tagName==="INPUT"&&t.type==="checkbox"&&(e.stopPropagation(),this.toggleCheck(t.checked))}),this.addEventListener("keydown",e=>{const t=e.composedPath()[0],a=t.tagName==="INPUT"||t.tagName==="BUTTON";a||(e.key===" "&&(e.preventDefault(),e.stopPropagation(),this.hasAttribute("show-checkbox")?a||this.toggleCheck():this.hasChildren&&this.setExpanded(!this.expanded)),e.key==="Enter"&&(e.preventDefault(),e.stopPropagation(),this.setExpanded(!this.expanded)))})}attributeChangedCallback(e,t,a){this._initialized&&e==="show-checkbox"&&(this.renderContent(),this.shadowRoot.querySelectorAll("au-tree-node").forEach(r=>{a!==null?r.setAttribute("show-checkbox",""):r.removeAttribute("show-checkbox")}))}setExpanded(e){if(e===this.expanded)return;this.expanded=e;const t=this.shadowRoot.querySelector('div[role="group"]'),a=this.shadowRoot.querySelector(".toggle-icon");this.expanded?(this.setAttribute("aria-expanded","true"),t&&(t.style.display="block"),a&&(a.style.transform="rotate(90deg)")):(this.setAttribute("aria-expanded","false"),t&&(t.style.display="none"),a&&(a.style.transform="rotate(0deg)")),this.dispatchEvent(new CustomEvent("au-tree-node-expand",{bubbles:!0,composed:!0}))}expandAllChildren(){this.setExpanded(!0),Array.from(this.shadowRoot.querySelectorAll("au-tree-node")).forEach(e=>e.expandAllChildren())}toggleCheck(e=null){const t=e!==null?e:!this.checked;this.setChecked(t),this.setChildrenChecked(t),this.dispatchEvent(new CustomEvent("au-tree-node-check-change",{bubbles:!0,composed:!0,detail:{checked:this.checked,node:this}}))}setChecked(e,t=!1){this.checked=e,this.indeterminate=t,this.indeterminate?this.setAttribute("aria-checked","mixed"):this.setAttribute("aria-checked",e?"true":"false");const a=this.shadowRoot.querySelector(`input#${this._uid}`);a&&(a.checked=e,a.indeterminate=t)}setChildrenChecked(e){if(!this.hasChildren)return;Array.from(this.shadowRoot.querySelectorAll("au-tree-node")).forEach(a=>{a.setChecked(e),a.setChildrenChecked(e)})}handleChildCheckChange(e){e.stopPropagation(),this.updateStateFromChildren(),this.dispatchEvent(new CustomEvent("au-tree-node-check-change",{bubbles:!0,composed:!0,detail:{checked:this.checked,node:this}}))}updateStateFromChildren(){const e=Array.from(this.shadowRoot.querySelectorAll("au-tree-node")),t=e.every(i=>i.checked&&!i.indeterminate),a=e.every(i=>!i.checked&&!i.indeterminate);t?this.setChecked(!0,!1):a?this.setChecked(!1,!1):this.setChecked(!1,!0)}render(){this._initialized=!0;const{children:e}=this._data,t=this.hasAttribute("show-checkbox");if(this.shadowRoot.innerHTML=`
+      <div role="tree" id="${treeId}"></div>
+    `;
+    const rootContainer = this.shadowRoot.getElementById(treeId);
+    if (Array.isArray(this._data)) {
+      this._data.forEach((item) => {
+        const node = document.createElement("au-tree-node");
+        node.data = item;
+        node.toggleLabel = this._toggleLabel;
+        node.fallbackNodeLabel = this._fallbackNodeLabel;
+        node.toggleLabelTemplate = this._toggleLabelTemplate;
+        if (this._showCheckbox) node.setAttribute("show-checkbox", "");
+        rootContainer.appendChild(node);
+      });
+    }
+    requestAnimationFrame(() => this.updateNodeRegistry());
+  }
+  /**
+   * 取得 DOM 順序中的所有節點的輔助函式（深度遍歷）
+   */
+  getAllNodes() {
+    return this.collectNodes(this.shadowRoot);
+  }
+  collectNodes(root, visibleOnly = false) {
+    let nodes = [];
+    const children = Array.from(root.querySelectorAll("au-tree-node"));
+    children.forEach((node) => {
+      nodes.push(node);
+      if (!visibleOnly || node.expanded) {
+        if (node.shadowRoot) {
+          nodes = nodes.concat(this.collectNodes(node.shadowRoot, visibleOnly));
+        }
+      }
+    });
+    return nodes;
+  }
+  updateNodeRegistry() {
+    this._nodeRegistry = this.collectNodes(this.shadowRoot, true);
+    this._nodeRegistry = this.collectNodes(this.shadowRoot, true);
+    const activeInfo = this.findActiveNode();
+    this._nodeRegistry.forEach((node) => node.tabIndex = -1);
+    if (activeInfo.activeNode && this._nodeRegistry.includes(activeInfo.activeNode)) {
+      activeInfo.activeNode.tabIndex = 0;
+    } else if (this._nodeRegistry.length > 0) {
+      this._nodeRegistry[0].tabIndex = 0;
+    }
+  }
+  findActiveNode() {
+    let focused = this.shadowRoot.activeElement;
+    while (focused && focused.shadowRoot && focused.shadowRoot.activeElement) {
+      focused = focused.shadowRoot.activeElement;
+    }
+    return { activeNode: focused instanceof AuTreeNode ? focused : null };
+  }
+  handleKeyDown(e) {
+    const current = e.composedPath().find((el) => el instanceof AuTreeNode);
+    if (!current) return;
+    this.updateNodeRegistry();
+    const index = this._nodeRegistry.indexOf(current);
+    let target = null;
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        if (index < this._nodeRegistry.length - 1) target = this._nodeRegistry[index + 1];
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        if (index > 0) target = this._nodeRegistry[index - 1];
+        break;
+      case "ArrowRight":
+        e.preventDefault();
+        if (current.hasChildren) {
+          if (!current.expanded) {
+            current.setExpanded(true);
+            this.updateNodeRegistry();
+          } else {
+            if (index < this._nodeRegistry.length - 1) target = this._nodeRegistry[index + 1];
+          }
+        }
+        break;
+      case "ArrowLeft":
+        e.preventDefault();
+        if (current.hasChildren && current.expanded) {
+          current.setExpanded(false);
+          this.updateNodeRegistry();
+          current.setExpanded(false);
+          this.updateNodeRegistry();
+          target = current;
+        } else {
+          const parent2 = current.getRootNode().host;
+          if (parent2 instanceof AuTreeNode) target = parent2;
+        }
+        break;
+      case "Home":
+        e.preventDefault();
+        if (this._nodeRegistry.length > 0) target = this._nodeRegistry[0];
+        break;
+      case "End":
+        e.preventDefault();
+        if (this._nodeRegistry.length > 0) target = this._nodeRegistry[this._nodeRegistry.length - 1];
+        break;
+      case "*":
+        e.preventDefault();
+        const parent = current.getRootNode().host;
+        if (parent && parent instanceof AuTreeNode) {
+          parent.expandAllChildren();
+        } else {
+          this.expandAllChildren();
+        }
+        this.updateNodeRegistry();
+        break;
+      default:
+        if (e.key.length === 1 && e.key.match(/\S/)) {
+          this.handleTypeAhead(e.key, index);
+        }
+        break;
+    }
+    if (target) {
+      this._nodeRegistry.forEach((n) => n.tabIndex = -1);
+      target.tabIndex = 0;
+      target.focus();
+    }
+  }
+  handleTypeAhead(char, currentIndex) {
+    char = char.toLowerCase();
+    const fwd = this._nodeRegistry.slice(currentIndex + 1).find((n) => n.label.toLowerCase().startsWith(char));
+    if (fwd) {
+      this.focusNode(fwd);
+      return;
+    }
+    const bwd = this._nodeRegistry.slice(0, currentIndex).find((n) => n.label.toLowerCase().startsWith(char));
+    if (bwd) {
+      this.focusNode(bwd);
+    }
+  }
+  focusNode(node) {
+    this._nodeRegistry.forEach((n) => n.tabIndex = -1);
+    node.tabIndex = 0;
+    node.focus();
+  }
+  expandAllChildren() {
+    Array.from(this.shadowRoot.querySelectorAll("au-tree-node")).forEach((n) => n.setExpanded(true));
+  }
+  handleNodeExpand() {
+  }
+  handleNodeCheckChange(e) {
+    const checkedNodes = this.getAllNodes().filter((n) => n.checked).map((n) => n.data);
+    this.dispatchEvent(new CustomEvent("change", { bubbles: true, composed: true, detail: { checkedNodes } }));
+  }
+}
+class AuTreeNode extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this._data = {};
+    this.expanded = false;
+    this.checked = false;
+    this.indeterminate = false;
+    this._initialized = false;
+    this._uid = `au-tree-node-${Math.random().toString(36).substr(2, 9)}`;
+    this._toggleLabel = null;
+    this._fallbackNodeLabel = "Node";
+    this._toggleLabelTemplate = null;
+  }
+  static get observedAttributes() {
+    return ["expanded", "show-checkbox", "checked", "indeterminate"];
+  }
+  get toggleLabel() {
+    return this._toggleLabel;
+  }
+  set toggleLabel(val) {
+    this._toggleLabel = val;
+    this.renderContent();
+    if (this.shadowRoot) {
+      this.shadowRoot.querySelectorAll("au-tree-node").forEach((n) => n.toggleLabel = val);
+    }
+  }
+  get fallbackNodeLabel() {
+    return this._fallbackNodeLabel;
+  }
+  set fallbackNodeLabel(val) {
+    this._fallbackNodeLabel = val || "Node";
+    this.renderContent();
+    if (this.shadowRoot) {
+      this.shadowRoot.querySelectorAll("au-tree-node").forEach((n) => n.fallbackNodeLabel = this._fallbackNodeLabel);
+    }
+  }
+  get toggleLabelTemplate() {
+    return this._toggleLabelTemplate;
+  }
+  set toggleLabelTemplate(val) {
+    this._toggleLabelTemplate = val;
+    this.renderContent();
+    if (this.shadowRoot) {
+      this.shadowRoot.querySelectorAll("au-tree-node").forEach((n) => n.toggleLabelTemplate = val);
+    }
+  }
+  get data() {
+    return this._data;
+  }
+  set data(val) {
+    this._data = val;
+    this.render();
+  }
+  get label() {
+    return this._data.label || "";
+  }
+  get hasChildren() {
+    return this._data.children && this._data.children.length > 0;
+  }
+  getLabelText() {
+    return this._data.label || this._fallbackNodeLabel;
+  }
+  formatText(template, values = {}) {
+    return Object.entries(values).reduce((message, [key, value]) => {
+      return message.replaceAll(`{${key}}`, String(value));
+    }, template);
+  }
+  escapeHTML(value) {
+    return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+  }
+  connectedCallback() {
+    this.shadowRoot.addEventListener("au-tree-node-check-change", this.handleChildCheckChange.bind(this));
+    this.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+    this.shadowRoot.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const target = e.target;
+      const toggleBtn = target.closest(".toggle-btn");
+      if (toggleBtn && !toggleBtn.classList.contains("hidden")) {
+        this.setExpanded(!this.expanded);
+        this.focus();
+        return;
+      }
+      if (target.closest(".node-content")) ;
+    });
+    this.shadowRoot.addEventListener("change", (e) => {
+      const input = e.target;
+      if (input.tagName === "INPUT" && input.type === "checkbox") {
+        e.stopPropagation();
+        this.toggleCheck(input.checked);
+      }
+    });
+    this.addEventListener("keydown", (e) => {
+      const target = e.composedPath()[0];
+      const isInternalInteractive = target.tagName === "INPUT" || target.tagName === "BUTTON";
+      if (isInternalInteractive) {
+        return;
+      }
+      if (e.key === " ") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.hasAttribute("show-checkbox")) {
+          if (!isInternalInteractive) this.toggleCheck();
+        } else {
+          if (this.hasChildren) {
+            this.setExpanded(!this.expanded);
+          }
+        }
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        e.stopPropagation();
+        this.setExpanded(!this.expanded);
+      }
+    });
+  }
+  attributeChangedCallback(name, old, val) {
+    if (!this._initialized) return;
+    if (name === "show-checkbox") {
+      this.renderContent();
+      const children = this.shadowRoot.querySelectorAll("au-tree-node");
+      children.forEach((c) => {
+        if (val !== null) c.setAttribute("show-checkbox", "");
+        else c.removeAttribute("show-checkbox");
+      });
+    }
+  }
+  setExpanded(state) {
+    if (state === this.expanded) return;
+    this.expanded = state;
+    const group = this.shadowRoot.querySelector('div[role="group"]');
+    const toggle = this.shadowRoot.querySelector(".toggle-icon");
+    if (this.expanded) {
+      this.setAttribute("aria-expanded", "true");
+      if (group) group.style.display = "block";
+      if (toggle) toggle.style.transform = "rotate(90deg)";
+    } else {
+      this.setAttribute("aria-expanded", "false");
+      if (group) group.style.display = "none";
+      if (toggle) toggle.style.transform = "rotate(0deg)";
+    }
+    this.dispatchEvent(new CustomEvent("au-tree-node-expand", { bubbles: true, composed: true }));
+  }
+  expandAllChildren() {
+    this.setExpanded(true);
+    Array.from(this.shadowRoot.querySelectorAll("au-tree-node")).forEach((n) => n.expandAllChildren());
+  }
+  toggleCheck(forceState = null) {
+    const newState = forceState !== null ? forceState : !this.checked;
+    this.setChecked(newState);
+    this.setChildrenChecked(newState);
+    this.dispatchEvent(new CustomEvent("au-tree-node-check-change", {
+      bubbles: true,
+      composed: true,
+      detail: { checked: this.checked, node: this }
+    }));
+  }
+  setChecked(state, indeterminate = false) {
+    this.checked = state;
+    this.indeterminate = indeterminate;
+    if (this.indeterminate) {
+      this.setAttribute("aria-checked", "mixed");
+    } else {
+      this.setAttribute("aria-checked", state ? "true" : "false");
+    }
+    const input = this.shadowRoot.querySelector(`input#${this._uid}`);
+    if (input) {
+      input.checked = state;
+      input.indeterminate = indeterminate;
+    }
+  }
+  setChildrenChecked(state) {
+    if (!this.hasChildren) return;
+    const children = Array.from(this.shadowRoot.querySelectorAll("au-tree-node"));
+    children.forEach((child) => {
+      child.setChecked(state);
+      child.setChildrenChecked(state);
+    });
+  }
+  handleChildCheckChange(e) {
+    e.stopPropagation();
+    this.updateStateFromChildren();
+    this.dispatchEvent(new CustomEvent("au-tree-node-check-change", {
+      bubbles: true,
+      composed: true,
+      detail: { checked: this.checked, node: this }
+    }));
+  }
+  updateStateFromChildren() {
+    const children = Array.from(this.shadowRoot.querySelectorAll("au-tree-node"));
+    const allChecked = children.every((c) => c.checked && !c.indeterminate);
+    const allUnchecked = children.every((c) => !c.checked && !c.indeterminate);
+    if (allChecked) {
+      this.setChecked(true, false);
+    } else if (allUnchecked) {
+      this.setChecked(false, false);
+    } else {
+      this.setChecked(false, true);
+    }
+  }
+  render() {
+    this._initialized = true;
+    const { children } = this._data;
+    const showCheckbox = this.hasAttribute("show-checkbox");
+    this.shadowRoot.innerHTML = `
       <style>
         :host {
           display: block;
@@ -1510,9 +4467,57 @@ var R=Object.defineProperty;var T=(f,e,t)=>e in f?R(f,e,{enumerable:!0,configura
         }
       </style>
       <div class="node-content"></div>
-      ${this.hasChildren?'<div role="group"></div>':""}
-    `,this.renderContent(),this.hasChildren){const a=this.shadowRoot.querySelector('div[role="group"]');e.forEach(i=>{const r=document.createElement("au-tree-node");r.data=i,r.toggleLabel=this._toggleLabel,r.fallbackNodeLabel=this._fallbackNodeLabel,r.toggleLabelTemplate=this._toggleLabelTemplate,t&&r.setAttribute("show-checkbox",""),a.appendChild(r)})}this.setAttribute("role","treeitem"),this.hasChildren&&this.setAttribute("aria-expanded","false"),t&&this.setAttribute("aria-checked","false")}renderContent(){const e=this.shadowRoot.querySelector(".node-content");if(!e)return;const t=this.hasAttribute("show-checkbox"),a=this.getLabelText(),i=this.escapeHTML(a);this.setAttribute("aria-label",a);const r=`<svg class="toggle-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" aria-hidden="true"/></svg><span class="visually-hidden">${i}</span>`,s=typeof this._toggleLabel=="function"?this._toggleLabel(this._data):this.formatText(this._toggleLabelTemplate||"Toggle {label}",{label:a}),o=this.escapeHTML(s),n=this.hasChildren?`<button class="toggle-btn" tabindex="-1" aria-label="${o}">${r}</button>`:`<button class="toggle-btn hidden" tabindex="-1" aria-hidden="true">${r}</button>`,v=t?`<div class="au-checkbox"><input type="checkbox" id="${this._uid}" tabindex="-1" ${this.checked?"checked":""}>`:"",c=`${this._uid}-label`,p=t?`<label id="${c}" for="${this._uid}">${i}</label></div>`:`<span>${i}</span>`;if(e.innerHTML=`
-        ${n}
-        ${v}
-        ${p}
-      `,t&&this.indeterminate){const d=e.querySelector("input");d&&(d.indeterminate=!0)}const l=e.querySelector(".toggle-icon");this.expanded&&l&&(l.style.transform="rotate(90deg)")}}typeof customElements<"u"&&(customElements.get("au-tree")||customElements.define("au-tree",q),customElements.get("au-tree-node")||customElements.define("au-tree-node",k));
+      ${this.hasChildren ? `<div role="group"></div>` : ""}
+    `;
+    this.renderContent();
+    if (this.hasChildren) {
+      const group = this.shadowRoot.querySelector('div[role="group"]');
+      children.forEach((childData) => {
+        const childNode = document.createElement("au-tree-node");
+        childNode.data = childData;
+        childNode.toggleLabel = this._toggleLabel;
+        childNode.fallbackNodeLabel = this._fallbackNodeLabel;
+        childNode.toggleLabelTemplate = this._toggleLabelTemplate;
+        if (showCheckbox) childNode.setAttribute("show-checkbox", "");
+        group.appendChild(childNode);
+      });
+    }
+    this.setAttribute("role", "treeitem");
+    if (this.hasChildren) {
+      this.setAttribute("aria-expanded", "false");
+    }
+    if (showCheckbox) {
+      this.setAttribute("aria-checked", "false");
+    }
+  }
+  renderContent() {
+    const container = this.shadowRoot.querySelector(".node-content");
+    if (!container) return;
+    const showCheckbox = this.hasAttribute("show-checkbox");
+    const labelText = this.getLabelText();
+    const escapedLabelText = this.escapeHTML(labelText);
+    this.setAttribute("aria-label", labelText);
+    const arrowIcon = `<svg class="toggle-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" aria-hidden="true"/></svg><span class="visually-hidden">${escapedLabelText}</span>`;
+    const toggleLabelText = typeof this._toggleLabel === "function" ? this._toggleLabel(this._data) : this.formatText(this._toggleLabelTemplate || "Toggle {label}", { label: labelText });
+    const escapedToggleLabelText = this.escapeHTML(toggleLabelText);
+    const buttonHtml = this.hasChildren ? `<button class="toggle-btn" tabindex="-1" aria-label="${escapedToggleLabelText}">${arrowIcon}</button>` : `<button class="toggle-btn hidden" tabindex="-1" aria-hidden="true">${arrowIcon}</button>`;
+    const checkboxHtml = showCheckbox ? `<div class="au-checkbox"><input type="checkbox" id="${this._uid}" tabindex="-1" ${this.checked ? "checked" : ""}>` : "";
+    const labelId = `${this._uid}-label`;
+    const labelHtml = showCheckbox ? `<label id="${labelId}" for="${this._uid}">${escapedLabelText}</label></div>` : `<span>${escapedLabelText}</span>`;
+    container.innerHTML = `
+        ${buttonHtml}
+        ${checkboxHtml}
+        ${labelHtml}
+      `;
+    if (showCheckbox && this.indeterminate) {
+      const input = container.querySelector("input");
+      if (input) input.indeterminate = true;
+    }
+    const toggle = container.querySelector(".toggle-icon");
+    if (this.expanded && toggle) toggle.style.transform = "rotate(90deg)";
+  }
+}
+if (typeof customElements !== "undefined") {
+  if (!customElements.get("au-tree")) customElements.define("au-tree", AuTree);
+  if (!customElements.get("au-tree-node")) customElements.define("au-tree-node", AuTreeNode);
+}
