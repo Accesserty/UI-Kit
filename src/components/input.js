@@ -72,9 +72,16 @@ class AuInput extends HTMLElement {
         border-radius: var(--au-input-border-radius, 0.25rem);
         padding: var(--au-input-container-padding-vertical, 0.25rem) var(--au-input-container-padding-horizontal, 0.25rem);
         gap: var(--au-input-container-gap, 0.625rem);
+        /* prefix/affix 不可被壓縮;窄容器時維持同一行,由 input 彈性縮小
+           (原本 <768px 轉 column 會讓 prefix/affix 與輸入框折行) */
+        .prefix, .affix {
+          flex-shrink: 0;
+        }
         @container (width < 768px) {
-          flex-direction: column;
-          align-items: flex-start;
+          input {
+            flex: 1;
+            min-width: 0;
+          }
         }
       }
       .color-code {
