@@ -24,7 +24,13 @@
     "dist",
     "README.md"
   ],
-  "main": "index.js",
+  "main": "dist/accesserty-ui-kit.js",
+  "module": "dist/accesserty-ui-kit.js",
+  "exports": {
+    ".": "./dist/accesserty-ui-kit.js",
+    "./min": "./dist/accesserty-ui-kit.min.js",
+    "./dist/*": "./dist/*"
+  },
   "scripts": {
     "test": "web-test-runner test/**/*.test.js --node-resolve --concurrency 1",
     "build": "vite build"
