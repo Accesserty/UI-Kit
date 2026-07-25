@@ -69,6 +69,13 @@ this.dispatchEvent(new CustomEvent('change', { bubbles: true, composed: true, de
 this.attachShadow({ mode: 'open' });
 ```
 
+**5. Rendering: rebuild vs. patch — pick by whether internal state must survive an update**
+
+A component is updated whenever an observed attribute changes or a framework re-renders and pushes new props/attributes. Choose the render strategy accordingly — this is why the codebase has two rendering styles, and it is deliberate, not inconsistent:
+
+- **Pure data projection → rebuild is fine.** If the component only projects its data/attributes and holds no internal live control or interactive state to preserve (e.g. `card`, `breadcrumbs`, `pagination`, `tree`), it may re-render its whole Shadow DOM from data inside `attributeChangedCallback`. Always escape interpolated values before assigning `innerHTML` (see `escapeHTML` in `breadcrumbs.js`). Expose complex data through a **property setter that reflects to an attribute** (see `set items()` in `breadcrumbs.js`) so React/Vue can pass an array or object, not only a JSON string.
+- **Wraps a live native control or holds interactive state → build once, then patch.** If the component wraps a native `<input>`/`<textarea>`/etc., or manages focus / selection / expanded / active state (every form-associated component, plus `accordion`, `dropdown`, `tabs`), build the tree once with `createElement`, keep references, and patch individual attributes in `attributeChangedCallback`. **Never re-assign `innerHTML` on update** — it destroys focus, caret position, current value, validity, event listeners, and the ElementInternals wiring, which corrupts data mid-edit under a framework re-render.
+
 
 ## Form-Associated Components
 

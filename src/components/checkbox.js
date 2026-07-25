@@ -88,8 +88,13 @@ class AuCheckbox extends HTMLElement {
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.id = inputID;
-    input.name = this.getAttribute('name') || 'default-checkbox';
-    input.value = this.getAttribute('value') || 'default';
+    // The shadow <input> does not participate in the outer form; submission is
+    // driven by the host's `name` + internals.setFormValue(). So mirror the host
+    // name (empty when absent, matching native "unnamed control is not
+    // submitted") instead of fabricating one, and default the value to native
+    // "on" so the element value matches what setFormValue submits.
+    input.name = this.getAttribute('name') || '';
+    input.value = this.getAttribute('value') || 'on';
 
     const textSlot = document.createElement('div');
     textSlot.setAttribute('class', 'text');

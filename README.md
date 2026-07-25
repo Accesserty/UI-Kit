@@ -10,12 +10,14 @@ A framework-agnostic library of **14 Web Components** built with accessibility a
 
 ## Features
 
-- **WCAG 2.2 AA** compliant by default; proactively preparing for WCAG 3.0 AA
+- **Built to WCAG 2.2 AA at the component level** — correct ARIA semantics, keyboard support, focus management, and accessible-contrast defaults, out of the box
 - **Zero runtime dependencies** — one self-contained JS file
 - **Framework-agnostic** — works in plain HTML, Vue, React, Angular, Nuxt, or any other stack
 - **Form-integrated** — form-associated components participate in native `<form>` submission and validation via the ElementInternals API
 - **SSR-safe** — all components guard against server-side import errors
 - **Fully themeable** — every visual detail is a CSS Custom Property
+
+> **On accessibility claims:** each component is built to meet WCAG 2.2 AA *as a component* — that gives you a strong head start, but it does not by itself make a whole page conform. Page-level conformance still depends on your content, structure, headings, and how you compose the pieces. We also follow the emerging WCAG 3.0 draft, and adjust as it stabilizes; treat that as direction, not a claim of alignment with a standard that is not final.
 
 
 ## Components

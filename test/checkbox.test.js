@@ -8,8 +8,8 @@ describe('AuCheckbox', () => {
 
     expect(input).to.exist;
     expect(input.type).to.equal('checkbox');
-    expect(input.name).to.equal('default-checkbox');
-    expect(input.value).to.equal('default');
+    expect(input.name).to.equal('');
+    expect(input.value).to.equal('on');
     expect(input.checked).to.be.false;
     expect(input.disabled).to.be.false;
   });

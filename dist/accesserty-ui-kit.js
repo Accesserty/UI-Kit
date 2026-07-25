@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-/*! Accesserty UI Kit v1.0.3 | built 2026-07-18 */
+/*! Accesserty UI Kit v1.0.3 | built 2026-07-25 */
 class AuAccordion extends HTMLElement {
   constructor() {
     super();
@@ -549,8 +549,8 @@ class AuCheckbox extends HTMLElement {
     const input = document.createElement("input");
     input.type = "checkbox";
     input.id = inputID;
-    input.name = this.getAttribute("name") || "default-checkbox";
-    input.value = this.getAttribute("value") || "default";
+    input.name = this.getAttribute("name") || "";
+    input.value = this.getAttribute("value") || "on";
     const textSlot = document.createElement("div");
     textSlot.setAttribute("class", "text");
     const slot = document.createElement("slot");

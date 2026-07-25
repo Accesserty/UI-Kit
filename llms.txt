@@ -1,6 +1,6 @@
 # Accesserty UI Kit
 
-> A framework-agnostic library of 14 accessibility-first Web Components. Zero runtime dependencies. WCAG 2.2 AA compliant. Works in plain HTML, Vue, React, Angular, and Nuxt via a single JS file.
+> A framework-agnostic library of 14 accessibility-first Web Components. Zero runtime dependencies. Each component is built to WCAG 2.2 AA at the component level (correct ARIA, keyboard, focus, and contrast defaults) — a head start toward accessibility, not a page-level conformance guarantee. Works in plain HTML, Vue, React, Angular, and Nuxt via a single JS file.
 
 ## Key Links
 
