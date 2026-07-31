@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accesserty UI Kit — Carousel (&lt;au-carousel&gt;)</title>
+  <!-- The <au-carousel> Web Component ships in this bundle. Slide content below
+       is author-defined native HTML (native-first); the component supplies the
+       pagination, prev/next, live region, roving focus and scroll mechanics. -->
+  <script src="../dist/accesserty-ui-kit.min.js" defer></script>
+  <!-- Design tokens (so .custom-carousel can reference --color-* vars) + shared
+       demo styles, where the Custom Style example's CSS lives. -->
+  <link rel="stylesheet" href="../src/css/au-style.css" />
+  <link rel="stylesheet" href="demo.css" />
+  <style>
+    /* ---- page shell (demo only) ---- */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
+      color: oklch(0.2 0 0);
+      max-width: 60rem;
+      margin: 0 auto;
+      padding: 2rem 1rem 5rem;
+      line-height: 1.6;
+    }
+    h1 { font-size: 1.6rem; }
+    h2 { margin-top: 2.5rem; font-size: 1.25rem; }
+    code { background: oklch(0.95 0 0); padding: 0.1em 0.35em; border-radius: 0.25rem; font-size: 0.9em; }
+    table { border-collapse: collapse; width: 100%; margin-top: 0.5rem; font-size: 0.9rem; }
+    th, td { border: 1px solid oklch(0.85 0 0); padding: 0.4rem 0.6rem; text-align: left; vertical-align: top; }
+    th { background: oklch(0.96 0 0); }
+    .note { background: oklch(0.97 0.02 250); border-left: 4px solid oklch(0.55 0.15 250); padding: 0.75rem 1rem; border-radius: 0.25rem; }
+    pre { background: oklch(0.96 0 0); padding: 0.75rem 1rem; border-radius: 0.5rem; overflow-x: auto; font-size: 0.85rem; }
+
+    /* ---- AUTHOR-OWNED slide styling ----
+       The component only sizes/snaps the slotted blocks. Their visual design is
+       the author's, styled here from the light DOM. */
+    .demo-slide {
+      display: flex;
+      flex-direction: column;
+      background: oklch(0.985 0 0);
+      border: 1px solid oklch(0.88 0 0);
+      border-radius: 0.75rem;
+      overflow: hidden;
+    }
+    .demo-slide img { display: block; inline-size: 100%; block-size: clamp(11rem, 26vw, 16rem); object-fit: cover; }
+    .demo-slide h3 { margin: 0.75rem 1rem 0; font-size: 1.1rem; }
+    .demo-slide p { margin: 0.35rem 1rem 0.75rem; color: oklch(0.4 0 0); }
+    .demo-slide a { margin: 0 1rem 1rem; align-self: start; color: oklch(0.42 0.16 264); }
+    .demo-slide a:focus-visible { outline: 2px solid oklch(0.42 0.16 264); outline-offset: 2px; }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+      overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>Accesserty UI Kit — Carousel</h1>
+  <p>
+    <code>&lt;au-carousel&gt;</code> is a Web Component. You provide the
+    <strong>slide blocks</strong> as native HTML children (each may contain links
+    or buttons); the component supplies a <strong>real button per block</strong>
+    for pagination — named by the block's title — a responsive
+    <em>slides-per-view</em> driven by <code>@container</code>, prev/next buttons,
+    a polite live region and roving keyboard focus. Tab order is
+    <strong>pagination → content → prev/next</strong>.
+  </p>
+  <p class="note">
+    Resize the window: slides-per-view steps 1 → 2 → 3 based on the carousel's own
+    width (<code>@container</code>, not the viewport). All slides stay readable and
+    reachable — a keyboard or screen-reader user can move through every block
+    freely; tabbing to an off-screen slide just scrolls it into view.
+  </p>
+
+  <h2>Live example</h2>
+  <au-carousel
+    data-live-template="{title}, item {current} of {total}"
+    data-item-fallback="Item {current} of {total}"
+    data-text-prev="Previous slide"
+    data-text-next="Next slide"
+    data-text-pagination="Choose a slide">
+
+    <div class="demo-slide" data-title="Coastal cliffs">
+      <img src="https://picsum.photos/seed/au-carousel-coast/800/450" alt="Sunlit coastal cliffs dropping into a turquoise sea." loading="lazy" />
+      <h3>Coastal cliffs</h3>
+      <p>Dramatic headlands where the ocean meets steep, weathered rock.</p>
+      <a href="#coastal-cliffs">Learn more<span class="sr-only"> about Coastal cliffs</span></a>
+    </div>
+    <div class="demo-slide" data-title="City at dusk">
+      <img src="https://picsum.photos/seed/au-carousel-city/800/450" alt="A dense city skyline glowing at dusk." loading="lazy" />
+      <h3>City at dusk</h3>
+      <p>Skyscrapers lighting up as the last daylight fades behind them.</p>
+      <a href="#city-at-dusk">Learn more<span class="sr-only"> about City at dusk</span></a>
+    </div>
+    <div class="demo-slide" data-title="Forest light">
+      <img src="https://picsum.photos/seed/au-carousel-forest/800/450" alt="Sunbeams breaking through a tall evergreen forest." loading="lazy" />
+      <h3>Forest light</h3>
+      <p>Morning light filtering between the trunks of an old-growth forest.</p>
+      <a href="#forest-light">Learn more<span class="sr-only"> about Forest light</span></a>
+    </div>
+    <div class="demo-slide" data-title="Desert dunes">
+      <img src="https://picsum.photos/seed/au-carousel-desert/800/450" alt="Rolling sand dunes under a clear sky." loading="lazy" />
+      <h3>Desert dunes</h3>
+      <p>Wind-sculpted dunes stretching to a flat, distant horizon.</p>
+      <a href="#desert-dunes">Learn more<span class="sr-only"> about Desert dunes</span></a>
+    </div>
+    <div class="demo-slide" data-title="Mountain lake">
+      <img src="https://picsum.photos/seed/au-carousel-lake/800/450" alt="A still mountain lake mirroring snow-capped peaks." loading="lazy" />
+      <h3>Mountain lake</h3>
+      <p>A calm alpine lake reflecting the peaks that surround it.</p>
+      <a href="#mountain-lake">Learn more<span class="sr-only"> about Mountain lake</span></a>
+    </div>
+    <div class="demo-slide" data-title="Wildflower field">
+      <img src="https://picsum.photos/seed/au-carousel-field/800/450" alt="A green field of wildflowers under scattered clouds." loading="lazy" />
+      <h3>Wildflower field</h3>
+      <p>An open meadow in bloom beneath a wide, cloud-dappled sky.</p>
+      <a href="#wildflower-field">Learn more<span class="sr-only"> about Wildflower field</span></a>
+    </div>
+  </au-carousel>
+
+  <h2>Basic usage</h2>
+  <pre><code>&lt;au-carousel&gt;
+  &lt;div data-title="Coastal cliffs"&gt;
+    &lt;img src="…" alt="…"&gt;
+    &lt;h3&gt;Coastal cliffs&lt;/h3&gt;
+    &lt;a href="…"&gt;Learn more&lt;/a&gt;
+  &lt;/div&gt;
+  &lt;div data-title="City at dusk"&gt;…&lt;/div&gt;
+  &lt;!-- …one block per slide… --&gt;
+&lt;/au-carousel&gt;</code></pre>
+  <p>
+    Each <strong>direct child</strong> of <code>&lt;au-carousel&gt;</code> is one
+    slide, and gets one pagination dot. Native HTML first; drop in UI Kit
+    components where you need them. The component sizes and snaps the blocks — you
+    style their contents.
+  </p>
+
+  <h2>Custom Style</h2>
+  <p>
+    Restyle the whole carousel by overriding its <code>--au-carousel-*</code>
+    variables on the host — no shadow-DOM surgery needed. This example uses the
+    <code>.custom-carousel</code> class (defined in <code>demo.css</code>) to swap
+    the dots and buttons to the brand's primary colour and square off the buttons.
+  </p>
+  <pre><code>/* demo.css */
+.custom-carousel {
+  --au-carousel-gap: 1.5rem;
+  --au-carousel-dot-color: var(--color-primary-400);
+  --au-carousel-dot-current-color: var(--color-primary-600);
+  --au-carousel-dot-focus-shadow-color: var(--color-primary-500);
+  --au-carousel-button-bg: var(--color-primary-500);
+  --au-carousel-button-text-color: var(--color-white);
+  --au-carousel-button-radius: 0.5rem;
+  --au-carousel-button-focus-shadow-color: var(--color-primary-500);
+}</code></pre>
+  <pre><code>&lt;au-carousel class="custom-carousel"&gt; … &lt;/au-carousel&gt;</code></pre>
+
+  <au-carousel class="custom-carousel"
+    data-live-template="{title}, item {current} of {total}"
+    data-text-prev="Previous slide"
+    data-text-next="Next slide"
+    data-text-pagination="Choose a slide">
+
+    <div class="demo-slide" data-title="Coastal cliffs">
+      <img src="https://picsum.photos/seed/au-carousel-coast/800/450" alt="Sunlit coastal cliffs dropping into a turquoise sea." loading="lazy" />
+      <h3>Coastal cliffs</h3>
+      <p>Dramatic headlands where the ocean meets steep, weathered rock.</p>
+      <a href="#coastal-cliffs-2">Learn more<span class="sr-only"> about Coastal cliffs</span></a>
+    </div>
+    <div class="demo-slide" data-title="City at dusk">
+      <img src="https://picsum.photos/seed/au-carousel-city/800/450" alt="A dense city skyline glowing at dusk." loading="lazy" />
+      <h3>City at dusk</h3>
+      <p>Skyscrapers lighting up as the last daylight fades behind them.</p>
+      <a href="#city-at-dusk-2">Learn more<span class="sr-only"> about City at dusk</span></a>
+    </div>
+    <div class="demo-slide" data-title="Forest light">
+      <img src="https://picsum.photos/seed/au-carousel-forest/800/450" alt="Sunbeams breaking through a tall evergreen forest." loading="lazy" />
+      <h3>Forest light</h3>
+      <p>Morning light filtering between the trunks of an old-growth forest.</p>
+      <a href="#forest-light-2">Learn more<span class="sr-only"> about Forest light</span></a>
+    </div>
+    <div class="demo-slide" data-title="Desert dunes">
+      <img src="https://picsum.photos/seed/au-carousel-desert/800/450" alt="Rolling sand dunes under a clear sky." loading="lazy" />
+      <h3>Desert dunes</h3>
+      <p>Wind-sculpted dunes stretching to a flat, distant horizon.</p>
+      <a href="#desert-dunes-2">Learn more<span class="sr-only"> about Desert dunes</span></a>
+    </div>
+  </au-carousel>
+
+  <h2>How to test the accessibility</h2>
+  <ul>
+    <li><strong>Tab order (dots → content → arrows):</strong> <kbd>Tab</kbd> reaches the dot group first (one stop; <kbd>←</kbd>/<kbd>→</kbd>/<kbd>Home</kbd>/<kbd>End</kbd> move between dots and jump). Further <kbd>Tab</kbd>s go through each slide's link in order — including back with <kbd>Shift</kbd>+<kbd>Tab</kbd> — and the carousel scrolls to follow your focus. Then the prev/next buttons.</li>
+    <li><strong>Free reading:</strong> with a screen reader you can read through every block (forward and back), not only what's on screen. The scroll container is not a focus stop, so there is no "read the whole list at once" dump.</li>
+    <li><strong>Named dots:</strong> each dot is labelled by its slide's title, so a screen reader announces e.g. "Forest light" — not "3".</li>
+    <li><strong>Change feedback:</strong> arrows, dots and swiping all update a polite live region ("Forest light, item 3 of 6").</li>
+    <li><strong>Reach the end:</strong> next/prev and the dots all reach the very last slide; it scrolls to the left edge so the dots line up.</li>
+    <li><strong>Responsive:</strong> narrow the window — slides-per-view steps 3 → 2 → 1 via <code>@container</code>.</li>
+    <li><strong>Reduced motion:</strong> turn it on in your OS — scrolling jumps instantly.</li>
+  </ul>
+
+  <h2>Slide naming (fallback chain)</h2>
+  <p>Titles are <strong>not required</strong>, but each dot always gets an accessible name:</p>
+  <ol>
+    <li>an explicit <code>data-title</code> on the slide;</li>
+    <li>otherwise the slide's own heading (<code>h1</code>–<code>h6</code>) text;</li>
+    <li>otherwise a positional fallback, e.g. "Item 3 of 6" (from <code>data-item-fallback</code>, translatable). In that case the component also logs a dev-console hint suggesting a title.</li>
+  </ol>
+
+  <h2>CSS Variables</h2>
+  <table>
+    <tr><th scope="col">Variable</th><th scope="col">Description</th><th scope="col">Default</th></tr>
+    <tr><td><code>--au-carousel-gap</code></td><td>Space between slides</td><td>1rem</td></tr>
+    <tr><td><code>--au-carousel-visible</code></td><td>Slides per view (set by <code>@container</code>: 1 → 2 → 3)</td><td>1</td></tr>
+    <tr><td><code>--au-carousel-dot-target</code></td><td>Dot focus/click hit area (≥24px)</td><td>1.75rem</td></tr>
+    <tr><td><code>--au-carousel-dot-size</code></td><td>Visible dot diameter</td><td>0.7rem</td></tr>
+    <tr><td><code>--au-carousel-dot-color</code></td><td>Dot colour (≥3:1 on white)</td><td>oklch(0.62 0 0)</td></tr>
+    <tr><td><code>--au-carousel-dot-current-color</code></td><td>Current dot colour</td><td>oklch(0.2 0 0)</td></tr>
+    <tr><td><code>--au-carousel-dot-gap</code></td><td>Gap between dots</td><td>0.25rem</td></tr>
+    <tr><td><code>--au-carousel-dot-focus-shadow-width</code></td><td>Dot focus ring width</td><td>3px</td></tr>
+    <tr><td><code>--au-carousel-dot-focus-shadow-color</code></td><td>Dot focus ring colour (≥3:1 on white)</td><td>oklch(0.55 0.2 256)</td></tr>
+    <tr><td><code>--au-carousel-button-size</code></td><td>Prev/next button size (≥24px)</td><td>2.75rem</td></tr>
+    <tr><td><code>--au-carousel-button-bg</code></td><td>Prev/next background</td><td>oklch(0.2 0 0)</td></tr>
+    <tr><td><code>--au-carousel-button-text-color</code></td><td>Prev/next glyph colour</td><td>oklch(0.99 0 0)</td></tr>
+    <tr><td><code>--au-carousel-button-radius</code></td><td>Prev/next corner radius</td><td>999px</td></tr>
+    <tr><td><code>--au-carousel-button-disabled-opacity</code></td><td>Prev/next opacity when disabled</td><td>0.35</td></tr>
+    <tr><td><code>--au-carousel-button-focus-shadow-width</code></td><td>Prev/next focus ring width</td><td>3px</td></tr>
+    <tr><td><code>--au-carousel-button-focus-shadow-color</code></td><td>Prev/next focus ring colour (≥3:1 on white)</td><td>oklch(0.55 0.2 256)</td></tr>
+    <tr><td><code>--au-carousel-controls-gap</code></td><td>Gap between prev and next</td><td>0.75rem</td></tr>
+  </table>
+
+  <h2>Attributes</h2>
+  <table>
+    <tr><th scope="col">Attribute</th><th scope="col">Description</th><th scope="col">Default</th></tr>
+    <tr><td><code>data-title</code> (per slide)</td><td>Accessible name for that slide's dot</td><td>heading → positional</td></tr>
+    <tr><td><code>data-dot-template</code></td><td>Dot accessible name, so a screen reader hears the title <em>and</em> the position; tokens <code>{title}</code> <code>{current}</code> <code>{total}</code> (i18n)</td><td>{title}, {current} of {total}</td></tr>
+    <tr><td><code>data-live-template</code></td><td>Live-region announcement; tokens <code>{title}</code> <code>{current}</code> <code>{total}</code></td><td>{title}, item {current} of {total}</td></tr>
+    <tr><td><code>data-item-fallback</code></td><td>Positional dot name when a slide has no title/heading</td><td>Item {current} of {total}</td></tr>
+    <tr><td><code>data-text-instructions</code></td><td>Visually-hidden hint on how to operate the dots, tied to the pagination group via <code>aria-describedby</code> (i18n)</td><td>Use the arrow keys to move between slides.</td></tr>
+    <tr><td><code>data-text-prev</code></td><td>Previous-button <code>aria-label</code> (i18n)</td><td>Previous slide</td></tr>
+    <tr><td><code>data-text-next</code></td><td>Next-button <code>aria-label</code> (i18n)</td><td>Next slide</td></tr>
+    <tr><td><code>data-text-pagination</code></td><td>Pagination group <code>aria-label</code> (i18n)</td><td>Choose a slide</td></tr>
+    <tr><td><code>data-icon-prev</code></td><td>Visible glyph on the previous button (decorative — a screen reader reads <code>data-text-prev</code> instead). Swap it for another character or icon-font glyph; for RTL, set it to <code>›</code></td><td>‹</td></tr>
+    <tr><td><code>data-icon-next</code></td><td>Visible glyph on the next button (decorative). For RTL, set it to <code>‹</code></td><td>›</td></tr>
+  </table>
+
+  <h2>Properties</h2>
+  <table>
+    <tr><th scope="col">Property</th><th scope="col">Type</th><th scope="col">Description</th></tr>
+    <tr><td><code>current</code></td><td>number</td><td>Index of the current (left-most) slide. Set it to move the carousel.</td></tr>
+  </table>
+  <pre><code>const c = document.querySelector('au-carousel');
+c.current = 2;         // go to the third slide
+c.slideTo(0);          // back to the first
+console.log(c.current);</code></pre>
+
+  <h2>Methods</h2>
+  <table>
+    <tr><th scope="col">Method</th><th scope="col">Description</th></tr>
+    <tr><td><code>slideTo(index)</code></td><td>Scroll to <code>index</code> (clamped to range) and make it current.</td></tr>
+  </table>
+
+  <h2>Events</h2>
+  <table>
+    <tr><th scope="col">Event</th><th scope="col">Detail</th><th scope="col">Description</th></tr>
+    <tr><td><code>slide-change</code></td><td><code>{ index, total, title }</code></td><td>Fires when the current slide changes (bubbles, composed).</td></tr>
+  </table>
+  <pre><code>// Vanilla
+document.querySelector('au-carousel')
+  .addEventListener('slide-change', (e) =&gt; console.log(e.detail.index));
+
+// React
+&lt;au-carousel ref={ref} /&gt;
+useEffect(() =&gt; {
+  const el = ref.current;
+  const on = (e) =&gt; setIndex(e.detail.index);
+  el.addEventListener('slide-change', on);
+  return () =&gt; el.removeEventListener('slide-change', on);
+}, []);
+
+// Vue
+&lt;au-carousel @slide-change="e =&gt; index = e.detail.index" /&gt;</code></pre>
+</body>
+</html>

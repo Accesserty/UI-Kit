@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>au-carousel × React — i18n</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 48rem; margin: 2rem auto; padding: 0 1rem; }
+    .demo-slide { border: 1px solid #ccc; border-radius: .5rem; padding: 1rem; }
+    button { font-size: 1rem; padding: .4rem .8rem; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>au-carousel × React — runtime i18n</h1>
+  <p>The <code>data-*</code> i18n attributes are bound to a React locale state. Toggle the
+     locale and the screen-reader text (dot names, prev/next, hint) updates live.</p>
+  <div id="root"></div>
+
+  <script type="module">
+    import React, { useState } from 'https://esm.sh/react@19';
+    import { createRoot } from 'https://esm.sh/react-dom@19/client';
+    import htm from 'https://esm.sh/htm';
+    import '../../dist/accesserty-ui-kit.min.js';
+
+    const html = htm.bind(React.createElement);
+
+    const dict = {
+      en: {
+        prev: 'Previous slide', next: 'Next slide', pagination: 'Choose a slide',
+        instructions: 'Use the arrow keys to move between slides.',
+        dot: '{title}, {current} of {total}',
+        slides: ['Coastal cliffs', 'City at dusk', 'Forest light'],
+      },
+      zh: {
+        prev: '上一張', next: '下一張', pagination: '選擇投影片',
+        instructions: '用方向鍵切換投影片。',
+        dot: '{title},第 {current} / 共 {total}',
+        slides: ['海岸', '城市黃昏', '森林光'],
+      },
+    };
+
+    function App() {
+      const [loc, setLoc] = useState('en');
+      const t = dict[loc];
+      return html`
+        <button id="toggle" onClick=${() => setLoc(loc === 'en' ? 'zh' : 'en')}>
+          Locale: ${loc} (click to switch)
+        </button>
+        <au-carousel
+          data-text-prev=${t.prev}
+          data-text-next=${t.next}
+          data-text-pagination=${t.pagination}
+          data-text-instructions=${t.instructions}
+          data-dot-template=${t.dot}
+          onslide-change=${(e) => console.log('slide-change', e.detail)}
+        >
+          ${t.slides.map(
+            (s, i) => html`
+              <div key=${i} class="demo-slide" data-title=${s}>
+                <h3>${s}</h3>
+                <a href=${'#s' + i}>Learn more about ${s}</a>
+              </div>
+            `
+          )}
+        </au-carousel>`;
+    }
+
+    createRoot(document.getElementById('root')).render(html`<${App} />`);
+    // signal for the automated check
+    customElements.whenDefined('au-carousel').then(() => { window.__reactReady = true; });
+  </script>
+</body>
+</html>

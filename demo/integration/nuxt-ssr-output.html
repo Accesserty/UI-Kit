@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>au-carousel × Nuxt SSR — hydration i18n</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 48rem; margin: 2rem auto; padding: 0 1rem; }
+    .demo-slide { border: 1px solid #ccc; border-radius: .5rem; padding: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>au-carousel × Nuxt SSR — hydration i18n</h1>
+  <p>This page is exactly what a Nuxt server would send: the <code>&lt;au-carousel&gt;</code>
+     tag with its i18n <code>data-*</code> attributes and slide content already rendered as
+     <strong>HTML text</strong> (the server never runs the web component). The component script
+     is loaded <strong>client-only</strong> at the end — as you would from a Nuxt
+     <code>*.client.ts</code> plugin — because the bundle extends <code>HTMLElement</code> and
+     cannot be imported on the Node server. On upgrade it reads the localized attributes.</p>
+
+  <!-- ===== SERVER-RENDERED MARKUP (what Nuxt streams to the browser) ===== -->
+  <au-carousel
+    lang="zh-Hant"
+    data-text-prev="上一張"
+    data-text-next="下一張"
+    data-text-pagination="選擇投影片"
+    data-text-instructions="用方向鍵切換投影片。"
+    data-dot-template="{title},第 {current} / 共 {total}"
+    data-live-template="{title},第 {current} / 共 {total} 張"
+  >
+    <div class="demo-slide" data-title="海岸"><h3>海岸</h3><a href="#s0">了解更多：海岸</a></div>
+    <div class="demo-slide" data-title="城市黃昏"><h3>城市黃昏</h3><a href="#s1">了解更多：城市黃昏</a></div>
+    <div class="demo-slide" data-title="森林光"><h3>森林光</h3><a href="#s2">了解更多：森林光</a></div>
+  </au-carousel>
+  <!-- ==================================================================== -->
+
+  <!-- Client-only registration (Nuxt: plugins/accesserty.client.ts). Never import
+       the bundle in server code — it extends HTMLElement, which Node lacks. -->
+  <script type="module">
+    import '../../dist/accesserty-ui-kit.min.js';
+    customElements.whenDefined('au-carousel').then(() => { window.__nuxtHydrated = true; });
+  </script>
+</body>
+</html>

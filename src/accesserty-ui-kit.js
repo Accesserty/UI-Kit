@@ -1,6 +1,7 @@
 import './components/accordion.js';
 import './components/breadcrumbs.js';
 import './components/card.js';
+import './components/carousel.js';
 import './components/checkbox.js';
 import './components/dropdown.js';
 import './components/file-upload.js';

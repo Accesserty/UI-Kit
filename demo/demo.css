@@ -501,6 +501,26 @@ code {
   /* --au-tab-badge-border-radius:; */
 }
 
+.custom-carousel {
+  --au-carousel-gap: 1.5rem;
+  /* --au-carousel-visible:; */
+  /* --au-carousel-dot-target:; */
+  /* --au-carousel-dot-size:; */
+  --au-carousel-dot-color: var(--color-primary-400);
+  --au-carousel-dot-current-color: var(--color-primary-600);
+  /* --au-carousel-dot-gap:; */
+  /* --au-carousel-dot-focus-shadow-width:; */
+  --au-carousel-dot-focus-shadow-color: var(--color-primary-500);
+  /* --au-carousel-button-size:; */
+  --au-carousel-button-bg: var(--color-primary-500);
+  --au-carousel-button-text-color: var(--color-white);
+  --au-carousel-button-radius: 0.5rem;
+  /* --au-carousel-button-disabled-opacity:; */
+  /* --au-carousel-button-focus-shadow-width:; */
+  --au-carousel-button-focus-shadow-color: var(--color-primary-500);
+  /* --au-carousel-controls-gap:; */
+}
+
 #demo-form {
   max-width: 800px;
 }
