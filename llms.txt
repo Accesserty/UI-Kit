@@ -1,6 +1,6 @@
 # Accesserty UI Kit
 
-> A framework-agnostic library of 14 accessibility-first Web Components. Zero runtime dependencies. Each component is built to WCAG 2.2 AA at the component level (correct ARIA, keyboard, focus, and contrast defaults) — a head start toward accessibility, not a page-level conformance guarantee. Works in plain HTML, Vue, React, Angular, and Nuxt via a single JS file.
+> A framework-agnostic library of 15 accessibility-first Web Components. Zero runtime dependencies. Each component is built to WCAG 2.2 AA at the component level (correct ARIA, keyboard, focus, and contrast defaults) — a head start toward accessibility, not a page-level conformance guarantee. Works in plain HTML, Vue, React, Angular, and Nuxt via a single JS file.
 
 ## Key Links
 
@@ -11,7 +11,7 @@
 
 ## Project Structure
 
-- `src/components/` — Source for all 14 custom elements (one .js file each)
+- `src/components/` — Source for all 15 custom elements (one .js file each)
 - `src/css/` — Design system CSS (cascade layers: basic-variables, tokens-variables, components)
 - `src/accesserty-ui-kit.js` — Bundle entry point (imports all components)
 - `demo/` — Human-readable documentation with live examples and CSS variable tables
@@ -45,6 +45,18 @@ Slots: heading, media, content, footer
 CSS Parts: au-card-container, heading, media, content, footer
 Form-associated: No
 CSS variables: 0 (styled via ::part())
+
+### au-carousel
+Tag: `<au-carousel>`
+Attributes: data-live-template, data-item-fallback, data-dot-template, data-text-prev, data-text-next, data-text-pagination, data-text-instructions, data-icon-prev, data-icon-next; per slide (direct child): data-title
+Localization templates: data-dot-template, data-live-template, data-item-fallback support `{title}`, `{current}`, `{total}`
+Content model: each direct child element is one slide (author-defined native HTML); one pagination button per slide, named + positioned; responsive slides-per-view via @container
+Properties: current (getter/setter)
+Methods: slideTo(index), refresh() (re-read slide titles after a runtime/locale change; also automatic via MutationObserver)
+Events: slide-change (detail: { index, total, title })
+Form-associated: No
+SSR: extends HTMLElement — register client-side only (e.g. Nuxt *.client plugin); not importable in Node
+CSS variables: 17 (--au-carousel-gap, --au-carousel-visible, --au-carousel-dot-*, --au-carousel-button-*, --au-carousel-controls-gap)
 
 ### au-checkbox
 Tag: `<au-checkbox>`

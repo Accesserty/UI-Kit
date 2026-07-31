@@ -3,7 +3,7 @@
 ![License: MIT](https://badgen.net/badge/license/MIT/orange)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Accesserty/UI-Kit)
 
-A framework-agnostic library of **14 Web Components** built with accessibility as a first principle. Every component ships with correct ARIA semantics, keyboard navigation, and focus management out of the box — no configuration required.
+A framework-agnostic library of **15 Web Components** built with accessibility as a first principle. Every component ships with correct ARIA semantics, keyboard navigation, and focus management out of the box — no configuration required.
 
 > **Philosophy:** Copy a single JS file, drop in a `<script>` tag, start using `<au-*>` elements. No build step, no npm install, no framework lock-in.
 
@@ -14,7 +14,7 @@ A framework-agnostic library of **14 Web Components** built with accessibility a
 - **Zero runtime dependencies** — one self-contained JS file
 - **Framework-agnostic** — works in plain HTML, Vue, React, Angular, Nuxt, or any other stack
 - **Form-integrated** — form-associated components participate in native `<form>` submission and validation via the ElementInternals API
-- **SSR-safe** — all components guard against server-side import errors
+- **SSR-friendly** — register client-side in SSR frameworks (see [Nuxt 3](#nuxt-3)); the `customElements.define()` guard keeps re-importing on the client safe
 - **Fully themeable** — every visual detail is a CSS Custom Property
 
 > **On accessibility claims:** each component is built to meet WCAG 2.2 AA *as a component* — that gives you a strong head start, but it does not by itself make a whole page conform. Page-level conformance still depends on your content, structure, headings, and how you compose the pieces. We also follow the emerging WCAG 3.0 draft, and adjust as it stabilizes; treat that as direction, not a claim of alignment with a standard that is not final.
@@ -27,6 +27,7 @@ A framework-agnostic library of **14 Web Components** built with accessibility a
 | `<au-accordion>` | Expandable content panels with exclusive-mode support |
 | `<au-breadcrumbs>` | Landmark navigation with JSON-driven items |
 | `<au-card>` | Flexible content container with named slots |
+| `<au-carousel>` | Accessible carousel: one pagination button per slide (named and positioned), responsive slides-per-view via `@container`, roving keyboard focus, and a polite live region |
 | `<au-checkbox>` | Form-associated checkbox with customizable checkmark |
 | `<au-dropdown>` | Popover-based menu with keyboard navigation |
 | `<au-file-upload>` | Drag-and-drop file picker with preview, validation, and form integration |
@@ -208,6 +209,17 @@ Accesserty UI Kit components are framework-agnostic Web Components. Pass transla
   <div class="au-tab-panel" slot="panel" label="Settings" label-lang="en"></div>
 </au-tabs>
 
+<au-carousel
+  data-text-prev="上一張"
+  data-text-next="下一張"
+  data-text-pagination="選擇投影片"
+  data-text-instructions="用方向鍵切換投影片"
+  data-dot-template="{title}，第 {current} / 共 {total}"
+  data-live-template="{title}，第 {current} / 共 {total} 張">
+  <div data-title="海岸"><h3>海岸</h3></div>
+  <div data-title="城市"><h3>城市</h3></div>
+</au-carousel>
+
 <au-tree
   data-text-node="節點"
   data-text-toggle="展開或收合 {label}">
@@ -293,7 +305,7 @@ Requires **Node.js 20 or higher**.
 # Install dependencies
 npm ci
 
-# Run all tests (174 tests across 14 components)
+# Run all tests (225 tests across 15 components)
 npm test
 
 # Test a single component

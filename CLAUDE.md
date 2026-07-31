@@ -6,7 +6,7 @@ Read it fully before making any changes.
 
 ## Project Overview
 
-Accesserty UI Kit is a library of **14 Web Components** built with vanilla Custom Elements v1 and the ElementInternals API. There are **zero runtime dependencies**. The design philosophy is "copy one JS file and use `<au-*>` tags" — no npm install required by end users.
+Accesserty UI Kit is a library of **15 Web Components** built with vanilla Custom Elements v1 and the ElementInternals API. There are **zero runtime dependencies**. The design philosophy is "copy one JS file and use `<au-*>` tags" — no npm install required by end users.
 
 **Accessibility standard:** WCAG 2.2 AA (proactively preparing for WCAG 3.0 AA).
 
@@ -136,7 +136,7 @@ Pattern: `--au-[component]-[part]-[property]-[state]`
 --au-input-focus-shadow-width        ✅ ...state=focus
 ```
 
-Components: `accordion`, `breadcrumbs`, `checkbox`, `dropdown`, `file-upload`, `input`, `pagination`, `radio`, `rating`, `switch`, `tabs`, `textarea`, `tree`
+Components: `accordion`, `breadcrumbs`, `carousel`, `checkbox`, `dropdown`, `file-upload`, `input`, `pagination`, `radio`, `rating`, `switch`, `tabs`, `textarea`, `tree`
 
 Every CSS variable used inside a component's `style.textContent` **must** be documented in that component's `demo/*.html` file with: variable name, description, and default value.
 
@@ -189,7 +189,7 @@ CSS Variables table format:
 
 ## Build Rules
 
-- Entry: `src/accesserty-ui-kit.js` (imports all 14 components)
+- Entry: `src/accesserty-ui-kit.js` (imports all 15 components)
 - Output: `dist/accesserty-ui-kit.js` (ES module) and `dist/accesserty-ui-kit.min.js` (minified)
 - Command: `npm run build`
 - **Always rebuild after changing any `src/components/*.js` file**
