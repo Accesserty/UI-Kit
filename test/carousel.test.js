@@ -259,6 +259,68 @@ describe('AuCarousel', () => {
     expect(dots[2].getAttribute('aria-label')).to.equal('Added, 3 of 3');
   });
 
+  it('clamps the current slide and updates controls when slides are removed', async () => {
+    const el = await mount(slidesHtml(3));
+    await tick();
+    el.current = 2;
+    await tick();
+
+    el.lastElementChild.remove();
+    await tick();
+
+    const dots = [...el.shadowRoot.querySelectorAll('.au-carousel-dot')];
+    const prev = el.shadowRoot.querySelector('[data-carousel-prev]');
+    const next = el.shadowRoot.querySelector('[data-carousel-next]');
+    expect(dots.length).to.equal(2);
+    expect(el.current).to.equal(1);
+    expect(dots[1].getAttribute('aria-current')).to.equal('true');
+    expect(prev.disabled).to.be.false;
+    expect(next.disabled).to.be.true;
+  });
+
+  it('clears its state and disables navigation when all slides are removed', async () => {
+    const el = await mount(slidesHtml(2));
+    await tick();
+
+    el.replaceChildren();
+    await tick();
+
+    expect(el.current).to.equal(-1);
+    expect(el.shadowRoot.querySelectorAll('.au-carousel-dot').length).to.equal(0);
+    expect(el.shadowRoot.querySelector('[data-carousel-prev]').disabled).to.be.true;
+    expect(el.shadowRoot.querySelector('[data-carousel-next]').disabled).to.be.true;
+  });
+
+  it('moves Shift+Tab from Previous to the current slide content', async () => {
+    const el = await mount(slidesHtml(3));
+    await tick();
+    el.current = 1;
+    await tick();
+
+    const prev = el.shadowRoot.querySelector('[data-carousel-prev]');
+    prev.focus();
+    prev.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true })
+    );
+    await tick();
+
+    expect(document.activeElement).to.equal(el.children[1].querySelector('a'));
+  });
+
+  it('moves Tab from a dot to the current slide content', async () => {
+    const el = await mount(slidesHtml(3));
+    await tick();
+    el.current = 1;
+    await tick();
+
+    const dot = el.shadowRoot.querySelectorAll('.au-carousel-dot')[1];
+    dot.focus();
+    dot.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
+    await tick();
+
+    expect(document.activeElement).to.equal(el.children[1].querySelector('a'));
+  });
+
   it('does not re-announce via the live region while a dot is focused', async () => {
     const el = await mount(slidesHtml(3));
     await tick();
