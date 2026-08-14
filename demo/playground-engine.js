@@ -223,6 +223,7 @@ const COMPONENT_CONFIGS = [
           { name: "--au-accordion-item-margin-bottom", default: "1rem", type: "size" },
           { name: "--au-accordion-heading-padding-vertical", default: "0.625rem", type: "size" },
           { name: "--au-accordion-heading-padding-horizontal", default: "1rem", type: "size" },
+          { name: "--au-accordion-info-max-width", default: "12rem", type: "size" },
         ]
       },
       {

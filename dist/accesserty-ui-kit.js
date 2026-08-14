@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-/*! Accesserty UI Kit v1.0.4 | built 2026-07-31 */
+/*! Accesserty UI Kit v1.0.4 | built 2026-08-14 */
 class AuAccordion extends HTMLElement {
   constructor() {
     super();
@@ -82,12 +82,18 @@ class AuAccordionItem extends HTMLElement {
     content.innerHTML = `
         <style>
           .au-accordion-item {
+            box-sizing: border-box;
             margin-bottom: var(--au-accordion-item-margin-bottom, 1rem);
+          }
+          :host {
+            display: block;
+            max-width: 100%;
           }
           button {
             /* behavior */
             cursor: pointer;
             -webkit-tap-highlight-color: oklch(0 0 0 / 0);
+            box-sizing: border-box;
             
             /* spacing */
             display: flex;
@@ -115,8 +121,11 @@ class AuAccordionItem extends HTMLElement {
 
             .heading {
               min-width: 0;
-              flex: 1 1 auto;
+              flex: 1 1 0;
+              max-width: 100%;
               overflow-wrap: break-word;
+              overflow-wrap: anywhere;
+              word-break: break-word;
 
               slot,
               ::slotted(*),
@@ -130,9 +139,9 @@ class AuAccordionItem extends HTMLElement {
               display: flex;
               align-items: center;
               gap: 1rem;
-              flex: 0 1 auto;
+              flex: 0 0 auto;
               min-width: 0;
-              max-width: 50%;
+              max-width: min(50%, var(--au-accordion-info-max-width, 12rem));
               & > *:first-child  {
                 flex: 1;
                 min-width: 20px;

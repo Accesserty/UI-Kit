@@ -250,4 +250,35 @@ describe('AuAccordion and AuAccordionItem', () => {
     expect(subContent).to.equal('Sub Info');
     expect(iconContent).to.equal('Icon');
   });
+
+  it('keeps the heading from pushing status and icon outside narrow headers', async () => {
+    const el = await fixture(html`
+      <div style="width: 320px;">
+        <au-accordion>
+          <au-accordion-item>
+            <span slot="heading">https://accesserty.com/?code=6e46c637-8180-49fc-8480-0cd77f3a9f63</span>
+            <span slot="sub">High</span>
+            <span slot="icon">▼</span>
+            <div slot="content">Content</div>
+          </au-accordion-item>
+        </au-accordion>
+      </div>
+    `);
+
+    const accordionItem = el.querySelector('au-accordion-item');
+    const button = accordionItem.shadowRoot.querySelector('button');
+    const heading = accordionItem.shadowRoot.querySelector('.heading');
+    const info = accordionItem.shadowRoot.querySelector('.info');
+    const icon = accordionItem.shadowRoot.querySelector('.icon');
+
+    const buttonRect = button.getBoundingClientRect();
+    const headingRect = heading.getBoundingClientRect();
+    const infoRect = info.getBoundingClientRect();
+    const iconRect = icon.getBoundingClientRect();
+
+    expect(buttonRect.width).to.be.at.most(320);
+    expect(headingRect.right).to.be.at.most(infoRect.left);
+    expect(infoRect.right).to.be.at.most(buttonRect.right);
+    expect(iconRect.width).to.be.greaterThan(0);
+  });
 });
