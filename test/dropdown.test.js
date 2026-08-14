@@ -141,6 +141,22 @@ describe('AuDropdown', () => {
     expect(el.isOpen).to.be.false;
   });
 
+  it('does not force focus back to trigger when menu closes from Tab', async () => {
+    el.open(0);
+    await new Promise(r => setTimeout(r, 100));
+    expect(el.items[0].shadowRoot.activeElement).to.not.be.null;
+
+    el.items[0].shadowRoot.activeElement.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'Tab',
+      bubbles: true,
+      composed: true,
+    }));
+    await new Promise(r => setTimeout(r, 50));
+
+    expect(el.isOpen).to.be.false;
+    expect(el.shadowRoot.activeElement).to.not.equal(el.trigger);
+  });
+
   // --- Item Selection ---
   it('dispatches selected event on item mouse click', async () => {
     let eventDetail = null;

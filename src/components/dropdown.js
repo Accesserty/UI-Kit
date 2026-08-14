@@ -10,6 +10,7 @@ class AuDropdown extends HTMLElement {
     this.menuId = this.generateId('menu');
     // 初始化內部狀態
     this._focusIndex = null;
+    this._returnFocusOnClose = true;
 
     const template = document.createElement('template');
     template.innerHTML = `
@@ -77,6 +78,20 @@ class AuDropdown extends HTMLElement {
             box-shadow: inset 0 0 0 var(--au-btn-focus-shadow-width, 3px) var(--au-btn-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
           }
 
+          .icon {
+            display: inline-block;
+            line-height: 1;
+            margin-inline-start: auto;
+          }
+
+          .icon::before {
+            content: var(--au-dropdown-arrow-down-icon, var(--au-control-arrow-down-icon, '▼'));
+          }
+
+          &[aria-expanded="true"] .icon::before {
+            content: var(--au-dropdown-arrow-up-icon, var(--au-control-arrow-up-icon, '▲'));
+          }
+
           &.a11y {
             transition: none;
             text-shadow: var(--au-btn-a11y-text-shadow, none);
@@ -128,9 +143,7 @@ class AuDropdown extends HTMLElement {
         aria-haspopup="menu" 
       >
         <slot name="trigger"><span class="trigger-fallback"></span></slot>
-        <svg class="icon" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m6 9 6 6 6-6"/>
-        </svg>
+        <span class="icon" aria-hidden="true"></span>
       </button>
       <div 
         id="${this.menuId}" 
@@ -201,6 +214,11 @@ class AuDropdown extends HTMLElement {
     this.menu.hidePopover();
   }
 
+  closeWithoutReturningFocus() {
+    this._returnFocusOnClose = false;
+    this.menu.hidePopover();
+  }
+
   handleToggle(e) {
     const isOpen = e.newState === 'open';
     this.trigger.setAttribute('aria-expanded', isOpen);
@@ -216,10 +234,12 @@ class AuDropdown extends HTMLElement {
         requestAnimationFrame(() => this.focusItem(indexToFocus));
       }
     } else {
-      // 確保關閉時焦點回到 Trigger
-      if (document.activeElement?.closest('au-dropdown') === this) {
+      // Escape/light dismiss should return focus to the trigger, but Tab should
+      // keep the browser's natural focus movement instead of creating a loop.
+      if (this._returnFocusOnClose && document.activeElement?.closest('au-dropdown') === this) {
         this.trigger.focus();
       }
+      this._returnFocusOnClose = true;
       this._focusIndex = null;
     }
   }
@@ -291,7 +311,7 @@ class AuDropdown extends HTMLElement {
         this.focusItem(items.length - 1);
         break;
       case 'Tab':
-        this.close();
+        this.closeWithoutReturningFocus();
         break;
       case 'Escape':
         e.preventDefault();
