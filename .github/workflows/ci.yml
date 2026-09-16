@@ -1,0 +1,102 @@
+# Runs on GitHub, where this repository is published. GitLab ignores this file
+# and uses .gitlab-ci.yml; both describe the same checks, so keep them in step.
+#
+# Split in two so a red run says which kind of check broke: "unit" is the fast
+# feedback loop, "integration" drives real browsers, SSR servers and a consumer
+# build. Each job prints its environment first, so a failure log states the
+# runner architecture, Node version and which browser resolved.
+#
+# Not covered here: Safari (needs macOS), screen-reader speech, and complete
+# accessibility conformance.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    name: Unit tests, build and documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Print environment
+        run: echo "arch=$(uname -m) node=$(node -v) npm=$(npm -v)"
+      - name: Resolve a browser
+        # @web/test-runner launches Chrome through chrome-launcher, which honours
+        # CHROME_PATH. Fail here with the reason rather than inside a test run.
+        run: |
+          for candidate in "${CHROME_PATH:-}" "$(command -v google-chrome || true)" "$(command -v chromium || true)"; do
+            if [ -n "$candidate" ] && [ -x "$candidate" ]; then
+              echo "CHROME_PATH=$candidate" >> "$GITHUB_ENV"
+              echo "browser: $candidate ($("$candidate" --version 2>&1 | head -1))"
+              exit 0
+            fi
+          done
+          echo "No Chrome or Chromium on this runner; the unit tests need one." >&2
+          exit 1
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npm run test:docs
+
+  integration:
+    name: Browsers, SSR and Angular AOT
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            test/ssr/package-lock.json
+            test/angular-aot/package-lock.json
+      - name: Print environment
+        run: echo "arch=$(uname -m) node=$(node -v) npm=$(npm -v)"
+      - name: Install CJK fonts
+        # Demos and fixtures contain Chinese text; without these fonts the
+        # layout and size assertions measure fallback glyphs.
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk > /dev/null
+      - run: npm ci
+      # Consumers always test a fresh build, so this precedes every check below.
+      - run: npm run build
+      - run: npm ci --prefix test/ssr
+      - name: Install Chrome for Playwright
+        # The browser suites request channel 'chrome'; Playwright installs the
+        # branded build that channel resolves to.
+        run: npm --prefix test/ssr exec -- playwright install --with-deps chrome
+      - name: Print browser versions
+        run: |
+          echo "playwright: $(npm --prefix test/ssr exec -- playwright --version)"
+      - run: npm run test:css -- chrome
+      - run: npm run test:controls -- chrome
+      - run: npm run test:pagination -- chrome
+      - run: npm run test:visibility
+      - run: npm run test:demo-safety
+      - run: npm run test:form-flow
+      - run: npm run test:dropdown:chrome
+      - run: node test/browser/tree.mjs chrome
+      - name: SSR across Next, Nuxt and Angular
+        run: npm test --prefix test/ssr
+      - run: npm ci --prefix test/angular-aot
+      - run: npm run check --prefix test/angular-aot
+      - name: Angular AOT consumer runtime
+        # preruntime builds the fixture first.
+        run: npm run runtime --prefix test/angular-aot
