@@ -30,11 +30,27 @@ class AuPagination extends HTMLElement {
     this.liveRegion.setAttribute('aria-live', 'polite');
     this.liveRegion.setAttribute('role', 'status');
     this.liveRegion.setAttribute('aria-atomic', 'true');
+    this.liveRegion.className = 'visually-hidden';
+    this._nodes = new Map();
     this._parseAttributes();
     this._render();
   }
 
-  attributeChangedCallback() {
+  connectedCallback() {
+    for (const key of ['total', 'currentPage', 'pageSize', 'pagerCount', 'layout', 'pageSizeOptions']) {
+      if (Object.hasOwn(this, key)) { const value = this[key]; delete this[key]; this[key] = value; }
+    }
+    this._requestRender();
+  }
+
+  disconnectedCallback() {
+    cancelAnimationFrame(this._renderFrame);
+    cancelAnimationFrame(this._announceFrame);
+    this._updatePending = false;
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue) return;
     this._parseAttributes();
     this._requestRender();
   }
@@ -42,24 +58,30 @@ class AuPagination extends HTMLElement {
   _requestRender() {
     if (this._updatePending) return;
     this._updatePending = true;
-    requestAnimationFrame(() => {
-      this._render();
+    this._renderFrame = requestAnimationFrame(() => {
       this._updatePending = false;
+      this._render();
     });
   }
 
   _parseAttributes() {
-    this.total = parseInt(this.getAttribute('data-total')) || 0;
-    this.currentPage = parseInt(this.getAttribute('data-current-page')) || 1;
-    this.pagerCount = parseInt(this.getAttribute('data-pager-count')) || 5;
-    this.pageSize = parseInt(this.getAttribute('data-page-size')) || 10;
+    const integer = (value, fallback, min = 1) => {
+      const number = Number(value);
+      return (typeof value === 'number' || typeof value === 'string') && String(value).trim() !== '' && Number.isSafeInteger(number) && number >= min ? number : fallback;
+    };
+    this._total = integer(this.getAttribute('data-total'), 0, 0);
+    this._pageSize = integer(this.getAttribute('data-page-size'), 10);
+    this._currentPage = Math.min(integer(this.getAttribute('data-current-page'), 1), this.totalPages);
+    this._pagerCount = Math.min(integer(this.getAttribute('data-pager-count'), 5), 100);
     const opts = this.getAttribute('data-page-size-options');
     if (opts) {
       try { this._pageSizeOptions = JSON.parse(opts); }
-      catch { this._pageSizeOptions = opts.split(',').map(n => parseInt(n.trim())); }
+      catch { this._pageSizeOptions = opts.split(',').map(n => n.trim()); }
     } else {
       this._pageSizeOptions = [10, 30, 50, 100];
     }
+    this._pageSizeOptions = Array.isArray(this._pageSizeOptions)
+      ? [...new Set(this._pageSizeOptions.map(value => integer(value, 0)).filter(Boolean))] : [10, 30, 50, 100];
     const lay = this.getAttribute('data-layout');
     if (lay) {
       try { this._layout = JSON.parse(lay); }
@@ -67,6 +89,8 @@ class AuPagination extends HTMLElement {
     } else {
       this._layout = ['total_page', 'total_items', 'page_size', 'first', 'prev', 'pages', 'next', 'last', 'jump'];
     }
+    const supported = ['total_page', 'total_items', 'page_size', 'first', 'prev', 'pages', 'next', 'last', 'jump'];
+    this._layout = Array.isArray(this._layout) ? [...new Set(this._layout.filter(value => supported.includes(value)))] : supported;
     this.texts = {
       totalPagesPrefix: this.getAttribute('data-text-total-pages-prefix') || 'Total',
       pageSuffix: this.getAttribute('data-text-page') || 'page(s)',
@@ -90,21 +114,28 @@ class AuPagination extends HTMLElement {
     }, template);
   }
 
+  get total() { return this._total; }
+  set total(value) { this.setAttribute('data-total', String(value)); }
+  get currentPage() { return this._currentPage; }
+  set currentPage(value) { this.setAttribute('data-current-page', String(value)); }
+  get pageSize() { return this._pageSize; }
+  set pageSize(value) { this.setAttribute('data-page-size', String(value)); }
+  get pagerCount() { return this._pagerCount; }
+  set pagerCount(value) { this.setAttribute('data-pager-count', String(value)); }
+
   get pageSizeOptions() {
-    return this._pageSizeOptions ?? [10, 30, 50, 100];
+    return [...(this._pageSizeOptions ?? [10, 30, 50, 100])];
   }
 
   set pageSizeOptions(val) {
-    this._pageSizeOptions = val;
     this.setAttribute('data-page-size-options', JSON.stringify(val));
   }
 
   get layout() {
-    return this._layout ?? ['total_page', 'total_items', 'page_size', 'first', 'prev', 'pages', 'next', 'last', 'jump'];
+    return [...(this._layout ?? ['total_page', 'total_items', 'page_size', 'first', 'prev', 'pages', 'next', 'last', 'jump'])];
   }
 
   set layout(val) {
-    this._layout = val;
     this.setAttribute('data-layout', JSON.stringify(val));
   }
 
@@ -127,9 +158,15 @@ class AuPagination extends HTMLElement {
     const totalPages = this.totalPages;
     const totalItems = this.total;
 
-    this.shadowRoot.innerHTML = '';
+    if (!this._style) {
     const style = document.createElement('style');
     style.textContent = `
+      :host([hidden]:not([hidden="until-found" i])) { display: none; }
+      :host { display: block; min-inline-size: 0; }
+      *, *::before, *::after { box-sizing: border-box; }
+      button, select, input { min-inline-size: 24px; min-block-size: 24px; max-inline-size: 100%; }
+      input { inline-size: 7rem; }
+      label, span, button { overflow-wrap: anywhere; }
       :is(ul, ol) {
         list-style: none;
         margin: 0;
@@ -150,7 +187,7 @@ class AuPagination extends HTMLElement {
         line-height: var(--au-btn-text-line-height, 1.5);
 
         /* border */
-        border: var(--au-btn-border-width, 1px) var(--au-btn-border-style, solid) var(--au-btn-border-color, oklch(0.7894 0 0));
+        border: var(--au-btn-border-width, 1px) var(--au-btn-border-style, solid) var(--au-btn-border-color, oklch(0.55 0 0));
         border-radius: var(--au-btn-border-radius, 0);
 
         /* others decoration */
@@ -165,25 +202,28 @@ class AuPagination extends HTMLElement {
 
         &:hover {
           background-color: var(--au-btn-hover-bg, oklch(0.9466 0 0));
-          border-color: var(--au-btn-hover-border-color, oklch(0.7894 0 0));
+          border-color: var(--au-btn-hover-border-color, oklch(0.55 0 0));
         }
 
         &:active {
           background-color: var(--au-btn-active-bg, oklch(0.8689 0 0));
-          border-color: var(--au-btn-active-border-color, oklch(0.7894 0 0));
+          border-color: var(--au-btn-active-border-color, oklch(0.55 0 0));
         }
 
         &:focus-visible {
-          outline: none;
-          box-shadow: inset 0 0 0 var(--au-btn-focus-shadow-width, 3px) var(--au-btn-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
+          outline: 2px solid var(--au-pagination-focus-color, #222);
+          outline-offset: 2px;
         }
 
         &[aria-current="page"] {
+          font-weight: 700;
+          text-decoration: underline;
+          text-underline-offset: 0.2em;
           cursor: not-allowed;
           pointer-events: none;
           background-color: var(--au-btn-current-bg, oklch(0.7894 0 0));
           color: var(--au-btn-current-text-color, oklch(0.1398 0 0));
-          border-color: var(--au-btn-current-border-color, oklch(0.7894 0 0));
+          border-color: var(--au-btn-current-border-color, oklch(0.55 0 0));
         }
 
         &.a11y {
@@ -220,14 +260,6 @@ class AuPagination extends HTMLElement {
         position: relative;
       }
 
-      .au-pagination + [aria-live] {
-        position: absolute;
-        top: 0;
-        left: 0;
-        opacity: 0;
-        z-index: -9999;
-      }
-
       :is(.au-pagination-container, .au-pagination-group, .pagination-buttons) {
         display: flex;
         flex-wrap: wrap;
@@ -247,137 +279,122 @@ class AuPagination extends HTMLElement {
       }
 
       .pagination-buttons {
-        gap: 0.625rem; 
-        li {
-          &:has(.pager:not([aria-current="page"])) {
-            @container (width <= 640px) {
-              display: none;
-            }
-          }
-        }
+        gap: 0.625rem;
+        justify-content: center;
+      }
+      @media (prefers-reduced-motion: reduce) { button, input, select { transition: none; } }
+      @media (forced-colors: active) {
+        button:focus-visible, input:focus-visible, select:focus-visible { outline-color: Highlight; }
+        button[aria-current="page"] { border: 3px solid Highlight; }
       }
     `;
     this.shadowRoot.appendChild(style);
-
-    const root = document.createElement('div');
-    root.className = 'au-pagination';
-
-    const container = document.createElement('div');
-    container.className = 'au-pagination-container';
-
-    // 第一組: 總頁數/總筆數/每頁顯示
-    const grp1 = document.createElement('div'); grp1.className = 'au-pagination-group';
-    if (layout.includes('total_page')) {
-      const el = document.createElement('span'); el.textContent = `${t.totalPagesPrefix}${totalPages}${t.pageSuffix}`; grp1.appendChild(el);
+    this._style = style;
     }
-    if (layout.includes('total_items')) {
-      const el = document.createElement('span'); el.textContent = `${totalItems}${t.totalItemsSuffix}`; grp1.appendChild(el);
-    }
+
+    const focused = this.shadowRoot.activeElement;
+    this._usedNodes = new Set();
+    const node = (key, tag, text) => {
+      this._usedNodes.add(key);
+      let element = this._nodes.get(key);
+      if (!element) { element = document.createElement(tag); this._nodes.set(key, element); }
+      if (text !== undefined && element.textContent !== String(text)) element.textContent = String(text);
+      return element;
+    };
+    // Keep stable controls in place. replaceChildren/innerHTML would blur them,
+    // close an open select and detach the established live-region node.
+    const children = (parent, desired) => {
+      for (const child of [...parent.children]) if (!desired.includes(child)) child.remove();
+      desired.forEach((child, index) => {
+        if (parent.children[index] !== child) parent.insertBefore(child, parent.children[index] || null);
+      });
+    };
+    const root = node('root', 'div'); root.className = 'au-pagination';
+    const container = node('container', 'div'); container.className = 'au-pagination-container';
+    const grp1 = node('info', 'div'); grp1.className = 'au-pagination-group';
+    const info = [];
+    if (layout.includes('total_page')) info.push(node('total-pages', 'span', t.totalPagesPrefix + ' ' + totalPages + ' ' + t.pageSuffix));
+    if (layout.includes('total_items')) info.push(node('total-items', 'span', totalItems + ' ' + t.totalItemsSuffix));
     if (layout.includes('page_size')) {
-      // hidden label + existing text spans preserved
-      const hiddenLbl = document.createElement('span');
-      hiddenLbl.className = 'visually-hidden';
-      hiddenLbl.textContent = t.pageSizeText;
-      grp1.appendChild(hiddenLbl);
-
-      const lbl = document.createElement('label');
-      lbl.setAttribute('for', this._selectId);
-      lbl.textContent = t.perText;
-      grp1.appendChild(lbl);
-
-      const select = document.createElement('select');
-      select.id = this._selectId;
-      this.pageSizeOptions.forEach(opt => {
-        const o = document.createElement('option'); o.value = opt; o.textContent = opt;
-        if (opt === this.pageSize) o.selected = true;
-        select.appendChild(o);
+      const hidden = node('size-name', 'span', t.pageSizeText); hidden.className = 'visually-hidden'; hidden.id = this._selectId + '-name';
+      const label = node('size-label', 'label'); label.htmlFor = this._selectId;
+      children(label, [node('size-prefix', 'span', t.perText + ' '), hidden]);
+      const select = node('size', 'select'); select.id = this._selectId;
+      const options = [...new Set([...this.pageSizeOptions, this.pageSize])].sort((a,b) => a-b).map(size => {
+        const option = node('size-' + size, 'option', size); option.value = String(size); return option;
       });
-      select.addEventListener('change', e => {
-        this.pageSize = +e.target.value;
-        this.setAttribute('data-page-size', this.pageSize);
-        this.dispatchEvent(new CustomEvent('page-size-change', { detail: this.pageSize, bubbles: true, composed: true }));
+      children(select, options); select.value = String(this.pageSize);
+      select.onchange = () => {
+        const size = Number(select.value);
+        if (size === this.pageSize) return;
+        this.pageSize = size;
         this.currentPage = 1;
-        this.setAttribute('data-current-page', '1');
-      });
-      grp1.appendChild(select);
-      // original post-span
-      const postSpan = document.createElement('span'); postSpan.textContent = t.totalItemsSuffix;
-      grp1.appendChild(postSpan);
+        // Observers see the complete new state; programmatic writes stay silent.
+        this.dispatchEvent(new CustomEvent('page-size-change', { detail: size, bubbles: true, composed: true }));
+        this.announce(this.formatText(this.texts.pageAnnouncement, { page: this.currentPage }));
+      };
+      info.push(label, select, node('size-suffix', 'span', t.totalItemsSuffix));
     }
-    container.appendChild(grp1);
+    children(grp1, info);
 
-    // 第二組: 按鈕列表
-    const grp2 = document.createElement('div'); grp2.className = 'au-pagination-group';
-    const ul = document.createElement('ul'); ul.className = 'pagination-buttons';
-    if (layout.includes('first')) {
-      const li = document.createElement('li'); const btn = document.createElement('button'); btn.textContent = t.firstText; btn.disabled = this.currentPage === 1; btn.addEventListener('click', () => this._goto(1)); li.appendChild(btn); ul.appendChild(li);
-    }
-    if (layout.includes('prev')) {
-      const li = document.createElement('li'); const btn = document.createElement('button'); btn.textContent = t.prevText; btn.disabled = this.currentPage === 1; btn.addEventListener('click', () => this._goto(this.currentPage - 1)); li.appendChild(btn); ul.appendChild(li);
-    }
-    if (layout.includes('pages')) this.pagers.forEach(page => {
-      const li = document.createElement('li');
-      const btn = document.createElement('button');
-      btn.className = 'pager';
-      if (page === this.currentPage) {
-        btn.setAttribute('aria-current', 'page');
-        btn.setAttribute('part', 'current-page');
-      } else {
-        btn.removeAttribute('aria-current'); // <--- 這裡！
-        // 如果不等於當前頁面，就移除 'part' 屬性
-        btn.removeAttribute('part');
-      }
-      btn.textContent = page;
-      btn.addEventListener('click', () => this._goto(page));
-      li.appendChild(btn); ul.appendChild(li);
-    });
-    if (layout.includes('next')) {
-      const li = document.createElement('li'); const btn = document.createElement('button'); btn.textContent = t.nextText; btn.disabled = this.currentPage >= totalPages; btn.addEventListener('click', () => this._goto(this.currentPage + 1)); li.appendChild(btn); ul.appendChild(li);
-    }
-    if (layout.includes('last')) {
-      const li = document.createElement('li'); const btn = document.createElement('button'); btn.textContent = t.lastText; btn.disabled = this.currentPage >= totalPages; btn.addEventListener('click', () => this._goto(totalPages)); li.appendChild(btn); ul.appendChild(li);
-    }
-    const nav = document.createElement('nav'); nav.setAttribute('aria-label', t.paginationLabel); nav.appendChild(ul);
-    grp2.appendChild(nav); container.appendChild(grp2);
-
-    // 第三組: 跳轉
+    const grp2 = node('navigation', 'div'); grp2.className = 'au-pagination-group';
+    const nav = node('nav', 'nav'); nav.setAttribute('aria-label', t.paginationLabel); nav.tabIndex = -1;
+    const list = node('buttons', 'ul'); list.className = 'pagination-buttons';
+    const items = [];
+    const button = (key, label, page, disabled = false, current = false) => {
+      const li = node('li-' + key, 'li');
+      const btn = node(key, 'button', label); btn.type = 'button'; btn.dataset.control = key;
+      btn.disabled = disabled;
+      btn.className = key.startsWith('page-') ? 'pager' : '';
+      if (current) { btn.setAttribute('aria-current', 'page'); btn.setAttribute('part', 'current-page'); }
+      else { btn.removeAttribute('aria-current'); btn.removeAttribute('part'); }
+      btn.onclick = () => this._goto(typeof page === 'function' ? page() : page);
+      children(li, [btn]); items.push(li);
+    };
+    if (layout.includes('first')) button('first', t.firstText, 1, this.currentPage === 1);
+    if (layout.includes('prev')) button('prev', t.prevText, () => this.currentPage - 1, this.currentPage === 1);
+    if (layout.includes('pages')) this.pagers.forEach(page => button('page-' + page, page, page, false, page === this.currentPage));
+    if (layout.includes('next')) button('next', t.nextText, () => this.currentPage + 1, this.currentPage >= totalPages);
+    if (layout.includes('last')) button('last', t.lastText, () => this.totalPages, this.currentPage >= totalPages);
+    children(list, items); children(nav, [list]); children(grp2, [nav]);
+    const groups = [grp1, grp2];
     if (layout.includes('jump')) {
-      const grp3 = document.createElement('div'); grp3.className = 'au-pagination-group';
-      const lbl = document.createElement('label'); lbl.setAttribute('for', this._jumpId); lbl.textContent = t.goText;
-      grp3.appendChild(lbl);
-      const input = document.createElement('input');
-      input.type = 'number'; input.id = this._jumpId; input.min = '1'; input.max = String(totalPages); input.value = String(this.currentPage);
-      input.addEventListener('keyup', e => { if (e.key === 'Enter') this._goto(+input.value); });
-      grp3.appendChild(input);
-      // existing span after input
-      const suf = document.createElement('span'); suf.textContent = t.pageSuffix;
-      grp3.appendChild(suf);
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.textContent = t.gotoText;
-      btn.addEventListener('click', () => this._goto(+input.value));
-      grp3.appendChild(btn);
-
-      container.appendChild(grp3);
+      const grp3 = node('jump-group', 'div'); grp3.className = 'au-pagination-group';
+      const label = node('jump-label', 'label', t.goText); label.htmlFor = this._jumpId;
+      const input = node('jump', 'input'); input.type = 'number'; input.id = this._jumpId;
+      input.min = '1'; input.max = String(totalPages); input.step = '1'; input.required = true;
+      // Translation/layout updates must not erase an unfinished page entry.
+      if (this._renderedPage !== this.currentPage || !input.isConnected) input.value = String(this.currentPage);
+      const jump = () => { if (input.reportValidity()) this._goto(input.valueAsNumber); };
+      input.onkeydown = event => { if (event.key === 'Enter') { event.preventDefault(); jump(); } };
+      const btn = node('jump-confirm', 'button', t.gotoText); btn.type = 'button'; btn.onclick = jump;
+      children(grp3, [label, input, node('jump-suffix', 'span', t.pageSuffix), btn]); groups.push(grp3);
     }
-
-    root.appendChild(container);
-    this.shadowRoot.append(root, this.liveRegion);
+    children(container, groups); children(root, [container]);
+    if (!root.isConnected) this.shadowRoot.append(root);
+    if (this.liveRegion.parentNode !== this.shadowRoot) this.shadowRoot.append(this.liveRegion);
+    this._renderedPage = this.currentPage;
+    for (const key of this._nodes.keys()) if (!this._usedNodes.has(key)) this._nodes.delete(key);
+    if (focused && this.isConnected && (!focused.isConnected || focused.disabled || this.shadowRoot.activeElement !== focused)) {
+      const target = focused.isConnected && !focused.disabled ? focused : list.querySelector('[aria-current="page"]') || list.querySelector('button:not(:disabled)') || nav;
+      target.focus({ preventScroll: true });
+    }
   }
 
   _goto(page) {
+    if (!Number.isSafeInteger(page)) return;
     if (page < 1) page = 1;
     if (page > this.totalPages) page = this.totalPages;
     if (page === this.currentPage) return;
     this.currentPage = page;
-    this.setAttribute('data-current-page', String(page));
     this.dispatchEvent(new CustomEvent('page-change', { detail: page, bubbles: true, composed: true }));
-    this.announce(this.formatText(this.texts.pageAnnouncement, { page }));
+    this.announce(this.formatText(this.texts.pageAnnouncement, { page: this.currentPage }));
   }
 
   announce(message) {
+    cancelAnimationFrame(this._announceFrame);
     while (this.liveRegion.firstChild) this.liveRegion.removeChild(this.liveRegion.firstChild);
-    requestAnimationFrame(() => {
+    this._announceFrame = requestAnimationFrame(() => {
       const span = document.createElement('span');
       span.textContent = message;
       this.liveRegion.appendChild(span);

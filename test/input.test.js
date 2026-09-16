@@ -1,6 +1,30 @@
 import { html, fixture, expect, nextFrame } from '@open-wc/testing';
 import '../src/components/input.js';
 
+describe('Input state restoration contract', () => {
+  it('restores silently, preserves focus and retains the initial reset baseline', async () => {
+    const form = await fixture(html`<form><au-input name="restored" value="initial" required></au-input></form>`);
+    const input = form.firstElementChild;
+    const events = [];
+    form.addEventListener('input', () => events.push('input'));
+    form.addEventListener('change', () => events.push('change'));
+    input.focus();
+    input.formStateRestoreCallback('restored value', 'restore');
+    expect(input.value).to.equal('restored value');
+    expect(new FormData(form).get('restored')).to.equal('restored value');
+    expect(input.shadowRoot.activeElement).to.equal(input.input);
+    input.formStateRestoreCallback('', 'autocomplete');
+    expect(input.internals.checkValidity()).to.be.false;
+    input.formStateRestoreCallback(new FormData(), 'restore');
+    expect(input.value).to.equal('');
+    form.reset();
+    expect(input.value).to.equal('initial');
+    expect(new FormData(form).get('restored')).to.equal('initial');
+    expect(input.internals.checkValidity()).to.be.true;
+    expect(events).to.deep.equal([]);
+  });
+});
+
 describe('AuInput', () => {
   it('reflects label correctly', async () => {
     const el = await fixture(html`<au-input label="Email"></au-input>`);
@@ -51,7 +75,7 @@ describe('AuInput', () => {
     el.setAttribute('aria-labelledby', 'search-label');
     await nextFrame();
     expect(input.hasAttribute('aria-label')).to.be.false;
-    expect(input.getAttribute('aria-labelledby')).to.equal('search-label');
+    expect(input.ariaLabelledByElements).to.have.length(0);
   });
 
   it('hides clear button if no value or no data-clear attr', async () => {
@@ -252,5 +276,128 @@ describe('AuInput', () => {
     const values = [...internal.querySelectorAll('option')].map(o => o.value);
     expect(values).to.include('Matcha');
     expect(internal.querySelectorAll('option').length).to.equal(2);
+  });
+
+  it('preserves one composed InputEvent including IME metadata', async () => {
+    const wrapper = await fixture(html`<div><au-input></au-input></div>`);
+    const el=wrapper.firstElementChild, events=[];
+    wrapper.addEventListener('input', event=>events.push(event));
+    el.input.value='中';
+    const event=new InputEvent('input',{bubbles:true,composed:true,data:'中',inputType:'insertCompositionText',isComposing:true});
+    el.input.dispatchEvent(event);
+    expect(events).to.have.length(1);
+    expect(events[0]).to.equal(event);
+    expect(events[0].isComposing).to.be.true;
+    expect(el.value).to.equal('中');
+  });
+
+  it('disables editing and clearing under a disabled fieldset', async () => {
+    const form=await fixture(html`<form><fieldset disabled><au-input name="name" value="Initial" data-clear></au-input></fieldset></form>`);
+    const fieldset=form.firstElementChild, el=fieldset.firstElementChild;
+    expect(el.input.disabled).to.be.true;
+    expect(el.clearButton.hidden || el.clearButton.disabled).to.be.true;
+    el.clear();
+    expect(el.value).to.equal('Initial');
+    expect(new FormData(form).has('name')).to.be.false;
+    fieldset.disabled=false;await nextFrame();
+    expect(el.input.disabled).to.be.false;
+    el.readonly=true; el.clear();
+    expect(el.value).to.equal('Initial');
+  });
+
+  it('resolves external names and descriptions and follows replacement through reset', async () => {
+    const form=await fixture(html`<form><span id="outside-name">Name</span><span id="outside-error">Required</span>
+      <au-input aria-labelledby="outside-name" aria-describedby="outside-error" value="Default"></au-input></form>`);
+    const el=form.querySelector('au-input');
+    expect(el.input.ariaLabelledByElements).to.deep.equal([form.querySelector('#outside-name')]);
+    expect(el.input.ariaDescribedByElements).to.deep.equal([form.querySelector('#outside-error')]);
+    el.focus();
+    const original=el.input;
+    const replacement=document.createElement('span');replacement.id='outside-name';replacement.textContent='姓名';
+    form.firstElementChild.replaceWith(replacement);await nextFrame();
+    expect(el.input.ariaLabelledByElements).to.deep.equal([replacement]);
+    expect(el.input).to.equal(original);
+    expect(el.shadowRoot.activeElement).to.equal(original);
+    form.reset();
+    expect(el.input.ariaLabelledByElements).to.deep.equal([replacement]);
+    expect(el.input.ariaDescribedByElements).to.deep.equal([form.querySelector('#outside-error')]);
+    expect(el.shadowRoot.activeElement).to.equal(el.input);
+  });
+
+  it('synchronizes value attributes after editing and submits the sanitized native value', async () => {
+    const form=await fixture(html`<form><au-input name="quantity" type="number" value="2"></au-input></form>`);
+    const el=form.firstElementChild;
+    el.value='3';el.setAttribute('value','4');
+    expect(el.value).to.equal('4');expect(new FormData(form).get('quantity')).to.equal('4');
+    el.value='not a number';
+    expect(el.value).to.equal('');expect(new FormData(form).get('quantity')).to.equal('');
+  });
+
+  it('returns focus to the input after its clear button disappears', async () => {
+    const el=await fixture(html`<au-input value="Text" data-clear></au-input>`);
+    el.clearButton.focus();el.clearButton.click();
+    expect(el.value).to.equal('');expect(el.shadowRoot.activeElement).to.equal(el.input);
+  });
+
+  it('discovers a late datalist and follows replacement without stale options', async () => {
+    const wrapper=await fixture(html`<div><au-input list="late-options"></au-input></div>`);
+    const el=wrapper.firstElementChild;await nextFrame();
+    const list=document.createElement('datalist');list.id='late-options';list.innerHTML='<option value="A"></option>';
+    wrapper.append(list);await nextFrame();
+    expect(el.input.list?.options[0].value).to.equal('A');
+    const replacement=list.cloneNode(false);replacement.innerHTML='<option value="B"></option>';list.replaceWith(replacement);await nextFrame();
+    expect(el.input.list?.options[0].value).to.equal('B');
+  });
+
+  it('supports native labels for the host and references in a containing shadow root', async () => {
+    const wrapper=await fixture(html`<div></div>`), root=wrapper.attachShadow({mode:'open'});
+    root.innerHTML='<label for="field">Account</label><span id="help">Use your name</span><au-input id="field" aria-describedby="help"></au-input>';
+    await nextFrame();
+    const el=root.querySelector('au-input');
+    expect(el.input.ariaLabelledByElements).to.deep.equal([root.querySelector('label')]);
+    expect(el.input.ariaDescribedByElements).to.deep.equal([root.querySelector('#help')]);
+    root.querySelector('#help').remove();await nextFrame();
+    expect(el.input.ariaDescribedByElements).to.have.length(0);
+  });
+
+  it('falls back to plain-text labeling and an internal description mirror on older engines', async () => {
+    const saved=[];
+    for(const name of ['ariaLabelledByElements','ariaDescribedByElements']){
+      let owner=Element.prototype;while(owner&&!Object.hasOwn(owner,name))owner=Object.getPrototypeOf(owner);
+      if(owner){saved.push([owner,name,Object.getOwnPropertyDescriptor(owner,name)]);delete owner[name];}
+    }
+    try {
+      const wrapper=await fixture(html`<div><span id="legacy-name">Account</span><span id="legacy-help">Required</span><au-input aria-labelledby="legacy-name" aria-describedby="legacy-help"></au-input></div>`);
+      const el=wrapper.querySelector('au-input');
+      expect(el.input.getAttribute('aria-label')).to.equal('Account');
+      const mirror=el.shadowRoot.getElementById(el.input.getAttribute('aria-describedby'));
+      expect(mirror.textContent).to.equal('Required');
+      wrapper.querySelector('#legacy-help').textContent='Updated help';await nextFrame();
+      expect(mirror.textContent).to.equal('Updated help');
+      wrapper.querySelector('#legacy-help').remove();await nextFrame();
+      expect(el.input.hasAttribute('aria-describedby')).to.be.false;
+    } finally {for(const [owner,name,descriptor] of saved)Object.defineProperty(owner,name,descriptor);}
+  });
+
+  it('preserves one composed change event across reset and reconnect', async () => {
+    const form=await fixture(html`<form><au-input value="Initial"></au-input></form>`),el=form.firstElementChild;
+    form.reset();el.remove();form.append(el);
+    const events=[];form.addEventListener('change',event=>events.push(event));
+    const event=new Event('change',{bubbles:true,composed:true});el.input.dispatchEvent(event);
+    expect(events).to.deep.equal([event]);
+  });
+
+  it('submits a native color value rather than an unsanitized empty string after clear', async () => {
+    const form=await fixture(html`<form><au-input name="color" type="color" value="#ff0000"></au-input></form>`);
+    const el=form.firstElementChild;el.clear();
+    expect(new FormData(form).get('color')).to.equal(el.input.value);
+  });
+
+  it('submits the sanitized reset value when the input type has changed', async () => {
+    const form=await fixture(html`<form><au-input name="quantity" value="Text"></au-input></form>`);
+    const el=form.firstElementChild;
+    el.setAttribute('type','number');el.value='5';form.reset();
+    expect(el.input.value).to.equal('');
+    expect(new FormData(form).get('quantity')).to.equal('');
   });
 });

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>File Upload — min</title>
+<script src="../../../dist/accesserty-ui-kit.min.js" defer></script>
+<style>body{font:16px system-ui;margin:12px}fieldset{min-inline-size:0;padding:12px}button{font:inherit;min-height:24px}button:focus-visible{outline:2px solid Highlight;outline-offset:2px}</style>
+<h1>Attachments</h1>
+<button id="before">Before</button>
+<form id="upload-form" enctype="multipart/form-data">
+<fieldset id="fields"><legend>File attachments</legend>
+<au-file-upload id="upload" name="attachments" label="Attachments" multiple required accept=".txt">
+<button type="button" id="trigger" slot="trigger">Choose files</button><span slot="hint">Text files only</span>
+</au-file-upload></fieldset>
+<button type="reset" id="reset-upload">Reset</button></form>
+<au-file-upload id="fallback" label="Default picker"></au-file-upload>
+<script>
+let e='consumer-owned';window.consumerSentinel=()=>e;
+window.u=document.getElementById('upload');window.uploadForm=document.getElementById('upload-form');window.fields=document.getElementById('fields');
+u.value=[];window.events=[];u.addEventListener('change',()=>events.push('change'));u.addEventListener('remove-file',e=>events.push(e.detail.name));
+uploadForm.addEventListener('submit',e=>e.preventDefault());
+</script></html>

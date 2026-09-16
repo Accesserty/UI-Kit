@@ -17,13 +17,15 @@ export default defineConfig({
         {
           dir: './dist',
           entryFileNames: '[name].js',
-          format: 'es',
+          // Side-effect registration also supports classic <script defer>.
+          // Keep generated helpers/classes out of the consumer's global scope.
+          format: 'iife',
           banner
         },
         {
           dir: './dist',
           entryFileNames: '[name].min.js',
-          format: 'es',
+          format: 'iife',
           banner,
           plugins: [terser()]
         }

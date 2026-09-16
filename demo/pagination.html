@@ -51,7 +51,7 @@
           </tr>
           <tr>
             <td>data-layout</td>
-            <td>Array or list of elements to include in order (e.g.
+            <td>Array or list of controls to show in the fixed component order (e.g.
               ['total_page','total_items','page_size','first','prev','pages','next','last','jump']).</td>
           </tr>
           <tr>
@@ -92,7 +92,7 @@
           </tr>
           <tr>
             <td>data-text-goto</td>
-            <td>Visually-hidden prefix for pager buttons (e.g. “go to”).</td>
+            <td>Visible label for the jump confirmation button (e.g. “Jump”).</td>
           </tr>
           <tr>
             <td>data-text-pagination-label</td>
@@ -116,6 +116,13 @@
     </section>
     <section>
       <h2>Properties</h2>
+      <p><code>total</code>, <code>currentPage</code>, <code>pageSize</code> and <code>pagerCount</code>
+        are writable numeric properties backed by their corresponding <code>data-*</code> attributes.
+        Attribute/property updates are silent. Read the properties for normalized effective values:
+        pages clamp to the available range, sizes must be positive safe integers, and pagerCount is capped at 100.</p>
+      <p>The active page size is always included in the select, even if omitted from the configured options.
+        Invalid array settings use defaults; invalid entries are discarded. Layout selects visible controls
+        in the component's fixed information/navigation/jump order; it does not reorder them.</p>
       <table>
         <caption>JavaScript properties on <code>&lt;au-pagination&gt;</code>:</caption>
         <thead>
@@ -139,7 +146,7 @@
             <td>layout</td>
             <td>string[]</td>
             <td>
-              Get or set the layout order as a JavaScript array. Equivalent to the <code>data-layout</code> attribute
+              Get or set the visible controls as a JavaScript array. Equivalent to the <code>data-layout</code> attribute
               but accepts an array directly.
               <pre style="background:#f4f4f4;padding:0.5rem;overflow:auto;"><code>document.querySelector('au-pagination').layout = ['prev', 'pages', 'next'];</code></pre>
             </td>
@@ -167,7 +174,8 @@
           <tr>
             <td>page-size-change</td>
             <td><code>number</code> (the new page size)</td>
-            <td>Fired when the user selects a different page size. Bubbles and is composed.</td>
+            <td>Fired once after the new size and page 1 are set. No additional page-change event is emitted.
+              Controlled frameworks must update both size and page in this handler. Bubbles and is composed.</td>
           </tr>
         </tbody>
       </table>
@@ -178,8 +186,16 @@ pagination.addEventListener('page-change', (e) => {
 });
 
 pagination.addEventListener('page-size-change', (e) => {
-  console.log('Page size:', e.detail);
+  console.log('Page size:', e.detail, 'Current page:', pagination.currentPage);
 });</code></pre>
+      <p>Navigation and language updates retain existing controls and focus. When a focused control
+        becomes disabled or is removed, focus moves to the current page or available navigation fallback.
+        Jump accepts whole pages within its range; invalid entries use native browser validation.
+        Page announcements do not certify that asynchronously loaded results have finished loading.</p>
+      <p>For Next, Nuxt and Angular SSR, register the component only on the client, bind
+        <code>data-current-page</code>/<code>data-page-size</code>, and consume the numeric custom-event details.
+        Servers render the host, not the interactive shadow controls. See <code>test/ssr/</code> for executable examples.
+        These checks are not a WCAG conformance or screen-reader certification.</p>
     </section>
     <section>
       <h2>Custom Style</h2>
@@ -205,10 +221,8 @@ pagination.addEventListener('page-size-change', (e) => {
       const listEl = document.getElementById('item-list');
 
       function renderList() {
-        const pageSize = pagination.getAttribute('data-page-size');
-        const currentPage = pagination.getAttribute('data-current-page');
-        const size = Number(pageSize);
-        const page = Number(currentPage);
+        const size = pagination.pageSize;
+        const page = pagination.currentPage;
         const start = (page - 1) * size;
         const end = start + size;
         const slice = dataList.slice(start, end);
@@ -225,10 +239,9 @@ pagination.addEventListener('page-size-change', (e) => {
         renderList();
       });
       pagination.addEventListener('page-size-change', () => {
-        pagination.setAttribute('data-current-page', 1);
         renderList();
       });
-      renderList();
+      customElements.whenDefined('au-pagination').then(renderList);
 
       const output = document.getElementById('output');
 

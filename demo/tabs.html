@@ -17,9 +17,9 @@
   <main>
     <h1>Accesserty UI Kit Tabs</h1>
     <p>
-      This is a highly recommended Web Component. Most custom-built tabs do not address accessibility issues, but by
-      using this component, the rendered HTML fully complies with accessibility standards—allowing you to focus solely
-      on developing your content.
+      This component provides horizontal tabs, keyboard selection and named content panels.
+      Your application still needs meaningful labels, appropriate content, theme contrast and assistive-technology testing.
+      Using the component is not a guarantee of WCAG conformance.
     </p>
     <section>
       <h2>Attribute</h2>
@@ -49,8 +49,9 @@
         </tr>
         <tr>
           <td>id</td>
-          <td>set custom id of tab</td>
+          <td>Stable panel ID, preserved unchanged. Missing panel IDs are generated once while managed; tab buttons have separate generated IDs.</td>
         </tr>
+        <tr><td>label-lang</td><td>Language of the generated tab label. Panel content keeps its own language.</td></tr>
       </table>
       <table>
         <caption>
@@ -72,8 +73,10 @@
           <td>data-text-badge-label-prefix</td>
           <td>Accessible label prefix for <code>data-badge</code>.</td>
         </tr>
+        <tr><td>aria-label / aria-labelledby</td><td>Name the tab list, preferably using a visible heading. External label IDs resolve in the containing document or shadow root.</td></tr>
+        <tr><td>selected-index</td><td>Zero-based declarative selection, including server output. Attribute changes set current selection; user selection does not reflect it.</td></tr>
       </table>
-      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>&lt;au-tabs
+      <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>&lt;au-tabs aria-label="Example sections"
   data-text-tab="頁籤 {index}"
   data-text-tab-lang="zh-Hant-TW"
   data-text-badge-label-prefix="補充資訊："&gt;
@@ -97,7 +100,7 @@
           <tr>
             <td>selectedIndex</td>
             <td>number</td>
-            <td>Get or set the currently selected tab by zero-based index. Setting this property programmatically selects the tab and fires the <code>tab-change</code> event.</td>
+            <td>Get or set the zero-based index; an empty group returns -1. Programmatic updates are silent and preserve focus outside the component. Nonnegative integer requests clamp to available panels; invalid requests are ignored. Requests before panels exist apply when panels arrive.</td>
           </tr>
         </tbody>
       </table>
@@ -107,6 +110,9 @@ console.log(tabs.selectedIndex); // 0
 
 // Programmatically select the third tab
 tabs.selectedIndex = 2;</code></pre>
+      <p>Selection follows panel identity when panels are reordered. Removing the selected panel chooses
+        the panel at its previous position, or the last remaining panel. Label, badge and language updates
+        keep the tab button and its focus. Removed panels regain the original attributes still owned by the component.</p>
     </section>
     <section>
       <h2>Events</h2>
@@ -125,7 +131,7 @@ tabs.selectedIndex = 2;</code></pre>
           <tr>
             <td>tab-change</td>
             <td><code>{ index: number, label: string }</code></td>
-            <td>Fired when the selected tab changes (by click or keyboard). Bubbles and is composed, so it crosses the Shadow DOM boundary.</td>
+            <td>One notification when user activation changes selection. Repeated activation, property/attribute writes and structural updates are silent. The label includes the effective fallback text when needed. Bubbles and is composed.</td>
           </tr>
         </tbody>
       </table>
@@ -145,8 +151,24 @@ document.querySelector('au-tabs').addEventListener('tab-change', (e) => {
 // tabsRef.current.addEventListener('tab-change', handler);</code></pre>
     </section>
     <section>
+      <h2>Keyboard and framework integration</h2>
+      <p>Left/Right select visually adjacent tabs with wrapping, mirrored in RTL; Home/End select the first/last tab.
+        Up/Down keep normal page scrolling. Tab follows the native sequence into the active panel and
+        its content; inactive panels are hidden and inert. Panels receive a default Tab stop; an explicit
+        consumer tabindex overrides it. Empty groups use the named tab list as a focus fallback after removal.</p>
+      <p>Only use this automatic-activation pattern when panel content is already available without a noticeable delay.
+        This component does not implement vertical tabs, delayed/manual activation, or closable-tab commands.</p>
+      <p>Bind <code>selected-index</code> (or the selectedIndex property after registration) and update your model from
+        <code>tab-change.detail.index</code>. Register only on the client. The Next/Nuxt/Angular fixtures verify
+        server-produced hosts and light-DOM panels, hydration identity, reactive labels and keyboard interaction;
+        they do not server-render the shadow tab buttons or guarantee no-JavaScript tab behavior.</p>
+      <p>Tab-to-panel relations use native element references. Older engines without that API retain named panels,
+        but lack that relation. Panel names use plain aria-label text because a light-DOM panel cannot reference
+        a button inside a descendant shadow root. This boundary needs assistive-technology verification.</p>
+    </section>
+    <section>
       <h2>Basic</h2>
-      <au-tabs data-text-tab="Tab {index}" data-text-badge-label-prefix="Additional information:">
+      <au-tabs aria-label="Basic examples" data-text-tab="Tab {index}" data-text-badge-label-prefix="Additional information:">
         <div class="au-tab-panel" slot="panel" id="custom-id" label="Tab1" data-prefix="data-prefix"
           data-badge="data-badge" data-affix="data-affix"><button>123</button></div>
         <div class="au-tab-panel" slot="panel" label="Tab2">Content 2</div>
@@ -161,9 +183,9 @@ document.querySelector('au-tabs').addEventListener('tab-change', (e) => {
     </section>
     <section>
       <h2>Nested</h2>
-      <au-tabs data-text-tab="Tab {index}" data-text-badge-label-prefix="Additional information:">
+      <au-tabs aria-label="Outer examples" data-text-tab="Tab {index}" data-text-badge-label-prefix="Additional information:">
         <div class="au-tab-panel" slot="panel" label="Tab1">
-          <au-tabs data-text-tab="Tab {index}" data-text-badge-label-prefix="Additional information:">
+          <au-tabs aria-label="Inner examples" data-text-tab="Tab {index}" data-text-badge-label-prefix="Additional information:">
             <div class="au-tab-panel" slot="panel" label="Tab3">Content 3</div>
             <div class="au-tab-panel" slot="panel" label="Tab4">Content 4</div>
           </au-tabs>
@@ -173,7 +195,7 @@ document.querySelector('au-tabs').addEventListener('tab-change', (e) => {
     </section>
     <section>
       <h2>Custom Style</h2>
-      <au-tabs class="custom-tabs" data-text-tab="Tab {index}" data-text-badge-label-prefix="Additional information:">
+      <au-tabs aria-label="Custom styled examples" class="custom-tabs" data-text-tab="Tab {index}" data-text-badge-label-prefix="Additional information:">
         <div class="au-tab-panel" slot="panel" label="Tab1" data-prefix="data-prefix" data-badge="data-badge"
           data-affix="data-affix">Content 1</div>
         <div class="au-tab-panel" slot="panel" label="Tab2">Content 2</div>
@@ -215,7 +237,7 @@ document.querySelector('au-tabs').addEventListener('tab-change', (e) => {
           <tr>
             <td>--au-tabs-border-color</td>
             <td>Tab border color</td>
-            <td>oklch(0.7894 0 0)</td>
+            <td>oklch(0.55 0 0)</td>
           </tr>
           <tr>
             <td>--au-tabs-text-color</td>
@@ -270,7 +292,7 @@ document.querySelector('au-tabs').addEventListener('tab-change', (e) => {
           <tr>
             <td>--au-tabs-selected-shadow-color</td>
             <td>Shadow color for selected tab</td>
-            <td>oklch(0.7894 0 0)</td>
+            <td>oklch(0.55 0 0)</td>
           </tr>
           <tr>
             <td>--au-tabs-selected-bg</td>
@@ -290,8 +312,9 @@ document.querySelector('au-tabs').addEventListener('tab-change', (e) => {
           <tr>
             <td>--au-tabs-focus-shadow-color</td>
             <td>Focus-visible shadow color</td>
-            <td>oklch(0.8315 0.1568 78.05)</td>
+            <td>oklch(0.45 0.15 260)</td>
           </tr>
+          <tr><td>--au-tabs-selected-focus-shadow-color</td><td>Focus indicator on the dark selected tab; verify when overriding selected background.</td><td>white</td></tr>
           <tr>
             <td>--au-tabs-padding-vertical</td>
             <td>Vertical padding for tab</td>
@@ -315,12 +338,12 @@ document.querySelector('au-tabs').addEventListener('tab-change', (e) => {
           <tr>
             <td>--au-tabpanels-border-color</td>
             <td>Tab panels container border color</td>
-            <td>oklch(0.7894 0 0)</td>
+            <td>oklch(0.55 0 0)</td>
           </tr>
           <tr>
             <td>--au-tab-panel-padding-vertical</td>
             <td>Vertical padding for tab panel</td>
-            <td>0.625rem</td>
+            <td>0.75rem</td>
           </tr>
           <tr>
             <td>--au-tab-panel-padding-horizontal</td>

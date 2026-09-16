@@ -2,6 +2,57 @@ import { html, fixture, expect, nextFrame } from '@open-wc/testing';
 import '../src/components/radio.js';
 
 describe('AuRadioGroup', () => {
+  it('preserves the selected option, DOM identity and focus during label changes', async () => {
+    const form = await fixture(html`<form><au-radio-group name="pick"><au-radio value="a" checked>A</au-radio><au-radio value="b">B</au-radio></au-radio-group></form>`);
+    const el = form.firstElementChild;await nextFrame();
+    const input = el.shadowRoot.querySelectorAll('input')[1];input.click();input.focus();
+    el.children[1].setAttribute('label', '翻譯');await nextFrame();
+    expect(el.value).to.equal('b');expect(new FormData(form).get('pick')).to.equal('b');
+    expect(el.shadowRoot.querySelectorAll('input')[1]).to.equal(input);
+    expect(el.shadowRoot.activeElement).to.equal(input);
+  });
+
+  it('supports value assignment, late options and an explicit empty option value', async () => {
+    const form = await fixture(html`<form><au-radio-group name="pick"><au-radio value="a">A</au-radio><au-radio value="">Empty</au-radio></au-radio-group></form>`);
+    const el = form.firstElementChild;await nextFrame();
+    el.value = '';expect(el.value).to.equal('');expect(new FormData(form).get('pick')).to.equal('');
+    el.value = 'late';expect(el.value).to.equal(null);expect(new FormData(form).has('pick')).to.be.false;
+    const option = document.createElement('au-radio');option.setAttribute('value', 'late');option.textContent = 'Late';el.append(option);await nextFrame();
+    expect(el.value).to.equal('late');expect(new FormData(form).get('pick')).to.equal('late');
+  });
+
+  it('preserves choice and individual disabled state across group and fieldset disabled cycles', async () => {
+    const form = await fixture(html`<form><fieldset><au-radio-group name="pick"><au-radio value="a" checked>A</au-radio><au-radio value="b">B</au-radio><au-radio value="c" disabled>C</au-radio></au-radio-group></fieldset></form>`);
+    const fieldset = form.firstElementChild, el = fieldset.firstElementChild;await nextFrame();
+    el.shadowRoot.querySelectorAll('input')[1].click();
+    el.disabled = true;el.disabled = false;
+    expect(el.shadowRoot.querySelectorAll('input')[2].disabled).to.be.true;
+    await nextFrame();expect(el.value).to.equal('b');
+    fieldset.disabled = true;expect([...el.shadowRoot.querySelectorAll('input')].every(input => input.disabled)).to.be.true;
+    expect(new FormData(form).has('pick')).to.be.false;
+    fieldset.disabled = false;expect(el.value).to.equal('b');
+  });
+
+  it('resolves external group names and descriptions', async () => {
+    const wrapper = await fixture(html`<div><span id="radio-label">Delivery</span><span id="radio-help">Choose one</span><au-radio-group aria-labelledby="radio-label" aria-describedby="radio-help"><au-radio value="a">A</au-radio></au-radio-group></div>`);
+    await nextFrame();const group = wrapper.lastElementChild.shadowRoot.querySelector('[role=radiogroup]');
+    expect(group.ariaLabelledByElements).to.deep.equal([wrapper.firstElementChild]);
+    expect(group.ariaDescribedByElements).to.deep.equal([wrapper.children[1]]);
+  });
+
+  it('keeps native submission current before input reaches the consumer', async () => {
+    const form = await fixture(html`<form><au-radio-group name="pick"><au-radio value="a">A</au-radio></au-radio-group></form>`);
+    const el = form.firstElementChild;await nextFrame();const values = [];
+    el.addEventListener('input', () => values.push(new FormData(form).get('pick')));
+    el.shadowRoot.querySelector('input').click();expect(values).to.deep.equal(['a']);
+  });
+
+  it('validates a required group and preserves native reset focus', async () => {
+    const form = await fixture(html`<form><au-radio-group name="pick" required><au-radio value="a">A</au-radio><au-radio value="b">B</au-radio></au-radio-group></form>`);
+    const el = form.firstElementChild;await nextFrame();expect(el.internals.checkValidity()).to.be.false;
+    const input = el.shadowRoot.querySelectorAll('input')[1];input.click();input.focus();expect(el.internals.checkValidity()).to.be.true;
+    form.reset();expect(el.value).to.equal(null);expect(el.shadowRoot.activeElement).to.equal(input);
+  });
   it('renders correct number of radios based on children', async () => {
     const el = await fixture(html`
       <au-radio-group>
@@ -105,7 +156,7 @@ describe('AuRadioGroup', () => {
     el.setAttribute('aria-labelledby', 'payment-label');
     await nextFrame();
     expect(group.hasAttribute('aria-label')).to.be.false;
-    expect(group.getAttribute('aria-labelledby')).to.equal('payment-label');
+    expect(group.ariaLabelledByElements).to.deep.equal([]);
   });
 
   it('uses child label attributes as localized radio option text', async () => {
@@ -290,7 +341,7 @@ describe('AuRadioGroup', () => {
     expect(formData.get('choice')).to.equal('yes');
   });
 
-  it('formResetCallback re-renders to initial state', async () => {
+  it('form reset restores the initial choice without replacing inputs', async () => {
     const form = await fixture(html`
       <form>
         <au-radio-group name="pick">
@@ -310,6 +361,87 @@ describe('AuRadioGroup', () => {
 
     form.reset();
     await nextFrame();
-    expect(el.shadowRoot.querySelectorAll('input[type="radio"]').length).to.be.greaterThan(0);
+    expect(el.value).to.equal('a');
+    expect(el.shadowRoot.querySelector('input')).to.equal(radios[0]);
+  });
+
+  it('retains selection identity through reorder and updates a selected value', async () => {
+    const form = await fixture(html`<form><au-radio-group name="pick"><au-radio value="a" checked>A</au-radio><au-radio value="b">B</au-radio></au-radio-group></form>`);
+    const el = form.firstElementChild, source = el.lastElementChild;
+    const input = el.shadowRoot.querySelectorAll('input')[1];
+    input.click(); input.focus(); el.prepend(source); await nextFrame();
+    expect(el.shadowRoot.querySelector('input')).to.equal(input);
+    expect(el.shadowRoot.activeElement).to.equal(input);
+    source.setAttribute('value', 'renamed'); await nextFrame();
+    expect(el.value).to.equal('renamed'); expect(new FormData(form).get('pick')).to.equal('renamed');
+  });
+
+  it('restores matching replacement options and moves focus after removal', async () => {
+    const el = await fixture(html`<au-radio-group value="b"><au-radio value="a">A</au-radio><au-radio value="b">B</au-radio></au-radio-group>`);
+    const selected = el.lastElementChild;
+    el.focus(); selected.remove(); await nextFrame();
+    expect(el.value).to.equal(null);
+    expect(el.shadowRoot.activeElement).to.equal(el.shadowRoot.querySelector('input'));
+    el.append(selected.cloneNode(true)); await nextFrame();
+    expect(el.value).to.equal('b');
+  });
+
+  it('honors explicit checked changes but not stale defaults on text and language updates', async () => {
+    const el = await fixture(html`<au-radio-group><au-radio value="a" checked>A</au-radio><au-radio value="b">B</au-radio></au-radio-group>`);
+    const source = el.lastElementChild;
+    source.setAttribute('checked', ''); await nextFrame(); expect(el.value).to.equal('b');
+    source.textContent = '繁體中文'; source.lang = 'zh-Hant'; await nextFrame();
+    expect(el.value).to.equal('b'); expect(el.shadowRoot.querySelectorAll('.text')[1].lang).to.equal('zh-Hant');
+    source.removeAttribute('checked'); await nextFrame(); expect(el.value).to.equal(null);
+  });
+
+  it('skips disabled radios, wraps, and does not loop on an all-disabled group', async () => {
+    const el = await fixture(html`<au-radio-group><au-radio value="a">A</au-radio><au-radio value="b" disabled>B</au-radio><au-radio value="c">C</au-radio></au-radio-group>`);
+    const inputs = el.shadowRoot.querySelectorAll('input');
+    inputs[0].dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowRight'})); expect(el.value).to.equal('c');
+    inputs[2].dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowRight'})); expect(el.value).to.equal('a');
+    el.disabled = true;
+    inputs[0].dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowRight'})); expect(el.value).to.equal('a');
+    expect([...inputs].every(input => input.tabIndex === -1)).to.be.true;
+  });
+
+  it('emits one input followed by one composed change after reconnect', async () => {
+    const form = await fixture(html`<form><au-radio-group name="pick"><au-radio value="a">A</au-radio><au-radio value="b">B</au-radio></au-radio-group></form>`);
+    const el = form.firstElementChild; el.remove(); form.append(el); await nextFrame();
+    const events = [];
+    form.addEventListener('input', event => events.push([event.type, event.composed, new FormData(form).get('pick')]));
+    form.addEventListener('change', event => events.push([event.type, event.composed, event.detail.value]));
+    el.shadowRoot.querySelectorAll('input')[1].click();
+    expect(events).to.deep.equal([['input', true, 'b'], ['change', true, 'b']]);
+    el.value = 'a'; form.reset(); el.formStateRestoreCallback('{"value":"b"}');
+    expect(events).to.have.length(2); expect(el.value).to.equal('b');
+    el.formStateRestoreCallback('invalid'); expect(el.value).to.equal('b');
+  });
+
+  it('omits disabled selections and unnamed groups without losing their values', async () => {
+    const form = await fixture(html`<form><au-radio-group name="pick"><au-radio value="a" checked>A</au-radio><au-radio value="b">B</au-radio></au-radio-group></form>`);
+    const el = form.firstElementChild;
+    el.firstElementChild.setAttribute('disabled', ''); await nextFrame();
+    expect(el.value).to.equal('a'); expect(new FormData(form).has('pick')).to.be.false;
+    el.value = 'b'; el.name = 'renamed'; expect(new FormData(form).get('renamed')).to.equal('b');
+    el.name = ''; expect([...new FormData(form)]).to.deep.equal([]);
+    el.value = null; expect(el.value).to.equal(null);
+  });
+
+  it('captures the first populated reset value for asynchronously inserted options', async () => {
+    const form = await fixture(html`<form><au-radio-group name="pick"></au-radio-group></form>`);
+    const el = form.firstElementChild;
+    el.innerHTML = '<au-radio value="late" checked>Late</au-radio><au-radio value="other">Other</au-radio>';
+    await nextFrame(); el.value = 'other'; form.reset(); expect(el.value).to.equal('late');
+  });
+
+  it('tracks associated labels and replacement external descriptions', async () => {
+    const wrapper = await fixture(html`<div><label for="radio-dynamic">Delivery</label><span id="radio-description">Choose one</span><au-radio-group id="radio-dynamic" aria-describedby="radio-description"><au-radio>A</au-radio></au-radio-group></div>`);
+    const group = wrapper.lastElementChild.shadowRoot.querySelector('[role=radiogroup]');
+    expect(group.ariaLabelledByElements).to.deep.equal([wrapper.firstElementChild]);
+    const replacement = document.createElement('span'); replacement.id = 'radio-description'; replacement.textContent = 'New help';
+    wrapper.children[1].replaceWith(replacement); await nextFrame();
+    expect(group.ariaDescribedByElements).to.deep.equal([replacement]);
+    replacement.remove(); await nextFrame(); expect(group.ariaDescribedByElements).to.deep.equal([]);
   });
 });

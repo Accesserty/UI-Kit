@@ -11,6 +11,8 @@ node_modules
 .DS_Store
 
 dist-ssr
+/test/angular-aot/dist/
+/test/angular-aot/.angular/
 coverage
 *.local
 

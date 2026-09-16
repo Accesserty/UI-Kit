@@ -3,12 +3,15 @@ class AuRadioGroup extends HTMLElement {
 
   constructor() {
     super();
-    this.attachShadow({ mode: "open" });
+    this.attachShadow({ mode: "open", delegatesFocus: true });
     this.internals = this.attachInternals();
 
     const style = document.createElement('style');
     style.textContent = `
+      :host([hidden]:not([hidden="until-found" i])) { display: none; }
+      :host { display: block; min-width: 0; }
       .au-radio-group {
+        min-width: 0;
         display: flex;
         flex-wrap: wrap;
         gap: 1rem;
@@ -17,11 +20,15 @@ class AuRadioGroup extends HTMLElement {
       .au-radio-group--vertical {
         flex-direction: column;
         label {
-          width: max-content;
+          width: fit-content;
+          max-width: 100%;
         }
       }
       label {
         cursor: pointer;
+        box-sizing: border-box;
+        max-width: 100%;
+        min-width: 0;
         display: flex;
         align-items: center;
         gap: var(--au-radio-content-gap, 0.375rem);
@@ -29,11 +36,13 @@ class AuRadioGroup extends HTMLElement {
         padding: 0.25rem;
         input[type="radio"] {
           appearance: none;
+          flex-shrink: 0;
+          box-sizing: border-box;
           margin: 0;
           cursor: pointer;
           width: var(--au-radio-input-width, 1.5rem);
           height: var(--au-radio-input-height, 1.5rem);
-          border: var(--au-radio-input-border-width, 1px) var(--au-radio-input-border-style, solid) var(--au-radio-input-border-color, oklch(0.7894 0 0));
+          border: var(--au-radio-input-border-width, 1px) var(--au-radio-input-border-style, solid) var(--au-radio-input-border-color, oklch(0.55 0 0));
           border-radius: 50%;
           background-color: var(--au-radio-input-bg, oklch(0.994 0 0));
           &:focus-visible {
@@ -57,6 +66,8 @@ class AuRadioGroup extends HTMLElement {
         }
         .text {
           flex: 1;
+          min-width: 0;
+          overflow-wrap: anywhere;
           color: var(--au-radio-label-text-color, oklch(0.1398 0 0));
           font-size: var(--au-radio-label-text-size, 1rem);
         }
@@ -71,7 +82,7 @@ class AuRadioGroup extends HTMLElement {
           }
         }
         &:has(input:focus-visible) {
-          box-shadow: inset 0 0 0 var(--au-radio-input-focus-shadow-width, 3px) var(--au-radio-input-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-radio-input-focus-shadow-width, 3px) var(--au-radio-input-focus-shadow-color, oklch(0.45 0.15 260));
         }
         &:has(input[type="radio"]:disabled) {
           cursor: not-allowed;
@@ -85,6 +96,14 @@ class AuRadioGroup extends HTMLElement {
           }
         }
       }
+      @media (forced-colors: active) {
+        label input[type="radio"] { appearance: auto; }
+        label input[type="radio"]:checked::before { content: none; }
+        label:has(input:focus-visible), .au-radio-group:focus-visible {
+          outline: 2px solid Highlight; outline-offset: 2px;
+        }
+      }
+      .au-radio-group:focus-visible { outline: 2px solid var(--au-radio-input-focus-shadow-color, oklch(0.45 0.15 260)); }
     `;
 
     const container = document.createElement('div');
@@ -97,177 +116,256 @@ class AuRadioGroup extends HTMLElement {
     const slot = document.createElement('slot');
     slot.style.display = 'none';
 
+    container.tabIndex = -1;
+    this._container = container;
+    this._slot = slot;
+    this._entries = new Map();
+    this._value = null;
+    this._selectionSet = false;
+    slot.addEventListener('slotchange', () => this.renderRadios());
     this.shadowRoot.append(style, container, slot);
   }
 
   connectedCallback() {
-    const slot = this.shadowRoot.querySelector('slot');
-    slot.addEventListener('slotchange', () => {
+    for (const name of ['value', 'name', 'disabled', 'required']) {
+      if (Object.hasOwn(this, name)) {
+        const value = this[name]; delete this[name]; this[name] = value;
+      }
+    }
+    this._mutationObserver ??= new MutationObserver(records => {
+      // An explicit checked mutation is an instruction; label/locale updates are not.
+      for (const record of records) {
+        if (record.attributeName !== 'checked' || !this._entries.has(record.target)) continue;
+        if (record.target.hasAttribute('checked')) {
+          this._selectedSource = record.target;
+          this._selectionSet = true;
+        } else if (this._selectedSource === record.target) {
+          this._selectedSource = null;
+          this._value = null;
+          this._selectionSet = true;
+        }
+      }
       this.renderRadios();
-    });
-    this._mutationObserver = new MutationObserver(() => {
-      this.renderRadios();
-      this.updateGroupAttributes();
     });
     this._mutationObserver.observe(this, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-      attributes: true,
-      attributeFilter: ['label', 'value', 'checked', 'disabled']
+      childList: true, subtree: true, characterData: true, attributes: true,
+      attributeFilter: ['label', 'value', 'checked', 'disabled', 'lang'],
     });
-    
+    this._referenceObserver ??= new MutationObserver(() => this.updateGroupAttributes());
+    this._referenceObserver.observe(this.getRootNode(), {
+      childList: true, subtree: true, characterData: true, attributes: true,
+      attributeFilter: ['id', 'for', 'aria-label'],
+    });
     this.renderRadios();
-    this.updateGroupAttributes();
   }
 
   disconnectedCallback() {
     this._mutationObserver?.disconnect();
+    this._referenceObserver?.disconnect();
   }
 
   renderRadios() {
-    const container = this.shadowRoot.querySelector('.au-radio-group');
-    container.innerHTML = ''; // Clear the container before rendering
-
-    const slot = this.shadowRoot.querySelector('slot');
-    const radios = slot.assignedElements();
-    const isDisabled = this.hasAttribute('disabled'); // Check if the group is disabled
-    let initialValue = null;
-
-    radios.forEach((radio, index) => {
-      const label = document.createElement('label');
-      const inputID = 'radio-' + this.generateId();
-      label.setAttribute('for', inputID);
-
-      const input = document.createElement('input');
-      input.type = 'radio';
-      input.id = inputID;
-      input.name = this.groupName;
-      input.value = radio.getAttribute('value') || `radio-${index + 1}`;
-
-      if (radio.hasAttribute('checked')) {
-        input.checked = true;
-        initialValue = input.value;
+    const focused = this.shadowRoot.activeElement;
+    const hadFocus = focused && this._container.contains(focused);
+    const sources = this._slot.assignedElements();
+    const entries = new Map();
+    sources.forEach((source, index) => {
+      let entry = this._entries.get(source);
+      if (!entry) {
+        const label = document.createElement('label');
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.id = 'radio-' + this.generateId();
+        input.name = this.groupName;
+        label.htmlFor = input.id;
+        const text = document.createElement('div');
+        text.className = 'text';
+        label.append(input, text);
+        entry = {source, label, input, text};
+        input.addEventListener('input', () => {
+          if (input.checked) {
+            this._selectedSource = source;
+            this._value = input.value;
+            this._selectionSet = true;
+            this._syncSelection();
+          }
+        });
+        input.addEventListener('change', event => this.handleChange(event, input));
+        input.addEventListener('keydown', event => this.handleKeyDown(event, input));
       }
-
-      if (isDisabled || radio.hasAttribute('disabled')) {
-        input.disabled = true;
-      }
-
-      const textSlot = document.createElement('div');
-      textSlot.setAttribute('class', 'text');
-      textSlot.textContent = radio.getAttribute('label') || radio.textContent.trim();
-
-      label.append(input, textSlot);
-      container.appendChild(label);
-
-      // Add event listeners for keyboard interaction and focus management
-      input.addEventListener('change', (event) => this.handleChange(event, input));
-      input.addEventListener('keydown', (event) => this.handleKeyDown(event, index));
+      entry.input.value = source.getAttribute('value') ?? `radio-${index + 1}`;
+      entry.input.disabled = this.disabled || Boolean(this._formDisabled) || source.hasAttribute('disabled');
+      entry.input.required = this.required;
+      entry.text.textContent = source.getAttribute('label') || source.textContent.trim();
+      if (source.hasAttribute('lang')) entry.text.setAttribute('lang', source.getAttribute('lang'));
+      else entry.text.removeAttribute('lang');
+      entries.set(source, entry);
     });
+    for (const [source, entry] of this._entries) {
+      if (!entries.has(source)) entry.label.remove();
+    }
+    this._entries = entries;
+    let index = 0;
+    for (const entry of entries.values()) {
+      if (this._container.children[index] !== entry.label) {
+        this._container.insertBefore(entry.label, this._container.children[index] || null);
+      }
+      index++;
+    }
+    if (!this._selectionSet && entries.size) {
+      this._selectedSource = sources.filter(source => source.hasAttribute('checked')).at(-1) || null;
+      this._selectionSet = true;
+    }
+    this._syncSelection();
+    if (!this._initialValueSet && entries.size) {
+      this._initialValue = this._value;
+      this._initialValueSet = true;
+    }
+    this.updateGroupAttributes();
+    if (hadFocus) {
+      const stillEnabled = [...entries.values()].some(entry => entry.input === focused && !entry.input.disabled);
+      if (stillEnabled && this.shadowRoot.activeElement !== focused) focused.focus();
+      else if (!stillEnabled) this.focus();
+    }
+  }
 
-    this.internals.setFormValue(initialValue);
+  _syncSelection() {
+    let selected = this._entries.get(this._selectedSource);
+    if (!selected && this._value !== null) {
+      selected = [...this._entries.values()].find(entry => entry.input.value === this._value);
+    }
+    this._selectedSource = selected?.source || null;
+    if (selected) this._value = selected.input.value;
+    const enabled = [...this._entries.values()].filter(entry => !entry.input.disabled);
+    const tabStop = selected && !selected.input.disabled ? selected : enabled[0];
+    for (const entry of this._entries.values()) {
+      entry.input.checked = entry === selected;
+      entry.input.tabIndex = entry === tabStop ? 0 : -1;
+    }
+    this.internals.setFormValue(
+      selected && !selected.input.disabled ? selected.input.value : null,
+      JSON.stringify({value: this._value}),
+    );
+    const anchor = enabled[0]?.input;
+    if (!anchor || !anchor.willValidate || anchor.validity.valid) this.internals.setValidity({});
+    else this.internals.setValidity(anchor.validity, anchor.validationMessage, anchor);
   }
 
   handleChange(event, input) {
-    if (input.checked) {
-      const radios = this.shadowRoot.querySelectorAll(`input[name="${this.groupName}"]`);
-      radios.forEach((radio) => {
-        if (radio !== input) {
-          radio.checked = false;
-        }
-      });
-      this.internals.setFormValue(input.value);
-      this.dispatchEvent(new CustomEvent('change', {
-        bubbles: true,
-        composed: true,
-        detail: { value: input.value },
-      }));
-    }
+    event.stopPropagation();
+    const entry = [...this._entries.values()].find(entry => entry.input === input);
+    if (!entry || !input.checked || input.disabled) return;
+    this._selectedSource = entry.source;
+    this._value = input.value;
+    this._selectionSet = true;
+    this._syncSelection();
+    this.dispatchEvent(new CustomEvent('change', {
+      bubbles: true, composed: true, detail: {value: input.value},
+    }));
   }
 
-  handleKeyDown(event, currentIndex) {
-    const radios = Array.from(this.shadowRoot.querySelectorAll(`input[name="${this.groupName}"]`));
-    let nextIndex;
-
-    switch (event.key) {
-      case 'ArrowRight':
-      case 'ArrowDown':
-        event.preventDefault();
-        nextIndex = (currentIndex + 1) % radios.length;
-        // Skip disabled radios
-        while (radios[nextIndex].disabled) {
-          nextIndex = (nextIndex + 1) % radios.length;
-        }
-        radios[nextIndex].focus();
-        radios[nextIndex].click();
-        break;
-      case 'ArrowLeft':
-      case 'ArrowUp':
-        event.preventDefault();
-        nextIndex = (currentIndex - 1 + radios.length) % radios.length;
-        // Skip disabled radios
-        while (radios[nextIndex].disabled) {
-          nextIndex = (nextIndex - 1 + radios.length) % radios.length;
-        }
-        radios[nextIndex].focus();
-        radios[nextIndex].click();
-        break;
-      default:
-        break;
-    }
+  handleKeyDown(event, currentInput) {
+    const step = {ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1}[event.key];
+    if (!step || event.altKey || event.ctrlKey || event.metaKey) return;
+    event.preventDefault();
+    const enabled = [...this._entries.values()].map(entry => entry.input).filter(input => !input.disabled);
+    if (!enabled.length || currentInput.disabled) return;
+    const current = enabled.indexOf(currentInput);
+    if (current < 0) return;
+    const next = enabled[(current + step + enabled.length) % enabled.length];
+    next.focus();
+    if (next !== currentInput || !next.checked) next.click();
   }
 
   static get observedAttributes() {
-    return ['disabled', 'direction', 'aria-label', 'aria-labelledby', 'label'];
+    return ['name', 'value', 'disabled', 'required', 'direction', 'aria-label', 'aria-labelledby', 'aria-describedby', 'aria-invalid', 'label'];
   }
 
-  attributeChangedCallback(name) {
-    if (name === 'disabled') {
-      const isDisabled = this.hasAttribute('disabled');
-      this.shadowRoot.querySelectorAll('input[type="radio"]').forEach(input => {
-        input.disabled = isDisabled;
-      });
-    } else if (['direction', 'aria-label', 'aria-labelledby', 'label'].includes(name)) {
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue) return;
+    if (name === 'value') this.value = newValue;
+    else if (name === 'disabled' || name === 'required') this.renderRadios();
+    else {
+      this._syncSelection();
       this.updateGroupAttributes();
     }
   }
 
   updateGroupAttributes() {
-    const container = this.shadowRoot.querySelector('.au-radio-group');
-    if (!container) return;
-
-    const ariaLabel = this.getAttribute('aria-label') || this.getAttribute('label');
-    if (ariaLabel) {
-      container.setAttribute('aria-label', ariaLabel);
-    } else {
-      container.removeAttribute('aria-label');
+    const container = this._container;
+    const root = this.getRootNode();
+    const resolve = attribute => (this.getAttribute(attribute) || '').trim().split(/\s+/)
+      .filter(Boolean).map(id => root.getElementById?.(id)).filter(element => element && element !== this);
+    const explicit = this.getAttribute('aria-label') || this.getAttribute('label');
+    let labels = resolve('aria-labelledby');
+    if (!labels.length && !explicit && this.isConnected) labels = [...(this.internals.labels || [])];
+    const descriptions = resolve('aria-describedby');
+    container.removeAttribute('aria-labelledby');
+    container.removeAttribute('aria-describedby');
+    if (explicit) container.setAttribute('aria-label', explicit);
+    else container.removeAttribute('aria-label');
+    if ('ariaLabelledByElements' in container) container.ariaLabelledByElements = labels;
+    else if (!explicit && labels.length) {
+      container.setAttribute('aria-label', labels.map(element => element.getAttribute('aria-label') || element.textContent).join(' ').trim());
     }
-
-    if (this.hasAttribute('aria-labelledby')) {
-      container.setAttribute('aria-labelledby', this.getAttribute('aria-labelledby'));
-    } else {
-      container.removeAttribute('aria-labelledby');
+    if ('ariaDescribedByElements' in container) container.ariaDescribedByElements = descriptions;
+    else if (descriptions.length) {
+      if (!this._descriptionMirror) {
+        this._descriptionMirror = document.createElement('span');
+        this._descriptionMirror.id = 'radio-description-' + this.generateId();
+        this._descriptionMirror.hidden = true;
+        this.shadowRoot.append(this._descriptionMirror);
+      }
+      this._descriptionMirror.textContent = descriptions.map(element => element.textContent).join(' ').trim();
+      container.setAttribute('aria-describedby', this._descriptionMirror.id);
     }
-
     container.classList.toggle('au-radio-group--vertical', this.getAttribute('direction') === 'vertical');
+    if (this.required) container.setAttribute('aria-required', 'true');
+    else container.removeAttribute('aria-required');
+    if (this.disabled || this._formDisabled) container.setAttribute('aria-disabled', 'true');
+    else container.removeAttribute('aria-disabled');
+    if (this.hasAttribute('aria-invalid')) container.setAttribute('aria-invalid', this.getAttribute('aria-invalid'));
+    else container.removeAttribute('aria-invalid');
   }
 
-  get value() {
-    const checked = Array.from(this.shadowRoot.querySelectorAll('input[type="radio"]')).find(r => r.checked);
-    return checked?.value ?? null;
+  get value() { return this._entries.get(this._selectedSource)?.input.value ?? null; }
+  set value(value) {
+    this._value = value == null ? null : String(value);
+    this._selectedSource = null;
+    this._selectionSet = true;
+    this._syncSelection();
+  }
+  get name() { return this.getAttribute('name') || ''; }
+  set name(value) { this.setAttribute('name', value); }
+  get required() { return this.hasAttribute('required'); }
+  set required(value) { this.toggleAttribute('required', Boolean(value)); }
+  get disabled() { return this.hasAttribute('disabled'); }
+  set disabled(value) { this.toggleAttribute('disabled', Boolean(value)); }
+  get validity() { return this.internals.validity; }
+  get validationMessage() { return this.internals.validationMessage; }
+  get willValidate() { return this.internals.willValidate; }
+  checkValidity() { return this.internals.checkValidity(); }
+  reportValidity() { return this.internals.reportValidity(); }
+
+  focus(options) {
+    const inputs = [...this._entries.values()].map(entry => entry.input);
+    const target = inputs.find(input => input.tabIndex === 0 && !input.disabled);
+    (target || this._container).focus(options);
   }
 
-  get disabled() {
-    return this.hasAttribute('disabled');
-  }
-
-  set disabled(val) {
-    val ? this.setAttribute('disabled', '') : this.removeAttribute('disabled');
-  }
-
-  formResetCallback() {
+  formDisabledCallback(disabled) {
+    this._formDisabled = disabled;
     this.renderRadios();
+  }
+
+  formResetCallback() { this.value = this._initialValue ?? null; }
+
+  formStateRestoreCallback(state) {
+    if (typeof state !== 'string') return;
+    try {
+      const restored = JSON.parse(state);
+      if (restored && (restored.value === null || typeof restored.value === 'string')) this.value = restored.value;
+    } catch { /* Ignore unrecognized state rather than treating it as an option. */ }
   }
 
   generateId() {

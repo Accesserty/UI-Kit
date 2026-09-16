@@ -3,16 +3,22 @@ class AuSwitch extends HTMLElement {
 
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({ mode: 'open', delegatesFocus: true });
     this.internals = this.attachInternals();
+    this.addEventListener('click', event => this._activateFromHost(event));
 
     const inputID = this.generateId();
 
     const style = document.createElement('style');
     style.textContent = `
+      :host([hidden]:not([hidden="until-found" i])) { display: none; }
+      :host { max-width: 100%; }
       .au-switch {
         display: inline-flex;
         flex-wrap: wrap;
+        box-sizing: border-box;
+        max-width: 100%;
+        overflow-wrap: anywhere;
         align-items: center;
         gap: var(--au-switch-gap, 1rem);
         cursor: pointer;
@@ -25,7 +31,7 @@ class AuSwitch extends HTMLElement {
           text-decoration: underline;
         }
         &:has(input:focus-visible) {
-          box-shadow: inset 0 0 0 var(--au-switch-focus-shadow-width, 3px) var(--au-switch-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-switch-focus-shadow-width, 3px) var(--au-switch-focus-shadow-color, oklch(0.45 0.15 260));
         } 
         &:has(input:disabled) {
           cursor: not-allowed;
@@ -35,31 +41,38 @@ class AuSwitch extends HTMLElement {
       }
       .container {
         display: flex;
+        flex-wrap: wrap;
+        min-width: 0;
+        max-width: 100%;
         align-items: center;
         gap: var(--au-switch-container-gap, 0.625rem);
       }
       .input {
         position: relative;
+        flex-shrink: 0;
         &:before {
           content: '';
           display: block;
           width: calc(var(--au-switch-input-width, 4rem) / 2 - 2 * var(--au-switch-inner-distance, 0.25rem));
           height: calc(var(--au-switch-input-width, 4rem) / 2 - 2 * var(--au-switch-inner-distance, 0.25rem));
-          background-color: gray;
+          background-color: var(--au-switch-inner-bg, oklch(0.55 0 0));
+          pointer-events: none;
           position: absolute;
           top: var(--au-switch-inner-distance, 0.25rem);
-          left: var(--au-switch-inner-distance, 0.25rem);
+          inset-inline-start: var(--au-switch-inner-distance, 0.25rem);
           border-radius: var(--au-switch-inner-border-radius, calc((var(--au-switch-input-width, 4rem) / 2 - var(--au-switch-inner-distance, 0.25rem)) / 2));
-          transition: background-color 360ms ease-in, left 240ms ease-in;
+          transition: background-color 360ms ease-in, inset-inline-start 240ms ease-in;
         }
         input[type="checkbox"] {
           appearance: none;
           cursor: pointer;
           margin: 0;
+          box-sizing: border-box;
           display: block;
           width: var(--au-switch-input-width, 4rem);
           height: calc(var(--au-switch-input-width, 4rem) / 2);
-          border: var(--au-switch-input-border-width, 1px) var(--au-switch-input-border-style, solid) var(--au-switch-input-border-color, oklch(0.7894 0 0));
+          border: var(--au-switch-input-border-width, 1px) var(--au-switch-input-border-style, solid) var(--au-switch-input-border-color, oklch(0.55 0 0));
+          background-color: var(--au-switch-input-bg, oklch(0.994 0 0));
           border-radius: var(--au-switch-input-border-radius, calc(var(--au-switch-input-width, 4rem) / 4));
           transition: background-color 360ms ease-in;
           &:focus-visible {
@@ -74,8 +87,18 @@ class AuSwitch extends HTMLElement {
         }
         &:has(input[type="checkbox"]:checked):before {
           background-color: var(--au-switch-inner-checked-bg, oklch(0.994 0 0));
-          left: calc(100% - (var(--au-switch-input-width, 4rem) / 2 - 2 * var(--au-switch-inner-distance, 0.25rem)) - var(--au-switch-inner-distance, 0.25rem));
+          inset-inline-start: calc(100% - (var(--au-switch-input-width, 4rem) / 2 - 2 * var(--au-switch-inner-distance, 0.25rem)) - var(--au-switch-inner-distance, 0.25rem));
         }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .input::before, .input input[type="checkbox"] { transition: none; }
+      }
+      @media (forced-colors: active) {
+        .input input[type="checkbox"] { forced-color-adjust: none; background-color: Canvas; border-color: ButtonText; }
+        .input::before { forced-color-adjust: none; background-color: CanvasText; }
+        .input:has(input:checked) input[type="checkbox"] { background-color: Highlight; }
+        .input:has(input:checked)::before { background-color: HighlightText; }
+        .au-switch:has(input:focus-visible) { outline: 2px solid Highlight; outline-offset: 2px; }
       }
      
     `;
@@ -96,6 +119,7 @@ class AuSwitch extends HTMLElement {
     this.inputElement = document.createElement('input');
     this.inputElement.id = inputID;
     this.inputElement.type = 'checkbox';
+    this.inputElement.value = this.getAttribute('value') ?? 'on';
     this.inputElement.setAttribute('role', 'switch');
     this.inputElement.setAttribute('aria-checked', 'false');
     inputDiv.appendChild(this.inputElement);
@@ -109,20 +133,31 @@ class AuSwitch extends HTMLElement {
     this.shadowRoot.append(style, switchElement);
 
     const slot = document.createElement('slot');
+    this._labelSlot = slot;
+    slot.addEventListener('slotchange', () => this.syncAccessibleLabel());
     this.labelFallback = document.createElement('span');
     this.labelFallback.textContent = this.getAttribute('label') || '';
     slot.appendChild(this.labelFallback);
     switchElement.prepend(slot);
 
+    this.inputElement.addEventListener('input', () => { this.checked = this.inputElement.checked; });
     this.inputElement.addEventListener('change', (event) => {
-      const checked = event.target.checked;
-      this.inputElement.setAttribute('aria-checked', checked.toString());
-      const formValue = checked ? (this.getAttribute('value') || 'on') : null;
-      this.internals.setFormValue(formValue);
-      this.dispatchEvent(new CustomEvent('change', { bubbles: true, composed: true, detail: checked }));
+      event.stopPropagation();
+      this.checked = this.inputElement.checked;
+      this.dispatchEvent(new CustomEvent('change', { bubbles: true, composed: true, detail: this.checked }));
     });
 
-    this.syncAccessibleLabel();
+  }
+
+  _activateFromHost(event) {
+    if (event.composedPath()[0] !== this) return;
+    // Wait for cancellation on the original host/label click before forwarding.
+    queueMicrotask(() => {
+      if (!event.defaultPrevented && this.isConnected && !this.inputElement.disabled) {
+        this.inputElement.focus();
+        this.inputElement.click();
+      }
+    });
   }
 
   get checked() {
@@ -130,7 +165,9 @@ class AuSwitch extends HTMLElement {
   }
 
   set checked(val) {
-    val ? this.setAttribute('checked', '') : this.removeAttribute('checked');
+    this.toggleAttribute('checked', Boolean(val));
+    this.inputElement.checked = Boolean(val);
+    this.updateFormValue();
   }
 
   get disabled() {
@@ -142,9 +179,7 @@ class AuSwitch extends HTMLElement {
   }
 
   formResetCallback() {
-    this.inputElement.checked = false;
-    this.inputElement.setAttribute('aria-checked', 'false');
-    this.internals.setFormValue(null);
+    this.checked = this._initialChecked;
   }
 
   generateId() {
@@ -157,10 +192,11 @@ class AuSwitch extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['name', 'value', 'checked', 'disabled', 'off', 'on', 'label', 'aria-label', 'aria-labelledby'];
+    return ['name', 'value', 'checked', 'disabled', 'required', 'off', 'on', 'label', 'aria-label', 'aria-labelledby', 'aria-describedby', 'aria-invalid'];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue) return;
     const input = this.shadowRoot.querySelector('input');
     const offText = this.shadowRoot.querySelector('.off-text');
     const onText = this.shadowRoot.querySelector('.on-text');
@@ -173,7 +209,16 @@ class AuSwitch extends HTMLElement {
         input.setAttribute('aria-checked', input.checked.toString());
         break;
       case 'disabled':
-        input.disabled = newValue !== null;
+        input.disabled = this.disabled || Boolean(this._formDisabled);
+        break;
+      case 'name':
+        input.name = newValue ?? '';
+        break;
+      case 'value':
+        input.value = newValue ?? 'on';
+        break;
+      case 'required':
+        input.required = newValue !== null;
         break;
       case 'off':
         offText.textContent = newValue || '';
@@ -187,6 +232,7 @@ class AuSwitch extends HTMLElement {
         break;
       case 'aria-label':
       case 'aria-labelledby':
+      case 'aria-describedby':
         this.syncAccessibleLabel();
         break;
       default:
@@ -197,25 +243,88 @@ class AuSwitch extends HTMLElement {
         }
         break;
     }
+    this.updateFormValue();
   }
 
   syncAccessibleLabel() {
-    if (!this.inputElement) return;
-
-    if (this.hasAttribute('aria-label')) {
-      this.inputElement.setAttribute('aria-label', this.getAttribute('aria-label'));
-    } else {
-      this.inputElement.removeAttribute('aria-label');
+    const input = this.inputElement;
+    const root = this.getRootNode();
+    const resolve = attribute => (this.getAttribute(attribute) || '').trim()
+      .split(/\s+/).filter(Boolean).map(id => root.getElementById?.(id))
+      .filter(element => element && element !== this);
+    const explicit = this.getAttribute('aria-label');
+    let labels = resolve('aria-labelledby');
+    const hasSlotText = this._labelSlot.assignedNodes({flatten: true})
+      .some(node => node.textContent?.trim());
+    if (!labels.length && !explicit && !hasSlotText && this.isConnected) {
+      labels = [...this.internals.labels];
     }
-
-    if (this.hasAttribute('aria-labelledby')) {
-      this.inputElement.setAttribute('aria-labelledby', this.getAttribute('aria-labelledby'));
-    } else {
-      this.inputElement.removeAttribute('aria-labelledby');
+    const descriptions = resolve('aria-describedby');
+    input.removeAttribute('aria-labelledby');
+    input.removeAttribute('aria-describedby');
+    if (explicit) input.setAttribute('aria-label', explicit);
+    else input.removeAttribute('aria-label');
+    if ('ariaLabelledByElements' in input) input.ariaLabelledByElements = labels;
+    else if (!explicit && labels.length) {
+      input.setAttribute('aria-label', labels.map(element =>
+        element.getAttribute('aria-label') || element.textContent).join(' ').trim());
+    }
+    if ('ariaDescribedByElements' in input) input.ariaDescribedByElements = descriptions;
+    else if (descriptions.length) {
+      if (!this._descriptionMirror) {
+        this._descriptionMirror = document.createElement('span');
+        this._descriptionMirror.id = this.generateId();
+        this._descriptionMirror.hidden = true;
+        this.shadowRoot.append(this._descriptionMirror);
+      }
+      this._descriptionMirror.textContent = descriptions.map(element => element.textContent).join(' ').trim();
+      input.setAttribute('aria-describedby', this._descriptionMirror.id);
     }
   }
 
+  _observeLabels() {
+    this._labelObserver?.disconnect();
+    this._labelObserver ??= new MutationObserver(() => this.syncAccessibleLabel());
+    this._labelObserver.observe(this.getRootNode(), {
+      subtree: true, childList: true, characterData: true,
+      attributes: true, attributeFilter: ['id', 'for', 'aria-label'],
+    });
+    this.syncAccessibleLabel();
+  }
+
+  disconnectedCallback() { this._labelObserver?.disconnect(); }
+
+  _upgradeProperties() {
+    for (const name of ['checked', 'disabled', 'required', 'name', 'value']) {
+      if (Object.hasOwn(this, name)) {
+        const value = this[name]; delete this[name]; this[name] = value;
+      }
+    }
+  }
+
+  get name() { return this.getAttribute('name') || ''; }
+  set name(value) { this.setAttribute('name', value); }
+  get value() { return this.getAttribute('value') ?? 'on'; }
+  set value(value) { this.setAttribute('value', value); }
+  get required() { return this.hasAttribute('required'); }
+  set required(value) { this.toggleAttribute('required', Boolean(value)); }
+  get validity() { return this.internals.validity; }
+  get validationMessage() { return this.internals.validationMessage; }
+  get willValidate() { return this.internals.willValidate; }
+  checkValidity() { return this.internals.checkValidity(); }
+  reportValidity() { return this.internals.reportValidity(); }
+  focus(options) { this.inputElement.focus(options); }
+
+  formStateRestoreCallback(state) {
+    if (state === 'checked' || state === 'unchecked') this.checked = state === 'checked';
+  }
+
   connectedCallback() {
+    this._upgradeProperties();
+    if (!this._initialCheckedSet) {
+      this._initialChecked = this.checked;
+      this._initialCheckedSet = true;
+    }
     const input = this.shadowRoot.querySelector('input');
     const offText = this.shadowRoot.querySelector('.off-text');
     const onText = this.shadowRoot.querySelector('.on-text');
@@ -234,8 +343,23 @@ class AuSwitch extends HTMLElement {
       onText.textContent = '';
     }
 
-    const formValue = input.checked ? (this.getAttribute('value') || 'on') : null;
-    this.internals.setFormValue(formValue);
+    input.disabled = this.disabled || Boolean(this._formDisabled);
+    this.updateFormValue();
+    this._observeLabels();
+  }
+
+  updateFormValue() {
+    const input = this.inputElement;
+    input.setAttribute('aria-checked', String(input.checked));
+    this.internals.setFormValue(input.checked ? this.value : null, input.checked ? 'checked' : 'unchecked');
+    if (!input.willValidate || input.validity.valid) this.internals.setValidity({});
+    else this.internals.setValidity(input.validity, input.validationMessage, input);
+  }
+
+  formDisabledCallback(disabled) {
+    this._formDisabled = disabled;
+    this.inputElement.disabled = this.disabled || disabled;
+    this.updateFormValue();
   }
 }
 

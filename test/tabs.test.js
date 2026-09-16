@@ -1,7 +1,106 @@
-import { html, fixture, expect } from '@open-wc/testing';
+import { html, fixture, expect, nextFrame } from '@open-wc/testing';
 import '../src/components/tabs.js';
 
 describe('AuTabs with <div class="au-tab-panel">', () => {
+  it('uses visual horizontal direction under inherited and changing RTL', async () => {
+    const box=await fixture(html`<div dir="rtl"><au-tabs><div class="au-tab-panel" slot="panel" label="One">One</div><div class="au-tab-panel" slot="panel" label="Two">Two</div><div class="au-tab-panel" slot="panel" label="Three">Three</div></au-tabs></div>`);
+    const el=box.querySelector('au-tabs'),tabs=[...el.shadowRoot.querySelectorAll('[role=tab]')];
+    const press=key=>el.shadowRoot.activeElement.dispatchEvent(new KeyboardEvent('keydown',{key,bubbles:true,composed:true,cancelable:true}));
+    tabs[0].focus();press('ArrowLeft');expect(el.shadowRoot.activeElement).to.equal(tabs[1]);
+    press('ArrowRight');expect(el.shadowRoot.activeElement).to.equal(tabs[0]);
+    press('End');expect(el.shadowRoot.activeElement).to.equal(tabs[2]);
+    press('Home');expect(el.shadowRoot.activeElement).to.equal(tabs[0]);
+    box.dir='ltr';press('ArrowRight');expect(el.shadowRoot.activeElement).to.equal(tabs[1]);
+  });
+
+  it('preserves panel IDs, tab nodes and focus across label and language changes', async () => {
+    const el = await fixture(html`<au-tabs><div class="au-tab-panel" slot="panel" id="stable-one" label="One">One</div><div class="au-tab-panel" slot="panel" id="stable-two" label="Two">Two</div></au-tabs>`);
+    const tab = el.shadowRoot.querySelectorAll('[role=tab]')[1];tab.click();
+    el.lastElementChild.setAttribute('label', '第二頁');el.lastElementChild.setAttribute('label-lang','zh-Hant');await nextFrame();
+    expect(el.lastElementChild.id).to.equal('stable-two');
+    expect(el.shadowRoot.querySelectorAll('[role=tab]')[1]).to.equal(tab);
+    expect(tab.querySelector('.label').textContent).to.equal('第二頁');
+    expect(tab.querySelector('.label').lang).to.equal('zh-Hant');expect(el.shadowRoot.activeElement).to.equal(tab);
+  });
+
+  it('preserves the selected panel through reorder and selects a neighbor after removal', async () => {
+    const el = await fixture(html`<au-tabs><div class="au-tab-panel" slot="panel" label="One">One</div><div class="au-tab-panel" slot="panel" label="Two">Two</div></au-tabs>`);
+    const panel=el.lastElementChild;el.shadowRoot.querySelectorAll('[role=tab]')[1].click();
+    el.prepend(panel);await nextFrame();expect(el.selectedIndex).to.equal(0);expect(panel.hidden).to.be.false;
+    panel.remove();await nextFrame();expect(el.selectedIndex).to.equal(0);
+    expect(el.shadowRoot.activeElement).to.equal(el.shadowRoot.querySelector('[role=tab]'));
+    expect(panel.hasAttribute('aria-hidden')).to.be.false;expect(panel.hasAttribute('role')).to.be.false;
+  });
+
+  it('makes inactive panels inert and gives plain-text panels a native Tab stop', async () => {
+    const el=await fixture(html`<au-tabs><div class="au-tab-panel" slot="panel">One</div><div class="au-tab-panel" slot="panel"><button>Other</button></div></au-tabs>`);
+    expect(el.firstElementChild.tabIndex).to.equal(0);
+    expect(el.lastElementChild.hidden).to.be.true;expect(el.lastElementChild.inert).to.be.true;
+  });
+
+  it('does not cancel vertical arrow scrolling in a horizontal tab list', async () => {
+    const el=await fixture(html`<au-tabs><div class="au-tab-panel" slot="panel">One</div><div class="au-tab-panel" slot="panel">Two</div></au-tabs>`);
+    const event=new KeyboardEvent('keydown',{key:'ArrowDown',cancelable:true,bubbles:true});
+    el.shadowRoot.querySelector('[role=tab]').dispatchEvent(event);
+    expect(event.defaultPrevented).to.be.false;expect(el.selectedIndex).to.equal(0);
+  });
+
+  it('emits one event per actual user change after reconnect, not repeated activation', async () => {
+    const wrapper=await fixture(html`<div><button id="outside">Outside</button><au-tabs><div class="au-tab-panel" slot="panel" label="One">One</div><div class="au-tab-panel" slot="panel">Two</div></au-tabs></div>`);
+    const el=wrapper.lastElementChild;el.remove();wrapper.append(el);await nextFrame();
+    const events=[];el.addEventListener('tab-change',e=>events.push(e.detail));
+    const tab=el.shadowRoot.querySelectorAll('[role=tab]')[1];tab.click();tab.click();
+    expect(events).to.deep.equal([{index:1,label:'Tab 2'}]);
+    wrapper.firstElementChild.focus();el.selectedIndex=0;expect(events).to.have.length(1);
+    expect(document.activeElement).to.equal(wrapper.firstElementChild);
+  });
+
+  it('handles empty groups, invalid indexes and initial selected-index safely', async () => {
+    const el=await fixture(html`<au-tabs selected-index="1"></au-tabs>`);
+    expect(el.selectedIndex).to.equal(-1);el.selectedIndex=1;
+    el.innerHTML='<div slot="panel" class="au-tab-panel">One</div><div slot="panel" class="au-tab-panel">Two</div>';await nextFrame();
+    expect(el.selectedIndex).to.equal(1);
+    for(const value of [NaN,Infinity,-1,0.5,'wrong']){el.selectedIndex=value;expect(el.selectedIndex).to.equal(1);}
+    el.selectedIndex=99;expect(el.selectedIndex).to.equal(1);
+  });
+
+  it('names the tablist through external references and links tabs to their panels', async () => {
+    const wrapper=await fixture(html`<div><span id="tabs-name">Account</span><au-tabs aria-labelledby="tabs-name"><div class="au-tab-panel" slot="panel">One</div></au-tabs></div>`);
+    const el=wrapper.lastElementChild;
+    expect(el.tabsList.ariaLabelledByElements).to.deep.equal([wrapper.firstElementChild]);
+    expect(el.shadowRoot.querySelector('[role=tab]').ariaControlsElements).to.deep.equal([el.firstElementChild]);
+  });
+
+  it('resolves multiple external names and updates a replacement reference', async () => {
+    const wrapper=await fixture(html`<div><span id="tabs-label-one">Account</span><span id="tabs-label-two">Settings</span><au-tabs aria-labelledby="tabs-label-one tabs-label-two"><div class="au-tab-panel" slot="panel">One</div></au-tabs></div>`);
+    const el=wrapper.lastElementChild;
+    expect(el.tabsList.ariaLabelledByElements).to.deep.equal([wrapper.children[0],wrapper.children[1]]);
+    const replacement=wrapper.firstElementChild.cloneNode(true);replacement.textContent='Profile';wrapper.firstElementChild.replaceWith(replacement);await nextFrame();
+    expect(el.tabsList.ariaLabelledByElements[0]).to.equal(replacement);
+  });
+
+  it('updates badges and fallback language without resetting the selected tab', async () => {
+    const el=await fixture(html`<au-tabs><div class="au-tab-panel" slot="panel">One</div><div class="au-tab-panel" slot="panel" data-badge="0">Two</div></au-tabs>`);
+    const tab=el.shadowRoot.querySelectorAll('[role=tab]')[1];tab.click();
+    el.setAttribute('data-text-tab','頁籤 {index}');el.setAttribute('data-text-tab-lang','zh-Hant');
+    el.lastElementChild.setAttribute('data-badge','3');el.setAttribute('data-text-badge-label-prefix','數量：');await nextFrame();
+    expect(tab.querySelector('.label').lang).to.equal('zh-Hant');
+    expect(tab.querySelector('.badge').getAttribute('aria-label')).to.equal('數量： 3');
+    expect(el.selectedIndex).to.equal(1);expect(el.shadowRoot.activeElement).to.equal(tab);
+  });
+
+  it('recovers focus from a removed active panel and handles removal of all panels', async () => {
+    const el=await fixture(html`<au-tabs><div class="au-tab-panel" slot="panel"><button>First</button></div><div class="au-tab-panel" slot="panel">Two</div></au-tabs>`);
+    el.querySelector('button').focus();el.firstElementChild.remove();await nextFrame();
+    expect(el.shadowRoot.activeElement).to.equal(el.shadowRoot.querySelector('[role=tab]'));
+    el.lastElementChild.remove();await nextFrame();expect(el.selectedIndex).to.equal(-1);expect(el.shadowRoot.activeElement).to.equal(el.tabsList);
+  });
+
+  it('keeps nested tab state independent', async () => {
+    const el=await fixture(html`<au-tabs><div class="au-tab-panel" slot="panel"><au-tabs><div class="au-tab-panel" slot="panel">Inner one</div><div class="au-tab-panel" slot="panel">Inner two</div></au-tabs></div><div class="au-tab-panel" slot="panel">Outer two</div></au-tabs>`);
+    const inner=el.querySelector('au-tabs');inner.shadowRoot.querySelectorAll('[role=tab]')[1].click();await nextFrame();
+    expect(inner.selectedIndex).to.equal(1);expect(el.selectedIndex).to.equal(0);
+  });
   it('renders the correct number of tab panels', async () => {
     const el = await fixture(html`
       <au-tabs>
@@ -66,7 +165,7 @@ describe('AuTabs with <div class="au-tab-panel">', () => {
     expect(tabs[2].getAttribute('aria-selected')).to.equal('true');
   });
 
-  it('focuses the corresponding panel on Tab key press', async () => {
+  it('keeps the active plain-text panel available in native Tab order', async () => {
     const el = await fixture(html`
       <au-tabs>
         <div class="au-tab-panel" slot="panel" label="Tab 1">Content 1</div>
@@ -83,9 +182,10 @@ describe('AuTabs with <div class="au-tab-panel">', () => {
     const panel = el.querySelector('.au-tab-panel[aria-hidden="false"]');
     expect(panel).to.exist;
     expect(panel.textContent).to.include('Content 1');
+    expect(panel.tabIndex).to.equal(0);
   });
 
-  it('names the panel with aria-label and omits cross-shadow idrefs', async () => {
+  it('names the light-DOM panel and uses a real control reference from its tab', async () => {
     const el = await fixture(html`
       <au-tabs>
         <div class="au-tab-panel" slot="panel" id="my-panel" label="My Tab">My Content</div>
@@ -95,11 +195,10 @@ describe('AuTabs with <div class="au-tab-panel">', () => {
     const tab = el.shadowRoot.querySelector('[role="tab"]');
     const panel = el.querySelector('.au-tab-panel');
 
-    // Panels (light DOM) and tabs (shadow DOM) can't share idrefs across the
-    // boundary, so the panel is named via aria-label and aria-controls is omitted.
+    // A shadow-to-ancestor element reference is supported, unlike a raw ID string.
     expect(panel.getAttribute('aria-label')).to.equal('My Tab');
     expect(panel.hasAttribute('aria-labelledby')).to.equal(false);
-    expect(tab.hasAttribute('aria-controls')).to.equal(false);
+    expect(tab.ariaControlsElements).to.deep.equal([panel]);
   });
 
   it('renders prefix, badge, and affix content correctly', async () => {

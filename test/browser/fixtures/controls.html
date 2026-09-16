@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>Standalone controls keyboard QA</title>
+<style>body{font:16px system-ui;margin:20px}section{margin-block:24px;max-width:600px}</style>
+<h1>Standalone controls keyboard QA</h1>
+<form id="form">
+<fieldset id="fields"><legend>Controls</legend>
+<section><button type="button" id="before-input">Before input</button><au-input id="text" name="text" label="Name" value=""></au-input><button type="button" id="after-input">After input</button></section>
+<section><button type="button" id="before-notes">Before notes</button><au-textarea id="notes" name="notes" label="Notes"></au-textarea><button type="button" id="after-notes">After notes</button></section>
+<section><button type="button" id="before-check">Before checkbox</button><au-checkbox id="check" name="check" label="Accept"></au-checkbox><button type="button" id="after-check">After checkbox</button></section>
+<section><button type="button" id="before-switch">Before switch</button><au-switch id="toggle" name="toggle" label="Notifications"></au-switch><button type="button" id="after-switch">After switch</button></section>
+<section><button type="button" id="before-radio">Before radio</button><au-radio-group id="radio" name="delivery" aria-label="Delivery"><au-radio value="a" checked>Standard</au-radio><au-radio value="b" disabled>Unavailable</au-radio><au-radio value="c">Express</au-radio></au-radio-group><button type="button" id="after-radio">After radio</button></section>
+<section><button type="button" id="before-rating">Before rating</button><au-rating id="rating" name="rating" value="2" max="5" label="Score"></au-rating><button type="button" id="after-rating">After rating</button></section>
+</fieldset><button type="reset" id="reset">Reset</button></form>
+<section><button id="before-tabs">Before tabs</button><au-tabs id="tabs" aria-label="Sections"><div slot="panel" class="au-tab-panel" label="First">First content</div><div slot="panel" class="au-tab-panel" label="Second">Second content</div></au-tabs><button id="after-tabs">After tabs</button></section>
+<script>
+const mode=new URL(location.href).searchParams.get('mode')||'source';
+const scripts=mode==='source'?['input','textarea','checkbox','switch','radio','rating','tabs'].map(x=>'../../../src/components/'+x+'.js'):mode==='bundle'?['../../../dist/accesserty-ui-kit.js']:mode==='min'?['../../../dist/accesserty-ui-kit.min.js']:[];
+if(!scripts.length) throw Error('Unknown fixture mode');
+for(const src of scripts) document.write('<script src="'+src+'"><\/script>');
+</script>
+</html>

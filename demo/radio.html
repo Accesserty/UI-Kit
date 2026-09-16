@@ -30,15 +30,15 @@
         </tr>
         <tr>
           <td>value</td>
-          <td>radio value</td>
+          <td>On the group: requested selection. On an option: its submission value. Use unique explicit option values; an empty value is allowed.</td>
         </tr>
         <tr>
           <td>checked</td>
-          <td>radio checked</td>
+          <td>Option-only initial selection marker. Later explicit changes update selection; label changes do not replay initial markers. Use the group's value property for controlled state.</td>
         </tr>
         <tr>
           <td>disabled</td>
-          <td>radio disabled</td>
+          <td>Disable the group or an individual option. Disabled fieldsets also prevent interaction and submission without discarding selection.</td>
         </tr>
         <tr>
           <td>direction</td>
@@ -54,8 +54,11 @@
         </tr>
         <tr>
           <td>aria-labelledby</td>
-          <td>Accessible label reference for the radio group.</td>
+          <td>IDs of visible group labels in the containing document or shadow root.</td>
         </tr>
+        <tr><td>aria-describedby</td><td>IDs of group instructions or error messages.</td></tr>
+        <tr><td>name</td><td>Native form submission key. Unnamed groups submit no entry.</td></tr>
+        <tr><td>required</td><td>Require selection using native radio validation when enabled options exist. An empty or entirely disabled option list has no validation anchor.</td></tr>
       </table>
     </section>
     <section>
@@ -87,7 +90,7 @@
     </section>
     <section>
       <h2>Localized Labels</h2>
-      <au-radio-group label="付款方式">
+      <au-radio-group label="付款方式" lang="zh-Hant">
         <au-radio value="card" label="信用卡" checked></au-radio>
         <au-radio value="transfer" label="轉帳"></au-radio>
         <au-radio value="cash" label="現金"></au-radio>
@@ -100,6 +103,25 @@
         <au-radio disabled>Radio 2</au-radio>
         <au-radio>Radio 3</au-radio>
       </au-radio-group>
+    </section>
+    <section>
+      <h2>Native form, validation and reset</h2>
+      <form id="delivery-form" novalidate>
+        <p id="delivery-label">Delivery method (required)</p>
+        <p id="delivery-help">Choose one delivery method. Reset clears your selection.</p>
+        <au-radio-group id="delivery" name="delivery" required direction="vertical" aria-labelledby="delivery-label" aria-describedby="delivery-help">
+          <au-radio value="standard">Standard delivery</au-radio>
+          <au-radio value="express">Express delivery</au-radio>
+          <au-radio value="pickup" disabled>Pickup (unavailable)</au-radio>
+        </au-radio-group>
+        <p id="delivery-error" role="alert" hidden></p>
+        <button type="submit">Confirm delivery</button>
+        <button type="reset">Reset</button>
+        <p id="delivery-status" role="status"></p>
+      </form>
+      <p>This demo does not send data. Tab enters the selected option (or the first enabled option).
+        Arrow keys move and select, skipping disabled options and wrapping; Space selects the focused option.
+        This is a standalone radio group, not the different radio-in-toolbar keyboard pattern.</p>
     </section>
     <section>
       <h2>Properties</h2>
@@ -115,19 +137,27 @@
         <tbody>
           <tr>
             <td>value</td>
-            <td>string | null (getter)</td>
-            <td>Returns the <code>value</code> of the currently checked radio, or <code>null</code> if none is checked.</td>
+            <td>string | null (getter + setter)</td>
+            <td>Select an option by value; null clears selection. Returns null if no option matches. Unmatched requests are retained for options inserted later. Property writes do not reflect the value attribute or emit change.</td>
           </tr>
           <tr>
             <td>disabled</td>
             <td>boolean (getter + setter)</td>
             <td>Get or set the disabled state of the whole group.</td>
           </tr>
+          <tr><td>name / required</td><td>string / boolean</td><td>Writable native form key and required constraint.</td></tr>
         </tbody>
       </table>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>const group = document.querySelector('au-radio-group');
-console.log(group.value); // e.g. "male"
+group.value = 'express';
+console.log(group.value);
 group.disabled = true;</code></pre>
+      <p><code>focus()</code> focuses the current enabled tab stop. <code>checkValidity()</code> and
+        <code>reportValidity()</code> expose native form validation. Reset silently restores the selection
+        captured when the first options are rendered; later value writes do not change that baseline.</p>
+      <p>Option nodes and keyboard focus survive label, language and value updates. When a focused option
+        is removed or disabled, focus moves to an enabled option or the group fallback. Option labels are
+        plain text; do not place links or buttons inside an option.</p>
     </section>
     <section>
       <h2>Events</h2>
@@ -144,13 +174,24 @@ group.disabled = true;</code></pre>
           <tr>
             <td>change</td>
             <td><code>{ value: string }</code></td>
-            <td>Fired when a radio selection changes. Bubbles and is composed.</td>
+            <td>One notification per user selection. Bubbles and is composed. Programmatic value changes, reset and restoration are silent.</td>
           </tr>
+          <tr><td>input</td><td>Native event</td><td>FormData is synchronized before the native composed input event reaches the consumer.</td></tr>
         </tbody>
       </table>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>document.querySelector('au-radio-group').addEventListener('change', (e) => {
   console.log('Selected:', e.detail.value);
 });</code></pre>
+    </section>
+    <section>
+      <h2>Framework and accessibility boundaries</h2>
+      <p>Bind the group value and handle <code>change.detail.value</code> to update your model.
+        Vue/Nuxt use explicit <code>:value</code> and <code>@change</code>; Angular form directives still need a value accessor.
+        Register the component only on the client. The Next/Nuxt/Angular fixtures verify host SSR and hydration,
+        not server-rendered shadow controls or operation without JavaScript.</p>
+      <p>Provide a visible group name and meaningful option text. Native element-reference labeling is used where supported;
+        older engines use a plain-text fallback, so rich labels may need an explicit localized aria-label.
+        Test your own themes, error flow and assistive technologies; the component is not a WCAG conformance guarantee.</p>
     </section>
     <section>
       <h2>CSS Variables</h2>
@@ -188,7 +229,7 @@ group.disabled = true;</code></pre>
         <tr>
           <td>--au-radio-input-border-color</td>
           <td>circle border color</td>
-          <td>oklch(0.7894 0 0)</td>
+          <td>oklch(0.55 0 0)</td>
         </tr>
         <tr>
           <td>--au-radio-input-bg</td>
@@ -233,7 +274,7 @@ group.disabled = true;</code></pre>
         <tr>
           <td>--au-radio-input-focus-shadow-color</td>
           <td>focusd border color</td>
-          <td>oklch(0.8315 0.15681888825079074 78.05241467152487)</td>
+          <td>oklch(0.45 0.15 260)</td>
         </tr>
         <tr>
           <td>--au-radio-label-disabled-text-color</td>
@@ -243,6 +284,34 @@ group.disabled = true;</code></pre>
       </table>
     </section>
   </main>
+  <script>
+    const form = document.getElementById('delivery-form');
+    const group = document.getElementById('delivery');
+    const error = document.getElementById('delivery-error');
+    const status = document.getElementById('delivery-status');
+    function clearError() {
+      error.hidden = true;
+      error.textContent = '';
+      group.removeAttribute('aria-invalid');
+      group.setAttribute('aria-describedby', 'delivery-help');
+    }
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      status.textContent = '';
+      if (!group.checkValidity()) {
+        error.hidden = false;
+        error.textContent = 'Please choose a delivery method.';
+        group.setAttribute('aria-invalid', 'true');
+        group.setAttribute('aria-describedby', 'delivery-help delivery-error');
+        group.focus();
+        return;
+      }
+      clearError();
+      status.textContent = `Selected: ${new FormData(form).get('delivery')}`;
+    });
+    group.addEventListener('change', () => { clearError(); status.textContent = ''; });
+    form.addEventListener('reset', () => { clearError(); status.textContent = ''; });
+  </script>
 </body>
 
 </html>

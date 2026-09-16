@@ -28,11 +28,11 @@
         </tr>
         <tr>
           <td>name</td>
-          <td>same group</td>
+          <td>Submission key. Multiple checked controls with the same name produce multiple entries; an unnamed control produces none.</td>
         </tr>
         <tr>
           <td>value</td>
-          <td>checkbox value</td>
+          <td>Value submitted when checked (default <code>on</code>). An explicit empty string remains empty.</td>
         </tr>
         <tr>
           <td>checked</td>
@@ -52,7 +52,15 @@
         </tr>
         <tr>
           <td>aria-labelledby</td>
-          <td>Accessible label reference passed to the internal checkbox input.</td>
+          <td>Label IDs resolved in the containing document or shadow root, including late and replaced labels.</td>
+        </tr>
+        <tr>
+          <td>aria-describedby / aria-invalid</td>
+          <td>Connect visible help/error text and expose application validation state.</td>
+        </tr>
+        <tr>
+          <td>required</td>
+          <td>Require this individual checkbox to be checked. This does not express “at least one of a group”.</td>
         </tr>
       </table>
     </section>
@@ -62,7 +70,7 @@
         Checkbox1
       </au-checkbox>
       <au-checkbox name="basic-checkbox" value="Checkbox_value2" checked>
-        Checkbox2(cheked)
+        Checkbox2(checked)
       </au-checkbox>
       <au-checkbox name="basic-checkbox" value="Checkbox_value3" disabled>
         Checkbox3(disabled)
@@ -81,7 +89,7 @@
         Checkbox1
       </au-checkbox>
       <au-checkbox name="custom-checkbox" value="custom_checkbox_value2" class="custom-checkbox" checked>
-        Checkbox2(cheked)
+        Checkbox2(checked)
       </au-checkbox>
       <au-checkbox name="custom-checkbox" value="custom_checkbox_value3" class="custom-checkbox" disabled>
         Checkbox3(disabled)
@@ -131,7 +139,7 @@
         <tr>
           <td>--au-checkbox-input-border-color</td>
           <td>square border color</td>
-          <td>oklch(0.7894 0 0)</td>
+          <td>oklch(0.55 0 0)</td>
         </tr>
         <tr>
           <td>--au-checkbox-input-border-radius</td>
@@ -151,7 +159,7 @@
         <tr>
           <td>--au-checkbox-input-focus-shadow-color</td>
           <td>focus border color(actually box-shadow)</td>
-          <td>oklch(0.8315 0.15681888825079074 78.05241467152487)</td>
+          <td>oklch(0.45 0.15 260)</td>
         </tr>
         <tr>
           <td>--au-checkbox-input-checked-bg</td>
@@ -212,6 +220,7 @@
           </tr>
         </thead>
         <tbody>
+          <tr><td>name / value / required</td><td>string / string / boolean</td><td>Writable reflected properties; updates synchronize native submission and validity.</td></tr>
           <tr>
             <td>checked</td>
             <td>boolean (getter + setter)</td>
@@ -228,6 +237,16 @@
 cb.checked = true;   // sets attribute
 cb.checked = false;  // removes attribute
 cb.disabled = true;</code></pre>
+      <p>Reset restores the checked state at first connection, not always unchecked. Assignments, reset and state
+        restoration are silent. Disabled ancestor fieldsets prevent interaction and submission. The current checked
+        state is reflected on the host; this attribute is not a native-style <code>defaultChecked</code> API.</p>
+      <p><code>focus(options)</code> focuses the checkbox. Native labels associated with the host can name and activate
+        it when no internal label is supplied. Explicit <code>aria-labelledby</code> takes precedence in browsers with
+        element-reference support; older engines use plain text and should receive an explicit localized
+        <code>aria-label</code> for rich labels. Do not place interactive elements inside the label slot.</p>
+      <p>Vue/Nuxt: use <code>:checked="agreed" @change="agreed = $event.detail"</code>, not direct text-style
+        <code>v-model</code>. React can bind <code>checked</code> and <code>onchange</code>. Angular form directives need
+        a value accessor; template property/event binding is separate. Register components only on the client in SSR apps.</p>
     </section>
     <section>
       <h2>Events</h2>
@@ -244,17 +263,20 @@ cb.disabled = true;</code></pre>
           <tr>
             <td>change</td>
             <td><code>boolean</code> (checked state)</td>
-            <td>Fired when the checked state changes. Bubbles and is composed.</td>
+            <td>One event after user activation, with boolean detail. Bubbles and is composed. Property assignment is silent.</td>
+          </tr>
+          <tr>
+            <td>input</td><td>—</td><td>Native composed event; the submitted value is already synchronized when listeners receive it.</td>
           </tr>
           <tr>
             <td>focus</td>
             <td>—</td>
-            <td>Fired when the checkbox receives focus. Bubbles and is composed.</td>
+            <td>Native focus event, not a synthetic duplicate. Composed but does not bubble; use focusin for delegation.</td>
           </tr>
           <tr>
             <td>blur</td>
             <td>—</td>
-            <td>Fired when the checkbox loses focus. Bubbles and is composed.</td>
+            <td>Native blur event, not a synthetic duplicate. Composed but does not bubble; use focusout for delegation.</td>
           </tr>
         </tbody>
       </table>
@@ -265,27 +287,46 @@ cb.disabled = true;</code></pre>
     <section>
       <h2>FAQ</h2>
       <h3>How does it compare to native checkboxes?</h3>
-      <p>Using the <code>au-checkbox</code> ensures that screen readers correctly interpret the association between the
-        label and input, making it recommended for use.</p>
-      <p>But even so, this is still not enough. If there is a group of multiple related checkboxes, it's best to use
-        role="group", aria-labelledby, &lt;ul&gt; and &lt;li&gt. This way, it is possible to know how many checkboxes
-        are
-        in the same group.</p>
+      <p>Prefer a native checkbox when it meets your needs. This component adds a configurable label/style and form
+        contract, not a guarantee of screen-reader or WCAG conformance. Keep a visible label, verify custom theme
+        contrast and target size, and test the consuming page with assistive technology.</p>
+      <p>Use a fieldset and legend to name a related group. A rule such as “choose at least one” needs group-level
+        application validation rather than setting required on every checkbox.</p>
       <form id="foodForm">
-        <div role="group" aria-labelledby="checkbox-group">
-          <p id="checkbox-group">Choose at least one</p>
+        <fieldset>
+          <legend>Choose at least one fruit</legend>
           <au-checkbox name="food" value="apple" class="basic-checkbox">Apple</au-checkbox>
           <au-checkbox name="food" value="banana" class="basic-checkbox">Banana</au-checkbox>
           <au-checkbox name="food" value="orange" class="basic-checkbox" checked>Orange</au-checkbox>
-          <div id="errorMessage" class="error" style="display: none;">Please Choose one</div>
+          <div id="errorMessage" class="error" role="alert" hidden>Please choose at least one fruit.</div>
           <button type="submit">Send</button>
-        </div>
+          <button type="reset">Reset</button>
+        </fieldset>
+        <p id="selection-status" role="status"></p>
       </form>
     </section>
   </main>
   <script>
     const form = document.getElementById('foodForm');
     const errorMessage = document.getElementById('errorMessage');
+    const status = document.getElementById('selection-status');
+    const checkboxes = [...form.querySelectorAll('au-checkbox')];
+    function showError(invalid) {
+      errorMessage.hidden = !invalid;
+      for (const checkbox of checkboxes) {
+        if (invalid) {
+          checkbox.setAttribute('aria-invalid', 'true');
+          checkbox.setAttribute('aria-describedby', 'errorMessage');
+        } else {
+          checkbox.removeAttribute('aria-invalid');checkbox.removeAttribute('aria-describedby');
+        }
+      }
+    }
+    form.addEventListener('reset', () => { showError(false); status.textContent = ''; });
+    form.addEventListener('change', () => {
+      status.textContent = '';
+      if (checkboxes.some(checkbox => checkbox.checked)) showError(false);
+    });
 
     form.addEventListener('submit', (event) => {
       event.preventDefault(); // 阻止默认提交行为
@@ -293,10 +334,10 @@ cb.disabled = true;</code></pre>
       const selectedFoods = formData.getAll('food');
 
       if (selectedFoods.length > 0) {
-        errorMessage.style.display = 'none';
-        alert('Your Choose：' + selectedFoods.join(', '));
+        showError(false);
+        status.textContent = 'Selected: ' + selectedFoods.join(', ');
       } else {
-        errorMessage.style.display = 'block';
+        status.textContent = '';showError(true);checkboxes[0].focus();
       }
     });
   </script>

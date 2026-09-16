@@ -7,8 +7,6 @@
   <title>Accesserty UI Kit File Upload</title>
   <link rel="stylesheet" href="../src/css/au-style.css" />
   <link rel="stylesheet" href="demo.css" />
-  <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   <script src="../src/components/file-upload.js" defer></script>
 </head>
 
@@ -21,10 +19,10 @@
       <au-file-upload label="Upload Files" multiple required max-files="3" max-size-mb="2" max-total-size-mb="2"
         accept=".txt, .jpg,.png,application/pdf" msg-drop-text="Drag & drop files here" msg-remove-text="Delete"
         msg-required="You must upload at least one document." msg-type-error="is not a supported file format"
-        msg-size-error="is too large. Limit is" msg-count-error="You can only attach up to"
-        msg-total-size-error="Total Size: " msg-added="{count} file(s) added."
-        msg-removed="{fileName} removed." msg-remove-file-label="Remove {fileName}">
-        <button slot="trigger" class="custom-btn--primary-flat">Choose file...</button>
+        msg-size-error="{fileName} exceeds {maxSize}MB." msg-count-error="{fileName} cannot be added; the limit is {maxFiles} files."
+        msg-total-size-error="Total file size cannot exceed {maxTotalSize}MB." msg-added="{count} file(s) added."
+        msg-removed="{fileName} removed." msg-remove-file-label="Delete {fileName}">
+        <button type="button" slot="trigger" class="custom-btn--primary-flat">Choose file...</button>
         <div slot="hint">.txt, .jpg, .png, application/pdf</div>
       </au-file-upload>
     </section>
@@ -35,13 +33,25 @@
       <au-file-upload class="custom-file-upload" label="Upload Files" multiple required max-files="3" max-size-mb="2"
         max-total-size-mb="2" accept=".txt, .jpg,.png,application/pdf" msg-drop-text="Drag & drop files here"
         msg-remove-text="Delete" msg-required="You must upload at least one document."
-        msg-type-error="is not a supported file format" msg-size-error="is too large. Limit is"
-        msg-count-error="You can only attach up to" msg-total-size-error="Total Size: "
+        msg-type-error="is not a supported file format" msg-size-error="{fileName} exceeds {maxSize}MB."
+        msg-count-error="{fileName} cannot be added; the limit is {maxFiles} files." msg-total-size-error="Total file size cannot exceed {maxTotalSize}MB."
         msg-added="{count} file(s) added." msg-removed="{fileName} removed."
-        msg-remove-file-label="Remove {fileName}">
-        <button slot="trigger" class="custom-btn--primary-flat">Choose file...</button>
+        msg-remove-file-label="Delete {fileName}">
+        <button type="button" slot="trigger" class="custom-btn--primary-flat">Choose file...</button>
         <div slot="hint">.txt, .jpg, .png, application/pdf</div>
       </au-file-upload>
+    </section>
+    <section>
+      <h2>Native form and default trigger</h2>
+      <p>This example only checks the selected attachments locally; it sends nothing to a server.
+        Without a trigger slot, a native button uses the component's label.</p>
+      <form id="file-demo-form" enctype="multipart/form-data">
+        <au-file-upload name="attachments" label="Choose text attachments" accept=".txt" multiple required>
+          <span slot="hint">Text files: at most 5 files, 5MB each and 20MB in total.</span>
+        </au-file-upload>
+        <button type="submit">Check attachments</button><button type="reset">Reset attachments</button>
+        <p id="file-demo-result" role="status"></p>
+      </form>
     </section>
     <section>
       <h2>Attributes</h2>
@@ -64,19 +74,19 @@
           </tr>
           <tr>
             <td>multiple</td>
-            <td>Allows selecting more than one file.</td>
+            <td>Allows adding more than one file. Without it, at most one file is accepted; remove it before choosing a replacement.</td>
           </tr>
           <tr>
             <td>max-files</td>
-            <td>Maximum number of files allowed.</td>
+            <td>Maximum retained file count (default 5). Nonnegative finite values are rounded down; zero accepts none. Invalid values use the default. Lowering limits does not delete existing files.</td>
           </tr>
           <tr>
             <td>max-size-mb</td>
-            <td>Maximum size per file in MB.</td>
+            <td>Maximum size per file in MB (default 5); nonnegative finite number. Invalid values use the default.</td>
           </tr>
           <tr>
             <td>max-total-size-mb</td>
-            <td>Maximum total size across all selected files in MB.</td>
+            <td>Maximum total selected size in MB (default 20). A batch exceeding this total is not added.</td>
           </tr>
           <tr>
             <td>msg-drop-text</td>
@@ -88,7 +98,7 @@
           </tr>
           <tr>
             <td>msg-remove-file-label</td>
-            <td>Accessible name template for each remove button. Supports <code>{fileName}</code>.</td>
+            <td>Accessible name template for each remove button. Supports <code>{fileName}</code> and <code>{action}</code> (the visible remove text). Defaults to <code>{action} {fileName}</code>. If a custom template omits the visible text, the component prepends it for speech-input matching. Localize both attributes together for natural wording.</td>
           </tr>
           <tr>
             <td>msg-added</td>
@@ -133,6 +143,19 @@
   msg-count-error="{fileName} 無法新增，最多只能上傳 {maxFiles} 個檔案"
   msg-total-size-error="檔案總大小不可超過 {maxTotalSize}MB"&gt;
 &lt;/au-file-upload&gt;</code></pre>
+      <p>Provide a named native <code>&lt;button type="button" slot="trigger"&gt;</code>
+        to customize keyboard file selection, or omit the slot to use the default button.
+        Public <code>focus(options)</code> focuses the visible trigger without opening
+        the picker, and is ignored while effectively disabled.
+        Host <code>aria-describedby</code> connects external text to the component's
+        groups and default button, in addition to internal upload instructions.
+        If you supply a custom trigger, set its own <code>aria-describedby</code>
+        to your error/hint IDs; the component does not overwrite consumer ARIA.
+        After the last focused remove button is removed, focus returns to an available
+        trigger, or the visible trigger region if no usable trigger exists. A disabled
+        component or ancestor fieldset prevents selection, dropping and removal without
+        losing the selected files. Form validation focuses a visible region and displays
+        the required message beside the picker.</p>
     </section>
     <section>
       <h2>CSS Variables</h2>
@@ -178,7 +201,7 @@
           <tr>
             <td>--au-file-upload-area-border-color</td>
             <td>border color of upload area</td>
-            <td>oklch(0.7894 0 0)</td>
+            <td>oklch(0.55 0 0)</td>
           </tr>
           <tr>
             <td>--au-file-upload-area-border-radius</td>
@@ -238,7 +261,7 @@
           <tr>
             <td>--au-file-upload-file-list-preview-border-color</td>
             <td>border color of image/icon</td>
-            <td>oklch(0.7894 0 0)</td>
+            <td>oklch(0.55 0 0)</td>
           </tr>
           <tr>
             <td>--au-file-upload-file-list-neme-ellipsis-line</td>
@@ -283,7 +306,7 @@
           <tr>
             <td>--au-file-upload-delete-border-color</td>
             <td>border color of delete button</td>
-            <td>oklch(0.7894 0 0)</td>
+            <td>oklch(0.55 0 0)</td>
           </tr>
           <tr>
             <td>--au-file-upload-delete-border-radius</td>
@@ -303,7 +326,7 @@
           <tr>
             <td>--au-file-upload-delete-hover-border-color</td>
             <td>border color(hover) of delete button</td>
-            <td>oklch(0.7894 0 0)</td>
+            <td>oklch(0.55 0 0)</td>
           </tr>
           <tr>
             <td>--au-file-upload-delete-active-bg</td>
@@ -312,13 +335,13 @@
           </tr>
           <tr>
             <td>--au-file-upload-delete-focus-shadow-width</td>
-            <td>border width(focus) of delete button</td>
+            <td>Focus outline width of delete button (minimum 2px)</td>
             <td>3px</td>
           </tr>
           <tr>
             <td>--au-file-upload-delete-focus-shadow-color</td>
             <td>border color(focus) of delete button</td>
-            <td>oklch(0.8315 0.15681888825079074 78.05241467152487)</td>
+            <td>oklch(0.45 0.15 260)</td>
           </tr>
         </tbody>
       </table>
@@ -339,8 +362,11 @@
             <td>value</td>
             <td>File[] (getter + setter)</td>
             <td>
-              Get the current array of selected <code>File</code> objects. Setting it to an array programmatically
-              replaces the current file list and updates the UI.
+              Get a copy of the selected <code>File</code> array. Assigning an array copies valid File entries,
+              replaces the list and synchronizes native form submission silently. Mutating the returned array
+              does not update the component. Pre-registration assignments are retained.
+              This controlled setter bypasses picker restrictions; use <code>handleFiles(files)</code> for
+              accept/count/size validation. Client-side checks do not replace server validation.
               <pre style="background:#f4f4f4;padding:0.5rem;overflow:auto;"><code>const fu = document.querySelector('au-file-upload');
 console.log(fu.value); // File[]
 fu.value = []; // clear files programmatically</code></pre>
@@ -351,6 +377,12 @@ fu.value = []; // clear files programmatically</code></pre>
     </section>
     <section>
       <h2>Events</h2>
+      <p>A named component contributes one real <code>File</code> entry per selected file to
+        <code>new FormData(form)</code>, under the component's current <code>name</code>.
+        Empty or unnamed controls contribute no entries. Reset clears the submitted files.
+        For native uploads use <code>enctype="multipart/form-data"</code>; when sending
+        FormData with fetch, let the browser set the multipart Content-Type boundary.
+        The component does not upload anything itself; enforce file-type and size checks on the server.</p>
       <table>
         <caption>Events dispatched by <code>&lt;au-file-upload&gt;</code>:</caption>
         <thead>
@@ -364,12 +396,12 @@ fu.value = []; // clear files programmatically</code></pre>
           <tr>
             <td>change</td>
             <td>—</td>
-            <td>Fired when files are added. Bubbles and is composed. Use <code>el.value</code> to read the current file list.</td>
+            <td>Fired when files are accepted by <code>handleFiles()</code> or removed by the button or <code>removeFile(file)</code>. Bubbles and is composed. Use <code>el.value</code> to read the current file list. Assigning <code>value</code> or resetting the form does not emit change.</td>
           </tr>
           <tr>
             <td>remove-file</td>
             <td><code>File</code></td>
-            <td>Fired when a file is removed from the list. <code>e.detail</code> is the removed <code>File</code> object. Bubbles and is composed.</td>
+            <td>Fired once for an actual removal, through either the button or <code>removeFile(file)</code>, before change. <code>e.detail</code> is the removed <code>File</code> object. Bubbles and is composed. Removing an absent file does nothing.</td>
           </tr>
         </tbody>
       </table>
@@ -384,6 +416,15 @@ fu.addEventListener('remove-file', (e) => {
 });</code></pre>
     </section>
   </main>
+  <script>
+    const fileForm = document.getElementById('file-demo-form');
+    const fileResult = document.getElementById('file-demo-result');
+    fileForm.addEventListener('submit', event => {
+      event.preventDefault();
+      fileResult.textContent = `${new FormData(fileForm).getAll('attachments').length} attachment(s) ready. No files were sent.`;
+    });
+    fileForm.addEventListener('reset', () => { fileResult.textContent = ''; });
+  </script>
 </body>
 
 </html>

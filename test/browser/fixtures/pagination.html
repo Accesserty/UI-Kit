@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Pagination QA</title>
+<style>body{margin:16px;font:16px system-ui}main{max-width:600px}</style>
+<main><h1>Pagination QA</h1><au-pagination id="pager" data-total="30" data-text-pagination-label="Results pages"></au-pagination><button id="after">After pagination</button></main>
+<script>
+const mode=new URL(location.href).searchParams.get('mode')||'source';
+const scripts={source:'../../../src/components/pagination.js',bundle:'../../../dist/accesserty-ui-kit.js',min:'../../../dist/accesserty-ui-kit.min.js'};
+const src=scripts[mode];
+if(!src) throw new Error('Unknown pagination fixture mode: '+mode);
+const script=document.createElement('script');
+script.src=src;
+script.onerror=()=>{ throw new Error('Failed to load pagination script: '+src); };
+document.head.append(script);
+</script></html>

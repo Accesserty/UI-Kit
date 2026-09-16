@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Accordion standalone checks</title>
+<style>body{margin:16px;font:16px system-ui}au-accordion{display:block;max-width:600px}</style>
+<button id="before">Before</button>
+<au-accordion id="faq" data-text-exclusive-hint="One answer at a time.">
+  <au-accordion-item id="first" open heading-level="2">
+    <span slot="heading">First answer</span><span slot="sub">Optional</span><span slot="icon">▼</span>
+    <div slot="content"><button id="inside">Read answer</button>
+      <au-accordion id="nested"><au-accordion-item id="inner" heading-level="3"><span slot="heading">Nested answer</span><div slot="content">Nested content</div></au-accordion-item></au-accordion>
+    </div>
+  </au-accordion-item>
+  <au-accordion-item id="second" open heading-level="2"><span slot="heading">Second answer</span><div slot="content"><button>Second action</button></div></au-accordion-item>
+</au-accordion>
+<button id="after">After</button>
+<script src="../../../dist/accesserty-ui-kit.js" defer></script>
+<script>
+window.accordionFixture={root:document.getElementById('faq'),first:document.getElementById('first'),second:document.getElementById('second'),inner:document.getElementById('inner'),inside:document.getElementById('inside')};
+accordionFixture.root.exclusive=true;
+accordionFixture.first.open=true;
+window.eventLog=[];
+accordionFixture.root.addEventListener('au-toggle',e=>{if(e.composedPath()[0].parentElement===accordionFixture.root)eventLog.push([e.target.id,e.detail.open]);});
+</script></html>

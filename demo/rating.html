@@ -35,17 +35,17 @@
         </tr>
         <tr>
           <td>name</td>
-          <td>Form field name</td>
-          <td>rating</td>
+          <td>Form field name; required for submission. Also writable as a JavaScript property.</td>
+          <td>Empty (not submitted)</td>
         </tr>
         <tr>
           <td>max</td>
-          <td>Maximum score (number of stars)</td>
+          <td>Maximum score (positive integer number of stars, capped at 100). Invalid values use 5. Also writable as a JavaScript property.</td>
           <td>5</td>
         </tr>
         <tr>
           <td>value</td>
-          <td>Currently selected value</td>
+          <td>Current score, clamped to 0–max. Invalid numbers become 0. Zero and fractional scores do not check an integer radio.</td>
           <td>0</td>
         </tr>
         <tr>
@@ -70,7 +70,7 @@
         </tr>
         <tr>
           <td>data-text-score</td>
-          <td>Visible score template when <code>show-score</code> is set. Supports <code>{value}</code>, <code>{max}</code>, and <code>{scoreInfo}</code>.</td>
+          <td>Score description, visible when <code>show-score</code> is set and visually hidden otherwise. Supports <code>{value}</code>, <code>{max}</code>, and <code>{scoreInfo}</code>. Keep the numeric value in translated templates.</td>
           <td>{value} / {max} {scoreInfo}</td>
         </tr>
         <tr>
@@ -90,7 +90,7 @@
         </tr>
         <tr>
           <td>readonly</td>
-          <td>Prevent interaction but allow focus (for display)</td>
+          <td>Display-only score. Radios are disabled and leave the Tab order; the group and exact score remain available to assistive technology. A named readonly score is still submitted.</td>
           <td>false</td>
         </tr>
       </table>
@@ -108,6 +108,8 @@
           </tr>
         </thead>
         <tbody>
+          <tr><td>name</td><td>string (getter + setter)</td><td>Reflects the form field name; changing it changes the submission key.</td></tr>
+          <tr><td>max</td><td>number (getter + setter)</td><td>Changes the number of options and recomputes the bounded score.</td></tr>
           <tr>
             <td>value</td>
             <td>number (getter + setter)</td>
@@ -121,7 +123,7 @@
           <tr>
             <td>readonly</td>
             <td>boolean (getter + setter)</td>
-            <td>Get or set the read-only state. Disables interaction but allows focus.</td>
+            <td>Get or set the display-only state. Internal radios cannot be focused or changed.</td>
           </tr>
         </tbody>
       </table>
@@ -129,11 +131,24 @@
 rating.value = 3.5;    // set partial star
 console.log(rating.value); // 3.5
 rating.readonly = true;</code></pre>
+      <p>Left/Right follow visual direction in RTL; Up/Down keep decrement/increment behavior.
+        Partial stars fill from the inline start edge. Integer values synchronize the selected radio, star fill, score text and form value.
+        Fractional values keep partial stars and the exact score description, without selecting a
+        rounded integer. User interaction chooses integer values. Reset restores the value captured
+        when the element first connects, bounded by the current max; property updates and reset
+        do not emit change. Label updates preserve existing option nodes and focus.</p>
+      <p><code>element.focus({ preventScroll: true })</code> focuses the current enabled
+        radio without selecting it. Disabled and readonly ratings ignore focus requests.
+        Host <code>aria-invalid</code> is mirrored to the radiogroup. Use
+        <code>aria-describedby</code> on the host to reference external error or hint
+        text; it is combined with the internal score description and follows text
+        replacement and updates. Application-specific constraint validation remains
+        the consumer's responsibility.</p>
     </section>
     <section>
       <h2>Basic Rating</h2>
       <au-rating id="basic-rating" aria-label="Rate this product" labels="Very Bad,Bad,OK,Good,Excellent"></au-rating>
-      <p id="rating-status"></p>
+      <p id="rating-status" role="status"></p>
     </section>
 
     <section>
@@ -167,16 +182,16 @@ rating.readonly = true;</code></pre>
 
     <section>
       <h2>Native Form Participation</h2>
-      <form id="demo-form" action="javascript:void(0);">
+      <form id="demo-form">
         <div style="margin-bottom: 1rem;">
-          <label for="form-rating" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Rate Us:</label>
-          <au-rating id="form-rating" name="user-rating" value="3"
+          <p style="margin-bottom: 0.5rem; font-weight: bold;">Rate Us:</p>
+          <au-rating id="form-rating" name="user-rating" value="3" aria-label="Rate Us"
             labels="Poor,Fair,Good,Very Good,Excellent"></au-rating>
         </div>
         <button type="submit" style="padding: 0.5rem 1rem; cursor: pointer;">Submit Form</button>
       </form>
-      <div id="form-output"
-        style="margin-top: 1rem; padding: 1rem; background: #eee; border-radius: 4px; display: none;"></div>
+      <div id="form-output" role="status"
+        style="margin-top: 1rem; padding: 1rem; background: #eee; border-radius: 4px;"></div>
     </section>
 
     <section>
@@ -217,7 +232,7 @@ rating.readonly = true;</code></pre>
         <tr>
           <td>--au-rating-star-stroke-color</td>
           <td>Star stroke color</td>
-          <td>oklch(0.6 0 0)</td>
+          <td>oklch(0.45 0 0)</td>
         </tr>
         <tr>
           <td>--au-rating-label-color</td>
@@ -242,7 +257,7 @@ rating.readonly = true;</code></pre>
         <tr>
           <td>--au-rating-focus-color</td>
           <td>Focus ring color</td>
-          <td>oklch(0.8315 0.157 78)</td>
+          <td>oklch(0.45 0.15 260)</td>
         </tr>
         <tr>
           <td>--au-rating-score-color</td>
@@ -260,7 +275,8 @@ rating.readonly = true;</code></pre>
     <section>
       <h2>Event Listeners</h2>
       <p>The <code>&lt;au-rating&gt;</code> component dispatches a <code>change</code> event when the rating is
-        selected.</p>
+        changed by the user. The event bubbles across Shadow DOM and carries <code>detail.value</code>.
+        Reconnecting the same element does not add duplicate handlers.</p>
       <code style="display: block; white-space: pre-wrap; background: #f4f4f4; padding: 1rem; border-radius: 4px;">
 document.querySelector('au-rating').addEventListener('change', (e) => {
   console.log('Selected rating:', e.detail.value);
@@ -271,12 +287,13 @@ document.querySelector('au-rating').addEventListener('change', (e) => {
     <section>
       <h2>Accessibility</h2>
       <ul>
-        <li>Uses native <code>&lt;input type="radio"&gt;</code> for proper form integration</li>
-        <li>Keyboard navigation with Arrow keys (←↑→↓)</li>
-        <li>Screen reader support via <code>role="radiogroup"</code></li>
+        <li>Native radio options; the host submits through <code>ElementInternals</code>.</li>
+        <li>Tab enters one option; Space selects it; arrow keys move and select with wrapping, following the <a href="https://www.w3.org/WAI/ARIA/apg/patterns/radio/examples/radio-rating/">APG rating keyboard pattern</a>.</li>
+        <li>Named radiogroup with an exact score description; these semantics are not a substitute for screen-reader testing.</li>
         <li>Visible labels below each star for clarity</li>
         <li>Focus indication with visible ring</li>
-        <li>Use <code>disabled</code> for read-only display mode</li>
+        <li>Use <code>readonly</code> for display-only scores; <code>disabled</code> (including a disabled ancestor fieldset) also excludes the value from native submission.</li>
+        <li>Reduced-motion and forced-colors styles, wrapping layout and a non-color-only selected marker. Recheck contrast and target sizes when customizing the theme.</li>
       </ul>
     </section>
   </main>

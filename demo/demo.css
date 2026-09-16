@@ -1,3 +1,14 @@
+.visually-hidden, .sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 html,
 body {
   line-height: 1.5;
@@ -274,7 +285,6 @@ code {
   max-width: 300px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  overflow: hidden;
 
   &::part(au-card-container) {
     display: flex;
@@ -292,7 +302,8 @@ code {
     h3 {
       font-size: 1.5rem;
       margin: 0;
-      word-break: brea-word;
+      overflow-wrap: anywhere;
+      min-width: 0;
       flex: 1;
     }
   }
@@ -318,6 +329,7 @@ code {
     border-top: 1px solid var(--color-border);
     padding: var(--spacing-m);
     display: flex;
+    flex-wrap: wrap;
     gap: 1rem;
     justify-content: flex-end;
   }
@@ -437,8 +449,8 @@ code {
   /* --au-radio-input-border-style:; */
   /* --au-radio-input-border-color:; */
   /* --au-radio-input-bg:; */
-  --au-radio-input-checked-bg: var(--color-primary-500);
-  --au-radio-input-checked-circle-color: var(--color-danger-500);
+  --au-radio-input-checked-bg: oklch(0.4 0.12 260);
+  --au-radio-input-checked-circle-color: white;
   /* --au-radio-label-text-color:; */
   /* --au-radio-label-text-size:; */
   /* --au-radio-label-hover-text-deco:; */
@@ -540,6 +552,7 @@ code {
 }
 
 .custom-dropdown {
+  --au-btn-focus-shadow-color: oklch(0.4 0 0);
   /* --au-dropdown-padding-vertical:; */
   /* --au-dropdown-padding-horizontal:; */
   --au-dropdown-text-color: red;

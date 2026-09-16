@@ -1,7 +1,51 @@
-import { html, fixture, expect } from '@open-wc/testing';
+import { html, fixture, expect, nextFrame } from '@open-wc/testing';
 import '../src/components/dropdown.js';
 
 describe('AuDropdown', () => {
+  it('degrades to an inline keyboard menu when Popover methods are unavailable', async () => {
+    const wrapper = await fixture(html`<div><button>Outside</button><au-dropdown><au-dropdown-item value="a">Alpha</au-dropdown-item><au-dropdown-item value="b">Beta</au-dropdown-item></au-dropdown></div>`);
+    const dropdown = wrapper.querySelector('au-dropdown');
+    dropdown.remove();
+    Object.defineProperty(dropdown.menu, 'showPopover', {value:undefined,configurable:true});
+    Object.defineProperty(dropdown.menu, 'hidePopover', {value:undefined,configurable:true});
+    wrapper.append(dropdown);
+    expect(dropdown.isOpen).to.be.false;
+    expect(dropdown.menu.hidden).to.be.true;
+    expect(dropdown.trigger.hasAttribute('popovertarget')).to.be.false;
+    dropdown.trigger.click();
+    expect(dropdown.isOpen).to.be.true;
+    expect(getComputedStyle(dropdown.menu).position).to.equal('static');
+    expect(dropdown.items[0].shadowRoot.activeElement).to.equal(dropdown.items[0].item);
+    dropdown.items[0].item.dispatchEvent(new KeyboardEvent('keydown', {key:'ArrowDown',bubbles:true,composed:true}));
+    expect(dropdown.items[1].shadowRoot.activeElement).to.equal(dropdown.items[1].item);
+    dropdown.items[1].item.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape',bubbles:true,composed:true}));
+    expect(dropdown.isOpen).to.be.false;
+    expect(dropdown.shadowRoot.activeElement).to.equal(dropdown.trigger);
+    let selections=0; dropdown.addEventListener('selected',()=>selections++);
+    dropdown.open(); dropdown.items[0].click();
+    expect(selections).to.equal(1);
+    dropdown.open(); wrapper.querySelector('button').focus();
+    expect(dropdown.isOpen).to.be.false;
+    expect(document.activeElement).to.equal(wrapper.querySelector('button'));
+    dropdown.open(); dropdown.remove(); wrapper.append(dropdown);
+    expect(dropdown.isOpen).to.be.false;
+  });
+
+  it('keeps native popovers inside the viewport in LTR/RTL without CSS anchors', async () => {
+    const dropdown = await fixture(html`<au-dropdown style="position:fixed;right:0;bottom:0;width:140px"><au-dropdown-item>${'LongWord'.repeat(60)}</au-dropdown-item></au-dropdown>`);
+    for(const dir of ['ltr','rtl']) {
+      dropdown.dir=dir; dropdown.open(); await nextFrame();
+      const box=dropdown.menu.getBoundingClientRect();
+      expect(box.left).to.be.at.least(7);
+      expect(box.right).to.be.at.most(innerWidth-7);
+      expect(box.top).to.be.at.least(7);
+      expect(box.bottom).to.be.at.most(innerHeight-7);
+      expect(box.bottom).to.be.at.most(dropdown.trigger.getBoundingClientRect().top);
+      expect(getComputedStyle(dropdown.menu).positionAnchor).not.to.equal('--dropdown-anchor');
+      dropdown.close();
+      expect(dropdown._trackingPosition).to.be.false;
+    }
+  });
   let el;
   beforeEach(async () => {
     el = await fixture(html`
@@ -21,6 +65,7 @@ describe('AuDropdown', () => {
 
     expect(trigger.getAttribute('role')).to.equal('button');
     expect(trigger.getAttribute('aria-haspopup')).to.equal('menu');
+    expect(trigger.getAttribute('aria-expanded')).to.equal('false');
     expect(trigger.getAttribute('popovertarget')).to.equal(menu.id);
     expect(menu.getAttribute('popover')).to.equal('auto');
     expect(menu.getAttribute('aria-labelledby')).to.equal(trigger.id);
@@ -236,6 +281,62 @@ describe('AuDropdown', () => {
 
     dropdown.setAttribute('data-text-trigger', '更多選項');
     expect(fallback.textContent).to.equal('更多選項');
+  });
+
+  it('navigates and returns focus inside a containing shadow root', async () => {
+    const wrapper = await fixture(html`<div></div>`);
+    wrapper.attachShadow({ mode: 'open' }).append(el);
+    el.open(0);
+    await new Promise(r => setTimeout(r, 100));
+    el.items[0].item.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, composed: true }));
+    expect(el.items[1].shadowRoot.activeElement).to.equal(el.items[1].item);
+    el.items[1].item.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, composed: true }));
+    await new Promise(r => setTimeout(r, 50));
+    expect(el.shadowRoot.activeElement).to.equal(el.trigger);
+  });
+
+  it('does not restore stale expanded state after disconnect and reconnect', async () => {
+    el.open();
+    await new Promise(r => setTimeout(r, 100));
+    const parent = el.parentNode;
+    el.remove();
+    parent.append(el);
+    await new Promise(r => setTimeout(r, 50));
+    expect(el.isOpen).to.be.false;
+    expect(el.trigger.getAttribute('aria-expanded')).to.equal('false');
+  });
+
+  it('keeps one selection notification after moving existing items and the dropdown', async () => {
+    let count = 0;
+    el.addEventListener('selected', () => count++);
+    const first = el.items[0];
+    for (let i = 0; i < 3; i++) {
+      first.remove();
+      el.append(first);
+      const parent = el.parentNode;
+      el.remove();
+      parent.append(el);
+    }
+    first.click();
+    expect(count).to.equal(1);
+    el.open(el.items.indexOf(first));
+    await new Promise(r => setTimeout(r, 100));
+    first.item.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true }));
+    expect(count).to.equal(2);
+    expect(el.isOpen).to.be.false;
+  });
+
+  it('focuses on open without a deferred paint and leaves external action focus alone', async () => {
+    const dialogAction = await fixture(html`<button>Action destination</button>`);
+    el.open(1);
+    expect(el.trigger.getAttribute('aria-expanded')).to.equal('true');
+    expect(el.items[1].shadowRoot.activeElement).to.equal(el.items[1].item);
+    el.addEventListener('selected', () => dialogAction.focus());
+    el.items[1].click();
+    expect(el.trigger.getAttribute('aria-expanded')).to.equal('false');
+    await new Promise(r => setTimeout(r, 50));
+    expect(document.activeElement).to.equal(dialogAction);
+    expect(el.isOpen).to.be.false;
   });
 });
 

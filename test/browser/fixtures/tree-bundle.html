@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Tree standalone checks</title>
+<style>body{margin:16px;font:16px system-ui}main{max-width:600px}</style>
+<main><h1>Tree checks</h1><span id="tree-label">Project files</span>
+<button id="before">Before tree</button>
+<au-tree id="files" show-checkbox aria-labelledby="tree-label"></au-tree>
+<button id="after">After tree</button><output id="changes" role="status"></output></main>
+<script src="../../../dist/accesserty-ui-kit.js" defer></script>
+<script>
+  // data assigned before definition is upgraded when the deferred script runs.
+  const tree = document.getElementById('files');
+  tree.data = [{id:'root',label:'Files',children:[
+    {id:'alpha',label:'Alpha'}, {id:'beta',label:'Beta',disabled:true},
+    {id:'gamma',label:'Gamma',children:[{id:'deep',label:'Deep item'}]}
+  ]},{id:'last',label:'Last'}];
+  window.selections=[];
+  tree.addEventListener('change',event=>{
+    selections.push(event.detail.checkedNodes.map(node=>node.id));
+    document.getElementById('changes').textContent=selections.length+' changes';
+  });
+</script>
+</html>

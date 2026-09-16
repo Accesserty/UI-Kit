@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>Plain HTML breadcrumbs — source</title>
+<script src="../../../src/components/breadcrumbs.js" defer></script>
+<h1>Plain HTML breadcrumbs</h1>
+<au-breadcrumbs aria-label="Breadcrumbs" items='[{"text":"Home","url":"./breadcrumbs-target.html"},{"text":"Components","url":"./breadcrumbs-target.html#components"},{"text":"Current page"}]'></au-breadcrumbs>
+<button id="after">After breadcrumbs</button>
+<script>
+  // This script runs before the deferred component registers. Both property
+  // shapes must survive upgrade and continue using the public setters.
+  const crumbs = document.querySelector('au-breadcrumbs');
+  crumbs.items = crumbs.getAttribute('items');
+  crumbs.separator = '›';
+</script>
+</html>

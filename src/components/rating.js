@@ -4,13 +4,15 @@ class AuRating extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
     this._groupName = 'rating-' + this.generateId();
-    this._skipRender = false;
 
     const template = document.createElement('template');
     template.innerHTML = `
       <style>
+      :host([hidden]:not([hidden="until-found" i])) { display: none; }
         :host {
           display: inline-flex;
+          flex-wrap: wrap;
+          max-width: 100%;
           align-items: center;
           gap: var(--au-rating-gap, 0.5rem);
         }
@@ -30,20 +32,20 @@ class AuRating extends HTMLElement {
           padding: 0;
           margin: 0;
           display: flex;
+          flex-wrap: wrap;
+          min-inline-size: 0;
+          max-width: 100%;
           gap: var(--au-rating-gap, 0.25rem);
         }
 
-        .au-rating:focus-within {
-          box-shadow: inset 0 0 0 var(--au-rating-focus-width, 3px) var(--au-rating-focus-color, oklch(0.8315 0.157 78));
-          border-radius: 4px;
-        }
-        
         .rating-option {
           display: flex;
           flex-direction: column;
           align-items: center;
           gap: 0.25rem;
-          flex: 1;
+          flex: 0 1 auto;
+          min-width: 0;
+          max-width: 100%;
         }
         
         input[type="radio"] {
@@ -65,13 +67,22 @@ class AuRating extends HTMLElement {
           align-items: center;
           gap: 0.25rem;
           padding: 0.25rem;
+          box-sizing: border-box;
+          min-width: 24px;
+          min-height: 24px;
+          max-width: 100%;
           border-radius: 4px;
           transition: transform 150ms ease;
         }
+        :host([readonly]) label, :host(:disabled) label { cursor: default; }
         
-        label:has(input:focus-visible) {
-          outline: none;
-          box-shadow: 0 0 0 var(--au-rating-focus-width, 3px) var(--au-rating-focus-color, oklch(0.8315 0.157 78));
+        input:checked + label {
+          box-shadow: inset 0 -2px 0 currentColor;
+        }
+
+        input:focus-visible + label {
+          outline: var(--au-rating-focus-width, 3px) solid var(--au-rating-focus-color, oklch(0.45 0.15 260));
+          outline-offset: -3px;
         }
         
         .star-wrapper {
@@ -84,7 +95,7 @@ class AuRating extends HTMLElement {
         .star {
           width: 100%;
           height: 100%;
-          stroke: var(--au-rating-star-stroke-color, oklch(0.6 0 0));
+          stroke: var(--au-rating-star-stroke-color, oklch(0.45 0 0));
           stroke-width: 1;
           transition: fill 150ms ease, transform 150ms ease;
         }
@@ -103,6 +114,10 @@ class AuRating extends HTMLElement {
         }
         
         /* Animation for filled stars */
+        :host(:dir(rtl)) .star-fill {
+          clip-path: inset(0 0 0 var(--au-rating-clip, 100%));
+        }
+
         @keyframes pulse {
           0% { transform: scale(1); }
           50% { transform: scale(1.15); }
@@ -137,23 +152,36 @@ class AuRating extends HTMLElement {
           color: var(--au-rating-score-color, oklch(0.1398 0 0));
           font-size: var(--au-rating-score-size, 1rem);
           font-weight: 500;
-          white-space: nowrap;
+          white-space: normal;
+          overflow-wrap: anywhere;
         }
         
         .score:empty {
           display: none;
         }
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after { animation: none !important; transition: none !important; }
+        }
+        @media (forced-colors: active) {
+          .star { forced-color-adjust: auto; stroke: CanvasText; }
+          .star-bg { fill: Canvas; }
+          .star-fill { fill: CanvasText; }
+          input:checked + label { border-bottom: 2px solid CanvasText; }
+          input:focus-visible + label { outline-color: Highlight; }
+        }
       </style>
-      <fieldset class="au-rating" role="radiogroup">
+      <fieldset class="au-rating" role="radiogroup" aria-describedby="score">
         <legend class="visually-hidden"></legend>
       </fieldset>
-      <span class="score"></span>
+      <span class="score" id="score"></span>
     `;
     this.shadowRoot.appendChild(template.content.cloneNode(true));
     this._fieldset = this.shadowRoot.querySelector('.au-rating');
     this._legend = this.shadowRoot.querySelector('legend');
     this._scoreEl = this.shadowRoot.querySelector('.score');
     this._internals = this.attachInternals();
+    this._fieldset.addEventListener('change', (e) => this.handleChange(e));
+    this._fieldset.addEventListener('keydown', (e) => this.handleKeyDown(e));
   }
 
   static get formAssociated() {
@@ -166,6 +194,8 @@ class AuRating extends HTMLElement {
       'max',
       'labels',
       'aria-label',
+      'aria-invalid',
+      'aria-describedby',
       'name',
       'show-score',
       'score-info',
@@ -178,31 +208,78 @@ class AuRating extends HTMLElement {
   }
 
   connectedCallback() {
+    // Properties assigned before registration must not shadow public setters.
+    for (const name of ['name', 'value', 'max', 'disabled', 'readonly']) {
+      if (Object.hasOwn(this, name)) {
+        const value = this[name]; delete this[name]; this[name] = value;
+      }
+    }
+    if (this._defaultValue === undefined) this._defaultValue = this.value;
     this.render();
-    this._fieldset.addEventListener('change', (e) => this.handleChange(e));
-    this._fieldset.addEventListener('keydown', (e) => this.handleKeyDown(e));
+    this._observeDescriptions();
+  }
+
+  disconnectedCallback() {
+    this._descriptionObserver?.disconnect();
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (oldValue !== newValue && this.isConnected && !this._skipRender) {
-      if (name === 'value') {
-        const val = parseFloat(newValue);
-        this.updateStars(val);
-        this.updateScoreDisplay(val);
-        this._internals.setFormValue(newValue);
-      } else {
-        this.render();
+    if (name === 'aria-describedby') {
+      if (oldValue !== newValue && this.isConnected) this._observeDescriptions();
+      return;
+    }
+    if (oldValue !== newValue && this.isConnected) this.render();
+  }
+
+  _observeDescriptions() {
+    this._descriptionObserver?.disconnect();
+    if (this.hasAttribute('aria-describedby')) {
+      this._descriptionObserver ??= new MutationObserver(() => this._syncDescriptions());
+      this._descriptionObserver.observe(this.getRootNode(), {
+        subtree: true, childList: true, characterData: true,
+        attributes: true, attributeFilter: ['id'],
+      });
+    }
+    this._syncDescriptions();
+  }
+
+  _syncDescriptions() {
+    const root = this.getRootNode();
+    const external = [...new Set((this.getAttribute('aria-describedby') || '').trim().split(/\s+/))]
+      .filter(Boolean).map(id => root.getElementById?.(id)).filter(el => el && el !== this);
+    if (!external.length) {
+      if (this._descriptionMirror) this._descriptionMirror.textContent = '';
+      this._fieldset.setAttribute('aria-describedby', 'score');
+      return;
+    }
+    if (typeof this._fieldset.ariaDescribedByElements !== 'undefined') {
+      this._fieldset.ariaDescribedByElements = [this._scoreEl, ...external];
+    } else {
+      if (!this._descriptionMirror) {
+        this._descriptionMirror = document.createElement('span');
+        this._descriptionMirror.id = 'external-description';
+        this._descriptionMirror.hidden = true;
+        this.shadowRoot.append(this._descriptionMirror);
       }
+      const text = external.map(el => el.textContent).join(' ').trim();
+      if (this._descriptionMirror.textContent !== text) this._descriptionMirror.textContent = text;
+      this._fieldset.setAttribute('aria-describedby', text ? 'score external-description' : 'score');
     }
   }
 
   get max() {
-    return parseInt(this.getAttribute('max')) || 5;
+    const max = Number(this.getAttribute('max'));
+    // Bound DOM work even when configuration is malformed or untrusted.
+    return Number.isInteger(max) && max > 0 ? Math.min(max, 100) : 5;
+  }
+
+  set max(value) {
+    this.setAttribute('max', value);
   }
 
   get value() {
-    const val = this.getAttribute('value');
-    return val ? parseFloat(val) : 0;
+    const val = Number(this.getAttribute('value'));
+    return Number.isFinite(val) ? Math.min(this.max, Math.max(0, val)) : 0;
   }
 
   set value(val) {
@@ -218,7 +295,11 @@ class AuRating extends HTMLElement {
   }
 
   get name() {
-    return this.getAttribute('name') || 'rating';
+    return this.getAttribute('name') || '';
+  }
+
+  set name(value) {
+    this.setAttribute('name', value);
   }
 
   get scoreInfo() {
@@ -284,102 +365,68 @@ class AuRating extends HTMLElement {
     const ariaLabel = this.ratingLabel;
     this._legend.textContent = ariaLabel;
     this._fieldset.setAttribute('aria-label', ariaLabel);
+    if (this.hasAttribute('aria-invalid')) this._fieldset.setAttribute('aria-invalid', this.getAttribute('aria-invalid'));
+    else this._fieldset.removeAttribute('aria-invalid');
 
-    // Clear existing options
-    this._fieldset.innerHTML = '<legend class="visually-hidden"></legend>';
-    this._legend = this._fieldset.querySelector('legend');
-    this._legend.textContent = ariaLabel;
-
-    if (this.readonly) {
-      this._fieldset.setAttribute('aria-readonly', 'true');
-    }
-    if (this.disabled) {
-      this._fieldset.setAttribute('aria-disabled', 'true');
-    }
+    const disabled = this.disabled || this._formDisabled;
+    this.readonly ? this._fieldset.setAttribute('aria-readonly', 'true') : this._fieldset.removeAttribute('aria-readonly');
+    disabled ? this._fieldset.setAttribute('aria-disabled', 'true') : this._fieldset.removeAttribute('aria-disabled');
 
     const labels = this.labels;
     const currentValue = this.value;
-    const intValue = Math.round(currentValue);
+    const previousFocus = this.shadowRoot.activeElement;
+    const options = [...this._fieldset.querySelectorAll('.rating-option')];
 
     for (let i = 1; i <= this.max; i++) {
-      const option = document.createElement('div');
-      option.className = 'rating-option';
-
-      const inputId = `${this._groupName}-${i}`;
-      const input = document.createElement('input');
-      input.type = 'radio';
+      let option = options[i - 1];
+      if (!option) {
+        option = document.createElement('div');
+        option.className = 'rating-option';
+        // Only static component-owned markup is parsed as HTML.
+        option.innerHTML = `<input type="radio"><label><span class="star-wrapper">${this.getStarSVG('star-bg')}${this.getStarSVG('star-fill')}</span><span class="label-text"></span></label>`;
+        this._fieldset.appendChild(option);
+      }
+      const input = option.querySelector('input');
+      const label = option.querySelector('label');
       input.name = this._groupName;
       input.value = i;
-      input.id = inputId;
-      if (i === intValue) {
-        input.checked = true;
-      }
+      input.id = `${this._groupName}-${i}`;
+      label.htmlFor = input.id;
+      input.checked = i === currentValue;
+      input.tabIndex = i === (Number.isInteger(currentValue) && currentValue > 0 ? currentValue : 1) ? 0 : -1;
       
       const labelTextContent = labels[i - 1];
       if (!labelTextContent) {
         input.setAttribute('aria-label', this.formatText(this.starLabelTemplate, { value: i, max: this.max }));
-      }
-      
-      if (this.disabled || this.readonly) {
-        input.disabled = true;
-      }
-
-      const label = document.createElement('label');
-      label.setAttribute('for', inputId);
-      
-      const starWrapper = document.createElement('span');
-      starWrapper.className = 'star-wrapper';
-      
-      const fullStars = Math.floor(currentValue);
-      const partialFill = currentValue - fullStars;
-      let clipRight = 100;
-
-      if (i <= fullStars) {
-        clipRight = 0;
-      } else if (i === fullStars + 1 && partialFill > 0) {
-        clipRight = 100 - (partialFill * 100);
-      }
-
-      starWrapper.style.setProperty('--au-rating-clip', `${clipRight}%`);
-      starWrapper.innerHTML = `
-        ${this.getStarSVG('star-bg')}
-        ${this.getStarSVG('star-fill')}
-      `;
-
-      label.appendChild(starWrapper);
-
-      const labelText = document.createElement('span');
-      labelText.className = 'label-text';
-      labelText.textContent = labels[i - 1] || '';
-      label.appendChild(labelText);
-
-      option.appendChild(input);
-      option.appendChild(label);
-      this._fieldset.appendChild(option);
+      } else input.removeAttribute('aria-label');
+      input.disabled = Boolean(disabled || this.readonly);
+      option.querySelector('.label-text').textContent = labelTextContent || '';
     }
-
+    options.slice(this.max).forEach(option => option.remove());
+    if (previousFocus && !this.shadowRoot.contains(previousFocus) && !disabled && !this.readonly) {
+      this._fieldset.querySelector('input[tabindex="0"]')?.focus();
+    }
+    this.updateStars(currentValue);
     this.updateScoreDisplay(currentValue);
     this._internals.setFormValue(currentValue.toString());
   }
 
   updateScoreDisplay(val) {
-    if (this.showScore) {
-      this._scoreEl.textContent = this.formatText(this.scoreTemplate, {
+    // Exact fractional/zero values remain available as the group's description.
+    this._scoreEl.classList.toggle('visually-hidden', !this.showScore);
+    this._scoreEl.textContent = this.formatText(this.scoreTemplate, {
         value: val,
         max: this.max,
         scoreInfo: this.scoreInfo
-      });
-    } else {
-      this._scoreEl.textContent = '';
-    }
+    });
   }
 
   handleChange(e) {
     if (e.target.type === 'radio') {
+      e.stopPropagation();
+      if (this.disabled || this._formDisabled || this.readonly) { this.render(); return; }
       const newValue = parseInt(e.target.value);
       this.value = newValue;
-      this.updateStars(newValue);
-      this.updateScoreDisplay(newValue);
       
       this.dispatchEvent(new CustomEvent('change', {
         bubbles: true,
@@ -401,8 +448,8 @@ class AuRating extends HTMLElement {
       let clipRight = 100;
       if (starValue <= fullStars) {
         clipRight = 0;
-        if (starValue === fullStars && partialFill === 0) { // Only animate full integer steps? Or last star?
-             wrapper.classList.add('animate');
+        if (starValue === fullStars && partialFill === 0) {
+          wrapper.classList.add('animate');
         }
       } else if (starValue === fullStars + 1 && partialFill > 0) {
         clipRight = 100 - (partialFill * 100);
@@ -414,26 +461,27 @@ class AuRating extends HTMLElement {
   }
 
   handleKeyDown(e) {
+    if (this.disabled || this._formDisabled || this.readonly) return;
     const radios = Array.from(this._fieldset.querySelectorAll('input[type="radio"]'));
-    const currentIndex = radios.findIndex(r => r === this.shadowRoot.activeElement || r.checked);
+    if (!radios.length) return;
+    let currentIndex = radios.indexOf(this.shadowRoot.activeElement);
+    if (currentIndex < 0) currentIndex = radios.findIndex(r => r.checked);
     let nextIndex;
 
-    switch (e.key) {
+    const rtl = getComputedStyle(this._fieldset).direction === 'rtl';
+    const key = rtl && e.key === 'ArrowRight' ? 'ArrowLeft' : rtl && e.key === 'ArrowLeft' ? 'ArrowRight' : e.key;
+    switch (key) {
       case 'ArrowRight':
       case 'ArrowDown':
         e.preventDefault();
-        if (this.value === 0 && currentIndex === 0) {
-          nextIndex = 0;
-        } else {
-          nextIndex = (currentIndex + 1) % radios.length;
-        }
+        nextIndex = (currentIndex + 1) % radios.length;
         radios[nextIndex].focus();
         radios[nextIndex].click();
         break;
       case 'ArrowLeft':
       case 'ArrowUp':
         e.preventDefault();
-        nextIndex = (currentIndex - 1 + radios.length) % radios.length;
+        nextIndex = currentIndex < 0 ? radios.length - 1 : (currentIndex - 1 + radios.length) % radios.length;
         radios[nextIndex].focus();
         radios[nextIndex].click();
         break;
@@ -441,14 +489,21 @@ class AuRating extends HTMLElement {
   }
 
   formResetCallback() {
-    this.value = this.getAttribute('value') || 0;
-    this._internals.setFormValue(this.value ? this.value.toString() : null);
+    this.value = this._defaultValue ?? 0;
+  }
+
+  focus(options) {
+    if (this.disabled || this._formDisabled || this.readonly) return;
+    this._fieldset.querySelector('input[tabindex="0"]:not(:disabled)')?.focus(options);
   }
 
   formStateRestoreCallback(state, mode) {
-    if (state) {
-        this.value = state;
-    }
+    if (typeof state === 'string') this.value = state;
+  }
+
+  formDisabledCallback(disabled) {
+    this._formDisabled = disabled;
+    if (this.isConnected) this.render();
   }
 }
 

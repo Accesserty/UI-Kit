@@ -39,14 +39,36 @@ npm run build
 ### Running Tests
 
 ```bash
-# Run all 14 component test suites (sequential, ~12 seconds)
+# Run the complete unit-test suite sequentially
 npm test
 
 # Test a single component during development
 npx web-test-runner test/input.test.js --node-resolve
 ```
 
-Tests run in a real Chromium browser. Always use `npm test` before submitting a PR — all 174 tests must pass.
+Tests run in a real Chromium browser. Always use `npm test` before submitting a PR — the complete suite must pass.
+
+### Integration tests
+
+Install `test/ssr` dependencies (`npm ci --prefix test/ssr`) and Google Chrome
+before running Playwright-based checks. Build fresh bundles with `npm run build`
+before testing consumers. `npm run test:docs` also checks the audited CSS defaults
+in demo tables and Playground; it is not a complete CSS parser or theme audit.
+
+Use `npm run test:css -- chrome`, `npm run test:controls -- chrome`, and
+`npm run test:pagination -- chrome` for Chrome-only runs. Omitting the argument
+runs Chrome, Firefox and Safari; the latter two require `UI_KIT_WEBDRIVER_MODULE`
+pointing to an installed Selenium client, their browser drivers, and (for Safari)
+remote automation permission. Safari needs macOS.
+
+A full check builds fresh bundles first, then runs the documentation, Chrome
+integration, SSR and Angular AOT checks. SSR runs separately through
+`npm test --prefix test/ssr`; installing its dependencies does not run it.
+For Angular AOT, install `test/angular-aot` dependencies and use
+`npm run runtime --prefix test/angular-aot`; its preruntime hook builds first.
+The Angular fixture's `dist/` is local generated output, not versioned product code.
+Passing these checks does not establish Safari behavior, actual screen-reader
+speech, or complete accessibility conformance.
 
 ### Building
 
@@ -221,7 +243,7 @@ All components must meet **WCAG 2.2 AA**. Before submitting:
 
 ### Checklist
 
-- [ ] All 174 existing tests pass (`npm test`)
+- [ ] The complete unit-test suite passes (`npm test`)
 - [ ] New tests written for new behavior
 - [ ] Demo page updated (new component) or corrected (bug fix)
 - [ ] CSS variables table in demo matches the component source exactly

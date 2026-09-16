@@ -44,15 +44,15 @@
         </tr>
         <tr>
           <td>heading</td>
-          <td>Title of accordion item</td>
+          <td>Non-interactive title text inside the header button. Set heading-level on the item to match the page outline.</td>
         </tr>
         <tr>
           <td>sub</td>
-          <td>Subtitle of accordion item</td>
+          <td>Non-interactive subtitle; included in the button's accessible name.</td>
         </tr>
         <tr>
           <td>icon</td>
-          <td>icon of accordion item</td>
+          <td>Decorative icon, hidden from assistive technologies. Do not put controls here.</td>
         </tr>
         <tr>
           <td>content</td>
@@ -106,7 +106,7 @@
           </tr>
           <tr>
             <td>open</td>
-            <td>When present on <code>&lt;au-accordion-item&gt;</code>, the item is open by default.</td>
+            <td>Controls the current expanded state of <code>&lt;au-accordion-item&gt;</code>. Any present value, including <code>open="false"</code>, means open.</td>
           </tr>
         </tbody>
       </table>
@@ -149,6 +149,7 @@
     <section>
       <h2>Exclusive Mode</h2>
       <p>Add <code>exclusive</code> attribute to <code>&lt;au-accordion&gt;</code>. When one item opens, all others close automatically.</p>
+      <p>Only direct item children participate; nested groups are independent. Initialization, inserted items and enabling exclusive mode retain the first open direct item. All items may be closed. Enter/Space toggles a header; Tab/Shift+Tab follows the visible controls. Closing focused content returns focus to its header.</p>
       <code style="display: block; white-space: pre-wrap;">&lt;au-accordion exclusive&gt;...&lt;/au-accordion&gt;</code>
       <br>
       <div role="group" aria-labelledby="group-label-exclusive">
@@ -185,7 +186,7 @@
             </div>
             <div slot="content">
               <au-accordion>
-                <au-accordion-item>
+                <au-accordion-item heading-level="4">
                   <div slot="heading">Heading</div>
                   <div slot="sub">
                     sub
@@ -195,7 +196,7 @@
                   </div>
                   <div slot="content">Content</div>
                 </au-accordion-item>
-                <au-accordion-item>
+                <au-accordion-item heading-level="4">
                   <div slot="heading">Heading2</div>
                   <div slot="sub">
                     sub
@@ -320,6 +321,8 @@
           <td>false</td>
           <td>Controls the expanded state. Settable via attribute or JS property (<code>element.open = true</code>).</td>
         </tr>
+        <tr><td>heading-level</td><td>integer attribute, 1–6</td><td>3</td><td>Heading level surrounding the native button. Choose a level appropriate to the page outline; invalid values fall back to 3.</td></tr>
+        <tr><td>no-region</td><td>boolean attribute</td><td>false</td><td>Omits the panel landmark role. Use when many simultaneously open panels would create too many regions; visibility and keyboard behavior remain unchanged.</td></tr>
       </table>
     </section>
 
@@ -340,7 +343,7 @@
           <td>true</td>
           <td>true</td>
           <td><code>{ open: boolean }</code></td>
-          <td>Fires whenever the item's expanded state changes (by user interaction or programmatic property set).</td>
+          <td>Fires for each actual connected open-state change, including programmatic changes and exclusive sibling closures. Same-value writes do not repeat events. Group listeners should filter the originating item to avoid treating nested events as their own.</td>
         </tr>
       </table>
       <br>
@@ -420,7 +423,7 @@ document.querySelector('au-accordion-item').addEventListener('au-toggle', (e) =&
         <tr>
           <td>--au-accordion-heading-border-color</td>
           <td>border color</td>
-          <td>oklch(0.7894 0 0)</td>
+          <td>oklch(0.55 0 0)</td>
         </tr>
         <tr>
           <td>--au-accordion-heading-border-radius</td>
@@ -440,7 +443,7 @@ document.querySelector('au-accordion-item').addEventListener('au-toggle', (e) =&
         <tr>
           <td>--au-accordion-heading-hover-border-color</td>
           <td>border color (hover)</td>
-          <td>oklch(0.7894 0 0)</td>
+          <td>oklch(0.55 0 0)</td>
         </tr>
         <tr>
           <td>--au-accordion-heading-active-bg</td>
@@ -450,17 +453,17 @@ document.querySelector('au-accordion-item').addEventListener('au-toggle', (e) =&
         <tr>
           <td>--au-accordion-heading-active-border-color</td>
           <td>border color (active)</td>
-          <td>oklch(0.7894 0 0)</td>
+          <td>oklch(0.55 0 0)</td>
         </tr>
         <tr>
           <td>--au-accordion-heading-focus-shadow-width</td>
-          <td>focus border width(actually box-shadow)</td>
+          <td>Focus outline width</td>
           <td>3px</td>
         </tr>
         <tr>
           <td>--au-accordion-heading-focus-shadow-color</td>
-          <td>focus border color(actually box-shadow)</td>
-          <td>oklch(0.8315 0.15681888825079074 78.05241467152487)</td>
+          <td>Focus outline color (forced-colors uses the system highlight)</td>
+          <td>oklch(0.4 0 0)</td>
         </tr>
         <tr>
           <td>--au-accordion-content-bg</td>
@@ -582,7 +585,7 @@ document.querySelector('au-accordion-item').addEventListener('au-toggle', (e) =&
         <tr>
           <td>--au-details-border-color</td>
           <td>details border color</td>
-          <td>oklch(0.7894 0 0)</td>
+          <td>oklch(0.55 0 0)</td>
         </tr>
         <tr>
           <td>--au-details-border-radius</td>
@@ -610,6 +613,8 @@ document.querySelector('au-accordion-item').addEventListener('au-toggle', (e) =&
           <td>summary cursor</td>
           <td>pointer</td>
         </tr>
+        <tr><td>--au-summary-focus-outline-color</td><td>Native summary keyboard focus outline color</td><td>oklch(0.45 0.15 260)</td></tr>
+        <tr><td>--au-summary-focus-outline-width</td><td>Native summary keyboard focus outline width (minimum 2px)</td><td>2px</td></tr>
         <tr>
           <td>--au-summary-padding-vertical</td>
           <td>summary padding vertical</td>
@@ -687,22 +692,22 @@ document.querySelector('au-accordion-item').addEventListener('au-toggle', (e) =&
         </tr>
         <tr>
           <td>--au-summary-focus-shadow-color</td>
-          <td>summary focus shadow color</td>
+          <td>Decorative inset shadow; the summary focus outline above is the indicator</td>
           <td>oklch(0.8315 0.15681888825079074 78.05241467152487)</td>
         </tr>
       </table>
     </section>
 
     <section>
-      <h2>Conclusion</h2>
+      <h2>Integration limits</h2>
       <p>
-        Developing an accordion is quite enjoyable as it requires understanding the relationships between
-        <code>role="region"</code>, <code>aria-controls</code>, <code>aria-expanded</code>, <code>aria-hidden</code>,
-        <code>aria-labelledby</code> and corresponding IDs, especially when it becomes clearer during unit testing.
+        Panels show and hide immediately; collapsed content is hidden and inert. Header and icon transitions
+        respect reduced-motion preferences. Focus outlines remain visible in forced-colors mode.
       </p>
       <p>
-        This Web Component is highly recommended for developers to create and use. Even developers who are not very
-        familiar with accessibility can contribute to accessible web development by simply implementing it!
+        Use client-only registration in SSR applications. Server-produced hosts and slotted content are retained
+        in the Next, Nuxt and Angular fixtures, while internal controls are created in the browser. Consumer content,
+        themes and real screen-reader interaction still require verification; using this component does not guarantee WCAG conformance.
       </p>
     </section>
   </main>

@@ -3,6 +3,8 @@ class AuFileUpload extends HTMLElement {
   static get observedAttributes() {
     return [
       'accept',
+      'aria-describedby',
+      'aria-invalid',
       'disabled',
       'form',
       'id',
@@ -20,6 +22,7 @@ class AuFileUpload extends HTMLElement {
       'msg-required',
       'name',
       'required',
+      'max-total-size-mb',
     ];
   }
 
@@ -32,6 +35,11 @@ class AuFileUpload extends HTMLElement {
 
     const style = document.createElement('style');
     style.textContent = `
+      :host([hidden]:not([hidden="until-found" i])) { display: none; }
+      :host { display: block; min-inline-size: 0; }
+
+      * { box-sizing: border-box; }
+      .file-upload-wrapper, .file-upload-container, .actions { min-inline-size: 0; overflow-wrap: anywhere; }
       .file-upload-container {
         position: relative;
         :is(ul, ol) {
@@ -50,8 +58,10 @@ class AuFileUpload extends HTMLElement {
         position: relative;
         display: grid;
         place-content: center;
-        padding: 4rem;
-        border: var(--au-file-upload-area-border-width, 1px) var(--au-file-upload-area-border-style, dashed) var(--au-file-upload-area-border-color, oklch(0.7894 0 0));
+        padding: clamp(0.75rem, 4vw, 2rem);
+        gap: 0.75rem;
+        min-inline-size: 0;
+        border: var(--au-file-upload-area-border-width, 1px) var(--au-file-upload-area-border-style, dashed) var(--au-file-upload-area-border-color, oklch(0.55 0 0));
         border-radius: var(--au-file-upload-area-border-radius, 0.25rem);
         transition: box-shadow 120ms ease-in;
         ::slotted([slot="trigger"]) {
@@ -59,15 +69,10 @@ class AuFileUpload extends HTMLElement {
           z-index: 2;
         }
         .drop-zone {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          color: transparent;
+          text-align: center;
         }
         &:hover {
-          box-shadow: var(--box-shadow);
+          box-shadow: var(--box-shadow, 0 0.75rem 1.125rem oklch(from oklch(0.1398 0 0) l c h / 0.15));
         }
       }
       .error-area {
@@ -90,6 +95,7 @@ class AuFileUpload extends HTMLElement {
           align-items: center;
           >div {
             flex: 1;
+            min-width: 0;
             display: flex;
             align-items: center;
             gap: var(--au-file-upload-file-list-item-inner-gap, 0.625rem);
@@ -101,7 +107,7 @@ class AuFileUpload extends HTMLElement {
             display: grid;
             place-content: center;
             object-fit: contain;
-            border: var(--au-file-upload-file-list-preview-border-width, 1px) var(--au-file-upload-file-list-preview-border-style, solid) var(--au-file-upload-file-list-preview-border-color, oklch(0.7894 0 0));
+            border: var(--au-file-upload-file-list-preview-border-width, 1px) var(--au-file-upload-file-list-preview-border-style, solid) var(--au-file-upload-file-list-preview-border-color, oklch(0.55 0 0));
           }
           .file-name  {
             flex: 1;
@@ -111,50 +117,59 @@ class AuFileUpload extends HTMLElement {
             -webkit-box-orient: vertical;
           }
           .delete {
+            min-inline-size: 24px;
+            min-block-size: 24px;
+            max-inline-size: 100%;
+            flex-shrink: 0;
             /* behavior */
             cursor: pointer;
             -webkit-tap-highlight-color: var(--au-file-upload-delete-tap-highlight-color, oklch(0 0 0 / 0));
-            
+
             /* spacing */
             padding: var(--au-file-upload-delete-padding-vertical, 0.625rem) var(--au-file-upload-delete-padding-horizontal, 1rem);
-            
+
             /* text */
             color: var(--au-file-upload-delete-text-color, oklch(0.1398 0 0));
             font-size: var(--au-file-upload-delete-text-size, 1rem);
             line-height: var(--au-file-upload-delete-text-line-height, 1.5);
-            
+
             /* border */
-            border: var(--au-file-upload-delete-border-width, 1px) var(--au-file-upload-delete-border-style, solid) var(--au-file-upload-delete-border-color, oklch(0.7894 0 0));
+            border: var(--au-file-upload-delete-border-width, 1px) var(--au-file-upload-delete-border-style, solid) var(--au-file-upload-delete-border-color, oklch(0.55 0 0));
             border-radius: var(--au-file-upload-delete-border-radius, 0.25rem);
-            
+
             /* others decoration */
             background-color: var(--au-file-upload-delete-bg, oklch(0.994 0 0));
             transition: background-color 160ms ease-in;
-            
+
             &:hover {
               background-color: var(--au-file-upload-delete-hover-bg, oklch(0.9466 0 0));
-              border-color: var(--au-file-upload-delete-hover-border-color, oklch(0.7894 0 0));
+              border-color: var(--au-file-upload-delete-hover-border-color, oklch(0.55 0 0));
             }
-            
+
             &:active {
               background-color: var(--au-file-upload-delete-active-bg, oklch(0.8689 0 0));
-              border-color: var(--au-file-upload-delete-active-border-color, oklch(0.7894 0 0));
+              border-color: var(--au-file-upload-delete-active-border-color, oklch(0.55 0 0));
             }
-            
+
             &:focus-visible {
-              outline: none;
-              box-shadow: inset 0 0 0 var(--au-file-upload-delete-focus-shadow-width, 3px) var(--au-file-upload-delete-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
+              outline: max(2px, var(--au-file-upload-delete-focus-shadow-width, 3px)) solid var(--au-file-upload-delete-focus-shadow-color, oklch(0.45 0.15 260));
+              outline-offset: 2px;
             }
           }
         }
         &+[aria-live] {
           position: absolute;
-          top: 0;
-          left: 0;
-          opacity: 0;
-          z-index: -9999;
+          inline-size: 1px; block-size: 1px; padding: 0;
+          overflow: hidden; clip-path: inset(50%); white-space: nowrap;
         }
       }
+      .trigger-area { min-inline-size: 0; }
+      .trigger-area:focus-visible, .default-trigger:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
+      .default-trigger { font: inherit; min-block-size: 24px; min-inline-size: 24px; padding: 0.625rem; max-inline-size: 100%; overflow-wrap: anywhere; }
+      .file-upload-container[aria-disabled="true"] { opacity: 0.65; }
+      @media (max-width: 360px) { .file-list [role=listitem] { flex-wrap: wrap; } }
+      @media (prefers-reduced-motion: reduce) { .upload-area, .file-list [role=listitem] .delete { transition: none; } }
+      @media (forced-colors: active) { .file-list [role=listitem] .delete:focus-visible { outline: 2px solid Highlight; } }
     `;
 
     this.wrapper = document.createElement('div');
@@ -162,10 +177,14 @@ class AuFileUpload extends HTMLElement {
 
     this.container = document.createElement('div');
     this.container.className = 'file-upload-container';
+    this.container.setAttribute('role', 'group');
+    this.container.setAttribute('aria-labelledby', 'upload-label');
+    this.container.setAttribute('aria-describedby', 'upload-errors upload-drop');
 
     this._id = this.getAttribute('id') || this.generateId();
 
     this.labelEl = document.createElement('label');
+    this.labelEl.id = 'upload-label';
     this.labelEl.textContent = this.getAttribute('label') || 'Upload files';
     this.labelEl.setAttribute('for', this._id);
 
@@ -182,14 +201,28 @@ class AuFileUpload extends HTMLElement {
 
     const triggerSlot = document.createElement('slot');
     triggerSlot.name = 'trigger';
+    this.defaultTrigger = document.createElement('button');
+    this.defaultTrigger.type = 'button';
+    this.defaultTrigger.className = 'default-trigger';
+    this.defaultTrigger.textContent = this.labelEl.textContent;
+    triggerSlot.append(this.defaultTrigger);
     triggerSlot.addEventListener('click', () => {
-      if (this.hasAttribute('disabled')) return;
+      if (this.effectiveDisabled) return;
       this.fileInput.click();
     }); // ensure the click triggers the input
     triggerSlot.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
-        e.preventDefault();
-        if (this.hasAttribute('disabled')) return;
+        const nativeButton = e.composedPath().some(node => node instanceof Element && node.matches('button'));
+        // A slotted button crosses the shadow boundary before its native
+        // activation is dispatched. Handle it here so keyboard activation
+        // preserves the file chooser's user-activation requirement in SSR
+        // and plain-HTML consumers, while preventing a second native click.
+        if (nativeButton || !e.composedPath().some(node => node instanceof Element && node.matches('input, a[href]'))) {
+          e.preventDefault();
+        } else {
+          return;
+        }
+        if (this.effectiveDisabled) return;
         this.fileInput.click();
       }
     }); // support non-button trigger accessibility
@@ -197,23 +230,22 @@ class AuFileUpload extends HTMLElement {
 
     this.dropZone = document.createElement('div');
     this.dropZone.className = 'drop-zone';
+    this.dropZone.id = 'upload-drop';
     this.dropZone.textContent = this.getAttribute('msg-drop-text') || 'Drop files here';
 
     this.usageDisplay = document.createElement('div');
     this.usageDisplay.className = 'usage';
-    this.usageDisplay.setAttribute('aria-live', 'polite');
 
     this.fileList = document.createElement('ul');
     this.fileList.className = 'file-list';
     this.fileList.setAttribute('role', 'list');
-    this.fileList.setAttribute('aria-live', 'polite');
-    this.fileList.setAttribute('aria-atomic', 'true');
 
     const hintSlot = document.createElement('slot');
     hintSlot.name = 'hint';
     this.errorMessage = document.createElement('div');
     this.errorMessage.className = 'error-area';
-    
+    this.errorMessage.id = 'upload-errors';
+
     this.errorList = document.createElement('ul');
     this.errorList.className = 'error-list';
     this.errorMessage.append(hintSlot, this.usageDisplay, this.errorList);
@@ -223,20 +255,26 @@ class AuFileUpload extends HTMLElement {
     this.liveRegion.setAttribute('role', 'status');
     this.liveRegion.setAttribute('aria-atomic', 'true');
 
-    this.fileInput.addEventListener('change', () => this.handleFiles(this.fileInput.files));
+    this.fileInput.addEventListener('change', e => {
+      e.stopPropagation();
+      try { this.handleFiles(this.fileInput.files); }
+      finally { this.fileInput.value = ''; }
+    });
+    this.addEventListener('invalid', () => {
+      this.showErrors([this.internals.validationMessage]);
+    });
 
-    this.dropZone.addEventListener('dragover', e => {
+    this.container.addEventListener('dragover', e => {
       e.preventDefault();
-      if (this.hasAttribute('disabled')) return;
+      if (this.effectiveDisabled) return;
       this.dropZone.classList.add('dragover');
     });
-    this.dropZone.addEventListener('dragleave', () => {
-      if (this.hasAttribute('disabled')) return;
+    this.container.addEventListener('dragleave', () => {
       this.dropZone.classList.remove('dragover');
     });
-    this.dropZone.addEventListener('drop', e => {
+    this.container.addEventListener('drop', e => {
       e.preventDefault();
-      if (this.hasAttribute('disabled')) return;
+      if (this.effectiveDisabled) return;
       this.dropZone.classList.remove('dragover');
       const dt = e.dataTransfer;
       if (dt?.files) this.handleFiles(dt.files);
@@ -246,7 +284,14 @@ class AuFileUpload extends HTMLElement {
     actionGroup.className = 'actions';
     const fileArea = document.createElement('div');
     fileArea.className = 'upload-area';
-    fileArea.append(triggerSlot, this.dropZone);
+    this.triggerArea = document.createElement('div');
+    this.triggerArea.className = 'trigger-area';
+    this.triggerArea.tabIndex = -1;
+    this.triggerArea.setAttribute('role', 'group');
+    this.triggerArea.setAttribute('aria-labelledby', 'upload-label');
+    this.triggerArea.setAttribute('aria-describedby', 'upload-errors');
+    this.triggerArea.append(triggerSlot);
+    fileArea.append(this.triggerArea, this.dropZone);
     actionGroup.append(fileArea);
 
     this.container.append(
@@ -267,6 +312,12 @@ class AuFileUpload extends HTMLElement {
     if (!this.shadowRoot) return;
 
     switch (name) {
+      case 'aria-describedby':
+        if (this.isConnected) this._observeDescriptions();
+        break;
+      case 'aria-invalid':
+        this.updateValidity();
+        break;
       case 'id':
         this._id = newValue || this.generateId();
         if (this.labelEl) this.labelEl.setAttribute('for', this._id);
@@ -283,43 +334,107 @@ class AuFileUpload extends HTMLElement {
         this.updateFileList();
         break;
       case 'msg-required':
-        this.checkValidity();
+        this.updateValidity();
         break;
       case 'disabled':
-        this.syncBooleanAttributeToInput('disabled');
+        this.syncDisabled();
         break;
       case 'multiple':
         this.syncBooleanAttributeToInput('multiple');
         break;
       case 'required':
         this.syncBooleanAttributeToInput('required');
-        this.checkValidity();
+        this.updateValidity();
         break;
       case 'accept':
       case 'form':
       case 'name':
         this.syncAttributeToInput(name);
+        if (name === 'name') this.syncFormValue();
+        break;
+      case 'max-total-size-mb':
+        this.updateUsage();
         break;
     }
   }
 
   connectedCallback() {
+    if (Object.hasOwn(this, 'value')) {
+      const value = this.value; delete this.value; this.value = value;
+    }
     this.updateLabelText();
     this.updateDropText();
-    document.addEventListener('dragover', this._preventDefault);
-    document.addEventListener('drop', this._preventDefault);
+    this.updateFileList();
+    this.syncFormValue();
+    this.updateUsage();
+    this.updateValidity();
+    this.syncDisabled();
+    this._observeDescriptions();
   }
 
   disconnectedCallback() {
-    document.removeEventListener('dragover', this._preventDefault);
-    document.removeEventListener('drop', this._preventDefault);
+    this._descriptionObserver?.disconnect();
+    cancelAnimationFrame(this._announcementFrame);
+    this.liveRegion.textContent = '';
     this.revokeAllPreviewUrls();
   }
 
-  _preventDefault = e => e.preventDefault();
+  get effectiveDisabled() { return this.hasAttribute('disabled') || !!this._formDisabled; }
+
+  _observeDescriptions() {
+    this._descriptionObserver?.disconnect();
+    if (this.hasAttribute('aria-describedby')) {
+      this._descriptionObserver ??= new MutationObserver(() => this._syncDescriptions());
+      this._descriptionObserver.observe(this.getRootNode(), {
+        subtree: true, childList: true, characterData: true,
+        attributes: true, attributeFilter: ['id'],
+      });
+    }
+    this._syncDescriptions();
+  }
+
+  _syncDescriptions() {
+    const root = this.getRootNode();
+    const external = [...new Set((this.getAttribute('aria-describedby') || '').trim().split(/\s+/))]
+      .filter(Boolean).map(id => root.getElementById?.(id)).filter(el => el && el !== this);
+    // Own controls only: do not overwrite ARIA supplied on a consumer's slotted trigger.
+    for (const target of [this.container, this.triggerArea, this.defaultTrigger]) {
+      if (typeof target.ariaDescribedByElements !== 'undefined') {
+        target.ariaDescribedByElements = [this.errorMessage, this.dropZone, ...external];
+      } else {
+        if (!this._descriptionMirror) {
+          this._descriptionMirror = document.createElement('span');
+          this._descriptionMirror.id = 'external-description';
+          this._descriptionMirror.hidden = true;
+          this.shadowRoot.append(this._descriptionMirror);
+        }
+        const text = external.map(el => el.textContent).join(' ').trim();
+        if (this._descriptionMirror.textContent !== text) this._descriptionMirror.textContent = text;
+        target.setAttribute('aria-describedby', 'upload-errors upload-drop' + (text ? ' external-description' : ''));
+      }
+    }
+  }
+
+  formDisabledCallback(disabled) {
+    this._formDisabled = disabled;
+    this.syncDisabled();
+  }
+
+  syncDisabled() {
+    if (!this.triggerArea) return;
+    const disabled = this.effectiveDisabled;
+    this.fileInput.disabled = disabled;
+    this.defaultTrigger.disabled = disabled;
+    // Inert applies to the composed subtree without rewriting consumer buttons.
+    this.triggerArea.inert = disabled;
+    this.container.setAttribute('aria-disabled', String(disabled));
+    this.fileList.querySelectorAll('button').forEach(button => { button.disabled = disabled; });
+    if (disabled) this.dropZone.classList.remove('dragover');
+  }
 
   updateLabelText() {
     if (this.labelEl) this.labelEl.textContent = this.getAttribute('label') || 'Upload files';
+    if (this.defaultTrigger) this.defaultTrigger.textContent = this.labelEl.textContent;
   }
 
   updateDropText() {
@@ -372,23 +487,23 @@ class AuFileUpload extends HTMLElement {
   }
 
   handleFiles(fileList) {
-    if (this.hasAttribute('disabled')) return;
-    const maxTotalSizeMB = parseFloat(this.getAttribute('max-total-size-mb') || '20');
-    const maxFiles = parseInt(this.getAttribute('max-files') || '5', 10);
-    const maxSizeMB = parseFloat(this.getAttribute('max-size-mb') || '5');
+    if (this.effectiveDisabled) return;
+    const maxTotalSizeMB = this.limit('max-total-size-mb', 20);
+    const maxFiles = Math.min(Math.floor(this.limit('max-files', 5)), this.hasAttribute('multiple') ? Infinity : 1);
+    const maxSizeMB = this.limit('max-size-mb', 5);
     const acceptAttr = this.getAttribute('accept');
-    const acceptList = acceptAttr ? acceptAttr.split(',').map(type => type.trim()) : [];
+    const acceptList = acceptAttr ? acceptAttr.toLowerCase().split(',').map(type => type.trim()).filter(Boolean) : [];
 
-    const newFiles = Array.from(fileList);
+    const newFiles = Array.from(fileList || []).filter(file => file instanceof File);
     const validFiles = [];
     const errorMessages = [];
 
     newFiles.forEach(file => {
       const isValidType = acceptList.length === 0 || acceptList.some(type => {
         if (type.endsWith('/*')) {
-          return file.type.startsWith(type.replace('/*', ''));
+          return file.type.toLowerCase().startsWith(type.slice(0, -1));
         }
-        return file.type === type || file.name.endsWith(type);
+        return type.startsWith('.') ? file.name.toLowerCase().endsWith(type) : file.type.toLowerCase() === type;
       });
       if (!isValidType) {
         errorMessages.push(this.formatFileError(
@@ -412,11 +527,12 @@ class AuFileUpload extends HTMLElement {
       validFiles.push(file);
     });
 
-    const uniqueFiles = validFiles.filter(file =>
-      !this.files.some(f => f.name === file.name && f.size === file.size)
-    );
+    const uniqueFiles = [];
+    validFiles.forEach(file => {
+      if (![...this.files, ...uniqueFiles].some(f => f.name === file.name && f.size === file.size)) uniqueFiles.push(file);
+    });
 
-    const slotsLeft = maxFiles - this.files.length;
+    const slotsLeft = Math.max(0, maxFiles - this.files.length);
     const filesToAdd = uniqueFiles.slice(0, slotsLeft);
     const dropped = uniqueFiles.slice(slotsLeft);
 
@@ -440,18 +556,16 @@ class AuFileUpload extends HTMLElement {
       filesToAdd.length = 0;
     }
 
-    if (errorMessages.length > 0) {
-      this.showErrors(errorMessages);
-    }
+    this.showErrors(errorMessages);
 
     if (filesToAdd.length === 0) return;
 
     this.files.push(...filesToAdd);
     this.updateFileList();
     this.updateUsage();
-    this.announce(this.formatMessage('msg-added', '{count} file(s) added.', { count: filesToAdd.length }));
+    this.announce([this.formatMessage('msg-added', '{count} file(s) added.', { count: filesToAdd.length }), ...errorMessages].join(' '));
     this.syncFormValue();
-    this.checkValidity();
+    this.updateValidity();
     this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
     this.fileInput.value = '';
   }
@@ -467,101 +581,143 @@ class AuFileUpload extends HTMLElement {
   }
 
   announce(message) {
+    cancelAnimationFrame(this._announcementFrame);
     while (this.liveRegion.firstChild) this.liveRegion.removeChild(this.liveRegion.firstChild);
-    requestAnimationFrame(() => {
+    if (!this.isConnected || !message) return;
+    this._announcementFrame = requestAnimationFrame(() => {
       const span = document.createElement('span');
       span.textContent = message;
       this.liveRegion.appendChild(span);
     });
   }
 
+  createFileRow(file) {
+    const row = document.createElement('li');
+    row.setAttribute('role', 'listitem');
+    const preview = document.createElement('div');
+    const image = file.type.startsWith('image/');
+    const icon = document.createElement(image ? 'img' : 'span');
+    icon.className = 'preview';
+    if (image) {
+      icon.alt = '';
+      icon.width = 40;
+      icon.height = 40;
+    } else {
+      icon.textContent = '📄';
+      icon.setAttribute('aria-hidden', 'true');
+    }
+    const name = document.createElement('span');
+    name.className = 'file-name';
+    name.textContent = file.name;
+    preview.append(icon, name);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'delete';
+    button._file = file;
+    button.setAttribute('part', 'delete');
+    button.addEventListener('click', () => this.removeFile(file));
+    row.append(preview, button);
+    return row;
+  }
+
   updateFileList() {
-    this.fileList.innerHTML = '';
-    this.files.forEach(file => {
-      const li = document.createElement('li');
-      li.setAttribute('role', 'listitem');
-
-      const preview = document.createElement('div');
-
-      if (file.type.startsWith('image/')) {
-        const img = document.createElement('img');
-        img.className = "preview";
-        let url = this.previewUrls.get(file);
-        if (!url) {
-          url = URL.createObjectURL(file);
-          this.previewUrls.set(file, url);
-        }
-        img.src = url;
-        img.alt = file.name;
-        img.width = 40;
-        img.height = 40;
-        preview.appendChild(img);
-      } else {
-        const icon = document.createElement('span');
-        icon.className = "preview"
-        icon.textContent = '📄';
-        icon.setAttribute('aria-hidden', 'true');
-        preview.appendChild(icon);
+    const previousButtons = [...this.fileList.querySelectorAll('button.delete')];
+    const focused = this.shadowRoot.activeElement;
+    const focusedIndex = previousButtons.indexOf(focused);
+    const focusedFile = focused?._file;
+    this._fileRows ??= new Map();
+    for (const [file, row] of this._fileRows) {
+      if (!this.files.includes(file)) { row.remove(); this._fileRows.delete(file); this.revokePreviewUrl(file); }
+    }
+    this.files.forEach((file, index) => {
+      let li = this._fileRows.get(file);
+      if (!li) {
+        li = this.createFileRow(file);
+        this._fileRows.set(file, li);
       }
-
-      const nameSpan = document.createElement('span');
-      nameSpan.className = 'file-name';
-      nameSpan.textContent = file.name;
-      preview.appendChild(nameSpan);
-
-      const removeBtn = document.createElement('button');
-      removeBtn.type = 'button';
-      removeBtn.className = 'delete';
-      removeBtn.textContent = this.getAttribute('msg-remove-text') || 'Remove';
-      removeBtn.setAttribute('aria-label', this.formatMessage('msg-remove-file-label', 'Remove {fileName}', { fileName: file.name }));
-      removeBtn.setAttribute('part', 'delete');
-      removeBtn.addEventListener('click', () => {
-        if (this.hasAttribute('disabled')) return;
-        this.revokePreviewUrl(file);
-        this.files = this.files.filter(f => f.name !== file.name || f.size !== file.size);
-        this.updateFileList();
-        this.updateUsage();
-        this.announce(this.formatMessage('msg-removed', '{fileName} removed.', { fileName: file.name }));
-        this.syncFormValue();
-        this.checkValidity();
-        this.dispatchEvent(new CustomEvent('remove-file', { bubbles: true, composed: true, detail: file }));
-      });
-
-      li.append(preview, removeBtn);
-      this.fileList.appendChild(li);
+      const removeBtn = li.querySelector('button.delete');
+      const visibleLabel = this.getAttribute('msg-remove-text')?.trim() || 'Remove';
+      const requestedName = this.formatMessage('msg-remove-file-label', '{action} {fileName}', { action: visibleLabel, fileName: file.name });
+      removeBtn.textContent = visibleLabel;
+      // Preserve speech-input matching even when only one label is localized.
+      removeBtn.setAttribute('aria-label', requestedName.includes(visibleLabel) ? requestedName : `${visibleLabel} ${requestedName}`);
+      removeBtn.disabled = this.effectiveDisabled;
+      const img = li.querySelector('img');
+      if (img) {
+        if (!this.previewUrls.has(file)) this.previewUrls.set(file, URL.createObjectURL(file));
+        if (img.src !== this.previewUrls.get(file)) img.src = this.previewUrls.get(file);
+      }
+      if (this.fileList.children[index] !== li) this.fileList.insertBefore(li, this.fileList.children[index] || null);
     });
+    if (focusedIndex >= 0) {
+      const buttons = [...this.fileList.querySelectorAll('button.delete')];
+      const next = buttons.find(button => button._file === focusedFile)
+        || buttons[Math.min(focusedIndex, buttons.length - 1)];
+      if (next) next.focus();
+      else this.focusTrigger();
+    }
   }
 
   removeFile(file) {
-    if (this.hasAttribute('disabled')) return;
-    this.revokePreviewUrl(file);
-    this.files = this.files.filter(f => f.name !== file.name || f.size !== file.size);
+    if (this.effectiveDisabled) return;
+    const index = this.files.findIndex(f => f === file || (f.name === file?.name && f.size === file?.size));
+    if (index < 0) return;
+    const removed = this.files[index];
+    this.revokePreviewUrl(removed);
+    this.files = this.files.filter((_, i) => i !== index);
     this.updateFileList();
     this.updateUsage();
-    this.announce(this.formatMessage('msg-removed', '{fileName} removed.', { fileName: file.name }));
+    this.announce(this.formatMessage('msg-removed', '{fileName} removed.', { fileName: removed.name }));
     this.syncFormValue();
-    this.checkValidity();
-    this.dispatchEvent(new CustomEvent('remove-file', { detail: file }));
+    this.updateValidity();
+    this.dispatchEvent(new CustomEvent('remove-file', { bubbles: true, composed: true, detail: removed }));
+    this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
   };
 
   updateUsage() {
-    const maxMB = parseFloat(this.getAttribute('max-total-size-mb') || '20');
+    const maxMB = this.limit('max-total-size-mb', 20);
     const totalMB = this.files.reduce((sum, f) => sum + f.size, 0) / (1024 * 1024);
     this.usageDisplay.textContent = `${totalMB.toFixed(1)}MB / ${maxMB}MB`;
   }
 
   syncFormValue() {
-    const dt = new DataTransfer();
-    this.files.forEach(file => dt.items.add(file));
-    this.internals.setFormValue(dt.files);
+    const name = this.getAttribute('name');
+    if (!name || this.files.length === 0) {
+      this.internals.setFormValue(null);
+      return;
+    }
+    const data = new FormData();
+    this.files.forEach(file => data.append(name, file, file.name));
+    this.internals.setFormValue(data);
   }
 
-  checkValidity() {
-    if (this.hasAttribute('required') && this.files.length === 0) {
+  limit(name, fallback) {
+    const raw = this.getAttribute(name);
+    const value = raw?.trim() ? Number(raw) : NaN;
+    return Number.isFinite(value) && value >= 0 ? value : fallback;
+  }
+
+  focus(options) {
+    if (!this.effectiveDisabled) this.focusTrigger(options);
+  }
+
+  focusTrigger(options) {
+    const slot = this.shadowRoot.querySelector('slot[name=trigger]');
+    const roots = slot.assignedElements({flatten:true});
+    const candidates = roots.flatMap(root => [root, ...root.querySelectorAll('button,input,[tabindex]')]);
+    const trigger = candidates.find(el => el.matches('button,input,[tabindex]') && !el.matches(':disabled') && el.tabIndex >= 0 && !el.closest('[hidden],[inert]') && el.getClientRects().length && getComputedStyle(el).visibility === 'visible');
+    (trigger || this.triggerArea).focus(options);
+  }
+
+  updateValidity() {
+    const missing = this.hasAttribute('required') && this.files.length === 0;
+    const invalid = missing ? 'true' : (this.getAttribute('aria-invalid') || 'false');
+    for (const target of [this.container, this.triggerArea, this.defaultTrigger]) target.setAttribute('aria-invalid', invalid);
+    if (missing) {
       this.internals.setValidity(
         { valueMissing: true },
         this.getText('msg-required', 'Please select at least one file.'),
-        this.fileInput
+        this.triggerArea
       );
       return false;
     }
@@ -569,27 +725,33 @@ class AuFileUpload extends HTMLElement {
     return true;
   }
 
+  checkValidity() { this.updateValidity(); return this.internals.checkValidity(); }
+  reportValidity() { this.updateValidity(); return this.internals.reportValidity(); }
+
   formResetCallback() {
     this.revokeAllPreviewUrls();
     this.files = [];
+    this.fileInput.value = '';
+    this.showErrors([]);
     this.updateFileList();
     this.updateUsage();
     this.syncFormValue();
-    this.checkValidity();
+    this.updateValidity();
   }
 
   get value() {
-    return this.files;
+    return [...this.files];
   }
 
   set value(val) {
     if (Array.isArray(val)) {
-      this.revokeAllPreviewUrls();
-      this.files = val;
+      this.files = [...new Set(val.filter(file => file instanceof File))];
+      this.fileInput.value = '';
+      this.showErrors([]);
       this.updateFileList();
       this.updateUsage();
       this.syncFormValue();
-      this.checkValidity();
+      this.updateValidity();
     }
   }
 

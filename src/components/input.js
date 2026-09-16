@@ -9,6 +9,7 @@ class AuInput extends HTMLElement {
 
     const style = document.createElement('style');
     style.textContent = `
+      :host([hidden]:not([hidden="until-found" i])) { display: none; }
     :host {
       display: block;
       container-type: inline-size;
@@ -19,6 +20,7 @@ class AuInput extends HTMLElement {
       align-items: center;
       background: var(--au-input-wrapper-bg, transparent);
       container-type: inline-size;
+      min-width: 0;
 
       @container (width < 768px) {
         flex-direction: column;
@@ -35,6 +37,7 @@ class AuInput extends HTMLElement {
           padding-left: 0;
         }
       }
+      label[hidden] { display: none; }
 
       input {
         -webkit-tap-highlight-color: oklch(0 0 0 / 0);
@@ -53,7 +56,7 @@ class AuInput extends HTMLElement {
         }
 
         &:focus-visible {
-          box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) var(--au-input-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) var(--au-input-focus-shadow-color, oklch(0.45 0.15 260));
         }
 
         &[type="color"] {
@@ -67,8 +70,11 @@ class AuInput extends HTMLElement {
       }
       .input-container {
         display: flex;
+        box-sizing: border-box;
+        min-width: 0;
+        max-width: 100%;
         align-items: center;
-        border: var(--au-input-border-width, 1px) var(--au-input-border-style, solid) var(--au-input-border-color, oklch(0.7894 0 0));
+        border: var(--au-input-border-width, 1px) var(--au-input-border-style, solid) var(--au-input-border-color, oklch(0.55 0 0));
         border-radius: var(--au-input-border-radius, 0.25rem);
         padding: var(--au-input-container-padding-vertical, 0.25rem) var(--au-input-container-padding-horizontal, 0.25rem);
         gap: var(--au-input-container-gap, 0.625rem);
@@ -101,6 +107,7 @@ class AuInput extends HTMLElement {
 
         width: 2rem;
         height: 2rem;
+        flex-shrink: 0;
         
         /* border */
         border: 0;
@@ -108,7 +115,7 @@ class AuInput extends HTMLElement {
 
         &:focus-visible {
           outline: none;
-          box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) var(--au-input-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
+          box-shadow: inset 0 0 0 var(--au-input-focus-shadow-width, 3px) var(--au-input-focus-shadow-color, oklch(0.45 0.15 260));
         }
 
         &:hover {
@@ -150,6 +157,9 @@ class AuInput extends HTMLElement {
           flex: 1;
         }
       }
+    }
+    @media (forced-colors: active) {
+      input:focus-visible, .clear-input:focus-visible { outline: 2px solid Highlight; outline-offset: -2px; }
     }
   `;
 
@@ -215,17 +225,21 @@ class AuInput extends HTMLElement {
 
   /** 綁定 input 事件（抽出方法以便 formResetCallback 重用） */
   _bindInputEvents() {
-    this.input.addEventListener('input', () => {
+    this.input.addEventListener('input', (event) => {
       this.value = this.input.value;
-      this.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
-      this.internals.setFormValue(this.value);
-      this._syncValidity();
-      this._updateClearButton();
-      this._updateColorCode();
+      // Native composed events already cross Shadow DOM. Preserve their identity,
+      // trust and composition metadata; bridge only explicitly non-composed events.
+      if (!event.composed) {
+        const forwarded = event instanceof InputEvent
+          ? new InputEvent('input', {bubbles:true,composed:true,data:event.data,inputType:event.inputType,isComposing:event.isComposing})
+          : new Event('input', {bubbles:true,composed:true});
+        this.dispatchEvent(forwarded);
+      }
     });
 
-    this.input.addEventListener('change', () => {
-      this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+    this.input.addEventListener('change', (event) => {
+      this.value = this.input.value;
+      if (!event.composed) this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
     });
   }
 
@@ -233,11 +247,13 @@ class AuInput extends HTMLElement {
     return [
       'type', 'name', 'value', 'placeholder', 'required', 'disabled', 'readonly', 'label',
       'min', 'max', 'step', 'pattern', 'autocomplete', 'autofocus', 'inputmode', 'maxlength', 'minlength',
-      'list', 'aria-label', 'aria-labelledby', 'data-size', 'data-layout', 'data-clear', 'data-clear-label'
+      'list', 'id', 'aria-label', 'aria-labelledby', 'aria-describedby', 'aria-invalid',
+      'data-size', 'data-layout', 'data-clear', 'data-clear-label'
     ];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue) return;
     if (name === 'label' && this.labelEl) {
       this.labelEl.textContent = newValue;
     } else if ((name === 'data-size' || name === 'data-layout') && this.wrapper) {
@@ -250,6 +266,12 @@ class AuInput extends HTMLElement {
       this._updateClearButton();
     } else if (name === 'list') {
       this._handleListAttribute(newValue);
+    } else if (name === 'id') {
+      this._id = newValue || this.generateId();
+      this.input.id = this._id;
+      this.labelEl.htmlFor = this._id;
+    } else if (['aria-label','aria-labelledby','aria-describedby'].includes(name)) {
+      this._syncAccessibleReferences();
     } else if (this.input) {
       if (newValue === null) {
         this.input.removeAttribute(name);
@@ -262,9 +284,13 @@ class AuInput extends HTMLElement {
         if (typeof this.input[camel] === 'boolean') this.input[camel] = true;
         else if (typeof this.input[name] === 'boolean') this.input[name] = true;
       }
+      if (name === 'value') this.input.value = newValue ?? '';
+      this.internals.setFormValue(this.input.value);
       this._syncValidity();
       this._updateColorCode();
     }
+    this._syncControlState();
+    this._syncAccessibleReferences();
   }
 
   get validity() {
@@ -288,6 +314,9 @@ class AuInput extends HTMLElement {
   }
 
   connectedCallback() {
+    for (const name of ['value','disabled','required','readonly']) {
+      if (Object.hasOwn(this,name)) {const value=this[name];delete this[name];this[name]=value;}
+    }
     if (!this._initialValueSet) {
       this._initialValue = this.input.value;
       this._initialValueSet = true;
@@ -296,17 +325,20 @@ class AuInput extends HTMLElement {
     this._syncValidity();
     this._updateClearButton();
     this._updateColorCode();
+    this._syncControlState();
+    this._observeExternalReferences();
 
     // Attempt to sync list initially (deferred to ensure light DOM is parsed)
     if (this.hasAttribute('list')) {
       requestAnimationFrame(() => {
-        this._handleListAttribute(this.getAttribute('list'));
+        if (this.isConnected) this._handleListAttribute(this.getAttribute('list'));
       });
     }
   }
 
   formResetCallback() {
     const currentValue = this._initialValue || '';
+    const wasFocused = this.shadowRoot.activeElement === this.input;
 
     // 重建 input 元素來清除 :user-invalid 狀態
     const newInput = this.input.cloneNode(false);
@@ -318,10 +350,19 @@ class AuInput extends HTMLElement {
     this._bindInputEvents();
 
     // 同步狀態
-    this.internals.setFormValue(currentValue);
+    this.internals.setFormValue(this.input.value);
     this._syncValidity();
     this._updateClearButton();
     this._updateColorCode();
+    this._syncControlState();
+    this._syncAccessibleReferences();
+    if (wasFocused) this.input.focus();
+  }
+
+  formStateRestoreCallback(state, mode) {
+    // Browser restoration is not a user edit. Reuse native sanitization and
+    // form/validity synchronization without changing the reset baseline.
+    if (typeof state === 'string' && this.input?.type !== 'file') this.value = state;
   }
 
   get value() {
@@ -332,7 +373,7 @@ class AuInput extends HTMLElement {
     if (this.input) {
       this.input.value = val;
       this.setAttribute('value', val);
-      this.internals.setFormValue(val);
+      this.internals.setFormValue(this.input.value);
       this._syncValidity();
       this._updateClearButton();
       this._updateColorCode();
@@ -341,20 +382,23 @@ class AuInput extends HTMLElement {
 
   /** ✅ 開發者用：清空 input 值 */
   clear() {
+    if (this.input.disabled || this.input.readOnly || !this.input.value) return;
+    const wasFocused = this.shadowRoot.activeElement === this.clearButton;
     this.input.value = '';
     this.value = '';
-    this.internals.setFormValue('');
     this.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
     this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
     this._updateClearButton();
     this._updateColorCode();
+    if (wasFocused) this.input.focus();
   }
 
   /** ✅ 開發者用：注入建議值 */
   suggest(val = '') {
+    if (this.input.disabled || this.input.readOnly) return;
     this.input.value = val;
     this.value = val;
-    this.internals.setFormValue(val);
+    this.internals.setFormValue(this.input.value);
     this.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
     this._updateClearButton();
     this._updateColorCode();
@@ -385,8 +429,8 @@ class AuInput extends HTMLElement {
   }
 
   /** ✅ 開發者用：聚焦 input 欄位 */
-  focus() {
-    this.input?.focus();
+  focus(options) {
+    this.input?.focus(options);
   }
 
   generateId() {
@@ -419,11 +463,68 @@ class AuInput extends HTMLElement {
   }
 
   _updateClearButton() {
+    if (!this.clearButton) return;
     const hasClear = this.hasAttribute('data-clear');
     const hasValue = this.input.value.length > 0;
     const label = this.getAttribute('data-clear-label') || 'Clear input';
     this.clearButton.setAttribute('aria-label', label);
-    this.clearButton.hidden = !(hasClear && hasValue);
+    this.clearButton.disabled = this.input.disabled || this.input.readOnly;
+    this.clearButton.hidden = !(hasClear && hasValue) || this.clearButton.disabled;
+  }
+
+  formDisabledCallback(disabled) {
+    this._formDisabled = disabled;
+    this._syncControlState();
+  }
+
+  _syncControlState() {
+    if (!this.input) return;
+    this.input.disabled = Boolean(this.disabled || this._formDisabled);
+    this.input.readOnly = this.readonly;
+    this._updateClearButton();
+    this._syncValidity();
+  }
+
+  _observeExternalReferences() {
+    this._referenceObserver?.disconnect();
+    this._referenceObserver ??= new MutationObserver(() => {
+      this._syncAccessibleReferences();
+      const listId=this.getAttribute('list');
+      const found=this.getRootNode().getElementById?.(listId);
+      const target=found?.tagName==='DATALIST' ? found : null;
+      if (listId && target !== this._externalDatalist) this._handleListAttribute(listId);
+    });
+    this._referenceObserver.observe(this.getRootNode(), {
+      subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['id','for','aria-label']
+    });
+    this._syncAccessibleReferences();
+  }
+
+  _syncAccessibleReferences() {
+    if (!this.input) return;
+    const root=this.getRootNode();
+    const resolve=attribute=>(this.getAttribute(attribute)||'').trim().split(/\s+/).filter(Boolean)
+      .map(id=>root.getElementById?.(id)).filter(el=>el && el!==this);
+    const explicit=this.getAttribute('aria-label');
+    let labels=resolve('aria-labelledby');
+    if (!labels.length && !explicit && !this.getAttribute('label') && this.isConnected) labels=[...this.internals.labels];
+    const descriptions=resolve('aria-describedby');
+    this.input.removeAttribute('aria-labelledby');
+    this.input.removeAttribute('aria-describedby');
+    explicit ? this.input.setAttribute('aria-label',explicit) : this.input.removeAttribute('aria-label');
+    this.labelEl.hidden=!this.labelEl.textContent;
+    if ('ariaLabelledByElements' in this.input) this.input.ariaLabelledByElements=labels;
+    else if (!explicit && labels.length) this.input.setAttribute('aria-label',labels.map(el=>el.getAttribute('aria-label')||el.textContent).join(' ').trim());
+    if ('ariaDescribedByElements' in this.input) this.input.ariaDescribedByElements=descriptions;
+    else if (descriptions.length) {
+      if (!this._descriptionMirror) {
+        this._descriptionMirror=document.createElement('span');
+        this._descriptionMirror.id=this.generateId();this._descriptionMirror.hidden=true;
+        this.shadowRoot.append(this._descriptionMirror);
+      }
+      this._descriptionMirror.textContent=descriptions.map(el=>el.textContent).join(' ').trim();
+      this.input.setAttribute('aria-describedby',this._descriptionMirror.id);
+    }
   }
 
   _updateColorCode() {
@@ -463,6 +564,7 @@ class AuInput extends HTMLElement {
       : document.getElementById(listId);
 
     if (externalDatalist && externalDatalist.tagName === 'DATALIST') {
+      this._externalDatalist = externalDatalist;
       this._syncInternalDatalist(externalDatalist, listId);
 
       // Keep the internal copy in sync with later changes to the external list.
@@ -473,6 +575,7 @@ class AuInput extends HTMLElement {
         childList: true,
         subtree: true,
         attributes: true,
+        characterData: true,
       });
     } else {
       // Not found yet; pass the attribute through (it cannot resolve inside the
@@ -499,6 +602,7 @@ class AuInput extends HTMLElement {
   }
 
   _disconnectDatalistObserver() {
+    this._externalDatalist = null;
     if (this._datalistObserver) {
       this._datalistObserver.disconnect();
       this._datalistObserver = null;
@@ -507,6 +611,7 @@ class AuInput extends HTMLElement {
 
   disconnectedCallback() {
     this._disconnectDatalistObserver();
+    this._referenceObserver?.disconnect();
   }
 }
 

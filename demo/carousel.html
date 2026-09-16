@@ -54,6 +54,8 @@
   </style>
 </head>
 <body>
+  <header><a href="index.html">Home</a></header>
+  <main>
   <h1>Accesserty UI Kit — Carousel</h1>
   <p>
     <code>&lt;au-carousel&gt;</code> is a Web Component. You provide the
@@ -73,6 +75,7 @@
 
   <h2>Live example</h2>
   <au-carousel
+    aria-label="Featured destinations"
     data-live-template="{title}, item {current} of {total}"
     data-item-fallback="Item {current} of {total}"
     data-text-prev="Previous slide"
@@ -118,7 +121,7 @@
   </au-carousel>
 
   <h2>Basic usage</h2>
-  <pre><code>&lt;au-carousel&gt;
+  <pre><code>&lt;au-carousel aria-label="Featured destinations"&gt;
   &lt;div data-title="Coastal cliffs"&gt;
     &lt;img src="…" alt="…"&gt;
     &lt;h3&gt;Coastal cliffs&lt;/h3&gt;
@@ -155,6 +158,7 @@
   <pre><code>&lt;au-carousel class="custom-carousel"&gt; … &lt;/au-carousel&gt;</code></pre>
 
   <au-carousel class="custom-carousel"
+    aria-label="More destinations"
     data-live-template="{title}, item {current} of {total}"
     data-text-prev="Previous slide"
     data-text-next="Next slide"
@@ -189,10 +193,10 @@
   <h2>How to test the accessibility</h2>
   <ul>
     <li><strong>Tab order (dots → content → arrows):</strong> <kbd>Tab</kbd> reaches the dot group first (one stop; <kbd>←</kbd>/<kbd>→</kbd>/<kbd>Home</kbd>/<kbd>End</kbd> move between dots and jump). Further <kbd>Tab</kbd>s go through each slide's link in order — including back with <kbd>Shift</kbd>+<kbd>Tab</kbd> — and the carousel scrolls to follow your focus. Then the prev/next buttons.</li>
-    <li><strong>Free reading:</strong> with a screen reader you can read through every block (forward and back), not only what's on screen. The scroll container is not a focus stop, so there is no "read the whole list at once" dump.</li>
+    <li><strong>Reading order:</strong> slides remain ordinary content in DOM order; the component does not hide off-screen slides from assistive technologies or remove their tab stops. Verify reading/navigation with your screen reader; automated browser tests are not a screen-reader result.</li>
     <li><strong>Named dots:</strong> each dot is labelled by its slide's title, so a screen reader announces e.g. "Forest light" — not "3".</li>
-    <li><strong>Change feedback:</strong> arrows, dots and swiping all update a polite live region ("Forest light, item 3 of 6").</li>
-    <li><strong>Reach the end:</strong> next/prev and the dots all reach the very last slide; it scrolls to the left edge so the dots line up.</li>
+    <li><strong>Change feedback:</strong> changed navigation and settled scrolling update a polite live region ("Forest light, item 3 of 6"), except while a named dot is focused to avoid duplicate announcements. Title edits and reordering are silent.</li>
+    <li><strong>Reach the end:</strong> controls reach the last slide at the track's start edge (right in RTL). Boundary arrows remain focusable with <code>aria-disabled="true"</code> and do nothing when activated again.</li>
     <li><strong>Responsive:</strong> narrow the window — slides-per-view steps 3 → 2 → 1 via <code>@container</code>.</li>
     <li><strong>Reduced motion:</strong> turn it on in your OS — scrolling jumps instantly.</li>
   </ul>
@@ -245,7 +249,7 @@
   <h2>Properties</h2>
   <table>
     <tr><th scope="col">Property</th><th scope="col">Type</th><th scope="col">Description</th></tr>
-    <tr><td><code>current</code></td><td>number</td><td>Index of the current (left-most) slide. Set it to move the carousel.</td></tr>
+    <tr><td><code>current</code></td><td>number</td><td>Zero-based start-edge slide index; -1 when empty. Numeric strings are accepted, fractions truncate, invalid/non-finite values become 0 and values clamp to range. Set the DOM property to move; there is no current attribute.</td></tr>
   </table>
   <pre><code>const c = document.querySelector('au-carousel');
 c.current = 2;         // go to the third slide
@@ -256,12 +260,13 @@ console.log(c.current);</code></pre>
   <table>
     <tr><th scope="col">Method</th><th scope="col">Description</th></tr>
     <tr><td><code>slideTo(index)</code></td><td>Scroll to <code>index</code> (clamped to range) and make it current.</td></tr>
+    <tr><td><code>refresh()</code></td><td>Immediately reread slide titles and structure. Heading/data-title edits also refresh automatically after a short debounce. Retained slide nodes keep their dots and selection when reordered; replacing a slide node creates a new identity.</td></tr>
   </table>
 
   <h2>Events</h2>
   <table>
     <tr><th scope="col">Event</th><th scope="col">Detail</th><th scope="col">Description</th></tr>
-    <tr><td><code>slide-change</code></td><td><code>{ index, total, title }</code></td><td>Fires when the current slide changes (bubbles, composed).</td></tr>
+    <tr><td><code>slide-change</code></td><td><code>{ index, total, title }</code></td><td>Fires for changed navigation/current writes and settled scrolling (bubbles, composed), not refresh/translation/reordering. Same-index writes and boundary clicks do not emit again.</td></tr>
   </table>
   <pre><code>// Vanilla
 document.querySelector('au-carousel')
@@ -277,6 +282,11 @@ useEffect(() =&gt; {
 }, []);
 
 // Vue
-&lt;au-carousel @slide-change="e =&gt; index = e.detail.index" /&gt;</code></pre>
+&lt;au-carousel :current.prop="index" @slide-change="e =&gt; index = e.detail.index" /&gt;</code></pre>
+  <h2>Naming and integration boundaries</h2>
+  <p>Give the carousel an <code>aria-label</code> or an <code>aria-labelledby</code> reference in its containing document/shadow root. Localize <code>data-text-roledescription</code> (default: carousel) as needed. Names and translations preserve controls; older browsers use a plain-text label fallback.</p>
+  <p>Tab from the dot group enters the current slide's first eligible native control (also Option+Tab in Safari); hidden, inert and negative-tabindex targets are skipped. The helper does not traverse controls inside a slide's nested Shadow DOM. Those components must expose their own accessible focus entry. Content without an eligible target follows native Tab order.</p>
+  <p>Keep the same keyed slide elements during framework updates to retain selection identity. Next assigns <code>ref.current.current</code> after client registration, Nuxt uses <code>:current.prop</code>, and Angular uses <code>[current]</code>. Real SSR fixtures preserve host and slide nodes but render internal controls only in the browser. No autoplay is provided; this continuous scroll layout is not a tabpanel carousel.</p>
+  </main>
 </body>
 </html>

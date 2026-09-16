@@ -3,10 +3,11 @@
 *************************/
 
 :root {
-  --color-focus: var(--color-yellow-200);
+  --color-focus: var(--color-blue-600);
   --color-visited: var(--color-purple-500);
-  --color-placeholder: var(--color-gray-300);
+  --color-placeholder: var(--color-gray-600);
   --color-border: var(--color-gray-300);
+  --box-shadow: 0 0.75rem 1.125rem oklch(from var(--color-black) l c h / 0.15);
 
   --color-primary-bg: var(--color-blue-50);
   --color-primary-100: var(--color-blue-100);

@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Shared CSS contract</title>
+<link rel="stylesheet" href="../../../src/css/au-style.css">
+<h1>Shared CSS contract</h1>
+<span id="black" style="color:var(--color-pure-black)">Black</span>
+<span id="white" style="color:var(--color-pure-white);background:black">White</span>
+<span id="focus-color" style="color:var(--color-focus)">Focus</span>
+<span id="placeholder-color" style="color:var(--color-placeholder)">Placeholder</span>
+<label>LTR<select id="ltr"><option>English</option><option>French</option><option>German</option></select></label>
+<div dir="rtl"><label>RTL<select id="rtl"><option>العربية</option></select></label></div>
+<label>Auto<select id="auto" dir="auto"><option>العربية</option></select></label>
+<button popovertarget="panel">Open information</button>
+<div id="panel" popover>Popover information</div>
+</html>

@@ -121,8 +121,8 @@ describe('AuCarousel', () => {
   it('disables prev at the first slide and next at the last', async () => {
     const el = await mount(slidesHtml(4));
     await tick();
-    expect(el.shadowRoot.querySelector('[data-carousel-prev]').disabled).to.be.true;
-    expect(el.shadowRoot.querySelector('[data-carousel-next]').disabled).to.be.false;
+    expect(el._prevBtn.getAttribute('aria-disabled')).to.equal('true');
+    expect(el._nextBtn.getAttribute('aria-disabled')).to.equal('false');
   });
 
   it('lets next/prev reach the very last slide (maxIndex = total - 1)', async () => {
@@ -134,7 +134,7 @@ describe('AuCarousel', () => {
     next.click();
     await tick();
     expect(el.current).to.equal(3);
-    expect(next.disabled).to.be.true;
+    expect(next.getAttribute('aria-disabled')).to.equal('true');
     expect(
       el.shadowRoot.querySelectorAll('.au-carousel-dot')[3].getAttribute('aria-current')
     ).to.equal('true');
@@ -274,8 +274,8 @@ describe('AuCarousel', () => {
     expect(dots.length).to.equal(2);
     expect(el.current).to.equal(1);
     expect(dots[1].getAttribute('aria-current')).to.equal('true');
-    expect(prev.disabled).to.be.false;
-    expect(next.disabled).to.be.true;
+    expect(prev.getAttribute('aria-disabled')).to.equal('false');
+    expect(next.getAttribute('aria-disabled')).to.equal('true');
   });
 
   it('clears its state and disables navigation when all slides are removed', async () => {
@@ -412,5 +412,100 @@ describe('AuCarousel', () => {
     el.current = -5;
     await tick();
     expect(el.current).to.equal(0);
+  });
+
+  it('normalizes invalid and fractional indexes without accessing a missing slide', async () => {
+    const el=await mount(slidesHtml(3));await tick();
+    for(const value of [NaN,Infinity,undefined,null,'bad',{},Symbol('invalid')]){
+      el.current=value;expect(el.current).to.equal(0);
+    }
+    el.current='1.9';expect(el.current).to.equal(1);
+    el.setCurrent(2.8);expect(el.current).to.equal(2);
+  });
+
+  it('retains current slide and dot identity on reorder and translation', async () => {
+    const el=await mount(slidesHtml(3));await tick();
+    el.current=1;const slide=el.children[1],dot=el._dots[1];dot.focus();
+    const changes=[];el.addEventListener('slide-change',e=>changes.push(e.detail));
+    el.prepend(slide);el.refresh();
+    expect(el.current).to.equal(0);expect(el._dots[0]).to.equal(dot);
+    expect(el.shadowRoot.activeElement).to.equal(dot);
+    slide.dataset.title='翻譯';el.refresh();
+    expect(el._dots[0]).to.equal(dot);expect(dot.getAttribute('aria-label')).to.equal('翻譯, 1 of 3');
+    expect(changes).to.have.length(0);
+    expect(el._dots.filter(n=>n.tabIndex===0)).to.have.length(1);
+  });
+
+  it('recovers removed dot focus and clears empty announcements', async () => {
+    const el=await mount(slidesHtml(3));await tick();
+    el.current=2;el._dots[2].focus();el.lastElementChild.remove();el.refresh();
+    expect(el.shadowRoot.activeElement).to.equal(el._dots[1]);
+    el.replaceChildren();el.refresh();
+    expect(el.current).to.equal(-1);expect(el._live.textContent).to.equal('');
+    expect(el.shadowRoot.activeElement).to.equal(el._wrapper);
+    el.setCurrent(3);expect(el.current).to.equal(-1);
+  });
+
+  it('skips hidden, negative-tabindex, disabled-fieldset and inert focus targets', async () => {
+    const el=await mount('<div data-title="First"><button hidden>Hidden</button><button tabindex="-1">Skip</button><fieldset disabled><button>Disabled</button></fieldset><div inert><button>Inert</button></div><button id="usable">Usable</button></div>');await tick();
+    expect(el._firstFocusable(0)).to.equal(el.querySelector('#usable'));
+    const dot=el._dots[0];dot.focus();dot.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true,cancelable:true}));
+    expect(document.activeElement).to.equal(el.querySelector('#usable'));
+  });
+
+  it('can enter a slide that is itself a native focusable element', async () => {
+    const el=await mount('<a href="#first" data-title="First">First</a>');await tick();
+    expect(el._firstFocusable(0)).to.equal(el.firstElementChild);
+  });
+
+  it('supports Safari Option+Tab traversal from dots and back from Previous', async () => {
+    const el=await mount(slidesHtml(3));await tick();el.current=1;
+    for(const [button,shiftKey] of [[el._dots[1],false],[el._prevBtn,true]]){
+      button.focus();button.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',altKey:true,shiftKey,bubbles:true,cancelable:true}));
+      expect(document.activeElement).to.equal(el.children[1].querySelector('a'));
+    }
+  });
+
+  it('keeps boundary button focus and emits no extra event on repeated activation', async () => {
+    const el=await mount(slidesHtml(2));await tick();
+    const events=[];el.addEventListener('slide-change',e=>events.push(e.detail.index));
+    el._nextBtn.focus();el._nextBtn.click();el._nextBtn.click();
+    expect(el.shadowRoot.activeElement).to.equal(el._nextBtn);
+    expect(el._nextBtn.disabled).to.be.false;
+    expect(el._nextBtn.getAttribute('aria-disabled')).to.equal('true');expect(events).to.deep.equal([1]);
+  });
+
+  it('ignores modified shortcuts and maps horizontal arrows in RTL', async () => {
+    const el=await mount(slidesHtml(3),{dir:'rtl'});await tick();
+    el._dots[0].focus();el._dots[0].dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowLeft',ctrlKey:true,bubbles:true}));
+    expect(el.current).to.equal(0);
+    el._dots[0].dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowLeft',bubbles:true}));
+    expect(el.current).to.equal(1);
+    el._scrollToIndex(2,'instant');el._onSettled();expect(el.current).to.equal(2);
+  });
+
+  it('retains dots and one notification through reconnection', async () => {
+    const wrapper=await fixture(document.createElement('div')),el=document.createElement('au-carousel');el.innerHTML=slidesHtml(3);wrapper.append(el);await tick();
+    const dot=el._dots[1],events=[];el.addEventListener('slide-change',e=>events.push(e.detail.index));
+    for(let i=0;i<3;i++){el.remove();wrapper.append(el);}
+    expect(el._dots[1]).to.equal(dot);dot.click();expect(events).to.deep.equal([1]);
+  });
+
+  it('upgrades current assigned before registration', async () => {
+    const tag='test-carousel-'+crypto.randomUUID(),el=document.createElement(tag);el.innerHTML=slidesHtml(3);el.current=2;
+    await fixture(el);customElements.define(tag,class extends customElements.get('au-carousel'){});
+    expect(Object.hasOwn(el,'current')).to.be.false;expect(el.current).to.equal(2);
+  });
+
+  it('resolves replaced external names in a containing shadow root without replacing dots', async () => {
+    const wrapper=await fixture(document.createElement('div')),root=wrapper.attachShadow({mode:'open'});
+    root.innerHTML='<span id="gallery-label">Destinations</span><au-carousel aria-labelledby="gallery-label">'+slidesHtml(2)+'</au-carousel>';
+    await tick();const el=root.lastElementChild,dot=el._dots[0];dot.focus();
+    expect(el._wrapper.ariaLabelledByElements).to.deep.equal([root.firstElementChild]);
+    root.firstElementChild.replaceWith(root.firstElementChild.cloneNode(true));await tick();
+    expect(el._wrapper.ariaLabelledByElements).to.deep.equal([root.firstElementChild]);
+    el.setAttribute('data-text-roledescription','輪播');
+    expect(el._wrapper.getAttribute('aria-roledescription')).to.equal('輪播');
+    expect(el.shadowRoot.activeElement).to.equal(dot);
   });
 });

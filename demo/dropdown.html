@@ -89,7 +89,7 @@
           <au-dropdown-item value="3">Action 3 (Separated)</au-dropdown-item>
         </au-dropdown>
         <br>
-        <p id="basic-status"></p>
+        <p id="basic-status" role="status"></p>
       </div>
     </section>
 
@@ -105,7 +105,7 @@
       <h2>Custom Style</h2>
       <div role="group" aria-labelledby="group-label-custom-style">
         <span id="group-label-custom-style" hidden>Custom Style Dropdown</span>
-        <au-dropdown id="basic-dropdown" class="custom-dropdown custom-btn--primary-outline">
+        <au-dropdown id="custom-dropdown" class="custom-dropdown custom-btn--primary-outline">
           <span slot="trigger">Options</span>
           <au-dropdown-item value="1">Action 1</au-dropdown-item>
           <au-dropdown-item value="2">Action 2</au-dropdown-item>
@@ -113,7 +113,7 @@
           <au-dropdown-item value="3">Action 3 (Separated)</au-dropdown-item>
         </au-dropdown>
         <br>
-        <p id="basic-status"></p>
+        <p id="custom-status" role="status"></p>
       </div>
     </section>
 
@@ -213,7 +213,7 @@
         <tr>
           <td>--au-dropdown-menu-border-color</td>
           <td>Border color</td>
-          <td>oklch(0.7894 0 0)</td>
+          <td>oklch(0.55 0 0)</td>
         </tr>
         <tr>
           <td>--au-dropdown-menu-border-radius</td>
@@ -257,7 +257,7 @@
         <tr>
           <td>--au-dropdown-focus-shadow-color</td>
           <td>Focus ring color</td>
-          <td>oklch(0.8315 0.15681888825079074 78.05241467152487)</td>
+          <td>oklch(0.4 0 0)</td>
         </tr>
       </table>
     </section>
@@ -300,6 +300,21 @@ dd.isOpen = false; // closes the menu</code></pre>
     console.log('Selected value:', e.detail.value);
   });
         </code>
+      <p>Each activation emits one bubbling, composed <code>selected</code> event
+        with the item's current <code>value</code>, including after reconnecting
+        the same item. Updating item text or value does not select it.</p>
+      <p>Enter, Space and the arrow keys on the trigger open the menu and focus
+        an item. Up/Down, Home and End move between items. Escape returns to the
+        trigger; Tab leaves the menu using the browser's keyboard navigation
+        settings. Translating existing text preserves the focused item.</p>
+      <p>Use text in the trigger slot and either an action label or a native link
+        per item. Consumers handle actions through <code>selected</code>; links
+        retain their own destinations. Custom colors need separate contrast checks.
+        Native Popover is detected automatically. Its top-layer menu uses JavaScript
+        positioning with viewport limits and LTR/RTL start alignment, without CSS
+        Anchor Positioning. Without Popover, the menu expands in document flow:
+        keyboard actions remain available but it is not a top-layer overlay and
+        may be constrained by the surrounding layout.</p>
     </section>
 
     <section>
@@ -310,12 +325,13 @@ dd.isOpen = false; // closes the menu</code></pre>
   </main>
 
   <script type="module">
-    const dropdown = document.getElementById('basic-dropdown');
-    const status = document.getElementById('basic-status');
-
-    dropdown.addEventListener('selected', (e) => {
-      status.textContent = `Last selected: ${e.detail.value} at ${new Date().toLocaleTimeString()}`;
-    });
+    for (const name of ['basic', 'custom']) {
+      const dropdown = document.getElementById(`${name}-dropdown`);
+      const status = document.getElementById(`${name}-status`);
+      dropdown.addEventListener('selected', (e) => {
+        status.textContent = `Last selected: ${e.detail.value}`;
+      });
+    }
   </script>
 </body>
 

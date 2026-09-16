@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>UI Kit host visibility and native focus contract</title>
+<link rel="stylesheet" href="../../../src/css/components.css">
+<button id="before">Before components</button>
+<div id="components"></div>
+<button id="after">After components</button>
+<select id="select" aria-label="Test choice"><option>First</option></select>
+<details><summary id="summary">Details</summary>Details content</details>
+<script>
+  window.ready = (async () => {
+    const mode = new URL(location.href).searchParams.get('mode') || 'source';
+    const files = mode === 'source'
+      ? ['accordion','breadcrumbs','card','carousel','checkbox','dropdown','file-upload',
+         'input','pagination','radio','rating','switch','tabs','textarea','tree']
+          .map(name => '../../../src/components/' + name + '.js')
+      : [mode === 'min' ? '../../../dist/accesserty-ui-kit.min.js' : '../../../dist/accesserty-ui-kit.js'];
+    for (const src of files) {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src; script.onload = resolve; script.onerror = reject;
+        document.head.append(script);
+      });
+    }
+    window.tags = ['au-accordion','au-accordion-item','au-breadcrumbs','au-card','au-carousel',
+      'au-checkbox','au-dropdown','au-dropdown-item','au-file-upload','au-input','au-pagination',
+      'au-radio-group','au-rating','au-switch','au-tabs','au-textarea','au-tree','au-tree-node'];
+    for (const tag of tags) {
+      const el = document.createElement(tag);
+      el.hidden = true;
+      el.setAttribute('aria-label', 'Hidden sample ' + tag);
+      document.getElementById('components').append(el);
+    }
+  })();
+</script>
+</html>

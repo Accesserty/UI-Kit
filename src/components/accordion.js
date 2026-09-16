@@ -3,6 +3,10 @@ class AuAccordion extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
 
+    const visibilityStyle = document.createElement('style');
+    visibilityStyle.textContent = ':host([hidden]:not([hidden="until-found" i])) { display: none; }';
+    this.shadowRoot.append(visibilityStyle);
+
     this._container = document.createElement('div');
     this._container.setAttribute('class', 'au-accordion');
 
@@ -19,15 +23,22 @@ class AuAccordion extends HTMLElement {
     this.shadowRoot.appendChild(this._container);
 
     this._onToggle = this._handleToggle.bind(this);
+    this._childrenObserver = new MutationObserver(() => this._syncItems());
   }
 
   connectedCallback() {
+    if (Object.hasOwn(this, 'exclusive')) {
+      const value = this.exclusive; delete this.exclusive; this.exclusive = value;
+    }
     this.addEventListener('au-toggle', this._onToggle);
+    this._childrenObserver.observe(this, { childList: true });
     this._updateExclusiveAria();
+    this._syncItems();
   }
 
   disconnectedCallback() {
     this.removeEventListener('au-toggle', this._onToggle);
+    this._childrenObserver.disconnect();
   }
 
   static get observedAttributes() {
@@ -49,6 +60,7 @@ class AuAccordion extends HTMLElement {
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'exclusive' && oldValue !== newValue) {
       this._updateExclusiveAria();
+      this._syncItems();
     }
     if (name === 'data-text-exclusive-hint' && oldValue !== newValue) {
       this._updateExclusiveHint();
@@ -58,6 +70,7 @@ class AuAccordion extends HTMLElement {
   _updateExclusiveHint() {
     if (!this._exclusiveHint) return;
     this._exclusiveHint.textContent = this.getAttribute('data-text-exclusive-hint') || 'Only one section may be expanded at a time.';
+    this._syncItems();
   }
 
   _updateExclusiveAria() {
@@ -69,16 +82,19 @@ class AuAccordion extends HTMLElement {
   }
 
   _handleToggle(e) {
-    if (!this.exclusive || !e.detail.open) return;
-    const items = [...this.children].filter(
-      el => el.tagName.toLowerCase() === 'au-accordion-item' && el !== e.target
-    );
-    items.forEach(item => { item.open = false; });
+    const item = e.composedPath()[0];
+    if (item?.parentElement !== this || item.localName !== 'au-accordion-item') return;
+    if (this.exclusive && e.detail?.open) this._syncItems(item);
   }
-}
 
-if (typeof customElements !== 'undefined' && !customElements.get('au-accordion')) {
-  customElements.define("au-accordion", AuAccordion);
+  _syncItems(preferred) {
+    const items = [...this.children].filter(el => el.localName === 'au-accordion-item');
+    const keep = preferred || items.find(item => item.hasAttribute('open'));
+    for (const item of items) {
+      item.updateExclusiveHint?.();
+      if (this.exclusive && item !== keep && item.hasAttribute('open')) item.removeAttribute('open');
+    }
+  }
 }
 
 
@@ -95,6 +111,7 @@ class AuAccordionItem extends HTMLElement {
 
     content.innerHTML = `
         <style>
+      :host([hidden]:not([hidden="until-found" i])) { display: none; }
           .au-accordion-item {
             box-sizing: border-box;
             margin-bottom: var(--au-accordion-item-margin-bottom, 1rem);
@@ -102,7 +119,9 @@ class AuAccordionItem extends HTMLElement {
           :host {
             display: block;
             max-width: 100%;
+            min-width: 0;
           }
+          [role="heading"] { margin: 0; }
           button {
             /* behavior */
             cursor: pointer;
@@ -116,7 +135,8 @@ class AuAccordionItem extends HTMLElement {
             gap: 1rem;
             word-break: break-word;
             width: 100%;
-            text-align: left;
+            text-align: start;
+            min-height: 24px;
             padding: var(--au-accordion-heading-padding-vertical, 0.625rem) var(--au-accordion-heading-padding-horizontal, 1rem);
             
             /* text */
@@ -126,7 +146,7 @@ class AuAccordionItem extends HTMLElement {
             line-height: var(--au-accordion-heading-text-line-height, 1.5);
             
             /* border */
-            border: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.7894 0 0));
+            border: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
             border-radius: var(--au-accordion-heading-border-radius, 0);
             
             /* others decoration */
@@ -191,49 +211,41 @@ class AuAccordionItem extends HTMLElement {
 
             &:hover {
               background-color: var(--au-accordion-heading-hover-bg, oklch(0.9466 0 0));
-              border-color: var(--au-accordion-heading-hover-border-color, oklch(0.7894 0 0));
+              border-color: var(--au-accordion-heading-hover-border-color, oklch(0.55 0 0));
             }
             
             &:active {
               background-color: var(--au-accordion-heading-active-bg, oklch(0.8689 0 0));
-              border-color: var(--au-accordion-heading-active-border-color, oklch(0.7894 0 0));
+              border-color: var(--au-accordion-heading-active-border-color, oklch(0.55 0 0));
             }
             
             &:focus-visible {
-              outline: none;
-              box-shadow: inset 0 0 0 var(--au-accordion-heading-focus-shadow-width, 3px) var(--au-accordion-heading-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
+              outline: var(--au-accordion-heading-focus-shadow-width, 3px) solid var(--au-accordion-heading-focus-shadow-color, oklch(0.4 0 0));
+              outline-offset: -3px;
             }
           }
 
-          div[role="region"] {
+          .region {
+            overflow-wrap: anywhere;
             background-color: var(--au-accordion-content-bg, oklch(0.9731 0 0));
             color: var(--au-accordion-content-text-color, oklch(0.1398 0 0));
             padding: var(--au-accordion-content-padding-top, 1rem)  var(--au-accordion-content-padding-right, 1rem)  var(--au-accordion-content-padding-bottom, 1rem)  var(--au-accordion-content-padding-left, 1rem);
             overscroll-behavior: var(--au-accordion-content-overscroll-behavior, auto);
-            /* 這裡設定展開時的高度 */
-            /* 注意：calc-size 目前支援度較低，確保你在支援的環境下使用 */
-            height: calc-size(auto, size); 
-            overflow: hidden; /* 確保內容縮放時不會溢出 */
-
-            /* --- 2. 關鍵：Transition 必須寫在這裡 --- */
-            transition-behavior: allow-discrete;
-            transition: height 0.5s ease-in-out, display 0.5s step-end allow-discrete; 
-            border-left: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.7894 0 0));
-            border-right: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.7894 0 0));
-            border-bottom: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.7894 0 0));
+            border-left: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
+            border-right: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
+            border-bottom: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
             border-radius: var(--au-accordion-content-border-radius, 0);
-            @starting-style {
-              height: 0;
-            }
-
             &[hidden] {
-              height: 0;
-              display: none;
+              display: none !important;
             }
           }
+          .exclusive-hint { position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap; }
+          @media (forced-colors: active) { button:focus-visible { outline: 2px solid Highlight; outline-offset:-2px; } }
+          @media (prefers-reduced-motion: reduce) { button, button .icon { transition: none; } }
         </style>
-        <button type="button" aria-expanded="false" aria-controls="${regionId}" part="button">
-            <div class="heading" id="${titleId}"><slot name="heading"></slot></div>
+        <div role="heading" aria-level="3">
+        <button type="button" id="${titleId}" aria-expanded="false" aria-controls="${regionId}" part="button">
+            <div class="heading"><slot name="heading"></slot></div>
             <div class="info">
               <div>
                 <slot name="sub"></slot>
@@ -243,7 +255,9 @@ class AuAccordionItem extends HTMLElement {
               </div>
             </div>
         </button>
-        <div role="region" id="${regionId}" aria-labelledby="${titleId}" hidden part="region">
+        </div>
+        <span class="exclusive-hint" id="${regionId}-hint"></span>
+        <div class="region" role="region" id="${regionId}" aria-labelledby="${titleId}" hidden inert part="region">
             <slot name="content"></slot>
         </div>
       `;
@@ -251,15 +265,23 @@ class AuAccordionItem extends HTMLElement {
     this.shadowRoot.append(content);
 
     this.button = this.shadowRoot.querySelector('button');
+    this.region = this.shadowRoot.querySelector('.region');
+    this.heading = this.shadowRoot.querySelector('[role="heading"]');
+    this._hint = this.shadowRoot.querySelector('.exclusive-hint');
     this.button.addEventListener('click', () => this.toggleAccordion());
   }
 
   connectedCallback() {
+    if (Object.hasOwn(this, 'open')) {
+      const value = this.open; delete this.open; this.open = value;
+    }
     this.updateExpanded();
+    this.updateSemantics();
+    this.updateExclusiveHint();
   }
 
   static get observedAttributes() {
-    return ["open"];
+    return ["open", "heading-level", "no-region"];
   }
 
   get open() {
@@ -275,6 +297,8 @@ class AuAccordionItem extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue) return;
+    if (name !== 'open') { this.updateSemantics(); return; }
     if (name === "open" && oldValue !== newValue) {
       this.updateExpanded();
       if (this.isConnected) {
@@ -289,13 +313,34 @@ class AuAccordionItem extends HTMLElement {
 
   updateExpanded() {
     const isOpen = this.hasAttribute('open');
-    this.button.setAttribute('aria-expanded', isOpen);
-    const region = this.shadowRoot.querySelector('div[role="region"]');
-    if (isOpen) {
-      region.removeAttribute('hidden');
-    } else {
-      region.setAttribute('hidden', '');
+    // Walk the composed ancestry so slotted controls and nested shadow controls
+    // return to their own header before the panel becomes hidden/inert.
+    let active = this.ownerDocument.activeElement;
+    while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+    for (let node = active; !isOpen && node; node = node.assignedSlot || node.parentNode || node.host) {
+      if (node === this.region) { this.button.focus({preventScroll:true}); break; }
     }
+    this.button.setAttribute('aria-expanded', isOpen);
+    this.region.hidden = !isOpen;
+    this.region.inert = !isOpen;
+  }
+
+  updateSemantics() {
+    const level = Number(this.getAttribute('heading-level'));
+    this.heading.setAttribute('aria-level', String(Number.isInteger(level) && level >= 1 && level <= 6 ? level : 3));
+    if (this.hasAttribute('no-region')) {
+      this.region.removeAttribute('role'); this.region.removeAttribute('aria-labelledby');
+    } else {
+      this.region.setAttribute('role','region'); this.region.setAttribute('aria-labelledby',this.button.id);
+    }
+  }
+
+  updateExclusiveHint() {
+    const owner = this.parentElement;
+    const exclusive = owner?.localName === 'au-accordion' && owner.hasAttribute('exclusive');
+    this._hint.textContent = exclusive ? owner.getAttribute('data-text-exclusive-hint') || 'Only one section may be expanded at a time.' : '';
+    if (exclusive) this.button.setAttribute('aria-describedby', this._hint.id);
+    else this.button.removeAttribute('aria-describedby');
   }
 
   generateId() {
@@ -314,4 +359,7 @@ class AuAccordionItem extends HTMLElement {
 
 if (typeof customElements !== 'undefined' && !customElements.get('au-accordion-item')) {
   customElements.define("au-accordion-item", AuAccordionItem);
+}
+if (typeof customElements !== 'undefined' && !customElements.get('au-accordion')) {
+  customElements.define("au-accordion", AuAccordion);
 }

@@ -60,7 +60,14 @@
         </tr>
         <tr>
           <td>aria-labelledby</td>
-          <td>Accessible label reference passed to the internal switch input.</td>
+          <td>Label IDs resolved in the containing document or shadow root; late and replaced references are tracked.</td>
+        </tr>
+        <tr>
+          <td>aria-describedby / aria-invalid</td>
+          <td>Connect application help/error messages and validation state.</td>
+        </tr>
+        <tr>
+          <td>required</td><td>Native validation requires this switch to be on.</td>
         </tr>
       </table>
     </section>
@@ -76,6 +83,7 @@
           </tr>
         </thead>
         <tbody>
+          <tr><td>name / value / required</td><td>string / string / boolean</td><td>Writable reflected properties; a missing value defaults to on, while an explicit empty value remains empty.</td></tr>
           <tr>
             <td>checked</td>
             <td>boolean (getter + setter)</td>
@@ -92,6 +100,16 @@
 sw.checked = true;   // turns on
 sw.checked = false;  // turns off
 console.log(sw.checked); // boolean</code></pre>
+      <p>Programmatic changes synchronize the native checked state, switch ARIA state, validity and submitted value.
+        User activation also reflects checked on the host. Reset silently restores the state captured at first connection;
+        it does not always turn the switch off. Disabled ancestor fieldsets prevent interaction and submission.</p>
+      <p>Use <code>focus(options)</code> to focus the internal switch. Native host-associated labels name and activate it
+        when no internal label is supplied. Older engines use plain-text reference fallbacks; supply a localized
+        <code>aria-label</code> for rich labels there. Avoid interactive content inside the label slot.</p>
+      <p>Vue/Nuxt: bind <code>:checked="enabled" @change="enabled = $event.detail"</code>, not text-style <code>v-model</code>.
+        React supports checked/property and onchange binding. Angular form directives need a value accessor beyond
+        custom-element schema configuration. SSR fixtures verify client registration after server-rendered hosts,
+        not server-rendered shadow controls.</p>
     </section>
     <section>
       <h2>Events</h2>
@@ -108,7 +126,7 @@ console.log(sw.checked); // boolean</code></pre>
           <tr>
             <td>change</td>
             <td><code>boolean</code> (checked state)</td>
-            <td>Fired when the switch is toggled. Bubbles and is composed.</td>
+            <td>One event when the user toggles the switch. Bubbles and is composed. Assignment, reset and state restoration are silent.</td>
           </tr>
         </tbody>
       </table>
@@ -150,6 +168,9 @@ console.log(sw.checked); // boolean</code></pre>
     </section>
     <section>
       <h2>CSS Variables</h2>
+      <p>The default boundary and focus colors target light surfaces. Recheck contrast and target size when overriding
+        them. The thumb follows RTL direction, reduced-motion preferences disable transitions, and forced-colors uses
+        system colors and a focus outline.</p>
       <table>
         <tr>
           <th scope="col">CSS Variables name</th>
@@ -209,7 +230,7 @@ console.log(sw.checked); // boolean</code></pre>
         <tr>
           <td>--au-switch-input-border-color</td>
           <td>border color of switch</td>
-          <td>oklch(0.7894 0 0)</td>
+          <td>oklch(0.55 0 0)</td>
         </tr>
         <tr>
           <td>--au-switch-input-border-radius</td>
@@ -220,6 +241,11 @@ console.log(sw.checked); // boolean</code></pre>
           <td>--au-switch-inner-border-radius</td>
           <td>border radius of inner circle</td>
           <td>calc((var(--au-switch-input-width, 4rem) / 2 - var(--au-switch-inner-distance, 0.25rem)) / 2)</td>
+        </tr>
+        <tr>
+          <td>--au-switch-input-bg / --au-switch-inner-bg</td>
+          <td>Off-state track / thumb color</td>
+          <td>oklch(0.994 0 0) / oklch(0.55 0 0)</td>
         </tr>
         <tr>
           <td>--au-switch-input-checked-bg</td>
@@ -234,7 +260,7 @@ console.log(sw.checked); // boolean</code></pre>
         <tr>
           <td>--au-switch-focus-shadow-color</td>
           <td>focus color</td>
-          <td>oklch(0.8315 0.15681888825079074 78.05241467152487)</td>
+          <td>oklch(0.45 0.15 260)</td>
         </tr>
         <tr>
           <td>--au-switch-focus-shadow-width</td>
@@ -246,8 +272,9 @@ console.log(sw.checked); // boolean</code></pre>
     <section>
       <h2>FAQ</h2>
       <h3>Why use input[type="checkbox"] instead of creating everything with div elements?</h3>
-      <p>We don't need to use aria-checked and tabindex attributes. Whenever possible, it's best to use native HTML
-        elements.</p>
+      <p>The native checkbox supplies keyboard and form-control behavior. Its switch role and mirrored aria-checked
+        expose on/off semantics. Keep the accessible label stable when toggling; off/on text is decorative and hidden
+        from assistive technology. Native behavior and automated tests do not establish full screen-reader conformance.</p>
     </section>
   </main>
   <script>

@@ -1,7 +1,28 @@
-import { html, fixture, expect } from "@open-wc/testing";
+import { html, fixture, expect, nextFrame } from "@open-wc/testing";
 import "../src/components/breadcrumbs.js";
 
 describe("AuBreadcrumbs", () => {
+  it('upgrades properties assigned before deferred registration without shadowing setters', async () => {
+    const tag = 'test-late-breadcrumbs';
+    const el = document.createElement(tag);
+    el.setAttribute('items', '[{"text":"Old"}]');
+    el.items = '[{"text":"Home","url":"/"},{"text":"Current"}]';
+    el.separator = '›';
+    document.body.append(el);
+    try {
+      customElements.define(tag, class extends customElements.get('au-breadcrumbs') {});
+      expect(Object.hasOwn(el, 'items')).to.be.false;
+      expect(Object.hasOwn(el, 'separator')).to.be.false;
+      expect(el.items).to.deep.equal([{text:'Home',url:'/'},{text:'Current'}]);
+      expect(el.shadowRoot.querySelector('a').textContent).to.equal('Home');
+      expect(el.shadowRoot.querySelector('[aria-hidden=true]').textContent).to.equal('›');
+      el.items = [{text:'Updated',url:'/docs'},{text:'Here'}];
+      expect(el.shadowRoot.querySelector('a').textContent).to.equal('Updated');
+      el.remove();document.body.append(el);
+      expect(el.shadowRoot.querySelectorAll('li')).to.have.length(2);
+    } finally { el.remove(); }
+  });
+
   it("renders the correct number of breadcrumb items", async () => {
     const el = await fixture(
       html`<au-breadcrumbs
@@ -100,7 +121,7 @@ describe("AuBreadcrumbs", () => {
 
     const comp = el.querySelector('au-breadcrumbs');
     const nav = comp.shadowRoot.querySelector('nav');
-    expect(nav.getAttribute('aria-labelledby')).to.equal('crumb-label');
+    expect(nav.ariaLabelledByElements).to.deep.equal([el.querySelector('#crumb-label')]);
   });
 
   it('uses label attribute as fallback aria-label', async () => {
@@ -138,5 +159,156 @@ describe("AuBreadcrumbs", () => {
     expect(anchor.getAttribute('title')).to.equal('前往<Home>');
     expect(separator.textContent).to.equal('<');
     expect(el.shadowRoot.querySelector('a span').innerHTML).to.equal('&lt;Home&gt;');
+  });
+
+  it('renders executable, unsupported, missing and malformed URLs as text', async () => {
+    const el = await fixture(html`<au-breadcrumbs></au-breadcrumbs>`);
+    for (const url of ['javascript:alert(1)', ' JAVAscript:alert(1)', 'java\nscript:alert(1)',
+      'java\tscript:alert(1)', 'data:text/html,test', 'vbscript:msgbox(1)',
+      'file:///etc/passwd', 'blob:https://example.com/id', 'mailto:test@example.com', 'http://[', '', null]) {
+      el.items = [{ text: 'Unsafe', url }, { text: 'Current' }];
+      expect(el.shadowRoot.querySelector('a'), String(url)).to.be.null;
+      expect(el.shadowRoot.querySelector('li').textContent).to.include('Unsafe');
+      expect(el.shadowRoot.querySelectorAll('[aria-current="page"]')).to.have.length(1);
+    }
+  });
+
+  it('allows HTTP(S), relative, fragment and query navigation through URL parsing', async () => {
+    const el = await fixture(html`<au-breadcrumbs></au-breadcrumbs>`);
+    for (const url of ['https://example.com/a', 'http://example.com/', '/docs', '../guide', '#section', '?page=2', '//example.com/a']) {
+      el.items = [{ text: 'Link', url }, { text: 'Current' }];
+      expect(el.shadowRoot.querySelector('a').href).to.equal(new URL(url, document.baseURI).href);
+    }
+  });
+
+  it('handles valid JSON with a non-list shape and malformed entries without throwing', async () => {
+    const el = await fixture(html`<au-breadcrumbs></au-breadcrumbs>`);
+    for (const value of ['null', 'true', '42', '"text"', '{"other":1}']) {
+      el.setAttribute('items', value);
+      expect(el.shadowRoot.querySelectorAll('li')).to.have.length(0);
+    }
+    el.setAttribute('items', '[null,42,[],{"text":"Current"}]');
+    expect(el.shadowRoot.querySelectorAll('li')).to.have.length(1);
+  });
+
+  it('allows local file navigation only from an actual local document, not a hosted file base', async () => {
+    const el = await fixture(html`<au-breadcrumbs></au-breadcrumbs>`);
+    const resolve = (value, URL, baseURI = URL) => el.navigationURL.call({ownerDocument:{URL,baseURI}},value);
+    const local = 'file:///demo/breadcrumbs.html';
+    for (const value of ['./index.html','../guide.html','#section','?page=2','file:///demo/index.html']) {
+      expect(resolve(value,local)).to.equal(new URL(value,local).href);
+    }
+    for (const value of ['javascript:alert(1)','java\nscript:alert(1)','data:text/html,test',
+      'blob:null/test','file://remote-host/share/file.html','//remote-host/share/file.html']) {
+      expect(resolve(value,local),value).to.equal(null);
+    }
+    expect(resolve('./index.html','https://example.com/','file:///demo/')).to.equal(null);
+    expect(resolve('file:///demo/index.html','https://example.com/')).to.equal(null);
+    expect(resolve('https://example.com/',local)).to.equal('https://example.com/');
+  });
+
+  it('updates external label references on replacement without rebuilding focused links', async () => {
+    const wrapper = await fixture(html`<div><span id="dynamic-crumb-label">Navigation</span>
+      <au-breadcrumbs aria-labelledby="dynamic-crumb-label" items='[{"text":"Home","url":"/"},{"text":"Current"}]'></au-breadcrumbs></div>`);
+    const el = wrapper.querySelector('au-breadcrumbs');
+    const nav = el.shadowRoot.querySelector('nav');
+    const link = nav.querySelector('a');
+    link.focus();
+    const replacement = document.createElement('span');
+    replacement.id = 'dynamic-crumb-label'; replacement.textContent = '導覽';
+    wrapper.firstElementChild.replaceWith(replacement);
+    await nextFrame();
+    expect(nav.ariaLabelledByElements).to.deep.equal([replacement]);
+    expect(el.shadowRoot.activeElement).to.equal(link);
+    expect(el.shadowRoot.querySelector('nav')).to.equal(nav);
+  });
+
+  it('resolves ordered labels in the containing shadow root and supports late labels', async () => {
+    const wrapper = await fixture(html`<div></div>`);
+    const root = wrapper.attachShadow({mode:'open'});
+    root.innerHTML = '<au-breadcrumbs aria-labelledby="second first" label="Fallback"></au-breadcrumbs>';
+    const el = root.firstElementChild;
+    for (const id of ['first', 'second']) {
+      const label = document.createElement('span'); label.id = id; label.textContent = id;
+      root.append(label);
+    }
+    await nextFrame();
+    expect(el.shadowRoot.querySelector('nav').ariaLabelledByElements)
+      .to.deep.equal([root.getElementById('second'), root.getElementById('first')]);
+  });
+
+  it('preserves focused links during label and separator changes', async () => {
+    const el = await fixture(html`<au-breadcrumbs items='[{"text":"Home","url":"/"},{"text":"Current"}]'></au-breadcrumbs>`);
+    const link = el.shadowRoot.querySelector('a'); link.focus();
+    el.setAttribute('aria-label', '導覽'); el.separator = '›';
+    expect(el.shadowRoot.activeElement).to.equal(link);
+  });
+
+  it('releases and rebinds external label tracking across reconnects', async () => {
+    const wrapper = await fixture(html`<div><span id="reconnect-label">Original</span>
+      <au-breadcrumbs aria-labelledby="reconnect-label"></au-breadcrumbs></div>`);
+    const el = wrapper.querySelector('au-breadcrumbs');
+    el.remove();
+    const replacement = document.createElement('span'); replacement.id = 'reconnect-label'; replacement.textContent = 'New';
+    wrapper.firstElementChild.replaceWith(replacement);
+    wrapper.append(el); await nextFrame();
+    expect(el.shadowRoot.querySelector('nav').ariaLabelledByElements).to.deep.equal([replacement]);
+  });
+
+  it('keeps keyboard focus within navigation if a focused URL is revoked', async () => {
+    const el = await fixture(html`<au-breadcrumbs items='[{"text":"Home","url":"/"},{"text":"Current"}]'></au-breadcrumbs>`);
+    el.shadowRoot.querySelector('a').focus();
+    el.items = [{text:'Home',url:'javascript:alert(1)'},{text:'Current'}];
+    expect(el.shadowRoot.querySelector('a')).to.be.null;
+    expect(el.shadowRoot.activeElement).to.equal(el.shadowRoot.querySelector('nav'));
+  });
+
+  it('falls back to its localized name when all referenced labels disappear', async () => {
+    const wrapper = await fixture(html`<div><span id="removed-label">Navigation</span>
+      <au-breadcrumbs aria-labelledby="removed-label" label="導覽"></au-breadcrumbs></div>`);
+    const el = wrapper.querySelector('au-breadcrumbs');
+    wrapper.firstElementChild.remove();
+    await nextFrame();
+    const nav = el.shadowRoot.querySelector('nav');
+    expect(nav.ariaLabelledByElements).to.have.length(0);
+    expect(nav.getAttribute('aria-label')).to.equal('導覽');
+  });
+
+  it('supports dynamic plain-text labels without native element-reference APIs', async () => {
+    // Simulate an older engine for this fixture only, restoring the native API.
+    let owner = Element.prototype;
+    while (owner && !Object.hasOwn(owner, 'ariaLabelledByElements')) owner = Object.getPrototypeOf(owner);
+    const descriptor = owner && Object.getOwnPropertyDescriptor(owner, 'ariaLabelledByElements');
+    try {
+      if (owner) delete owner.ariaLabelledByElements;
+      const wrapper = await fixture(html`<div><span id="legacy-label">Original</span>
+        <au-breadcrumbs aria-labelledby="legacy-label" label="Fallback"></au-breadcrumbs></div>`);
+      const el = wrapper.querySelector('au-breadcrumbs');
+      const nav = el.shadowRoot.querySelector('nav');
+      expect('ariaLabelledByElements' in nav).to.be.false;
+      expect(nav.getAttribute('aria-label')).to.equal('Original');
+      wrapper.firstElementChild.textContent = 'Updated';
+      await nextFrame();
+      expect(nav.getAttribute('aria-label')).to.equal('Updated');
+      el.setAttribute('aria-label', 'Explicit rich-label alternative');
+      expect(nav.getAttribute('aria-label')).to.equal('Explicit rich-label alternative');
+      el.removeAttribute('aria-label');
+      wrapper.firstElementChild.remove();
+      await nextFrame();
+      expect(nav.getAttribute('aria-label')).to.equal('Fallback');
+    } finally {
+      if (owner) Object.defineProperty(owner, 'ariaLabelledByElements', descriptor);
+    }
+  });
+
+  it('wraps long breadcrumb text in narrow containers', async () => {
+    const wrapper = await fixture(html`<div style="width:180px"><au-breadcrumbs></au-breadcrumbs></div>`);
+    const el = wrapper.firstElementChild;
+    el.items = [{text:'long-name'.repeat(30),url:'/docs'},
+      {text:'blocked-name'.repeat(30),url:'javascript:alert(1)'},
+      {text:'current-name'.repeat(30)}];
+    await nextFrame();
+    const nav = el.shadowRoot.querySelector('nav');
+    expect(nav.scrollWidth).to.be.at.most(nav.clientWidth + 1);
   });
 });

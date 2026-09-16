@@ -36,21 +36,22 @@
 
 		<section>
 			<h2>Basic</h2>
-			<au-tree id="tree-basic" data-text-node="Node" data-text-toggle="Expand or collapse {label}"></au-tree>
+			<au-tree id="tree-basic" aria-label="Project files" data-text-node="Node" data-text-toggle="Expand or collapse {label}"></au-tree>
 		</section>
 
 		<section>
 			<h2>Checkbox Tree</h2>
 			<p>Supports tri-state selection (Indeterminate).</p>
-			<au-tree id="tree-check" show-checkbox data-text-node="Node" data-text-toggle="Expand or collapse {label}"></au-tree>
+			<au-tree id="tree-check" aria-label="Select project files" show-checkbox data-text-node="Node" data-text-toggle="Expand or collapse {label}"></au-tree>
+			<p id="tree-check-status" role="status">No files selected.</p>
 		</section>
 
 		<section>
 			<h2>Custom Toggle Label</h2>
 			<p>Customize the aria-label of toggle buttons with an attribute template or JavaScript function.</p>
-			<au-tree id="tree-custom-label" data-text-node="Node" data-text-toggle="Expand or collapse {label}"></au-tree>
+			<au-tree id="tree-custom-label" aria-label="Project files with custom toggle text" data-text-node="Node" data-text-toggle="Expand or collapse {label}"></au-tree>
 			<code style="display: block; white-space: pre-wrap; background: #f4f4f4; padding: 1rem; border-radius: 4px;">
-&lt;au-tree data-text-node="Node" data-text-toggle="Expand or collapse {label}"&gt;&lt;/au-tree&gt;
+&lt;au-tree aria-label="Project files" data-text-node="Node" data-text-toggle="Expand or collapse {label}"&gt;&lt;/au-tree&gt;
 
 const customLabelTree = document.getElementById('tree-custom-label');
 customLabelTree.toggleLabel = (node) => {	
@@ -77,10 +78,13 @@ customLabelTree.toggleLabel = (node) => {
 						<td>
 							Set the tree data as a JavaScript array. Each node can have <code>label</code> (string),
 							<code>children</code> (array, optional), and <code>disabled</code> (boolean, optional).
+							Use sibling-unique <code>id</code> values for updates that preserve focus and state.
+							Without IDs, the same object references are needed. Disabled branches cannot be checked
+							by users or ancestor cascades, but remain navigable and expandable. Labels render as text.
 							<pre style="background:#f4f4f4;padding:0.5rem;overflow:auto;"><code>document.querySelector('au-tree').data = [
-  { label: 'Parent', children: [
-    { label: 'Child 1' },
-    { label: 'Child 2', disabled: true }
+  { id: 'parent', label: 'Parent', children: [
+    { id: 'first', label: 'Child 1' },
+    { id: 'second', label: 'Child 2', disabled: true }
   ]},
   { label: 'Leaf node' }
 ];</code></pre>
@@ -117,6 +121,18 @@ customLabelTree.toggleLabel = (node) => {
 		</section>
 		<section>
 			<h2>Events</h2>
+			<p>Tab enters the tree at its retained focus position; Up/Down move through visible
+				nodes, Right expands or enters children, and Left collapses or moves to the parent in LTR.
+        In RTL these two horizontal keys are mirrored. Clicking a row or activating
+        its treeitem checks it in checkbox mode; the disclosure button only expands.
+				Home/End move to the endpoints. Type a name prefix to find a visible node; * expands
+				its siblings. Space checks an enabled node in checkbox mode. Tab leaves the tree.</p>
+			<p>Checkbox changes emit one event with all fully checked records. Disabled child
+				branches are excluded when computing a parent's mixed state. Changing data or
+				translations is silent. Original data objects are not mutated and this component
+				does not submit native form values. Optional leaf <code>checked</code> and branch
+				<code>expanded</code> data fields are reapplied on data assignment; omit them to
+				retain interaction state. Optional <code>lang</code> sets each node's language.</p>
 			<table>
 				<caption>Events dispatched by <code>&lt;au-tree&gt;</code>:</caption>
 				<thead>
@@ -181,7 +197,7 @@ customLabelTree.toggleLabel = (node) => {
 				<tr>
 					<td>--au-tree-focus-shadow-color</td>
 					<td>Color of the focus ring</td>
-					<td>oklch(0.8315 0.1568 78.05)</td>
+							<td>oklch(0.4 0 0)</td>
 				</tr>
 				<!-- Node Content -->
 				<tr>
@@ -197,7 +213,7 @@ customLabelTree.toggleLabel = (node) => {
 				<tr>
 					<td>--au-tree-node-bg</td>
 					<td>Background color of the node</td>
-					<td>oklch(0.994 0 0)</td>
+					<td>transparent</td>
 				</tr>
 				<tr>
 					<td>--au-tree-node-hover-bg</td>
@@ -223,7 +239,7 @@ customLabelTree.toggleLabel = (node) => {
 				<tr>
 					<td>--au-tree-node-text-family</td>
 					<td>Font family for node label</td>
-					<td>--</td>
+					<td>inherit</td>
 				</tr>
 				<tr>
 					<td>--au-tree-node-text-line-height</td>
@@ -244,7 +260,7 @@ customLabelTree.toggleLabel = (node) => {
 				<tr>
 					<td>--au-tree-node-border-color</td>
 					<td>Border color for node</td>
-					<td>oklch(0.7894 0 0)</td>
+					<td>oklch(0.55 0 0)</td>
 				</tr>
 				<tr>
 					<td>--au-tree-node-border-radius</td>
@@ -254,7 +270,7 @@ customLabelTree.toggleLabel = (node) => {
 				<tr>
 					<td>--au-tree-node-hover-border-color</td>
 					<td>Border color on hover</td>
-					<td>oklch(0.7894 0 0)</td>
+					<td>oklch(0.55 0 0)</td>
 				</tr>
 				<!-- Toggle Button -->
 				<tr>
@@ -301,7 +317,7 @@ customLabelTree.toggleLabel = (node) => {
 				<tr>
 					<td>--au-tree-node-checkbox-input-border-color</td>
 					<td>Border color of checkbox</td>
-					<td>oklch(0.7894 0 0)</td>
+					<td>oklch(0.4 0 0)</td>
 				</tr>
 				<tr>
 					<td>--au-tree-node-checkbox-input-border-radius</td>
@@ -316,7 +332,7 @@ customLabelTree.toggleLabel = (node) => {
 				<tr>
 					<td>--au-tree-node-checkbox-input-checked-symbol</td>
 					<td>Symbol shown when checked</td>
-					<td>'✔︎'</td>
+					<td>'✔'</td>
 				</tr>
 				<tr>
 					<td>--au-tree-node-checkbox-input-checked-text-color</td>
@@ -331,7 +347,7 @@ customLabelTree.toggleLabel = (node) => {
 				<tr>
 					<td>--au-tree-node-checkbox-label-text-size</td>
 					<td>Size of the checkbox label text</td>
-					<td>1rem</td>
+					<td>inherit</td>
 				</tr>
 				<tr>
 					<td>--au-tree-node-checkbox-label-active-text-color</td>
@@ -351,7 +367,7 @@ customLabelTree.toggleLabel = (node) => {
 				<tr>
 					<td>--au-tree-node-checkbox-input-focus-shadow-color</td>
 					<td>Focus shadow color for checkbox</td>
-					<td>oklch(0.8315 0.1568 78.05)</td>
+							<td>oklch(0.4 0 0)</td>
 				</tr>
 			</table>
 		</section>
@@ -390,7 +406,9 @@ customLabelTree.toggleLabel = (node) => {
 
 		const checkTree = document.getElementById('tree-check');
 		checkTree.addEventListener('change', (e) => {
-			console.log('Tree Change:', e.detail);
+			const labels = e.detail.checkedNodes.map(node => node.label);
+			document.getElementById('tree-check-status').textContent = labels.length
+				? 'Selected: ' + labels.join(', ') : 'No files selected.';
 		});
 
 		const customLabelTree = document.getElementById('tree-custom-label');

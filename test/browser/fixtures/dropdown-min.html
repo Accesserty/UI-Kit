@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>Dropdown standalone checks</title>
+<style>body{margin:16px;font:16px system-ui}button{font:inherit}</style>
+<button id="before">Before menu</button>
+<au-dropdown id="actions" data-text-trigger="Document actions">
+  <au-dropdown-item value="edit">Edit</au-dropdown-item>
+  <au-dropdown-item value="save">Save</au-dropdown-item>
+  <au-dropdown-item value="open"><a href="#destination">Open document</a></au-dropdown-item>
+</au-dropdown>
+<button id="after">After menu</button>
+<p id="destination">Document destination</p>
+<script src="../../../dist/accesserty-ui-kit.min.js" defer></script>
+</html>

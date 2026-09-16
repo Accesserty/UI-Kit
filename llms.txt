@@ -1,6 +1,6 @@
 # Accesserty UI Kit
 
-> A framework-agnostic library of 15 accessibility-first Web Components. Zero runtime dependencies. Each component is built to WCAG 2.2 AA at the component level (correct ARIA, keyboard, focus, and contrast defaults) — a head start toward accessibility, not a page-level conformance guarantee. Works in plain HTML, Vue, React, Angular, and Nuxt via a single JS file.
+> A framework-agnostic library of 15 accessibility-first Web Components with zero runtime dependencies and WCAG 2.2 AA as a design target. Automated and targeted browser checks are not complete conformance or screen-reader verification. Supports plain HTML and configured Vue, React, Angular and Nuxt integrations via a single JS file; SSR registration remains client-only.
 
 ## Key Links
 
@@ -17,17 +17,16 @@
 - `demo/` — Human-readable documentation with live examples and CSS variable tables
 - `test/` — Browser-based unit tests using @web/test-runner and @open-wc/testing
 - `dist/` — Build output: `accesserty-ui-kit.js` and `accesserty-ui-kit.min.js`
-- `CLAUDE.md` — AI assistant work handbook (patterns, rules, constraints)
-- `docs/ARCHITECTURE.md` — Technical architecture deep-dive
 
 ## Components
 
 ### au-accordion
 Tag: `<au-accordion>`, `<au-accordion-item>`
 Attributes (au-accordion): exclusive, data-text-exclusive-hint
-Attributes (accordion-item): open
+Attributes (accordion-item): open, heading-level (1–6; default 3), no-region
 Properties: open (boolean getter/setter), exclusive (on au-accordion)
 Events: au-toggle (detail: { open })
+Events describe actual connected state changes, including programmatic updates and sibling closures; same-value writes do not repeat events. Exclusive mode affects direct item children only and normalizes initial/inserted state to the first open item. Nested groups are independent. Native heading buttons support Enter/Space and normal Tab navigation; collapsing focused content returns focus to its header. Heading/sub slots must be non-interactive. Panel visibility is immediate and inert when closed. Plain deferred scripts and pre-definition Boolean properties work; framework registration remains client-only.
 Form-associated: No
 CSS variables: 15+ (--au-accordion-heading-*, --au-accordion-content-*)
 
@@ -35,6 +34,7 @@ CSS variables: 15+ (--au-accordion-heading-*, --au-accordion-content-*)
 Tag: `<au-breadcrumbs>`
 Attributes: items (JSON array), separator, aria-label, aria-labelledby, label, data-link-title-prefix, data-link-title-template (`{text}`, `{index}`)
 Properties: items (getter/setter), separator (getter/setter)
+Pre-registration items/separator assignments are replayed through the accessors. Items accepts an array, JSON string or single item object; rendering requires client registration. SSR integrations serialize the items attribute and register client-side; internal links are not server-rendered. Links use native navigation, not framework router events. Translation retains link focus; a removed/revoked focused link returns focus to the navigation landmark.
 Events: none
 Form-associated: No
 CSS variables: 8 (--au-breadcrumbs-*)
@@ -42,18 +42,22 @@ CSS variables: 8 (--au-breadcrumbs-*)
 ### au-card
 Tag: `<au-card>`
 Slots: heading, media, content, footer
+Only named slots are projected, in that order; no default slot. The card adds no role, tabindex, automatic heading semantics or custom events. Native child controls retain forms, reset and event behavior. render() is idempotent and retains the shell/slots/focus. Default block/min-inline-size/wrapping styles respect hidden; consumers own media sizes, content semantics, themes and focus styling.
 CSS Parts: au-card-container, heading, media, content, footer
+Parts refer to the container and slot elements; style assigned content through consumer selectors. Real Next/Nuxt/Angular fixtures retain server host/content nodes and native event/form behavior, with client-only registration. These are not screen-reader results.
 Form-associated: No
 CSS variables: 0 (styled via ::part())
 
 ### au-carousel
 Tag: `<au-carousel>`
-Attributes: data-live-template, data-item-fallback, data-dot-template, data-text-prev, data-text-next, data-text-pagination, data-text-instructions, data-icon-prev, data-icon-next; per slide (direct child): data-title
+Attributes: aria-label, aria-labelledby, data-text-roledescription, data-live-template, data-item-fallback, data-dot-template, data-text-prev, data-text-next, data-text-pagination, data-text-instructions, data-icon-prev, data-icon-next; per slide (direct child): data-title
 Localization templates: data-dot-template, data-live-template, data-item-fallback support `{title}`, `{current}`, `{total}`
 Content model: each direct child element is one slide (author-defined native HTML); one pagination button per slide, named + positioned; responsive slides-per-view via @container
 Properties: current (getter/setter)
+current is a zero-based DOM property, not an attribute; numeric strings/fractions normalize to a bounded integer, invalid/non-finite inputs become 0, empty is -1. Pre-definition property assignment is supported when slides exist at upgrade. Stable slide element identity preserves the selected slide and dot focus across translation/reordering; new nodes are new identities.
 Methods: slideTo(index), refresh() (re-read slide titles after a runtime/locale change; also automatic via MutationObserver)
 Events: slide-change (detail: { index, total, title })
+Changed navigation/current writes and settled scrolling emit; refresh/translation/reordering are silent. Boundary arrows remain focusable aria-disabled controls and do not repeat events. Scrolling uses the track start edge in LTR/RTL without scrolling outer containers. Named wrapper references external labels across Shadow DOM; fallback naming is plain text. Forced-colors outlines and a non-color current-dot ring remain visible; dots wrap at narrow widths. Off-screen slides remain readable/tabbable; there is no autoplay or tabpanel model.
 Form-associated: No
 SSR: extends HTMLElement — register client-side only (e.g. Nuxt *.client plugin); not importable in Node
 CSS variables: 17 (--au-carousel-gap, --au-carousel-visible, --au-carousel-dot-*, --au-carousel-button-*, --au-carousel-controls-gap)
@@ -72,6 +76,8 @@ Attributes (au-dropdown): data-text-trigger
 Attributes (dropdown-item): value
 Properties: isOpen (getter/setter on au-dropdown)
 Events: selected (detail: { value }) on au-dropdown-item
+Activation: one selected event per click/Enter/Space, including after reconnection; translated text/value updates are silent and retain focus.
+Keyboard: open(index) focuses immediately; arrows/Home/End navigate owned items across containing shadow roots; Escape restores trigger focus and Tab leaves using browser keyboard preferences.
 Form-associated: No
 CSS variables: 11 (--au-dropdown-menu-*, --au-dropdown-item-*, --au-dropdown-focus-shadow-*)
 
@@ -80,9 +86,10 @@ Tag: `<au-file-upload>`
 Attributes: accept, multiple, name, disabled, required, label, max-files, max-size-mb, max-total-size-mb, msg-drop-text, msg-remove-text, msg-remove-file-label, msg-added, msg-removed, msg-required, msg-type-error, msg-size-error, msg-count-error, msg-total-size-error
 Localization templates: msg-remove-file-label and msg-removed support `{fileName}`; msg-added supports `{count}`; msg-size-error supports `{fileName}` and `{maxSize}`; msg-count-error supports `{fileName}` and `{maxFiles}`; msg-total-size-error supports `{maxTotalSize}`
 Properties: value (getter/setter: File[])
-Methods: handleFiles(files), formResetCallback(), checkValidity()
+Methods: handleFiles(files), removeFile(file), checkValidity(), reportValidity()
 Events: change, remove-file (detail: File)
-Form-associated: Yes (setFormValue: DataTransfer with files)
+Form-associated: Yes (ElementInternals FormData with actual File entries)
+Default trigger: native button named by label; a custom trigger should be a named button type=button. Disabled fields/fieldsets block picker/drop/removal and omit submission without losing selection. Validation focuses a visible region and shows inline errors. Drag/drop handling is scoped to the component. Without multiple, selection is capped at one; remove before replacement. Picker limits default to 5 files, 5MB each and 20MB total; invalid limits use defaults and zero is valid. Extensions/MIME matching is case-insensitive; same name/size duplicates are ignored. The controlled value setter copies File entries, bypasses picker limits, and emits no change. Removal emits remove-file then change once; reset is silent. Translation retains remove-button identity. Pre-registration value assignments survive deferred loading. Client-only registration is required for SSR; File values cannot be serialized as an HTML attribute.
 CSS variables: 20+ (--au-file-upload-label-*, --au-file-upload-area-*, --au-file-upload-delete-*, --au-file-upload-file-list-*)
 
 ### au-input
@@ -150,9 +157,12 @@ CSS variables: 15 (--au-textarea-label-*, --au-textarea-container-*, --au-textar
 
 ### au-tree
 Tags: `<au-tree>`, `<au-tree-node>` (auto-created from data)
-Attributes (au-tree): show-checkbox, data-text-node, data-text-toggle (`{label}`)
+Attributes (au-tree): show-checkbox, aria-label, aria-labelledby, data-text-node, data-text-toggle (`{label}`)
 Properties (au-tree): data (getter/setter — JS object tree), toggleLabel (getter/setter), fallbackNodeLabel (getter/setter), toggleLabelTemplate (getter/setter)
 Events: change (on au-tree, when checkbox state changes)
+Data: use sibling-unique id values to retain nodes, focus and state across object replacement; otherwise identity uses the original objects. Labels are plain text. Optional lang sets node language.
+State: leaf checked and branch expanded fields are reapplied on data assignment; omitted fields retain local state. Disabled branches block checkbox actions/cascades but allow navigation and expansion. Parent checks aggregate enabled children.
+Events: one change.detail.checkedNodes array for an actual check operation; data/locale updates are silent and do not mutate input objects. Assign data as a DOM property, not JSON markup.
 Form-associated: No
 CSS variables: 30+ (--au-tree-*, --au-tree-node-*, --au-tree-node-checkbox-*, --au-tree-node-toggle-*)
 
@@ -169,7 +179,7 @@ CSS variables: 30+ (--au-tree-*, --au-tree-node-*, --au-tree-node-checkbox-*, --
 - No framework dependency — components must work from a `<script>` tag alone
 - Shadow DOM mode is always `open` (accessible to testing and DevTools)
 - CSS variables control all visual properties; no inline styles
-- `calc-size()` for accordion animation (progressive enhancement; falls back to instant show/hide)
+- Accordion panel visibility is immediate; reduced motion disables header/icon transitions
 - `formAssociated = true` + ElementInternals for native form participation (no hidden inputs)
 - Events always use `{ bubbles: true, composed: true }` to cross Shadow DOM boundaries
 - `generateId()` uses `crypto.getRandomValues()` with `Math.random()` fallback for SSR safety

@@ -54,6 +54,19 @@
     </section>
 
     <section>
+      <h2>External labels and descriptions</h2>
+      <p id="account-label">Account name</p>
+      <p id="account-help">Use the name shown on your account.</p>
+      <au-input name="account" aria-labelledby="account-label" aria-describedby="account-help"></au-input>
+      <p>Label and description IDs resolve in the containing document or shadow root.
+        Native element references track late or replaced labels and descriptions without rebuilding
+        the input. When no explicit or internal label is provided, native labels associated with
+        the host can supply its name. Older engines use plain text; provide an explicit
+        <code>aria-label</code> for rich labels on those engines. Set <code>aria-invalid</code>
+        and reference visible error text with <code>aria-describedby</code> when your application validates a field.</p>
+    </section>
+
+    <section>
       <h2>Placeholder</h2>
       <au-input label="Default" placeholder="Please Enter Here..."></au-input>
     </section>
@@ -214,7 +227,7 @@
           <tr>
             <td>--au-input-border-color</td>
             <td>Border color for input container</td>
-            <td>oklch(0.7894 0 0)</td>
+            <td>oklch(0.55 0 0)</td>
           </tr>
           <tr>
             <td>--au-input-invalid-shadow-width</td>
@@ -234,7 +247,7 @@
           <tr>
             <td>--au-input-focus-shadow-color</td>
             <td>Shadow color when input is focused</td>
-            <td>oklch(0.8315 0.15681888825079074 78.05241467152487)</td>
+            <td>oklch(0.45 0.15 260)</td>
           </tr>
           <tr>
             <td>--au-input-bg</td>
@@ -309,7 +322,7 @@
           <tr>
             <td>value</td>
             <td>string (getter + setter)</td>
-            <td>Get or set the input value programmatically.</td>
+            <td>Get or set the input value programmatically. Property and attribute updates synchronize the displayed and submitted value, including native type sanitization. Programmatic assignment does not emit an input event.</td>
           </tr>
           <tr>
             <td>disabled</td>
@@ -332,6 +345,18 @@
 input.value = 'Hello';
 input.disabled = true;
 input.required = false; // removes required attribute</code></pre>
+      <p>A disabled ancestor fieldset also disables editing and clear actions. Readonly keeps
+        the named value in native form submission but prevents editing, clearing and suggestions.
+        Clearing from the built-in button returns focus to the input. Reset restores the initial
+        value, rebinds accessible references and preserves input focus.</p>
+      <p>Browser string-state restoration synchronizes non-file input values and
+        validation silently without replacing the initial reset value. Actual history
+        restoration and autofill depend on the browser; callback tests are not proof
+        of password-manager or BFCache support.</p>
+      <p>Vue client-only templates can use direct <code>v-model</code> for this text-value contract.
+        Nuxt SSR rejects that directive on custom elements; use explicit
+        <code>:value="text" @input="text = $event.target.value"</code> binding instead.
+        This is separate from Angular form directives, which require a value accessor.</p>
     </section>
     <section>
       <h2>Events</h2>
@@ -346,11 +371,11 @@ input.required = false; // removes required attribute</code></pre>
         <tbody>
           <tr>
             <td>input</td>
-            <td>Fired on every keystroke. Bubbles and is composed — works across Shadow DOM boundaries in Vue, Angular, React.</td>
+            <td>One notification per native input event, including paste and composition updates. Native composed events keep their InputEvent data, inputType, isComposing and trust; non-composed events are bridged once. Clear and suggest APIs emit synthetic input notifications.</td>
           </tr>
           <tr>
             <td>change</td>
-            <td>Fired when the value is committed (blur or Enter). Bubbles and is composed.</td>
+            <td>One notification when the native control commits a change (timing depends on input type). Non-composed events are bridged; clear also emits change. Ordinary value assignment and reset are silent.</td>
           </tr>
         </tbody>
       </table>

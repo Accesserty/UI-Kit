@@ -1,0 +1,16 @@
+import '../../../../../src/components/rating.js';
+import '../../../../../src/components/input.js';
+import '../../../../../src/components/textarea.js';
+import '../../../../../src/components/checkbox.js';
+import '../../../../../src/components/switch.js';
+import '../../../../../src/components/radio.js';
+import '../../../../../src/components/tabs.js';
+import '../../../../../src/components/pagination.js';
+import '../../../../../src/components/dropdown.js';
+import '../../../../../src/components/tree.js';
+import '../../../../../src/components/accordion.js';
+import '../../../../../src/components/carousel.js';
+import '../../../../../src/components/card.js';
+import '../../../../../src/components/breadcrumbs.js';
+import '../../../../../src/components/file-upload.js';
+export default defineNuxtPlugin(()=>{});

@@ -1,861 +1,507 @@
+// Tree data is rendered as text. A sibling-unique id retains node identity;
+// otherwise the same object reference is required to retain local state.
+function auTreeRecords(value, ancestors = new Set()) {
+  return Array.isArray(value) ? value.filter(item =>
+    item && typeof item === 'object' && !Array.isArray(item) && !ancestors.has(item)) : [];
+}
+
 class AuTree extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({mode: 'open'});
     this._data = [];
     this._nodeRegistry = [];
-    this._showCheckbox = false;
+    this._activeNode = null;
+    this._toggleLabel = null;
+    this._typeBuffer = '';
+    this._typeTime = 0;
+    this.shadowRoot.innerHTML = `
+      <style>
+      :host([hidden]:not([hidden="until-found" i])) { display: none; }
+        :host { display:block; min-width:0; font-family:var(--au-tree-text-family);
+          font-size:var(--au-tree-font-size,1rem); color:var(--au-tree-color,oklch(0.1398 0 0)); }
+        [role=tree] { margin:0; padding:0; min-width:0; }
+        [role=tree]:focus-visible { outline:2px solid var(--au-tree-focus-shadow-color,oklch(0.4 0 0)); }
+        @media (forced-colors:active) { [role=tree]:focus-visible {outline-color:Highlight;} }
+      </style><div role="tree" tabindex="-1"></div>`;
+    this._container = this.shadowRoot.querySelector('[role=tree]');
     this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.handleFocusIn = this.handleFocusIn.bind(this);
     this.handleNodeExpand = this.handleNodeExpand.bind(this);
     this.handleNodeCheckChange = this.handleNodeCheckChange.bind(this);
-    this._toggleLabel = null;
-    this._fallbackNodeLabel = 'Node';
-    this._toggleLabelTemplate = null;
   }
 
   static get observedAttributes() {
-    return ['show-checkbox', 'data-text-node', 'data-text-toggle'];
-  }
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (name === 'show-checkbox') {
-      this._showCheckbox = newValue !== null;
-      // 傳播到所有現有的節點
-      this.getAllNodes().forEach(node => {
-        if (this._showCheckbox) node.setAttribute('show-checkbox', '');
-        else node.removeAttribute('show-checkbox');
-      });
-    }
-    if (name === 'data-text-node') {
-      this._fallbackNodeLabel = newValue || 'Node';
-      this.getAllNodes().forEach(node => {
-        node.fallbackNodeLabel = this._fallbackNodeLabel;
-      });
-    }
-    if (name === 'data-text-toggle') {
-      this._toggleLabelTemplate = newValue;
-      this.getAllNodes().forEach(node => {
-        node.toggleLabelTemplate = this._toggleLabelTemplate;
-      });
-    }
-  }
-
-  get toggleLabel() { return this._toggleLabel; }
-  set toggleLabel(val) {
-    this._toggleLabel = val;
-    this.getAllNodes().forEach(node => {
-      node.toggleLabel = val;
-    });
-  }
-
-  get fallbackNodeLabel() { return this._fallbackNodeLabel; }
-  set fallbackNodeLabel(val) {
-    this._fallbackNodeLabel = val || 'Node';
-    this.setAttribute('data-text-node', this._fallbackNodeLabel);
-  }
-
-  get toggleLabelTemplate() { return this._toggleLabelTemplate; }
-  set toggleLabelTemplate(val) {
-    this._toggleLabelTemplate = val;
-    if (val === null || val === undefined) this.removeAttribute('data-text-toggle');
-    else this.setAttribute('data-text-toggle', val);
-  }
-
-  get data() { return this._data; }
-  set data(val) {
-    this._data = val;
-    this.render();
+    return ['show-checkbox','data-text-node','data-text-toggle','aria-label','aria-labelledby'];
   }
 
   connectedCallback() {
-    this._upgradeProperty('data');
-    if (this.shadowRoot.innerHTML === '') this.render();
-    this.addEventListener('keydown', this.handleKeyDown);
-    this.addEventListener('au-tree-node-expand', this.handleNodeExpand);
-    this.addEventListener('au-tree-node-check-change', this.handleNodeCheckChange);
+    for (const prop of ['data','toggleLabel','fallbackNodeLabel','toggleLabelTemplate']) this._upgradeProperty(prop);
+    this.addEventListener('keydown',this.handleKeyDown);
+    this.addEventListener('focusin',this.handleFocusIn);
+    this.addEventListener('au-tree-node-expand',this.handleNodeExpand);
+    this.addEventListener('au-tree-node-check-change',this.handleNodeCheckChange);
+    if (!this._rendered) this.render();
+    else { this.syncAccessibleLabel(); this.updateNodeRegistry(); }
+    this.observeLabelRoot();
+  }
+
+  disconnectedCallback() {
+    this.removeEventListener('keydown',this.handleKeyDown);
+    this.removeEventListener('focusin',this.handleFocusIn);
+    this.removeEventListener('au-tree-node-expand',this.handleNodeExpand);
+    this.removeEventListener('au-tree-node-check-change',this.handleNodeCheckChange);
+    this._labelObserver?.disconnect();
+    this._typeBuffer = '';
   }
 
   _upgradeProperty(prop) {
-    if (this.hasOwnProperty(prop)) {
-      let value = this[prop];
-      delete this[prop];
-      this[prop] = value;
+    if (Object.prototype.hasOwnProperty.call(this,prop)) {
+      const value = this[prop]; delete this[prop]; this[prop] = value;
     }
   }
 
-  generateId() {
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const byteArray = new Uint32Array(1);
-      crypto.getRandomValues(byteArray);
-      return `au-tree-${byteArray[0].toString(36)}`;
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue || !this._container) return;
+    if (name === 'aria-label' || name === 'aria-labelledby') {
+      this.syncAccessibleLabel();
+      if (this.isConnected && name === 'aria-labelledby') this.observeLabelRoot();
+    } else {
+      const {activeNode,activeElement} = this.findActiveNode();
+      this._container.setAttribute('aria-multiselectable',String(this.hasAttribute('show-checkbox')));
+      for (const node of this.getAllNodes()) node.syncPresentation();
+      if (activeNode && activeElement?.hidden) activeNode.focus();
+      this.updateNodeRegistry();
     }
-    return `au-tree-${Math.random().toString(36).slice(2)}`;
+  }
+
+  get data() { return this._data; }
+  set data(value) { this._data = Array.isArray(value) ? value : []; this.render(); }
+  get toggleLabel() { return this._toggleLabel; }
+  set toggleLabel(value) {
+    this._toggleLabel = value;
+    for (const node of this.getAllNodes()) node.syncPresentation();
+  }
+  get fallbackNodeLabel() { return this.getAttribute('data-text-node') || 'Node'; }
+  set fallbackNodeLabel(value) { this.setAttribute('data-text-node',value || 'Node'); }
+  get toggleLabelTemplate() { return this.getAttribute('data-text-toggle'); }
+  set toggleLabelTemplate(value) {
+    if (value == null) this.removeAttribute('data-text-toggle');
+    else this.setAttribute('data-text-toggle',value);
+  }
+
+  observeLabelRoot() {
+    this._labelObserver?.disconnect();
+    if (!this.getAttribute('aria-labelledby')?.trim()) return;
+    this._labelObserver ??= new MutationObserver(()=>this.syncAccessibleLabel());
+    this._labelObserver.observe(this.getRootNode(),{
+      childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['id','aria-label']
+    });
+    this.syncAccessibleLabel();
+  }
+
+  syncAccessibleLabel() {
+    const root = this.getRootNode();
+    const ids = (this.getAttribute('aria-labelledby') || '').trim().split(/\s+/).filter(Boolean);
+    const labels = ids.map(id=>root.getElementById?.(id)).filter(el=>el && el !== this);
+    const fallback = this.getAttribute('aria-label')?.trim() || 'Tree';
+    if ('ariaLabelledByElements' in this._container) {
+      this._container.ariaLabelledByElements = labels;
+      this._container.setAttribute('aria-label',fallback);
+    } else {
+      const text = labels.map(el=>el.getAttribute('aria-label') || el.textContent).join(' ').trim();
+      this._container.setAttribute('aria-label',text || fallback);
+    }
+  }
+
+  static reconcile(container, data, tree, parent, ancestors = new Set()) {
+    const records = auTreeRecords(data,ancestors);
+    const counts = new Map();
+    const idOf = item => (typeof item.id === 'string' && item.id !== '') ||
+      (typeof item.id === 'number' && Number.isFinite(item.id)) ? item.id : undefined;
+    for (const item of records) {
+      const id = idOf(item);
+      if (id !== undefined) counts.set(id,(counts.get(id) || 0)+1);
+    }
+    const old = [...container.children];
+    const available = new Map();
+    for (const node of old) {
+      const bucket = available.get(node._identity) || [];
+      bucket.push(node); available.set(node._identity,bucket);
+    }
+    const retained = new Set();
+    records.forEach((item,index)=>{
+      const id = idOf(item);
+      const identity = id !== undefined && counts.get(id) === 1 ? id : item;
+      const node = available.get(identity)?.shift() || document.createElement('au-tree-node');
+      node._identity = identity;
+      node._tree = tree;
+      node.parentTreeNode = parent;
+      node._level = parent ? parent._level+1 : 1;
+      node._position = index+1;
+      node._setSize = records.length;
+      node.updateData(item,new Set([...ancestors,item]));
+      if (container.children[index] !== node) container.insertBefore(node,container.children[index] || null);
+      retained.add(node);
+    });
+    for (const node of old) if (!retained.has(node)) {
+      node.clearOwner(); node.remove();
+    }
   }
 
   render() {
-    const treeId = this.generateId();
-    this.shadowRoot.innerHTML = `
-      <style>
-        :host {
-          display: block;
-          font-family: var(--au-tree-text-family);
-          font-size: var(--au-tree-font-size, 1rem);
-          color: var(--au-tree-color, oklch(0.1398 0 0));
-        }
-        /* 使用 div 代替 ul 以防止自定義元素產生無效的列表語義 */
-        div[role="tree"] {
-          margin: 0;
-          padding: 0;
-        }
-      </style>
-      <div role="tree" id="${treeId}"></div>
-    `;
-
-    const rootContainer = this.shadowRoot.getElementById(treeId);
-
-    if (Array.isArray(this._data)) {
-      this._data.forEach(item => {
-        const node = document.createElement('au-tree-node');
-        node.data = item; // 傳遞資料物件
-        node.toggleLabel = this._toggleLabel; // 傳遞 toggleLabel 設定
-        node.fallbackNodeLabel = this._fallbackNodeLabel;
-        node.toggleLabelTemplate = this._toggleLabelTemplate;
-        if (this._showCheckbox) node.setAttribute('show-checkbox', '');
-        rootContainer.appendChild(node);
-      });
+    if (!this._container) return;
+    this._rendered = true;
+    const {activeNode,activeElement} = this.findActiveNode();
+    this._rendering = true;
+    try { AuTree.reconcile(this._container,this._data,this,null); }
+    finally { this._rendering = false; }
+    this.syncAccessibleLabel();
+    this._container.setAttribute('aria-multiselectable',String(this.hasAttribute('show-checkbox')));
+    this.updateNodeRegistry(activeNode || this._activeNode);
+    if (activeNode) {
+      const target = this._activeNode;
+      if (target === activeNode && activeElement?.isConnected && !activeElement.hidden && !activeElement.disabled) {
+        activeElement.focus({preventScroll:true});
+      } else (target || this._container).focus({preventScroll:true});
     }
-
-    // 初始化註冊表
-    requestAnimationFrame(() => this.updateNodeRegistry());
-  }
-
-  /**
-   * 取得 DOM 順序中的所有節點的輔助函式（深度遍歷）
-   */
-  getAllNodes() {
-    return this.collectNodes(this.shadowRoot);
   }
 
   collectNodes(root, visibleOnly = false) {
-    let nodes = [];
-    const children = Array.from(root.querySelectorAll('au-tree-node'));
-    children.forEach(node => {
+    const nodes = [];
+    for (const node of root.querySelectorAll('au-tree-node')) {
       nodes.push(node);
-      // 如果 visibleOnly 為 true，則僅在展開時遍歷
-      if (!visibleOnly || node.expanded) {
-        if (node.shadowRoot) {
-          nodes = nodes.concat(this.collectNodes(node.shadowRoot, visibleOnly));
-        }
-      }
-    });
+      if (!visibleOnly || node.expanded) nodes.push(...this.collectNodes(node.shadowRoot,visibleOnly));
+    }
     return nodes;
   }
-
-  updateNodeRegistry() {
-    this._nodeRegistry = this.collectNodes(this.shadowRoot, true);
-    this._nodeRegistry = this.collectNodes(this.shadowRoot, true);
-    // 管理 tabindex：嚴格保持只有一個 "0"，其餘為 "-1"
-    const activeInfo = this.findActiveNode();
-    this._nodeRegistry.forEach(node => node.tabIndex = -1);
-
-    if (activeInfo.activeNode && this._nodeRegistry.includes(activeInfo.activeNode)) {
-      activeInfo.activeNode.tabIndex = 0;
-    } else if (this._nodeRegistry.length > 0) {
-      this._nodeRegistry[0].tabIndex = 0;
-    }
-  }
+  getAllNodes() { return this.collectNodes(this.shadowRoot); }
 
   findActiveNode() {
-    // 尋找當前有焦點或 tabindex=0 的元素
-    let focused = this.shadowRoot.activeElement;
-    while (focused && focused.shadowRoot && focused.shadowRoot.activeElement) {
-      focused = focused.shadowRoot.activeElement;
+    let activeElement = this.shadowRoot.activeElement;
+    let activeNode = null;
+    while (activeElement) {
+      if (activeElement instanceof AuTreeNode) activeNode = activeElement;
+      if (!activeElement.shadowRoot?.activeElement) break;
+      activeElement = activeElement.shadowRoot.activeElement;
     }
-    return { activeNode: focused instanceof AuTreeNode ? focused : null };
+    return {activeNode,activeElement};
   }
 
-  handleKeyDown(e) {
-    const current = e.composedPath().find(el => el instanceof AuTreeNode);
-    if (!current) return;
+  updateNodeRegistry(preferred = this.findActiveNode().activeNode || this._activeNode) {
+    this._nodeRegistry = this.collectNodes(this.shadowRoot,true);
+    while (preferred && !this._nodeRegistry.includes(preferred)) preferred = preferred.parentTreeNode;
+    this._activeNode = preferred || this._nodeRegistry[0] || null;
+    for (const node of this.getAllNodes()) node.tabIndex = node === this._activeNode ? 0 : -1;
+  }
 
-    // 重新整理註冊表以確保準確性
+  focusNode(node, options) {
+    if (!this._nodeRegistry.includes(node)) return;
+    this.updateNodeRegistry(node);
+    node.focus(options);
+  }
+  focus(options) {
     this.updateNodeRegistry();
+    (this._activeNode || this._container).focus(options);
+  }
+  handleFocusIn(event) {
+    const node = event.composedPath().find(item=>item instanceof AuTreeNode);
+    if (node?._tree === this) this.updateNodeRegistry(node);
+  }
+  handleNodeExpand(event) {
+    if (event.target === this) return;
+    const {activeNode} = this.findActiveNode();
+    this.updateNodeRegistry();
+    if (activeNode && !this._nodeRegistry.includes(activeNode)) this.focusNode(this._activeNode);
+  }
+  handleNodeCheckChange(event) {
+    if (event.detail?.node?._tree !== this) return;
+    const checkedNodes = this.getAllNodes().filter(node=>node.checked && !node.indeterminate).map(node=>node.data);
+    this.dispatchEvent(new CustomEvent('change',{bubbles:true,composed:true,detail:{checkedNodes}}));
+  }
+
+  handleKeyDown(event) {
+    const current = event.composedPath().find(item=>item instanceof AuTreeNode);
+    if (current?._tree !== this || event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
+    this.updateNodeRegistry(current);
     const index = this._nodeRegistry.indexOf(current);
-
-    let target = null;
-
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        if (index < this._nodeRegistry.length - 1) target = this._nodeRegistry[index + 1];
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        if (index > 0) target = this._nodeRegistry[index - 1];
-        break;
+    let target;
+    const rtl = getComputedStyle(current).direction === 'rtl';
+    const key = rtl && event.key === 'ArrowRight' ? 'ArrowLeft' : rtl && event.key === 'ArrowLeft' ? 'ArrowRight' : event.key;
+    switch(key) {
+      case 'ArrowDown': target = this._nodeRegistry[index+1]; break;
+      case 'ArrowUp': target = this._nodeRegistry[index-1]; break;
       case 'ArrowRight':
-        e.preventDefault();
         if (current.hasChildren) {
-          if (!current.expanded) {
-            current.setExpanded(true);
-            this.updateNodeRegistry();
-          } else {
-            // 移至第一個子節點
-            if (index < this._nodeRegistry.length - 1) target = this._nodeRegistry[index + 1];
-          }
+          if (!current.expanded) current.setExpanded(true);
+          else target = current.childNodesList[0];
         }
         break;
       case 'ArrowLeft':
-        e.preventDefault();
-        if (current.hasChildren && current.expanded) {
-          current.setExpanded(false);
-          this.updateNodeRegistry();
-          current.setExpanded(false);
-          this.updateNodeRegistry();
-          target = current; // 保持焦點
-        } else {
-          // 返回父節點
-          const parent = current.getRootNode().host;
-          if (parent instanceof AuTreeNode) target = parent;
-        }
+        if (current.expanded) current.setExpanded(false);
+        else target = current.parentTreeNode;
         break;
-      case 'Home':
-        e.preventDefault();
-        if (this._nodeRegistry.length > 0) target = this._nodeRegistry[0];
-        break;
-      case 'End':
-        e.preventDefault();
-        if (this._nodeRegistry.length > 0) target = this._nodeRegistry[this._nodeRegistry.length - 1];
-        break;
+      case 'Home': target = this._nodeRegistry[0]; break;
+      case 'End': target = this._nodeRegistry.at(-1); break;
       case '*':
-        e.preventDefault();
-        // 使用者請求：展開所有同級節點
-        const parent = current.getRootNode().host;
-        if (parent && parent instanceof AuTreeNode) {
-          parent.expandAllChildren();
-        } else {
-          // 根層級
-          this.expandAllChildren();
-        }
-        this.updateNodeRegistry();
+        for (const sibling of current.parentTreeNode?.childNodesList || [...this._container.children]) sibling.setExpanded(true);
         break;
       default:
-        // 預先輸入搜尋 (Type-ahead)
-        if (e.key.length === 1 && e.key.match(/\S/)) {
-          this.handleTypeAhead(e.key, index);
+        if (event.key.length === 1 && /\S/.test(event.key)) {
+          event.preventDefault();
+          this.handleTypeAhead(event.key,index);
         }
-        break;
+        return;
     }
-
-    if (target) {
-      this._nodeRegistry.forEach(n => n.tabIndex = -1);
-      target.tabIndex = 0;
-      target.focus();
-    }
+    event.preventDefault();
+    this._typeBuffer = '';
+    if (target) this.focusNode(target);
   }
 
-  handleTypeAhead(char, currentIndex) {
-    char = char.toLowerCase();
-    // 向後搜尋
-    const fwd = this._nodeRegistry.slice(currentIndex + 1).find(n => n.label.toLowerCase().startsWith(char));
-    if (fwd) {
-      this.focusNode(fwd);
-      return;
-    }
-    // 從頭循環搜尋
-    const bwd = this._nodeRegistry.slice(0, currentIndex).find(n => n.label.toLowerCase().startsWith(char));
-    if (bwd) {
-      this.focusNode(bwd);
+  handleTypeAhead(char,index) {
+    const now = Date.now();
+    this._typeBuffer = now-this._typeTime < 700 ? this._typeBuffer+char.toLowerCase() : char.toLowerCase();
+    this._typeTime = now;
+    const repeated = [...this._typeBuffer].every(letter=>letter === this._typeBuffer[0]);
+    const term = repeated ? char.toLowerCase() : this._typeBuffer;
+    const nodes = this._nodeRegistry;
+    const start = term.length > 1 ? index : index+1;
+    for (let offset=0; offset<nodes.length; offset++) {
+      const node = nodes[(start+offset)%nodes.length];
+      if (node.label.toLowerCase().startsWith(term)) { this.focusNode(node); break; }
     }
   }
-
-  focusNode(node) {
-    this._nodeRegistry.forEach(n => n.tabIndex = -1);
-    node.tabIndex = 0;
-    node.focus();
-  }
-
-  expandAllChildren() {
-    Array.from(this.shadowRoot.querySelectorAll('au-tree-node')).forEach(n => n.setExpanded(true));
-  }
-
-  handleNodeExpand() {
-    // 邏輯在大多數情況下透過同步更新處理，
-    // 但監聽器確保捕獲冒泡的更新。
-  }
-
-  handleNodeCheckChange(e) {
-    // 根節點不需要在此處理特定邏輯，因為節點會處理傳播。
-    // 如果需要，我們可以在此發出根層級的 'change' 事件來聚合所有資料。
-    const checkedNodes = this.getAllNodes().filter(n => n.checked).map(n => n.data);
-    this.dispatchEvent(new CustomEvent('change', { bubbles: true, composed: true, detail: { checkedNodes } }));
-  }
+  expandAllChildren() { for (const node of this._container.children) node.setExpanded(true); }
 }
 
 class AuTreeNode extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({mode:'open'});
     this._data = {};
-    this.expanded = false;
-    this.checked = false;
-    this.indeterminate = false;
-    this._initialized = false;
-    this._uid = `au-tree-node-${Math.random().toString(36).substr(2, 9)}`;
+    this._expanded = false;
+    this._checked = false;
+    this._indeterminate = false;
     this._toggleLabel = null;
     this._fallbackNodeLabel = 'Node';
     this._toggleLabelTemplate = null;
-  }
-
-  static get observedAttributes() {
-    return ['expanded', 'show-checkbox', 'checked', 'indeterminate'];
-  }
-
-  get toggleLabel() { return this._toggleLabel; }
-  set toggleLabel(val) {
-    this._toggleLabel = val;
-    this.renderContent();
-    if (this.shadowRoot) {
-      this.shadowRoot.querySelectorAll('au-tree-node').forEach(n => n.toggleLabel = val);
-    }
-  }
-
-  get fallbackNodeLabel() { return this._fallbackNodeLabel; }
-  set fallbackNodeLabel(val) {
-    this._fallbackNodeLabel = val || 'Node';
-    this.renderContent();
-    if (this.shadowRoot) {
-      this.shadowRoot.querySelectorAll('au-tree-node').forEach(n => n.fallbackNodeLabel = this._fallbackNodeLabel);
-    }
-  }
-
-  get toggleLabelTemplate() { return this._toggleLabelTemplate; }
-  set toggleLabelTemplate(val) {
-    this._toggleLabelTemplate = val;
-    this.renderContent();
-    if (this.shadowRoot) {
-      this.shadowRoot.querySelectorAll('au-tree-node').forEach(n => n.toggleLabelTemplate = val);
-    }
-  }
-
-  get data() { return this._data; }
-  set data(val) {
-    this._data = val;
-    this.render();
-  }
-
-  get label() { return this._data.label || ''; }
-  get hasChildren() { return this._data.children && this._data.children.length > 0; }
-
-  getLabelText() {
-    return this._data.label || this._fallbackNodeLabel;
-  }
-
-  formatText(template, values = {}) {
-    return Object.entries(values).reduce((message, [key, value]) => {
-      return message.replaceAll(`{${key}}`, String(value));
-    }, template);
-  }
-
-  escapeHTML(value) {
-    return String(value)
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#39;');
-  }
-
-
-  connectedCallback() {
-    // 捕獲子節點的勾選變更（向上傳播）
-    this.shadowRoot.addEventListener('au-tree-node-check-change', this.handleChildCheckChange.bind(this));
-
-    this.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
-
-    // 透過委派處理內部互動
-    this.shadowRoot.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const target = e.target;
-
-      // 處理切換按鈕
-      const toggleBtn = target.closest('.toggle-btn');
-      if (toggleBtn && !toggleBtn.classList.contains('hidden')) {
-        this.setExpanded(!this.expanded);
-        this.focus(); // 確保 Host 獲得焦點
-        return;
-      }
-
-      // 處理核取方塊 (Input)
-      // 原生 input change 事件處理狀態，但 click 事件會冒泡。
-      // 我們依賴 'change' 事件處理邏輯。
-      // 然而，如果我們點擊 Label，它會觸發 Input 的點擊。
-      // 如果 'change' 監聽器處理了它，我們不需要在這裡對 Checkbox 點擊做任何事。
-
-      // 後備方案：如果點擊 node-content 中的空白處，將焦點設為 host
-      if (target.closest('.node-content')) {
-        // this.focus(); 
-      }
-    });
-
-    // 監聽輸入變更（當點擊 Input 或 Label 時發生原生事件）
-    // 委派迴圈對 'change' 效果不佳，因為它不會從 ShadowDOM 冒泡？
-    // 等等，Input 的 'change' 事件會冒泡。
-    this.shadowRoot.addEventListener('change', (e) => {
-      const input = e.target;
-      if (input.tagName === 'INPUT' && input.type === 'checkbox') {
-        e.stopPropagation();
-        this.toggleCheck(input.checked);
-      }
-    });
-
-    this.addEventListener('keydown', (e) => {
-      // 如果焦點在 Input 或 Button 上，我們讓它們自然處理 Enter/Space？
-      // 使用者互動需求：「點擊按鈕展開/折疊」，「點擊 Input 勾選」。
-      // 但為了 Tree Item (Host) 的無障礙功能，我們仍然需要快捷鍵。
-      const target = e.composedPath()[0];
-      const isInternalInteractive = target.tagName === 'INPUT' || target.tagName === 'BUTTON';
-
-      if (isInternalInteractive) {
-        // 讓原生行為發生（Space 切換 input，Enter 點擊按鈕）
-        // 但方向鍵必須冒泡到 AuTree 以進行導航！
-        // 核取方塊 input 通常不會消耗 Up/Down。
-        return;
-      }
-
-      // 如果焦點在 Host (treeitem) 上：
-      if (e.key === ' ') {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (this.hasAttribute('show-checkbox')) {
-          // 標準樹狀行為：Space 切換動作（勾選）
-          if (!isInternalInteractive) this.toggleCheck();
-        } else {
-          if (this.hasChildren) {
-            this.setExpanded(!this.expanded);
-          }
-        }
-      }
-
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        e.stopPropagation();
-
-        this.setExpanded(!this.expanded);
-      }
-    });
-  }
-
-  attributeChangedCallback(name, old, val) {
-    if (!this._initialized) return;
-
-    if (name === 'show-checkbox') {
-      this.renderContent();
-      // 傳播
-      const children = this.shadowRoot.querySelectorAll('au-tree-node');
-      children.forEach(c => {
-        if (val !== null) c.setAttribute('show-checkbox', '');
-        else c.removeAttribute('show-checkbox');
-      });
-    }
-    // 如果手動更改屬性（內部邏輯中很少見），則反映 ARIA 狀態
-  }
-
-  setExpanded(state) {
-    if (state === this.expanded) return;
-    this.expanded = state;
-    const group = this.shadowRoot.querySelector('div[role="group"]');
-    const toggle = this.shadowRoot.querySelector('.toggle-icon');
-
-    if (this.expanded) {
-      this.setAttribute('aria-expanded', 'true');
-      if (group) group.style.display = 'block';
-      if (toggle) toggle.style.transform = 'rotate(90deg)';
-    } else {
-      this.setAttribute('aria-expanded', 'false');
-      if (group) group.style.display = 'none';
-      if (toggle) toggle.style.transform = 'rotate(0deg)';
-    }
-    this.dispatchEvent(new CustomEvent('au-tree-node-expand', { bubbles: true, composed: true }));
-  }
-
-  expandAllChildren() {
-    this.setExpanded(true);
-    Array.from(this.shadowRoot.querySelectorAll('au-tree-node')).forEach(n => n.expandAllChildren());
-  }
-
-  toggleCheck(forceState = null) {
-    const newState = forceState !== null ? forceState : !this.checked;
-    this.setChecked(newState);
-    // 向下級聯
-    this.setChildrenChecked(newState);
-
-    // 向上發送
-    this.dispatchEvent(new CustomEvent('au-tree-node-check-change', {
-      bubbles: true,
-      composed: true,
-      detail: { checked: this.checked, node: this }
-    }));
-  }
-
-  setChecked(state, indeterminate = false) {
-    this.checked = state;
-    this.indeterminate = indeterminate;
-
-    // 更新 ARIA
-    if (this.indeterminate) {
-      this.setAttribute('aria-checked', 'mixed');
-    } else {
-      this.setAttribute('aria-checked', state ? 'true' : 'false');
-    }
-
-    // 更新視覺 input
-    const input = this.shadowRoot.querySelector(`input#${this._uid}`);
-    if (input) {
-      input.checked = state;
-      input.indeterminate = indeterminate;
-    }
-  }
-
-  setChildrenChecked(state) {
-    if (!this.hasChildren) return;
-    const children = Array.from(this.shadowRoot.querySelectorAll('au-tree-node'));
-    children.forEach(child => {
-      child.setChecked(state);
-      child.setChildrenChecked(state);
-    });
-  }
-
-  handleChildCheckChange(e) {
-    e.stopPropagation();
-    this.updateStateFromChildren();
-    // 進一步向上傳播
-    this.dispatchEvent(new CustomEvent('au-tree-node-check-change', {
-      bubbles: true,
-      composed: true,
-      detail: { checked: this.checked, node: this }
-    }));
-  }
-
-  updateStateFromChildren() {
-    const children = Array.from(this.shadowRoot.querySelectorAll('au-tree-node'));
-    const allChecked = children.every(c => c.checked && !c.indeterminate);
-    const allUnchecked = children.every(c => !c.checked && !c.indeterminate);
-
-    if (allChecked) {
-      this.setChecked(true, false);
-    } else if (allUnchecked) {
-      this.setChecked(false, false);
-    } else {
-      this.setChecked(false, true);
-    }
-  }
-
-  render() {
-    this._initialized = true;
-    const { children } = this._data;
-    const showCheckbox = this.hasAttribute('show-checkbox');
-
-    // 結構： 
-    // .node-content (框架)
-    //   button.toggle-btn (如果有子節點)
-    //   input (核取方塊)
-    //   label (文字)
-
     this.shadowRoot.innerHTML = `
       <style>
-        :host {
-          display: block;
-          outline: none;
-        }
+      :host([hidden]:not([hidden="until-found" i])) { display: none; }
+        :host {display:block;min-width:0;outline:none;}
+        [hidden] {display:none!important;}
         .node-content {
-          display: flex;
-          align-items: center;
-          gap: var(--au-tree-node-padding-horizontal, 0.25rem);
-          padding: var(--au-tree-node-padding-vertical, 0.25rem) var(--au-tree-node-padding-horizontal, 0.25rem);
-          .au-checkbox {
-            display: flex;
-            align-items: center;
-            gap: var(--au-tree-node-checkbox-content-gap, 0.375rem);
-          }
+          display:flex;align-items:center;min-width:0;box-sizing:border-box;
+          gap:var(--au-tree-node-padding-horizontal,0.25rem);
+          padding:var(--au-tree-node-padding-vertical,0.25rem) var(--au-tree-node-padding-horizontal,0.25rem);
+          background:var(--au-tree-node-bg,transparent);
+          border:var(--au-tree-node-border-width,0) var(--au-tree-node-border-style,solid) var(--au-tree-node-border-color,oklch(0.55 0 0));
+          border-radius:var(--au-tree-node-border-radius,0);
+          color:var(--au-tree-node-text-color,oklch(0.1398 0 0));
+          font:inherit;font-family:var(--au-tree-node-text-family,inherit);
+          font-size:var(--au-tree-node-text-size,1rem);line-height:var(--au-tree-node-text-line-height,1.5);
         }
-        .node-content > * {
-          vertical-align: middle;
+        .node-content:hover {background:var(--au-tree-node-hover-bg,oklch(0.9466 0 0));border-color:var(--au-tree-node-hover-border-color,oklch(0.55 0 0));}
+        .node-content:active {background:var(--au-tree-node-active-bg,oklch(0.8689 0 0));}
+        :host(:focus) > .node-content,.node-content:focus-within {
+          outline:var(--au-tree-focus-shadow-width,3px) solid var(--au-tree-focus-shadow-color,oklch(0.4 0 0));outline-offset:-3px;
         }
-        /* 焦點樣式：當 host 聚焦或內部元素聚焦時框住內容 */
-        :host(:focus) .node-content {
-          outline: none;
-          box-shadow: inset 0 0 0 var(--au-tree-focus-shadow-width, 3px) var(--au-tree-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
-        }
-        
-        button {
-          /* behavior */
-          cursor: pointer;
-          -webkit-tap-highlight-color: oklch(0 0 0 / 0);
-          
-          /* spacing */
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: var(--au-tree-node-padding-horizontal, 1rem);
-          word-break: break-word;
-          width: 100%;
-          text-align: left;
-          padding: var(--au-tree-node-padding-vertical, 0.625rem) var(--au-tree-node-padding-horizontal, 1rem);
-          
-          /* text */
-          color: var(--au-tree-node-text-color, oklch(0.1398 0 0));
-          font-size: var(--au-tree-node-text-size, 1rem);
-          font-family: var(--au-tree-node-text-family);
-          line-height: var(--au-tree-node-text-line-height, 1.5);
-          
-          /* border */
-          border: var(--au-tree-node-border-width, 0) var(--au-tree-node-border-style, solid) var(--au-tree-node-border-color, oklch(0.7894 0 0));
-          border-radius: var(--au-tree-node-border-radius, 0);
-          
-          /* others decoration */
-          background-color: var(--au-tree-node-bg, transparent);
-          transition: background-color 160ms ease-in;
-
-          .heading {
-            flex: 1;
-          }
-
-          .info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex: 0 1 auto;
-          }
-
-          .icon {
-            transition: transform 300ms ease-in;
-            display: flex;
-            align-items: center;
-          }
-
-          &[aria-expanded="true"] {
-            .icon {
-              transform: rotate3d(0, 0, 1, 180deg);
-              transform-origin: center;
-            }
-          }
-
-          &:hover {
-            background-color: var(--au-tree-node-hover-bg, oklch(0.9466 0 0));
-            border-color: var(--au-tree-node-hover-border-color, oklch(0.7894 0 0));
-          }
-          
-          &:active {
-            background-color: var(--au-tree-node-active-bg, oklch(0.8689 0 0));
-            border-color: var(--au-accordion-heading-active-border-color, oklch(0.7894 0 0));
-          }
-          
-          &:focus-visible {
-            outline: none;
-          }
-
-          &.hidden {
-            visibility: hidden;
-            pointer-events: none;
-          }
-        }
-         
-        /* 切換按鈕 */
         .toggle-btn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0;
-          width: var(--au-tree-node-toggle-btn-size, 2rem);
-          height: var(--au-tree-node-toggle-btn-size, 2rem);
+          display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+          min-width:24px;min-height:24px;width:var(--au-tree-node-toggle-btn-size,2rem);height:var(--au-tree-node-toggle-btn-size,2rem);
+          padding:0;border:0;background:transparent;color:inherit;cursor:pointer;
         }
-
-        .toggle-icon {
-          width: var(--au-tree-node-toggle-icon-size, 1rem);
-          height: var(--au-tree-node-toggle-icon-size, 1rem);
-          transition: transform 0.15s ease;
+        .toggle-btn.hidden {visibility:hidden;pointer-events:none;}
+        .toggle-icon {width:var(--au-tree-node-toggle-icon-size,1rem);height:var(--au-tree-node-toggle-icon-size,1rem);transition:transform 150ms ease;}
+        :host([aria-expanded=true]) .toggle-icon {transform:rotate(90deg);}
+        :host(:dir(rtl)) .toggle-icon {transform:rotate(180deg);}
+        :host(:dir(rtl)[aria-expanded=true]) .toggle-icon {transform:rotate(90deg);}
+        .label {display:flex;align-items:center;min-width:0;gap:var(--au-tree-node-checkbox-content-gap,0.375rem);cursor:pointer;}
+        .text {min-width:0;overflow-wrap:anywhere;font-size:var(--au-tree-node-checkbox-label-text-size,inherit);}
+        .label:active {color:var(--au-tree-node-checkbox-label-active-text-color,oklch(0.537 0 0));}
+        :host([aria-disabled=true]) .label {cursor:not-allowed;color:var(--au-tree-node-checkbox-label-disabled-text-color,oklch(0.537 0 0));}
+        .checkmark {
+          appearance:none;box-sizing:border-box;flex-shrink:0;min-width:24px;min-height:24px;
+          width:var(--au-tree-node-checkbox-input-width,1.5rem);height:var(--au-tree-node-checkbox-input-height,1.5rem);
+          margin:0;border:var(--au-tree-node-checkbox-input-border-width,1px) var(--au-tree-node-checkbox-input-border-style,solid) var(--au-tree-node-checkbox-input-border-color,oklch(0.4 0 0));
+          border-radius:var(--au-tree-node-checkbox-input-border-radius,0.25rem);
+          background:var(--au-tree-node-checkbox-input-bg,oklch(0.994 0 0));cursor:pointer;
         }
-        
-        /* 核取方塊樣式 */
-        input[type="checkbox"] {
-          appearance: none;
-          cursor: pointer;
-          width: var(--au-tree-node-checkbox-input-width, 1.5rem);
-          height: var(--au-tree-node-checkbox-input-height, 1.5rem);
-          border: var(--au-tree-node-checkbox-input-border-width, 1px) var(--au-tree-node-checkbox-input-border-style, solid) var(--au-tree-node-checkbox-input-border-color, oklch(0.7894 0 0));
-          border-radius: var(--au-tree-node-checkbox-input-border-radius, 0.25rem);
-          background-color: var(--au-tree-node-checkbox-input-bg, oklch(0.994 0 0));
-          &:focus-visible {
-            outline: none;
-          }
-          &:disabled {
-            cursor: not-allowed;
-          }
-          &:checked {
-            background-color: var(--au-tree-node-checkbox-input-checked-bg, oklch(0.1398 0 0));
-            display: grid;
-            place-content: center;
-            &:before {
-              content: var(--au-tree-node-checkbox-input-checked-symbol, '✔');
-              color: var(--au-tree-node-checkbox-input-checked-text-color, oklch(0.994 0 0));
-              font-size: var(--au-tree-node-checkbox-input-checked-text-size, 1.125rem);
-            }
-          }
-          &:indeterminate {
-            background-color: var(--au-tree-node-checkbox-input-checked-bg, oklch(0.1398 0 0)); /* 建議背景色與 checked 一致 */
-            border-color: transparent;
-            display: grid;
-            place-content: center;
-
-            &:before {
-              /* 使用 '−' (Minus Sign) 符號，比一般連字號 '-' 更寬更置中 */
-              content: var(--au-tree-node-checkbox-input-indeterminate-symbol, '−'); 
-              color: var(--au-tree-node-checkbox-input-checked-text-color, oklch(0.994 0 0));
-              font-size: var(--au-tree-node-checkbox-input-checked-text-size, 1.125rem);
-              
-              /* 確保符號垂直置中 */
-              line-height: 0; 
-              font-weight: bold;
-            }
-          }
+        :host([aria-disabled=true]) .checkmark {cursor:not-allowed;}
+        :host([checked]) .checkmark,:host([indeterminate]) .checkmark {display:grid;place-content:center;background:var(--au-tree-node-checkbox-input-checked-bg,oklch(0.1398 0 0));}
+        :host([checked]) .checkmark::before {content:var(--au-tree-node-checkbox-input-checked-symbol,'✔');}
+        :host([indeterminate]) .checkmark::before {content:var(--au-tree-node-checkbox-input-indeterminate-symbol,'−');}
+        .checkmark::before {color:var(--au-tree-node-checkbox-input-checked-text-color,oklch(0.994 0 0));font-size:var(--au-tree-node-checkbox-input-checked-text-size,1.125rem);}
+        :host(:focus-visible) .checkmark {outline:var(--au-tree-node-checkbox-input-focus-shadow-width,3px) solid var(--au-tree-node-checkbox-input-focus-shadow-color,oklch(0.4 0 0));outline-offset:1px;}
+        [role=group] {padding-inline-start:var(--au-tree-indent,1.5rem);margin:0;min-width:0;}
+        @media(forced-colors:active) {
+          :host(:focus) > .node-content,.node-content:focus-within,:host(:focus-visible) .checkmark {outline:2px solid Highlight;outline-offset:-2px;}
+          .checkmark {forced-color-adjust:none;background:Canvas;border-color:CanvasText;}
+          :host([checked]) .checkmark,:host([indeterminate]) .checkmark {background:Highlight;}
+          .checkmark::before {color:HighlightText;}
+          :host([aria-disabled=true]) .checkmark {border-color:GrayText;}
         }
-
-         label {
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: var(--au-tree-node-checkbox-content-gap, 0.375rem);
-          -webkit-tap-highlight-color: oklch(0 0 0 / 0);
-          .text {
-            flex: 1;
-            font-size: var(--au-tree-node-checkbox-label-text-size, 1rem);
-          }
-          &:active {
-            .text {
-              color: var(--au-tree-node-checkbox-label-active-text-color, oklch(0.537 0 0));
-            }
-          }
-          &:has(input:focus-visible) {
-            box-shadow: inset 0 0 0 var(--au-tree-node-checkbox-input-focus-shadow-width, 3px) var(--au-tree-node-checkbox-input-focus-shadow-color, oklch(0.8315 0.15681888825079074 78.05241467152487));
-          }
-          &:has(input[type="checkbox"]:disabled) {
-            cursor: not-allowed;
-            input[type="checkbox"] {
-              opacity: 0.5;
-            }
-            .text {
-              pointer-events: none;
-              text-decoration: none;
-              color: var(--au-tree-node-checkbox-label-disabled-text-color, oklch(0.537 0 0));
-            }
-          }
-        }
-        
-        div[role="group"] {
-          padding-left: var(--au-tree-indent, 1.5rem);
-          margin: 0;
-          display: none;
-        }
-
-        .visually-hidden { 
-          position: absolute; 
-          width: 1px; 
-          height: 1px; 
-          padding: 0; 
-          margin: -1px; 
-          overflow: hidden; 
-          clip: rect(0,0,0,0); 
-          border: 0;
-        }
+        @media(prefers-reduced-motion:reduce) {.toggle-icon {transition:none;}}
       </style>
-      <div class="node-content"></div>
-      ${this.hasChildren ? `<div role="group"></div>` : ''}
-    `;
-
-    this.renderContent();
-
-    // 渲染子節點
-    if (this.hasChildren) {
-      const group = this.shadowRoot.querySelector('div[role="group"]');
-      children.forEach(childData => {
-        const childNode = document.createElement('au-tree-node');
-        childNode.data = childData;
-        childNode.toggleLabel = this._toggleLabel;
-        childNode.fallbackNodeLabel = this._fallbackNodeLabel;
-        childNode.toggleLabelTemplate = this._toggleLabelTemplate;
-        if (showCheckbox) childNode.setAttribute('show-checkbox', '');
-        group.appendChild(childNode);
-      });
-    }
-
-    // Host 上的 ARIA 配置
-    this.setAttribute('role', 'treeitem');
-    if (this.hasChildren) {
-      this.setAttribute('aria-expanded', 'false');
-    }
-    if (showCheckbox) {
-      this.setAttribute('aria-checked', 'false');
-    }
+      <div class="node-content">
+        <button type="button" class="toggle-btn" tabindex="-1"><svg class="toggle-icon" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
+        <span class="label"><span class="checkmark" aria-hidden="true"></span><span class="text"></span></span>
+      </div><div role="group" hidden inert></div>`;
+    this._row = this.shadowRoot.querySelector('.node-content');
+    this._group = this.shadowRoot.querySelector('[role=group]');
+    this._checkmark = this.shadowRoot.querySelector('.checkmark');
+    this._button = this.shadowRoot.querySelector('button');
+    this._text = this.shadowRoot.querySelector('.text');
+    // Stable listeners are installed once, not on every connection.
+    this._button.addEventListener('click',()=>{this.setExpanded(!this.expanded);this.focus();});
+    this._row.addEventListener('click',event=>{
+      if (event.target.closest('button')) return;
+      this.focus();
+      if (this.hasCheckbox) this.toggleCheck();
+      else if (this.hasChildren) this.setExpanded(!this.expanded);
+    });
+    this.addEventListener('click',event=>{
+      // Retargeted descendant clicks must not activate this node a second time.
+      if (event.composedPath()[0] !== this) return;
+      this.focus();
+      if (this.hasCheckbox) this.toggleCheck();
+      else if (this.hasChildren) this.setExpanded(!this.expanded);
+    });
+    this.addEventListener('keydown',event=>{
+      if (event.composedPath()[0] !== this || event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
+      if (event.key === ' ' || event.key === 'Enter') {
+        event.preventDefault();event.stopPropagation();
+        if (event.key === ' ' && this.hasCheckbox) this.toggleCheck();
+        else if (this.hasChildren) this.setExpanded(!this.expanded);
+      }
+    });
   }
 
-  renderContent() {
-    const container = this.shadowRoot.querySelector('.node-content');
-    if (!container) return;
-    const showCheckbox = this.hasAttribute('show-checkbox');
-    const labelText = this.getLabelText(); // 取得純文字標籤
-    const escapedLabelText = this.escapeHTML(labelText);
+  static get observedAttributes() {return ['expanded','checked','indeterminate','show-checkbox'];}
+  connectedCallback() {this.syncPresentation();}
+  attributeChangedCallback(name,oldValue,newValue) {
+    if (oldValue === newValue || this._syncing) return;
+    if (name === 'expanded') this.setExpanded(newValue !== null);
+    else if (name === 'checked') this.setChecked(newValue !== null,this.indeterminate);
+    else if (name === 'indeterminate') this.setChecked(this.checked,newValue !== null);
+    else this.syncPresentation();
+  }
 
-    // 1. 修正：直接在 Host 上設定 aria-label，解決 Shadow DOM 邊界問題
-    this.setAttribute('aria-label', labelText);
-    const arrowIcon = `<svg class="toggle-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" aria-hidden="true"/></svg><span class="visually-hidden">${escapedLabelText}</span>`;
+  get data() {return this._data;}
+  set data(value) {
+    if (this._tree && !this._tree._rendering) {
+      const {activeNode,activeElement}=this._tree.findActiveNode();
+      this.updateData(value,new Set([value]));
+      this._tree.updateNodeRegistry(activeNode);
+      if (activeNode && activeElement?.isConnected) activeElement.focus({preventScroll:true});
+    } else this.updateData(value,new Set([value]));
+  }
+  get childNodesList() {return [...this._group.children];}
+  get hasChildren() {return this._group.childElementCount > 0;}
+  get hasCheckbox() {return this._tree ? this._tree.hasAttribute('show-checkbox') : this.hasAttribute('show-checkbox');}
+  get disabled() {return !!this._data.disabled || !!this.parentTreeNode?.disabled;}
+  get label() {return this.getLabelText();}
+  get expanded() {return this._expanded;}
+  set expanded(value) {this.setExpanded(value);}
+  get checked() {return this._checked;}
+  set checked(value) {this.setChecked(value,this.indeterminate);}
+  get indeterminate() {return this._indeterminate;}
+  set indeterminate(value) {this.setChecked(this.checked,value);}
+  get toggleLabel() {return this._tree?.toggleLabel ?? this._toggleLabel;}
+  set toggleLabel(value) {this._toggleLabel=value;this.syncPresentation();for(const child of this.childNodesList) child.toggleLabel=value;}
+  get fallbackNodeLabel() {return this._tree?.fallbackNodeLabel || this._fallbackNodeLabel;}
+  set fallbackNodeLabel(value) {this._fallbackNodeLabel=value || 'Node';this.syncPresentation();for(const child of this.childNodesList) child.fallbackNodeLabel=value;}
+  get toggleLabelTemplate() {return this._tree?.toggleLabelTemplate ?? this._toggleLabelTemplate;}
+  set toggleLabelTemplate(value) {this._toggleLabelTemplate=value;this.syncPresentation();for(const child of this.childNodesList) child.toggleLabelTemplate=value;}
+  getLabelText() {return this._data.label == null || this._data.label === '' ? this.fallbackNodeLabel : String(this._data.label);}
 
-    const toggleLabelText = typeof this._toggleLabel === 'function'
-      ? this._toggleLabel(this._data)
-      : this.formatText(this._toggleLabelTemplate || 'Toggle {label}', { label: labelText });
-    const escapedToggleLabelText = this.escapeHTML(toggleLabelText);
+  clearOwner() {this._tree=null;for(const child of this.childNodesList) child.clearOwner();}
 
-    // 切換按鈕
-    const buttonHtml = this.hasChildren
-      ? `<button class="toggle-btn" tabindex="-1" aria-label="${escapedToggleLabelText}">${arrowIcon}</button>`
-      : `<button class="toggle-btn hidden" tabindex="-1" aria-hidden="true">${arrowIcon}</button>`; // 佔位符
+  updateData(value,ancestors) {
+    this._data = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+    if ('checked' in this._data) this._checked=!!this._data.checked;
+    if ('expanded' in this._data) this._expanded=!!this._data.expanded;
+    AuTree.reconcile(this._group,this._data.children,this._tree,this,ancestors);
+    if (!this.hasChildren) {this._expanded=false;this._indeterminate=false;}
+    else this.updateStateFromChildren();
+    this.syncPresentation();
+  }
 
-    // 核取方塊
-    // 使用 tabindex="-1" 將 Roving Tabindex 流程保留在 Host 作為主要，
-    // 但允許滑鼠使用者點擊它。
-    // 如果使用者在某些瀏覽模式下嘗試，也可以 tab 到它，但明確設置 -1 會將其從序列中移除。
-    const checkboxHtml = showCheckbox
-      ? `<div class="au-checkbox"><input type="checkbox" id="${this._uid}" tabindex="-1" ${this.checked ? 'checked' : ''}>`
-      : '';
+  syncPresentation() {
+    const text=this.getLabelText();
+    this.setAttribute('role','treeitem');
+    this.setAttribute('aria-label',text);
+    this.setAttribute('aria-disabled',String(this.disabled));
+    this.setAttribute('aria-level',String(this._level || 1));
+    this.setAttribute('aria-posinset',String(this._position || 1));
+    this.setAttribute('aria-setsize',String(this._setSize || 1));
+    this._syncing=true;
+    this.toggleAttribute('expanded',this.hasChildren && this.expanded);
+    this.toggleAttribute('checked',this.checked);
+    this.toggleAttribute('indeterminate',this.indeterminate);
+    this._syncing=false;
+    if (this.hasChildren) this.setAttribute('aria-expanded',String(this.expanded));
+    else this.removeAttribute('aria-expanded');
+    if (this.hasCheckbox) this.setAttribute('aria-checked',this.indeterminate ? 'mixed' : String(this.checked));
+    else this.removeAttribute('aria-checked');
+    this._text.textContent=text;
+    const custom=this.toggleLabel;
+    const toggleText=typeof custom === 'function' ? custom(this._data) : (this.toggleLabelTemplate || 'Toggle {label}').replaceAll('{label}',text);
+    this._button.setAttribute('aria-label',String(toggleText));
+    this._button.classList.toggle('hidden',!this.hasChildren);
+    this._button.setAttribute('aria-hidden',String(!this.hasChildren));
+    this._checkmark.hidden=!this.hasCheckbox;
+    this._group.hidden=!this.hasChildren || !this.expanded;
+    this._group.inert=this._group.hidden;
+    if(this._data.lang) this.setAttribute('lang',String(this._data.lang)); else this.removeAttribute('lang');
+  }
 
-    const labelId = `${this._uid}-label`;
-    const labelHtml = showCheckbox
-      ? `<label id="${labelId}" for="${this._uid}">${escapedLabelText}</label></div>`
-      : `<span>${escapedLabelText}</span>`;
-    // 更好：如果沒有核取方塊， label 表現為文字。
-    // 如果我們想要在沒有核取方塊時點擊標籤展開，我們需要監聽器。
-
-    container.innerHTML = `
-        ${buttonHtml}
-        ${checkboxHtml}
-        ${labelHtml}
-      `;
-
-
-    if (showCheckbox && this.indeterminate) {
-      const input = container.querySelector('input');
-      if (input) input.indeterminate = true;
+  setExpanded(value) {
+    const next=!!value && this.hasChildren;
+    if (next === this.expanded) {this.syncPresentation();return;}
+    const tree=this._tree;
+    const active=tree?.findActiveNode().activeNode;
+    this._expanded=next;
+    this.syncPresentation();
+    if(tree) {
+      tree.updateNodeRegistry(active || tree._activeNode);
+      if(active && !tree._nodeRegistry.includes(active)) tree.focusNode(tree._activeNode);
     }
+    this.dispatchEvent(new CustomEvent('au-tree-node-expand',{bubbles:true,composed:true}));
+  }
+  expandAllChildren() {this.setExpanded(true);for(const child of this.childNodesList) child.setExpanded(true);}
 
-    const toggle = container.querySelector('.toggle-icon');
-    if (this.expanded && toggle) toggle.style.transform = 'rotate(90deg)';
+  setChecked(value,indeterminate=false) {
+    this._checked=!!value;this._indeterminate=!!indeterminate;this.syncPresentation();
+  }
+  setChildrenChecked(value) {
+    for (const child of this.childNodesList) {
+      if(child.disabled) continue;
+      child.setChecked(value);child.setChildrenChecked(value);
+    }
+  }
+  updateStateFromChildren() {
+    const children=this.childNodesList.filter(child=>!child.disabled);
+    if (!children.length) return;
+    const all=children.every(child=>child.checked && !child.indeterminate);
+    const none=children.every(child=>!child.checked && !child.indeterminate);
+    this.setChecked(all,!all && !none);
+  }
+  toggleCheck(value=null) {
+    if (!this.hasCheckbox || this.disabled) {this.syncPresentation();return;}
+    const tree=this._tree;
+    const before=tree?.getAllNodes().map(node=>[node.checked,node.indeterminate].join(':')).join(',');
+    const next=value == null ? !this.checked : !!value;
+    this.setChecked(next);this.setChildrenChecked(next);
+    let parent=this.parentTreeNode;
+    while(parent) {parent.updateStateFromChildren();parent=parent.parentTreeNode;}
+    const after=tree?.getAllNodes().map(node=>[node.checked,node.indeterminate].join(':')).join(',');
+    if(tree && before === after) return;
+    this.dispatchEvent(new CustomEvent('au-tree-node-check-change',{bubbles:true,composed:true,detail:{checked:this.checked,node:this}}));
   }
 }
 
 if (typeof customElements !== 'undefined') {
-  if (!customElements.get('au-tree')) customElements.define('au-tree', AuTree);
-  if (!customElements.get('au-tree-node')) customElements.define('au-tree-node', AuTreeNode);
+  if (!customElements.get('au-tree-node')) customElements.define('au-tree-node',AuTreeNode);
+  if (!customElements.get('au-tree')) customElements.define('au-tree',AuTree);
 }

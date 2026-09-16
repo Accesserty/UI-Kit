@@ -95,6 +95,7 @@
         margin-bottom: 1.5rem;
         color: oklch(0.3 0.15 25);
       }
+      .error-summary:focus { outline: 3px solid currentColor; outline-offset: 3px; }
       .error-summary[aria-hidden="false"] { display: block; }
       .error-summary h2 {
         margin: 0 0 0.75rem;
@@ -153,7 +154,7 @@
     <header><a href="../demo/index.html" title="go to home page">Home</a></header>
     <main>
       <h1>Accesserty UI Kit Form</h1>
-      <p>A complex form demonstrating validation for all form components: required fields, format checking, length limits, at-least-one-checkbox rules, and rating requirements. Validation runs on blur per field and shows all errors on submit.</p>
+      <p>A complex form demonstrating validation for all form components: required fields, format checking, length limits, at-least-one-checkbox rules, and rating requirements. Validation runs when a field value changes and shows all errors on submit.</p>
 
       <p class="form-legend-note">Fields marked with <span aria-hidden="true">*</span><span class="visually-hidden">asterisk</span> are required.</p>
 
@@ -161,17 +162,17 @@
       <div
         id="error-summary"
         class="error-summary"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
+        role="region"
+        tabindex="-1"
+        aria-labelledby="error-summary-title"
         aria-hidden="true"
       >
-        <h2>Please fix the following errors before submitting:</h2>
+        <h2 id="error-summary-title">Please fix the following errors before submitting:</h2>
         <ul id="error-summary-list"></ul>
       </div>
 
       <div id="success-banner" class="success-banner" role="status" aria-hidden="true">
-        ✔ Application submitted successfully!
+        ✔ Demo validation passed. The collected data is shown below; nothing was sent.
       </div>
 
       <form id="job-form" novalidate>
@@ -192,7 +193,7 @@
                 required
                 aria-describedby="err-first-name"
               ></au-input>
-              <div id="err-first-name" class="field-error" role="alert" aria-hidden="true">
+              <div id="err-first-name" class="field-error" aria-hidden="true">
                 First name is required.
               </div>
             </div>
@@ -208,7 +209,7 @@
                 required
                 aria-describedby="err-last-name"
               ></au-input>
-              <div id="err-last-name" class="field-error" role="alert" aria-hidden="true">
+              <div id="err-last-name" class="field-error" aria-hidden="true">
                 Last name is required.
               </div>
             </div>
@@ -227,7 +228,7 @@
                 required
                 aria-describedby="err-email"
               ></au-input>
-              <div id="err-email" class="field-error" role="alert" aria-hidden="true">
+              <div id="err-email" class="field-error" aria-hidden="true">
                 Please enter a valid email address (e.g. jane@example.com).
               </div>
             </div>
@@ -247,7 +248,7 @@
               <div id="hint-phone" style="font-size:0.8125rem;color:oklch(0.45 0 0);margin-top:0.25rem;">
                 Optional. Format: +886 912 345 678
               </div>
-              <div id="err-phone" class="field-error" role="alert" aria-hidden="true">
+              <div id="err-phone" class="field-error" aria-hidden="true">
                 Please enter a valid phone number (7–20 digits, may include +, spaces, dashes).
               </div>
             </div>
@@ -266,7 +267,7 @@
                 max=""
                 aria-describedby="err-birthdate"
               ></au-input>
-              <div id="err-birthdate" class="field-error" role="alert" aria-hidden="true">
+              <div id="err-birthdate" class="field-error" aria-hidden="true">
                 Date of birth is required and must not be a future date.
               </div>
             </div>
@@ -282,7 +283,7 @@
                 data-layout="vertical"
                 aria-describedby="err-portfolio"
               ></au-input>
-              <div id="err-portfolio" class="field-error" role="alert" aria-hidden="true">
+              <div id="err-portfolio" class="field-error" aria-hidden="true">
                 Please enter a valid URL starting with https://.
               </div>
             </div>
@@ -307,7 +308,7 @@
                 maxlength="80"
                 aria-describedby="err-position"
               ></au-input>
-              <div id="err-position" class="field-error" role="alert" aria-hidden="true">
+              <div id="err-position" class="field-error" aria-hidden="true">
                 Position is required (2–80 characters).
               </div>
             </div>
@@ -325,7 +326,7 @@
                 data-layout="vertical"
                 aria-describedby="err-salary"
               ></au-input>
-              <div id="err-salary" class="field-error" role="alert" aria-hidden="true">
+              <div id="err-salary" class="field-error" aria-hidden="true">
                 Please enter a salary between $10,000 and $999,999.
               </div>
             </div>
@@ -347,7 +348,7 @@
               <au-radio value="3_to_5">3 – 5 yrs</au-radio>
               <au-radio value="5_plus">5+ yrs</au-radio>
             </au-radio-group>
-            <div id="err-experience" class="field-error" role="alert" aria-hidden="true">
+            <div id="err-experience" class="field-error" aria-hidden="true">
               Please select your years of experience.
             </div>
           </div>
@@ -366,7 +367,7 @@
               <au-checkbox id="skill-rs"  name="skill" value="rust">Rust</au-checkbox>
               <au-checkbox id="skill-java" name="skill" value="java">Java</au-checkbox>
             </div>
-            <div id="err-skills" class="field-error" role="alert" aria-hidden="true">
+            <div id="err-skills" class="field-error" aria-hidden="true">
               Please select at least one technical skill.
             </div>
           </div>
@@ -385,7 +386,7 @@
               labels="Beginner,Basic,Intermediate,Advanced,Expert"
               aria-describedby="err-skill-level"
             ></au-rating>
-            <div id="err-skill-level" class="field-error" role="alert" aria-hidden="true">
+            <div id="err-skill-level" class="field-error" aria-hidden="true">
               Please select a skill level (1–5 stars).
             </div>
           </div>
@@ -405,7 +406,7 @@
             <div id="hint-cover" class="char-count">
               <span id="char-count-cover">0</span> / 1000
             </div>
-            <div id="err-cover" class="field-error" role="alert" aria-hidden="true">
+            <div id="err-cover" class="field-error" aria-hidden="true">
               Cover letter is required (minimum 50 characters, maximum 1000).
             </div>
           </div>
@@ -429,7 +430,7 @@
               <au-radio value="onsite">On-site</au-radio>
               <au-radio value="hybrid">Hybrid</au-radio>
             </au-radio-group>
-            <div id="err-worktype" class="field-error" role="alert" aria-hidden="true">
+            <div id="err-worktype" class="field-error" aria-hidden="true">
               Please select a preferred work type.
             </div>
           </div>
@@ -446,7 +447,7 @@
                 min=""
                 aria-describedby="err-start-date"
               ></au-input>
-              <div id="err-start-date" class="field-error" role="alert" aria-hidden="true">
+              <div id="err-start-date" class="field-error" aria-hidden="true">
                 Please enter a valid start date (today or later).
               </div>
             </div>
@@ -483,10 +484,10 @@
               msg-total-size-error="Total upload size exceeds"
               aria-describedby="err-resume"
             >
-              <button type="button" slot="trigger" class="custom-btn--primary-flat">Choose resume file…</button>
+              <button type="button" slot="trigger" class="custom-btn--primary-flat" aria-describedby="err-resume">Choose resume file…</button>
               <div slot="hint">Accepted: PDF, DOC, DOCX · Max 5 MB</div>
             </au-file-upload>
-            <div id="err-resume" class="field-error" role="alert" aria-hidden="true">
+            <div id="err-resume" class="field-error" aria-hidden="true">
               Please upload your resume (PDF or DOC, max 5 MB).
             </div>
           </div>
@@ -529,8 +530,9 @@
       function showError(errEl, fieldEl, show) {
         errEl.setAttribute('aria-hidden', show ? 'false' : 'true');
         if (fieldEl) {
-          if (show) fieldEl.setAttribute('data-invalid', '');
-          else fieldEl.removeAttribute('data-invalid');
+          fieldEl.toggleAttribute('data-invalid', show);
+          if (show) fieldEl.setAttribute('aria-invalid', 'true');
+          else fieldEl.removeAttribute('aria-invalid');
         }
       }
 
@@ -538,7 +540,8 @@
       function show(el) { el.setAttribute('aria-hidden', 'false'); }
 
       /* ── Date helpers ── */
-      const today = new Date().toISOString().slice(0, 10);
+      const localDate = new Date();
+      const today = [localDate.getFullYear(), String(localDate.getMonth() + 1).padStart(2, '0'), String(localDate.getDate()).padStart(2, '0')].join('-');
       document.getElementById('field-birthdate').setAttribute('max', today);
       document.getElementById('field-start-date').setAttribute('min', today);
 
@@ -690,13 +693,17 @@
         const fieldEl = document.getElementById(id);
 
         if (errEl) {
-          errEl.textContent = message || errEl.textContent; // preserve static text if no dynamic msg
+          errEl.textContent = message;
           showError(errEl, fieldEl, message !== '');
         }
         return message;
       }
 
-      /* ── Blur validation for text-input fields ── */
+      // Hidden nodes referenced by aria-describedby can still be read; keep
+      // inactive error descriptions empty, not just visually hidden.
+      document.querySelectorAll('.field-error').forEach(el => { el.textContent = ''; });
+
+      /* ── Change validation for text-input fields ── */
       ['field-first-name','field-last-name','field-email','field-phone',
        'field-birthdate','field-portfolio','field-position','field-salary',
        'field-cover-letter','field-start-date'].forEach(id => {
@@ -727,6 +734,16 @@
       const successBanner = document.getElementById('success-banner');
       const output = document.getElementById('form-output');
 
+      errorSummaryList.addEventListener('click', event => {
+        const link = event.target.closest('a[data-field]');
+        if (!link) return;
+        const target = document.getElementById(link.dataset.field);
+        if (!target) return;
+        event.preventDefault();
+        target.focus({preventScroll: true});
+        target.scrollIntoView({behavior: 'instant', block: 'center'});
+      });
+
       form.addEventListener('submit', (e) => {
         e.preventDefault();
 
@@ -741,17 +758,22 @@
 
         if (errors.length > 0) {
           // Populate error summary
-          errorSummaryList.innerHTML = errors.map(err => {
-            const targetId = errorMap[err.id] || err.id;
-            return `<li><a href="#${targetId}">${err.label}: ${err.message}</a></li>`;
-          }).join('');
+          errorSummaryList.replaceChildren(...errors.map(err => {
+            const targetId = err.id === 'group-skills' ? 'skill-js' : err.id;
+            const item = document.createElement('li');
+            const link = document.createElement('a');
+            link.href = '#' + targetId;
+            link.dataset.field = targetId;
+            link.textContent = err.label + ': ' + err.message;
+            item.append(link);
+            return item;
+          }));
           show(errorSummary);
           hide(successBanner);
 
           // Scroll to + focus summary
-          errorSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          // Move focus to summary after scroll
-          setTimeout(() => errorSummary.focus?.(), 400);
+          errorSummary.focus({preventScroll: true});
+          errorSummary.scrollIntoView({behavior: 'instant', block: 'start'});
           return;
         }
 
@@ -768,10 +790,7 @@
           }
         }
 
-        // Supplement: rating and file details
-        const rating = document.getElementById('field-skill-level');
-        result.skill_level = rating.value;
-
+        // File metadata supplements the actual native FormData entries.
         const resumeEl = document.getElementById('field-resume');
         result.resume_files = (resumeEl?.value || []).map(f => `${f.name} (${(f.size/1024).toFixed(1)} KB)`);
 
@@ -780,7 +799,7 @@
 
         output.textContent = JSON.stringify(result, null, 2);
         show(successBanner);
-        successBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        successBanner.scrollIntoView({ behavior: 'instant', block: 'nearest' });
       });
 
       /* ── Form Reset ── */
@@ -789,10 +808,11 @@
         Object.keys(errorMap).forEach(id => {
           const errEl = document.getElementById(errorMap[id]);
           const fieldEl = document.getElementById(id);
-          if (errEl) showError(errEl, fieldEl, false);
+          if (errEl) { errEl.textContent = ''; showError(errEl, fieldEl, false); }
         });
         hide(errorSummary);
         hide(successBanner);
+        errorSummaryList.replaceChildren();
         output.textContent = '— submit the form to see collected data —';
         charCount.textContent = '0';
         charCountEl.classList.remove('over');

@@ -1,0 +1,12 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Carousel standalone checks</title><style>body{margin:16px;font:16px system-ui}au-carousel{width:100%;max-width:900px}article{box-sizing:border-box;padding:12px;background:#eee;min-height:100px}</style>
+<button id="before">Before</button><span id="gallery-name">Destinations</span>
+<au-carousel id="gallery" aria-labelledby="gallery-name">
+<article id="one" data-title="Coast"><button hidden>Hidden</button><button tabindex="-1">Not a Tab target</button><button id="coast">Coast guide</button></article>
+<article id="two" data-title="City"><button id="city">City guide</button></article>
+<article id="three" data-title="Forest"><button id="forest">Forest guide</button></article>
+</au-carousel><button id="after">After</button>
+<script src="../../../dist/accesserty-ui-kit.min.js" defer></script><script>
+window.gallery=document.getElementById('gallery');gallery.current=1;window.changes=[];
+gallery.addEventListener('slide-change',e=>changes.push(e.detail.index));
+</script></html>

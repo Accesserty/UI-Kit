@@ -64,7 +64,7 @@ describe('AuCheckbox', () => {
     el.setAttribute('aria-labelledby', 'terms-label');
     await nextFrame();
     expect(input.hasAttribute('aria-label')).to.be.false;
-    expect(input.getAttribute('aria-labelledby')).to.equal('terms-label');
+    expect(input.ariaLabelledByElements).to.deep.equal([]);
   });
 
   it('dispatches a change event when the checkbox is clicked', async () => {

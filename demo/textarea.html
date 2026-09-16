@@ -41,7 +41,11 @@
           </tr>
           <tr>
             <td>aria-labelledby</td>
-            <td>Accessible label reference passed to the internal textarea.</td>
+            <td>Label IDs resolved in the containing document or shadow root; references track inserted and replaced labels.</td>
+          </tr>
+          <tr>
+            <td>aria-describedby / aria-invalid</td>
+            <td>Resolve visible help or error text IDs and expose application validation state. Applications supply the message text.</td>
           </tr>
         </tbody>
       </table>
@@ -55,7 +59,30 @@
       <au-textarea label="意見內容" placeholder="請輸入你的意見"></au-textarea>
     </section>
     <section>
+      <h2>External label and help text</h2>
+      <label for="review-notes">Review notes</label>
+      <p id="review-help">Describe what you observed. Do not include sensitive information.</p>
+      <au-textarea id="review-notes" name="notes" aria-describedby="review-help" rows="4"></au-textarea>
+      <p>Native labels associated with the host supply the name when no internal or explicit label is set.
+        Clicking the label focuses the textarea. An explicit <code>aria-labelledby</code> can reference other
+        visible text. Older engines use plain-text reference fallbacks, not the full accessible-name algorithm;
+        supply a localized <code>aria-label</code> for rich labels there.</p>
+    </section>
+    <section>
+      <h2>Readonly and disabled</h2>
+      <au-textarea label="Readonly notes" name="readonly-notes" value="This text can be selected and copied." readonly></au-textarea>
+      <fieldset disabled>
+        <legend>Unavailable section</legend>
+        <au-textarea label="Disabled notes" name="disabled-notes" value="Editing is disabled by the fieldset."></au-textarea>
+      </fieldset>
+      <p>Readonly fields retain their native form value. Disabled fields, including those inside a disabled
+        fieldset, cannot be edited and are omitted from submission. Programmatic value assignment remains available.</p>
+    </section>
+    <section>
       <h2>CSS Variables</h2>
+      <p>Content-based height is progressive enhancement. Where <code>field-sizing: content</code> is unsupported,
+        native rows and scrolling remain available. Vertical resizing is allowed. The default boundary and focus
+        colors are intended for light backgrounds; recheck contrast when overriding tokens or using a dark surface.</p>
       <table>
         <thead>
           <tr>
@@ -148,7 +175,7 @@
           <tr>
             <td>--au-textarea-border-color</td>
             <td>border color of textarea</td>
-            <td>oklch(0.7894 0 0)</td>
+            <td>oklch(0.55 0 0)</td>
           </tr>
           <tr>
             <td>--au-textarea-border-radius</td>
@@ -178,7 +205,7 @@
           <tr>
             <td>--au-textarea-focus-shadow-color</td>
             <td>focus border color of textarea</td>
-            <td>oklch(0.8315 0.15681888825079074 78.05241467152487)</td>
+            <td>oklch(0.45 0.15 260)</td>
           </tr>
           <tr>
             <td>--au-textarea-readonly-bg</td>
@@ -208,7 +235,12 @@
           <tr>
             <td>value</td>
             <td>string (getter + setter)</td>
-            <td>Get or set the textarea content programmatically.</td>
+            <td>Get or set current content; native line-break normalization is also used for submission. Property assignment is silent and does not reflect to the value attribute. Setting or removing the value attribute updates current content.</td>
+          </tr>
+          <tr>
+            <td>name / required</td>
+            <td>string / boolean (getters + setters)</td>
+            <td>Reflect the submission name and required attribute. An empty name produces no form entry.</td>
           </tr>
           <tr>
             <td>disabled</td>
@@ -225,6 +257,12 @@
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>const ta = document.querySelector('au-textarea');
 ta.value = 'Prefilled content';
 ta.readonly = true;</code></pre>
+      <p><code>focus(options)</code> focuses the internal textarea. Form reset restores the value at first connection,
+        preserves textarea focus and rebinds accessible references. Reset and state restoration do not emit input/change.</p>
+      <p>Register the component on the client, not through a server-side module import. The Next, Nuxt and Angular
+        fixtures in <code>test/ssr/</code> cover host hydration and client interaction; the server does not render the
+        internal textarea. Use explicit <code>:value="notes" @input="notes = $event.target.value"</code> for Nuxt SSR.
+        Angular form directives require a value accessor in addition to custom-element schema configuration.</p>
     </section>
     <section>
       <h2>Events</h2>
@@ -239,11 +277,11 @@ ta.readonly = true;</code></pre>
         <tbody>
           <tr>
             <td>input</td>
-            <td>Fired on every keystroke. Bubbles and is composed.</td>
+            <td>One notification per native input event. Composed events preserve their identity, trust and composition metadata; non-composed events are bridged once. This includes text entry, paste and composition updates, not every physical key.</td>
           </tr>
           <tr>
             <td>change</td>
-            <td>Fired when value is committed. Bubbles and is composed.</td>
+            <td>One notification when the native textarea commits a change. Non-composed events are bridged once to the host.</td>
           </tr>
         </tbody>
       </table>

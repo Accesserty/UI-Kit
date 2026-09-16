@@ -24,8 +24,8 @@ const COMPONENT_CONFIGS = [
           { name: "--au-btn-padding-horizontal", default: "1rem", type: "size" },
           { name: "--au-btn-border-width", default: "1px", type: "size" },
           { name: "--au-btn-border-style", default: "solid", type: "select", options: ["solid", "dashed", "dotted", "double", "none"] },
-          { name: "--au-btn-border-color", default: "oklch(0.7894 0 0)", type: "color" },
-          { name: "--au-btn-border-radius", default: "0rem", type: "size" }, // 使用 0rem 讓引擎偵測單位
+          { name: "--au-btn-border-color", default: "oklch(0.55 0 0)", type: "color" },
+          { name: "--au-btn-border-radius", default: "0", type: "size" }, // 使用 0rem 讓引擎偵測單位
         ]
       },
       {
@@ -43,10 +43,12 @@ const COMPONENT_CONFIGS = [
         selector: ".your-custom-button-classname",
         vars: [
           { name: "--au-btn-hover-bg", default: "oklch(0.9466 0 0)", type: "color" },
-          { name: "--au-btn-hover-border-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-btn-hover-border-color", default: "oklch(0.55 0 0)", type: "color" },
           { name: "--au-btn-active-bg", default: "oklch(0.8689 0 0)", type: "color" },
-          { name: "--au-btn-active-border-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-btn-active-border-color", default: "oklch(0.55 0 0)", type: "color" },
           { name: "--au-btn-focus-shadow-width", default: "3px", type: "size" },
+          { name: "--au-btn-focus-outline-color", default: "oklch(0.45 0.15 260)", type: "color" },
+          { name: "--au-btn-focus-outline-width", default: "2px", type: "size" },
           { name: "--au-btn-focus-shadow-color", default: "oklch(0.8315 0.15681888825079074 78.05241467152487)", type: "color" },
         ]
       },
@@ -132,7 +134,7 @@ const COMPONENT_CONFIGS = [
         vars: [
           { name: "--au-select-picker-border-width", default: "1px", type: "size" },
           { name: "--au-select-picker-border-style", default: "solid", type: "select", options: ["solid", "dashed", "dotted", "double", "none"] },
-          { name: "--au-select-picker-border-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-select-picker-border-color", default: "oklch(0.55 0 0)", type: "color" },
           { name: "--au-select-picker-border-radius", default: "0.25rem", type: "size" },
           { name: "--au-select-picker-bg", default: "oklch(0.994 0 0)", type: "color" },
         ]
@@ -150,8 +152,7 @@ const COMPONENT_CONFIGS = [
           { name: "--au-group-label-bg", default: "oklch(0.994 0 0)", type: "color" },
           { name: "--au-group-label-border-width", default: "1px", type: "size" },
           { name: "--au-group-label-border-style", default: "solid", type: "select", options: ["solid", "dashed", "dotted", "double", "none"] },
-          { name: "--au-group-label-border-color", default: "oklch(0.7894 0 0)", type: "color" },
-          { name: "--au-group-label-border-radius", default: "0.25rem", type: "size" },
+          { name: "--au-group-label-border-color", default: "oklch(0.55 0 0)", type: "color" },
         ]
       },
       {
@@ -160,9 +161,9 @@ const COMPONENT_CONFIGS = [
         vars: [
           { name: "--au-option-text-color", default: "oklch(0.1398 0 0)", type: "color" },
           { name: "--au-option-padding-top", default: "0.375rem", type: "size" },
-          { name: "--au-option-padding-bottom", default: "0.625rem", type: "size" },
-          { name: "--au-option-padding-left", default: "2.675rem", type: "size" },
-          { name: "--au-option-padding-right", default: "0.375rem", type: "size" },
+          { name: "--au-option-padding-bottom", default: "0.375rem", type: "size" },
+          { name: "--au-option-padding-left", default: "2.625rem", type: "size" },
+          { name: "--au-option-padding-right", default: "0.625rem", type: "size" },
           { name: "--au-option-hover-bg", default: "oklch(0.9466 0 0)", type: "color" },
           { name: "--au-option-hover-text-color", default: "oklch(0.1398 0 0)", type: "color" },
           { name: "--au-option-active-bg", default: "oklch(0.8689 0 0)", type: "color" },
@@ -170,6 +171,8 @@ const COMPONENT_CONFIGS = [
           { name: "--au-option-checked-bg", default: "oklch(0.9466 0 0)", type: "color" },
           { name: "--au-option-checked-text-color", default: "oklch(0.1398 0 0)", type: "color" },
           { name: "--au-option-focus-bg", default: "oklch(0.9466 0 0)", type: "color" },
+          { name: "--au-option-focus-outline-color", default: "oklch(0.45 0.15 260)", type: "color" },
+          { name: "--au-option-focus-outline-width", default: "2px", type: "size" },
           { name: "--au-checkmark-padding-top", default: "0.375rem", type: "size" },
         ]
       }
@@ -213,9 +216,18 @@ const COMPONENT_CONFIGS = [
             </div>
           </au-accordion-item>
         </au-accordion>
+        <details><summary>Native details alternative</summary><p>Native disclosure content.</p></details>
       </div>
     `,
     groups: [
+      {
+        title: "Native Details Focus",
+        selector: ".your-custom-accordion-classname",
+        vars: [
+          { name: "--au-summary-focus-outline-color", default: "oklch(0.45 0.15 260)", type: "color" },
+          { name: "--au-summary-focus-outline-width", default: "2px", type: "size" },
+        ]
+      },
       {
         title: "Heading Layout",
         selector: ".your-custom-accordion-classname",
@@ -242,21 +254,21 @@ const COMPONENT_CONFIGS = [
         vars: [
           { name: "--au-accordion-heading-border-width", default: "1px", type: "size" },
           { name: "--au-accordion-heading-border-style", default: "solid", type: "select", options: ["solid", "dashed", "dotted", "none"] },
-          { name: "--au-accordion-heading-border-color", default: "oklch(0.7894 0 0)", type: "color" },
-          { name: "--au-accordion-heading-border-radius", default: "0.25rem", type: "size" },
+          { name: "--au-accordion-heading-border-color", default: "oklch(0.55 0 0)", type: "color" },
+          { name: "--au-accordion-heading-border-radius", default: "0", type: "size" },
         ]
       },
       {
         title: "Heading Backgrounds & State",
         selector: ".your-custom-accordion-classname",
         vars: [
-          { name: "--au-accordion-heading-bg", default: "transparent", type: "color" },
+          { name: "--au-accordion-heading-bg", default: "oklch(0.994 0 0)", type: "color" },
           { name: "--au-accordion-heading-hover-bg", default: "oklch(0.9466 0 0)", type: "color" },
-          { name: "--au-accordion-heading-hover-border-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-accordion-heading-hover-border-color", default: "oklch(0.55 0 0)", type: "color" },
           { name: "--au-accordion-heading-active-bg", default: "oklch(0.8689 0 0)", type: "color" },
-          { name: "--au-accordion-heading-active-border-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-accordion-heading-active-border-color", default: "oklch(0.55 0 0)", type: "color" },
           { name: "--au-accordion-heading-focus-shadow-width", default: "3px", type: "size" },
-          { name: "--au-accordion-heading-focus-shadow-color", default: "oklch(0.8315 0.1568 78.05)", type: "color" },
+          { name: "--au-accordion-heading-focus-shadow-color", default: "oklch(0.4 0 0)", type: "color" },
         ]
       },
       {
@@ -282,13 +294,13 @@ const COMPONENT_CONFIGS = [
     previewHTML: `
       <div class="your-custom-breadcrumbs-classname">
         <h3>With Separator Attribute</h3>
-        <au-breadcrumbs separator="/" data-link-title-template="Go to {text}" items='[{"text":"Home","url":"/"},{"text":"Library","url":"/library"},{"text":"Data"}]'></au-breadcrumbs>
+        <au-breadcrumbs separator="/" data-link-title-template="Go to {text}" items='[{"text":"Home","url":"./index.html"},{"text":"Library","url":"./index.html#components"},{"text":"Data"}]'></au-breadcrumbs>
 
         <h3>With Slotted Icons</h3>
-        <au-breadcrumbs data-link-title-template="Go to {text}" items='[{"text":"Home","url":"/"},{"text":"Category","url":"/category"},{"text":"Subcategory"}]'>
-          <span slot="icon-0">🏠</span>
-          <span slot="icon-1">📂</span>
-          <span slot="icon-2">📄</span>
+        <au-breadcrumbs data-link-title-template="Go to {text}" items='[{"text":"Home","url":"./index.html"},{"text":"Category","url":"./index.html#components"},{"text":"Subcategory"}]'>
+          <span slot="icon-1" aria-hidden="true">🏠</span>
+          <span slot="icon-2" aria-hidden="true">📂</span>
+          <span slot="icon-3" aria-hidden="true">📄</span>
         </au-breadcrumbs>
       </div>
     `,
@@ -297,9 +309,9 @@ const COMPONENT_CONFIGS = [
         title: "Layout & Background",
         selector: ".your-custom-breadcrumbs-classname",
         vars: [
-          { name: "--au-breadcrumbs-bg", default: "oklch(0.9731 0 0)", type: "color" },
-          { name: "--au-breadcrumbs-link-padding-vertical", default: "0.25rem", type: "size" },
-          { name: "--au-breadcrumbs-link-padding-horizontal", default: "0.5rem", type: "size" },
+          { name: "--au-breadcrumbs-bg", default: "transparent", type: "color" },
+          { name: "--au-breadcrumbs-link-padding-vertical", default: "0.375rem", type: "size" },
+          { name: "--au-breadcrumbs-link-padding-horizontal", default: "0.625rem", type: "size" },
         ]
       },
       {
@@ -307,9 +319,9 @@ const COMPONENT_CONFIGS = [
         selector: ".your-custom-breadcrumbs-classname",
         vars: [
           { name: "--au-breadcrumbs-text-size", default: "1rem", type: "size" },
-          { name: "--au-breadcrumbs-text-deco", default: "none", type: "text" },
-          { name: "--au-breadcrumbs-link-color", default: "oklch(0.437 0 0)", type: "color" },
-          { name: "--au-breadcrumbs-link-visited-color", default: "oklch(0.437 0 0)", type: "color" },
+          { name: "--au-breadcrumbs-text-deco", default: "underline", type: "text" },
+          { name: "--au-breadcrumbs-link-color", default: "oklch(0.429 0.2972777928415759 264.05202063805507)", type: "color" },
+          { name: "--au-breadcrumbs-link-visited-color", default: "oklch(0.3748 0.167 303.51)", type: "color" },
           { name: "--au-breadcrumbs-link-currentpage-color", default: "oklch(0.1398 0 0)", type: "color" },
         ]
       },
@@ -318,7 +330,7 @@ const COMPONENT_CONFIGS = [
         selector: ".your-custom-breadcrumbs-classname",
         vars: [
           { name: "--au-breadcrumbs-focus-shadow-width", default: "3px", type: "size" },
-          { name: "--au-breadcrumbs-focus-shadow-color", default: "oklch(0.8315 0.1568 78.05)", type: "color" },
+          { name: "--au-breadcrumbs-focus-shadow-color", default: "oklch(0.45 0.15 260)", type: "color" },
         ]
       }
     ]
@@ -351,7 +363,7 @@ const COMPONENT_CONFIGS = [
           { name: "--au-checkbox-input-bg", default: "oklch(0.994 0 0)", type: "color" },
           { name: "--au-checkbox-input-border-width", default: "1px", type: "size" },
           { name: "--au-checkbox-input-border-style", default: "solid", type: "select", options: ["solid", "dashed", "dotted", "none"] },
-          { name: "--au-checkbox-input-border-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-checkbox-input-border-color", default: "oklch(0.55 0 0)", type: "color" },
           { name: "--au-checkbox-input-border-radius", default: "0.25rem", type: "size" },
         ]
       },
@@ -381,7 +393,7 @@ const COMPONENT_CONFIGS = [
         selector: ".your-custom-checkbox-classname",
         vars: [
           { name: "--au-checkbox-input-focus-shadow-width", default: "3px", type: "size" },
-          { name: "--au-checkbox-input-focus-shadow-color", default: "oklch(0.8315 0.1568 78.05)", type: "color" },
+          { name: "--au-checkbox-input-focus-shadow-color", default: "oklch(0.45 0.15 260)", type: "color" },
         ]
       }
     ]
@@ -393,7 +405,7 @@ const COMPONENT_CONFIGS = [
     label: 'Tabs',
     previewHTML: `
       <div class="your-custom-tab-classname">
-        <au-tabs id="preview-tabs" data-text-tab="Tab {index}" data-text-badge-label-prefix="Additional information:">
+        <au-tabs id="preview-tabs" aria-label="Preview sections" data-text-tab="Tab {index}" data-text-badge-label-prefix="Additional information:">
           <div class="au-tab-panel" slot="panel" label="Home" data-prefix="🏠">
             <p>Welcome to the Home tab.</p>
           </div>
@@ -415,7 +427,7 @@ const COMPONENT_CONFIGS = [
           { name: "--au-tabs-bg", default: "oklch(0.9731 0 0)", type: "color" },
           { name: "--au-tabs-border-width", default: "1px", type: "size" },
           { name: "--au-tabs-border-style", default: "solid", type: "select", options: ["solid", "dashed", "dotted", "none"] },
-          { name: "--au-tabs-border-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-tabs-border-color", default: "oklch(0.55 0 0)", type: "color" },
           { name: "--au-tabs-border-radius", default: "0rem", type: "size" },
           { name: "--au-tabs-padding-vertical", default: "0.625rem", type: "size" },
           { name: "--au-tabs-padding-horizontal", default: "1rem", type: "size" },
@@ -429,7 +441,7 @@ const COMPONENT_CONFIGS = [
           { name: "--au-tabs-selected-bg", default: "oklch(0.1398 0 0)", type: "color" },
           { name: "--au-tabs-selected-text-color", default: "oklch(0.994 0 0)", type: "color" },
           { name: "--au-tabs-selected-shadow-width", default: "1px", type: "size" },
-          { name: "--au-tabs-selected-shadow-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-tabs-selected-shadow-color", default: "oklch(0.55 0 0)", type: "color" },
           { name: "--au-tabs-selected-text-stroke-width", default: "0.5px", type: "size" },
           { name: "--au-tabs-selected-text-stroke-color", default: "oklch(0.994 0 0)", type: "color" },
         ]
@@ -442,7 +454,8 @@ const COMPONENT_CONFIGS = [
           { name: "--au-tabs-hover-bg", default: "oklch(0.9466 0 0)", type: "color" },
           { name: "--au-tabs-active-bg", default: "oklch(0.8689 0 0)", type: "color" },
           { name: "--au-tabs-focus-shadow-width", default: "3px", type: "size" },
-          { name: "--au-tabs-focus-shadow-color", default: "oklch(0.8315 0.1568 78.05)", type: "color" },
+          { name: "--au-tabs-focus-shadow-color", default: "oklch(0.45 0.15 260)", type: "color" },
+          { name: "--au-tabs-selected-focus-shadow-color", default: "white", type: "color" },
         ]
       },
       {
@@ -457,13 +470,13 @@ const COMPONENT_CONFIGS = [
       },
       {
         title: "Panels & Badges",
-        selector: ".your-custom-tab-panel-classname",
+        selector: ".your-custom-tab-classname",
         targetId: "preview-tabs",
         vars: [
           { name: "--au-tabpanels-border-width", default: "1px", type: "size" },
           { name: "--au-tabpanels-border-style", default: "solid", type: "select", options: ["solid", "dashed", "dotted"] },
-          { name: "--au-tabpanels-border-color", default: "oklch(0.7894 0 0)", type: "color" },
-          { name: "--au-tab-panel-padding-vertical", default: "0.625rem", type: "size" },
+          { name: "--au-tabpanels-border-color", default: "oklch(0.55 0 0)", type: "color" },
+          { name: "--au-tab-panel-padding-vertical", default: "0.75rem", type: "size" },
           { name: "--au-tab-panel-padding-horizontal", default: "1rem", type: "size" },
           { name: "--au-tab-badge-bg", default: "oklch(0.8689 0 0)", type: "color" },
           { name: "--au-tab-badge-text-color", default: "oklch(0.1398 0 0)", type: "color" },
@@ -507,7 +520,7 @@ const COMPONENT_CONFIGS = [
         vars: [
           { name: "--au-dialog-border-width", default: "1px", type: "size" },
           { name: "--au-dialog-border-style", default: "solid", type: "select", options: ["solid", "dashed", "dotted", "double", "none"] },
-          { name: "--au-dialog-border-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-dialog-border-color", default: "oklch(0.55 0 0)", type: "color" },
           { name: "--au-dialog-border-radius", default: "0.5rem", type: "size" },
         ]
       },
@@ -561,7 +574,7 @@ const COMPONENT_CONFIGS = [
           { name: "--au-dropdown-menu-bg", default: "oklch(1 0 0)", type: "color" },
           { name: "--au-dropdown-menu-border-width", default: "1px", type: "size" },
           { name: "--au-dropdown-menu-border-style", default: "solid", type: "select", options: ["solid", "dashed", "dotted", "double", "none"] },
-          { name: "--au-dropdown-menu-border-color", default: "oklch(0.8 0 0)", type: "color" },
+          { name: "--au-dropdown-menu-border-color", default: "oklch(0.55 0 0)", type: "color" },
           { name: "--au-dropdown-menu-border-radius", default: "0rem", type: "size" },
         ]
       },
@@ -587,10 +600,10 @@ const COMPONENT_CONFIGS = [
         <au-file-upload label="Upload Files" multiple required max-files="3" max-size-mb="2" max-total-size-mb="2"
           accept=".txt, .jpg,.png,application/pdf" msg-drop-text="Drag & drop files here" msg-remove-text="Delete"
           msg-required="You must upload at least one document." msg-type-error="is not a supported file format"
-          msg-size-error="is too large. Limit is" msg-count-error="You can only attach up to"
-          msg-total-size-error="Total Size: " msg-added="{count} file(s) added."
-          msg-removed="{fileName} removed." msg-remove-file-label="Remove {fileName}">
-          <button slot="trigger" class="btn">Choose file...</button>
+          msg-size-error="{fileName} exceeds {maxSize}MB." msg-count-error="{fileName} cannot be added; the limit is {maxFiles} files."
+          msg-total-size-error="Total file size cannot exceed {maxTotalSize}MB." msg-added="{count} file(s) added."
+          msg-removed="{fileName} removed." msg-remove-file-label="Delete {fileName}">
+          <button type="button" slot="trigger" class="btn">Choose file...</button>
           <div slot="hint">.txt, .jpg, .png, application/pdf</div>
         </au-file-upload>
       </div>
@@ -612,7 +625,7 @@ const COMPONENT_CONFIGS = [
         vars: [
           { name: "--au-file-upload-area-border-width", default: "1px", type: "size" },
           { name: "--au-file-upload-area-border-style", default: "dashed", type: "select", options: ["dashed", "solid", "dotted", "double", "none"] },
-          { name: "--au-file-upload-area-border-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-file-upload-area-border-color", default: "oklch(0.55 0 0)", type: "color" },
           { name: "--au-file-upload-area-border-radius", default: "0.25rem", type: "size" },
         ]
       },
@@ -626,7 +639,7 @@ const COMPONENT_CONFIGS = [
           { name: "--au-file-upload-file-list-preview-height", default: "3rem", type: "size" },
           { name: "--au-file-upload-file-list-preview-border-width", default: "1px", type: "size" },
           { name: "--au-file-upload-file-list-preview-border-style", default: "solid", type: "select", options: ["solid", "dashed", "dotted", "double", "none"] },
-          { name: "--au-file-upload-file-list-preview-border-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-file-upload-file-list-preview-border-color", default: "oklch(0.55 0 0)", type: "color" },
         ]
       },
       {
@@ -644,7 +657,7 @@ const COMPONENT_CONFIGS = [
         vars: [
           { name: "--au-file-upload-delete-text-color", default: "oklch(0.1398 0 0)", type: "color" },
           { name: "--au-file-upload-delete-bg", default: "oklch(0.994 0 0)", type: "color" },
-          { name: "--au-file-upload-delete-border-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-file-upload-delete-border-color", default: "oklch(0.55 0 0)", type: "color" },
           { name: "--au-file-upload-delete-border-radius", default: "0.25rem", type: "size" },
           { name: "--au-file-upload-delete-hover-bg", default: "oklch(0.9466 0 0)", type: "color" },
           { name: "--au-file-upload-delete-active-bg", default: "oklch(0.8689 0 0)", type: "color" },
@@ -675,7 +688,7 @@ const COMPONENT_CONFIGS = [
           { name: "--au-input-container-gap", default: "0.625rem", type: "size" },
           { name: "--au-input-border-width", default: "1px", type: "size" },
           { name: "--au-input-border-style", default: "solid", type: "select", options: ["solid", "dashed", "dotted", "double", "none"] },
-          { name: "--au-input-border-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-input-border-color", default: "oklch(0.55 0 0)", type: "color" },
           { name: "--au-input-border-radius", default: "0.25rem", type: "size" },
         ]
       },
@@ -705,7 +718,7 @@ const COMPONENT_CONFIGS = [
         selector: '.your-custom-input-classname',
         vars: [
           { name: "--au-input-focus-shadow-width", default: "3px", type: "size" },
-          { name: "--au-input-focus-shadow-color", default: "oklch(0.8315 0.157 78)", type: "color" },
+          { name: "--au-input-focus-shadow-color", default: "oklch(0.45 0.15 260)", type: "color" },
           { name: "--au-input-invalid-shadow-width", default: "3px", type: "size" },
           { name: "--au-input-invalid-shadow-color", default: "oklch(0.5722 0.233 29.08)", type: "color" },
         ]
@@ -729,7 +742,7 @@ const COMPONENT_CONFIGS = [
     id: 'pagination',
     label: 'Pagination',
     previewHTML: `
-      <p>CSS Variables = Button Styles</p>
+      <p>CSS Variables = Button Styles. Page changes preserve keyboard focus; custom themes still need contrast checks.</p>
       <au-pagination
         data-total="1000"
         data-current-page="1" 
@@ -760,7 +773,7 @@ const COMPONENT_CONFIGS = [
         vars: [
           { name: "--au-btn-current-bg", default: "oklch(0.7894 0 0)", type: "color" },
           { name: "--au-btn-current-text-color", default: "oklch(0.1398 0 0)", type: "color" },
-          { name: "--au-btn-current-border-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-btn-current-border-color", default: "oklch(0.55 0 0)", type: "color" },
         ]
       }
     ]
@@ -796,7 +809,7 @@ const COMPONENT_CONFIGS = [
         vars: [
           { name: "--au-radio-input-border-width", default: "1px", type: "size" },
           { name: "--au-radio-input-border-style", default: "solid", type: "select", options: ["solid", "dashed", "dotted", "double", "none"] },
-          { name: "--au-radio-input-border-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-radio-input-border-color", default: "oklch(0.55 0 0)", type: "color" },
           { name: "--au-radio-input-bg", default: "oklch(0.994 0 0)", type: "color" },
         ]
       },
@@ -823,7 +836,7 @@ const COMPONENT_CONFIGS = [
           { name: "--au-radio-label-hover-text-deco", default: "underline", type: "select", options: ["none", "underline", "overline", "line-through"] },
           { name: "--au-radio-label-active-text-color", default: "oklch(0.537 0 0)", type: "color" },
           { name: "--au-radio-input-focus-shadow-width", default: "3px", type: "size" },
-          { name: "--au-radio-input-focus-shadow-color", default: "oklch(0.8315 0.157 78)", type: "color" },
+          { name: "--au-radio-input-focus-shadow-color", default: "oklch(0.45 0.15 260)", type: "color" },
           { name: "--au-radio-label-disabled-text-color", default: "oklch(0.537 0 0)", type: "color" },
         ]
       }
@@ -853,7 +866,7 @@ const COMPONENT_CONFIGS = [
           { name: "--au-rating-star-size", default: "2rem", type: "size" },
           { name: "--au-rating-star-color", default: "oklch(0.8 0 0)", type: "color" },
           { name: "--au-rating-star-filled-color", default: "oklch(0.75 0.15 85)", type: "color" },
-          { name: "--au-rating-star-stroke-color", default: "oklch(0.6 0 0)", type: "color" },
+          { name: "--au-rating-star-stroke-color", default: "oklch(0.45 0 0)", type: "color" },
         ]
       },
       {
@@ -872,7 +885,7 @@ const COMPONENT_CONFIGS = [
         vars: [
           { name: "--au-rating-gap", default: "0.25rem", type: "size" },
           { name: "--au-rating-focus-width", default: "3px", type: "size" },
-          { name: "--au-rating-focus-color", default: "oklch(0.8315 0.157 78)", type: "color" },
+          { name: "--au-rating-focus-color", default: "oklch(0.45 0.15 260)", type: "color" },
         ]
       }
     ]
@@ -897,8 +910,8 @@ const COMPONENT_CONFIGS = [
         title: "Layout & Spacing",
         selector: '.your-custom-switch-classname',
         vars: [
-          { name: "--au-switch-gap", default: "0.625rem", type: "size" },
-          { name: "--au-switch-container-gap", default: "0.375rem", type: "size" },
+          { name: "--au-switch-gap", default: "1rem", type: "size" },
+          { name: "--au-switch-container-gap", default: "0.625rem", type: "size" },
           { name: "--au-switch-padding-top", default: "0.625rem", type: "size" },
           { name: "--au-switch-padding-right", default: "0.25rem", type: "size" },
           { name: "--au-switch-padding-bottom", default: "0.625rem", type: "size" },
@@ -909,8 +922,8 @@ const COMPONENT_CONFIGS = [
         title: "Switch Dimensions",
         selector: '.your-custom-switch-classname',
         vars: [
-          { name: "--au-switch-input-width", default: "2.5rem", type: "size" },
-          { name: "--au-switch-inner-distance", default: "2px", type: "size" },
+          { name: "--au-switch-input-width", default: "4rem", type: "size" },
+          { name: "--au-switch-inner-distance", default: "0.25rem", type: "size" },
         ]
       },
       {
@@ -919,8 +932,10 @@ const COMPONENT_CONFIGS = [
         vars: [
           { name: "--au-switch-input-border-width", default: "1px", type: "size" },
           { name: "--au-switch-input-border-style", default: "solid", type: "select", options: ["solid", "dashed", "dotted", "none"] },
-          { name: "--au-switch-input-border-color", default: "oklch(0.7894 0 0)", type: "color" },
-          { name: "--au-switch-inner-border-radius", default: "1.25rem", type: "size" },
+          { name: "--au-switch-input-border-color", default: "oklch(0.55 0 0)", type: "color" },
+          { name: "--au-switch-input-bg", default: "oklch(0.994 0 0)", type: "color" },
+          { name: "--au-switch-inner-bg", default: "oklch(0.55 0 0)", type: "color" },
+          { name: "--au-switch-inner-border-radius", default: "calc((var(--au-switch-input-width, 4rem) / 2 - var(--au-switch-inner-distance, 0.25rem)) / 2)", type: "text" },
           { name: "--au-switch-input-checked-bg", default: "oklch(0.1398 0 0)", type: "color" },
         ]
       },
@@ -929,7 +944,7 @@ const COMPONENT_CONFIGS = [
         selector: '.your-custom-switch-classname',
         vars: [
           { name: "--au-switch-focus-shadow-width", default: "3px", type: "size" },
-          { name: "--au-switch-focus-shadow-color", default: "oklch(0.8315 0.1568 78.05)", type: "color" },
+          { name: "--au-switch-focus-shadow-color", default: "oklch(0.45 0.15 260)", type: "color" },
         ]
       }
     ]
@@ -973,7 +988,7 @@ const COMPONENT_CONFIGS = [
         vars: [
           { name: "--au-textarea-border-width", default: "1px", type: "size" },
           { name: "--au-textarea-border-style", default: "solid", type: "select", options: ["solid", "dashed", "dotted", "none"] },
-          { name: "--au-textarea-border-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-textarea-border-color", default: "oklch(0.55 0 0)", type: "color" },
           { name: "--au-textarea-border-radius", default: "0.25rem", type: "size" },
           { name: "--au-textarea-container-padding-vertical", default: "0.25rem", type: "size" },
           { name: "--au-textarea-container-padding-horizontal", default: "0.25rem", type: "size" },
@@ -996,7 +1011,7 @@ const COMPONENT_CONFIGS = [
         selector: '.your-custom-textarea-classname',
         vars: [
           { name: "--au-textarea-focus-shadow-width", default: "3px", type: "size" },
-          { name: "--au-textarea-focus-shadow-color", default: "oklch(0.8315 0.1568 78.05)", type: "color" },
+          { name: "--au-textarea-focus-shadow-color", default: "oklch(0.45 0.15 260)", type: "color" },
           { name: "--au-textarea-invalid-shadow-width", default: "3px", type: "size" },
           { name: "--au-textarea-invalid-shadow-color", default: "oklch(0.5722 0.233 29.08)", type: "color" },
         ]
@@ -1019,10 +1034,10 @@ const COMPONENT_CONFIGS = [
     previewHTML: `
       <div class="your-custom-tree-classname">
         <h3>Basic Tree</h3>
-        <au-tree id="tree-demo-basic" data-text-node="Node" data-text-toggle="Expand or collapse {label}"></au-tree>
+        <au-tree id="tree-demo-basic" aria-label="Project files" data-text-node="Node" data-text-toggle="Expand or collapse {label}"></au-tree>
         
         <h3>Checkbox Tree</h3>
-        <au-tree id="tree-demo-check" show-checkbox data-text-node="Node" data-text-toggle="Expand or collapse {label}"></au-tree>
+        <au-tree id="tree-demo-check" aria-label="Select project files" show-checkbox data-text-node="Node" data-text-toggle="Expand or collapse {label}"></au-tree>
       </div>    
     `,
     onLoad: (container) => {
@@ -1081,7 +1096,7 @@ const COMPONENT_CONFIGS = [
           { name: "--au-tree-node-padding-horizontal", default: "0.25rem", type: "size" },
           { name: "--au-tree-node-border-width", default: "0px", type: "size" },
           { name: "--au-tree-node-border-style", default: "solid", type: "select", options: ["solid", "dashed", "dotted", "none"] },
-          { name: "--au-tree-node-border-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-tree-node-border-color", default: "oklch(0.55 0 0)", type: "color" },
           { name: "--au-tree-node-border-radius", default: "0rem", type: "size" },
         ]
       },
@@ -1110,10 +1125,10 @@ const COMPONENT_CONFIGS = [
           { name: "--au-tree-node-checkbox-input-height", default: "1.5rem", type: "size" },
           { name: "--au-tree-node-checkbox-input-bg", default: "oklch(0.994 0 0)", type: "color" },
           { name: "--au-tree-node-checkbox-input-border-width", default: "1px", type: "size" },
-          { name: "--au-tree-node-checkbox-input-border-color", default: "oklch(0.7894 0 0)", type: "color" },
+          { name: "--au-tree-node-checkbox-input-border-color", default: "oklch(0.4 0 0)", type: "color" },
           { name: "--au-tree-node-checkbox-input-border-radius", default: "0.25rem", type: "size" },
           { name: "--au-tree-node-checkbox-input-checked-bg", default: "oklch(0.1398 0 0)", type: "color" },
-          { name: "--au-tree-node-checkbox-input-checked-symbol", default: "'✔︎'", type: "text" },
+          { name: "--au-tree-node-checkbox-input-checked-symbol", default: "'✔'", type: "text" },
           { name: "--au-tree-node-checkbox-input-checked-text-color", default: "oklch(0.994 0 0)", type: "color" },
         ]
       },
@@ -1129,7 +1144,7 @@ const COMPONENT_CONFIGS = [
         selector: '.your-custom-tree-classname',
         vars: [
           { name: "--au-tree-focus-shadow-width", default: "3px", type: "size" },
-          { name: "--au-tree-focus-shadow-color", default: "oklch(0.8315 0.1568 78.05)", type: "color" },
+          { name: "--au-tree-focus-shadow-color", default: "oklch(0.4 0 0)", type: "color" },
         ]
       }
     ]
@@ -1391,16 +1406,15 @@ class PlaygroundEngine {
   }
 
   initCopy() {
-    this.copyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(this.cssOutput.textContent).then(() => {
-        this.copyStatus.textContent = "CSS code copied to clipboard";
-        const original = this.copyBtn.textContent;
-        this.copyBtn.textContent = 'Copied!';
-        setTimeout(() => {
-          this.copyBtn.textContent = original;
-          this.copyStatus.textContent = "";
-        }, 2000);
-      });
+    this.copyBtn.addEventListener('click', async () => {
+      this.copyStatus.textContent = '';
+      try {
+        if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+        await navigator.clipboard.writeText(this.cssOutput.textContent);
+        this.copyStatus.textContent = 'CSS code copied to clipboard.';
+      } catch {
+        this.copyStatus.textContent = 'Could not copy automatically. Select the generated CSS and copy it manually.';
+      }
     });
   }
 

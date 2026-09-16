@@ -18,56 +18,40 @@
 
     <section>
       <h2>Basic</h2>
-      <h3>We recommand using original select because now we can style <code>&lt;option&gt;</code></h3>
+      <h3>Use native select for keyboard and form behavior</h3>
       <p>
         We use the same style because <code>&lt;button&gt;</code> and <code>&lt;select&gt;</code> often appear in the
         same area, such as for page filters or form inputs.
       </p>
       <button data-size="large">This is a Large Button</button>
-      <select data-size="large">
-        <button>
-          <selectedcontent></selectedcontent>
-        </button>
-        <div>
-          <div role="group">
-            <label>Group1</label>
-            <option value="a">Taipei</option>
-            <option value="b"><b>New York(Custom HTML)</b></option>
-            <option value="c">Hong Kong</option>
-          </div>
-          <div role="group">
-            <label>Group2</label>
-            <option value="d">LA</option>
-            <option value="e"><b>CA(Custom HTML)</b></option>
-            <option value="f">AL</option>
-          </div>
-        </div>
+      <label for="city-basic">Destination city</label>
+      <select id="city-basic" name="city" data-size="large">
+        <optgroup label="Asia">
+          <option value="taipei">Taipei</option>
+          <option value="hong-kong">Hong Kong</option>
+        </optgroup>
+        <optgroup label="North America">
+          <option value="new-york">New York</option>
+          <option value="los-angeles">Los Angeles</option>
+        </optgroup>
       </select>
     </section>
 
     <section>
       <h2>Custom Style</h2>
       <button data-size="large" class="custom-btn--primary-flat a11y">This is a Large Button</button>
-      <select data-size="large" class="custom-btn--primary-flat a11y">
-        <button>
-          <selectedcontent></selectedcontent>
-        </button>
-        <div>
-          <div role="group">
-            <label>Group1</label>
-            <option value="a">Taipei</option>
-            <option value="b"><b>New York(Custom HTML)</b></option>
-            <option value="c">Hong Kong</option>
-          </div>
-          <div role="group">
-            <label>Group2</label>
-            <option value="d">LA</option>
-            <option value="e"><b>CA(Custom HTML)</b></option>
-            <option value="f">AL</option>
-          </div>
-        </div>
+      <label for="city-custom">Destination city (custom theme)</label>
+      <select id="city-custom" name="city-custom" data-size="large" class="custom-btn--primary-flat a11y">
+        <optgroup label="Asia">
+          <option value="taipei">Taipei</option>
+          <option value="hong-kong">Hong Kong</option>
+        </optgroup>
+        <optgroup label="North America">
+          <option value="new-york">New York</option>
+          <option value="los-angeles">Los Angeles</option>
+        </optgroup>
       </select>
-      <p>If you want to change <code>&lt;select&gt;</code> html structure, here you are:</p>
+      <p>These examples use standard options and optgroups. Rich customizable-select markup is an optional enhancement; check browser support before changing the structure:</p>
       <ul>
         <li>
           <a href="https://developer.chrome.com/blog/a-customizable-select?hl=zh-tw"
@@ -104,7 +88,7 @@
         <tr>
           <td>--au-select-picker-border-color</td>
           <td>option popover border color</td>
-          <td>oklch(0.7894 0 0)</td>
+          <td>oklch(0.55 0 0)</td>
         </tr>
         <tr>
           <td>--au-select-picker-border-radius</td>
@@ -137,7 +121,7 @@
           <td>0.375rem</td>
         </tr>
         <tr>
-          <td>--au-group-label-text-size</td>
+          <td>--au-group-label-large-text-size</td>
           <td>group text font size</td>
           <td>0.875rem</td>
         </tr>
@@ -164,7 +148,7 @@
         <tr>
           <td>--au-group-label-border-color</td>
           <td>group border color</td>
-          <td>oklch(0.7894 0 0)</td>
+          <td>oklch(0.55 0 0)</td>
         </tr>
         <tr>
           <td>--au-checkmark-padding-top</td>
@@ -237,6 +221,16 @@
           <td>oklch(0.9466 0 0)</td>
         </tr>
         <tr>
+          <td>--au-option-focus-outline-color</td>
+          <td>Keyboard focus outline; check contrast against custom option backgrounds</td>
+          <td>oklch(0.45 0.15 260)</td>
+        </tr>
+        <tr>
+          <td>--au-option-focus-outline-width</td>
+          <td>Keyboard focus outline width (minimum 2px)</td>
+          <td>2px</td>
+        </tr>
+        <tr>
           <td>--au-select-arrow-down-icon</td>
           <td>checkmark icon(not open)</td>
           <td>▼</td>
@@ -248,6 +242,7 @@
         </tr>
       </table>
     </section>
+  </main>
 </body>
 
 </html>

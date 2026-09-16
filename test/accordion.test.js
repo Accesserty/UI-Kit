@@ -1,5 +1,5 @@
 // accordion.test.js
-import { html, fixture, expect } from '@open-wc/testing';
+import { html, fixture, expect, nextFrame } from '@open-wc/testing';
 import '../src/components/accordion.js';
 
 describe('AuAccordion and AuAccordionItem', () => {
@@ -70,7 +70,7 @@ describe('AuAccordion and AuAccordionItem', () => {
     const region = accordionItem.shadowRoot.querySelector('div[role="region"]');
 
     // Get the IDs from the elements
-    const titleId = heading.getAttribute('id');
+    const titleId = button.getAttribute('id');
     const regionId = region.getAttribute('id');
 
     // Check if the button's aria-controls matches the region's ID
@@ -280,5 +280,83 @@ describe('AuAccordion and AuAccordionItem', () => {
     expect(headingRect.right).to.be.at.most(infoRect.left);
     expect(infoRect.right).to.be.at.most(buttonRect.right);
     expect(iconRect.width).to.be.greaterThan(0);
+  });
+
+  it('does not let a nested toggle close its containing exclusive item', async () => {
+    const el = await fixture(html`<au-accordion exclusive><au-accordion-item open>
+      <span slot="heading">Outer</span><div slot="content"><au-accordion exclusive>
+        <au-accordion-item><span slot="heading">Inner</span></au-accordion-item>
+      </au-accordion></div></au-accordion-item><au-accordion-item></au-accordion-item></au-accordion>`);
+    const outer = el.firstElementChild, inner = outer.querySelector('au-accordion-item');
+    inner.button.click();
+    expect(inner.open).to.be.true;expect(outer.open).to.be.true;
+  });
+
+  it('normalizes initial, inserted and enabled exclusive state without affecting nested groups', async () => {
+    const el = await fixture(html`<au-accordion exclusive><au-accordion-item open></au-accordion-item><au-accordion-item open></au-accordion-item></au-accordion>`);
+    const [a,b] = el.children;
+    expect(a.open).to.be.true;expect(b.open).to.be.false;
+    const c = document.createElement('au-accordion-item');c.open=true;el.append(c);await nextFrame();
+    expect(c.open).to.be.false;
+    el.exclusive=false;b.open=true;c.open=true;el.exclusive=true;
+    expect([...el.children].map(n=>n.open)).to.deep.equal([true,false,false]);
+    b.open=true;expect(a.open).to.be.false;expect(b.open).to.be.true;
+  });
+
+  it('returns slotted and nested-shadow focus before hiding, but does not steal external focus', async () => {
+    const host = await fixture(html`<div><button id="outside">Outside</button><au-accordion-item open>
+      <span slot="heading">Details</span><div slot="content"><button id="inside">Inside</button><span id="nested"></span></div>
+    </au-accordion-item></div>`);
+    const item=host.querySelector('au-accordion-item');
+    host.querySelector('#inside').focus();item.open=false;
+    expect(item.shadowRoot.activeElement).to.equal(item.button);expect(item.region.inert).to.be.true;
+    item.open=true;
+    const shadow=host.querySelector('#nested').attachShadow({mode:'open'});shadow.innerHTML='<button>Nested</button>';
+    shadow.firstElementChild.focus();item.open=false;
+    expect(item.shadowRoot.activeElement).to.equal(item.button);
+    host.querySelector('#outside').focus();item.open=true;item.open=false;
+    expect(document.activeElement).to.equal(host.querySelector('#outside'));
+  });
+
+  it('exposes configurable heading levels and optional named regions without replacing controls', async () => {
+    const item=await fixture(html`<au-accordion-item heading-level="2"><span slot="heading">Title</span></au-accordion-item>`);
+    expect(item.heading.getAttribute('aria-level')).to.equal('2');expect(item.button.parentElement).to.equal(item.heading);
+    expect(item.region.getAttribute('aria-labelledby')).to.equal(item.button.id);
+    item.button.focus();const original=item.button;
+    item.querySelector('[slot=heading]').textContent='翻譯';item.setAttribute('heading-level','4');
+    expect(item.heading.getAttribute('aria-level')).to.equal('4');expect(item.shadowRoot.activeElement).to.equal(original);
+    for(const value of ['0','7','2.5','abc','']){item.setAttribute('heading-level',value);expect(item.heading.getAttribute('aria-level')).to.equal('3');}
+    item.setAttribute('no-region','');expect(item.region.hasAttribute('role')).to.be.false;
+    item.open=true;expect(item.region.hidden).to.be.false;
+    item.removeAttribute('no-region');expect(item.region.getAttribute('role')).to.equal('region');
+  });
+
+  it('describes the actual trigger and updates the hint without focus loss', async () => {
+    const el=await fixture(html`<au-accordion exclusive><au-accordion-item><span slot="heading">Title</span></au-accordion-item></au-accordion>`);
+    const item=el.firstElementChild;item.button.focus();
+    expect(item.button.getAttribute('aria-describedby')).to.equal(item._hint.id);
+    el.setAttribute('data-text-exclusive-hint','一次只能開啟一個區塊');
+    expect(item._hint.textContent).to.equal('一次只能開啟一個區塊');expect(item.shadowRoot.activeElement).to.equal(item.button);
+    el.exclusive=false;expect(item.button.hasAttribute('aria-describedby')).to.be.false;
+  });
+
+  it('keeps single state-change notifications after reconnects including programmatic changes', async () => {
+    const wrapper=await fixture(html`<div><au-accordion><au-accordion-item></au-accordion-item></au-accordion></div>`);
+    const el=wrapper.firstElementChild,item=el.firstElementChild,events=[];
+    el.addEventListener('au-toggle',e=>events.push(e.detail.open));
+    for(let i=0;i<3;i++){el.remove();wrapper.append(el);item.remove();el.append(item);}
+    item.button.click();item.open=true;item.open=false;
+    expect(events).to.deep.equal([true,false]);
+  });
+
+  it('upgrades open and exclusive assignments made before definition', async () => {
+    const rootTag='test-accordion-'+crypto.randomUUID(),itemTag='test-item-'+crypto.randomUUID();
+    const host=await fixture(html`<div></div>`),root=document.createElement(rootTag),item=document.createElement(itemTag);
+    root.exclusive=true;item.open=true;root.append(item);host.append(root);
+    customElements.define(itemTag,class extends customElements.get('au-accordion-item'){});
+    customElements.define(rootTag,class extends customElements.get('au-accordion'){});
+    expect(Object.hasOwn(item,'open')).to.be.false;expect(Object.hasOwn(root,'exclusive')).to.be.false;
+    expect(item.hasAttribute('open')).to.be.true;expect(root.hasAttribute('exclusive')).to.be.true;
+    expect(item.region.hidden).to.be.false;
   });
 });

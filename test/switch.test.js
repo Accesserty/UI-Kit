@@ -51,7 +51,7 @@ describe('AuSwitch', () => {
     el.setAttribute('aria-labelledby', 'notification-label');
     await nextFrame();
     expect(input.hasAttribute('aria-label')).to.be.false;
-    expect(input.getAttribute('aria-labelledby')).to.equal('notification-label');
+    expect(input.ariaLabelledByElements).to.deep.equal([]);
   });
 
   it('sets the default off and on text when attributes are not provided', async () => {

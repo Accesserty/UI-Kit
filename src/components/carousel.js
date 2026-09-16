@@ -10,6 +10,9 @@ class AuCarousel extends HTMLElement {
       'data-text-instructions',
       'data-icon-prev',
       'data-icon-next',
+      'aria-label',
+      'aria-labelledby',
+      'data-text-roledescription',
     ];
   }
 
@@ -35,6 +38,7 @@ class AuCarousel extends HTMLElement {
 
     const style = document.createElement('style');
     style.textContent = `
+      :host([hidden]:not([hidden="until-found" i])) { display: none; }
       :host {
         display: block;
         /* The carousel is its OWN container, so "slides per view" responds to
@@ -65,11 +69,12 @@ class AuCarousel extends HTMLElement {
 
         --au-carousel-controls-gap: 0.75rem;
       }
-      :host([hidden]) { display: none; }
+
 
       /* ---- pagination: one real button per slide, named by its title ---- */
       .au-carousel-pagination {
         display: flex;
+        flex-wrap: wrap;
         justify-content: center;
         align-items: center;
         gap: var(--au-carousel-dot-gap);
@@ -79,6 +84,9 @@ class AuCarousel extends HTMLElement {
         display: inline-flex;
         inline-size: var(--au-carousel-dot-target);
         block-size: var(--au-carousel-dot-target);
+        min-inline-size: 24px;
+        min-block-size: 24px;
+        flex-shrink: 0;
         padding: 0;
         border: none;
         background: transparent;
@@ -91,6 +99,8 @@ class AuCarousel extends HTMLElement {
         );
       }
       .au-carousel-dot[aria-current="true"] {
+        border: 2px solid var(--au-carousel-dot-current-color);
+        border-radius: 999px;
         background-image: radial-gradient(
           circle,
           var(--au-carousel-dot-current-color) 0 calc(var(--au-carousel-dot-size) / 2),
@@ -170,6 +180,9 @@ class AuCarousel extends HTMLElement {
         justify-content: center;
         inline-size: var(--au-carousel-button-size);
         block-size: var(--au-carousel-button-size);
+        min-inline-size: 24px;
+        min-block-size: 24px;
+        flex-shrink: 0;
         border: none;
         border-radius: var(--au-carousel-button-radius);
         background: var(--au-carousel-button-bg);
@@ -178,13 +191,20 @@ class AuCarousel extends HTMLElement {
         line-height: 1;
         cursor: pointer;
       }
-      .au-carousel-button:disabled {
+      .au-carousel-button[aria-disabled="true"] {
         opacity: var(--au-carousel-button-disabled-opacity);
         cursor: not-allowed;
       }
       .au-carousel-button:focus-visible {
         outline: none;
         box-shadow: 0 0 0 var(--au-carousel-button-focus-shadow-width) var(--au-carousel-button-focus-shadow-color);
+      }
+      @media (forced-colors: active) {
+        .au-carousel-dot { background-image:none; border:1px solid ButtonText; border-radius:999px; }
+        .au-carousel-dot[aria-current="true"] { background:Highlight; border:3px double ButtonText; }
+        .au-carousel-button { border:1px solid ButtonText; }
+        .au-carousel-button[aria-disabled="true"] { color:GrayText; opacity:1; }
+        .au-carousel-dot:focus-visible,.au-carousel-button:focus-visible { outline:2px solid Highlight;outline-offset:2px;box-shadow:none; }
       }
 
       .au-carousel-live,
@@ -205,6 +225,8 @@ class AuCarousel extends HTMLElement {
     // ---- shell (built once) ----
     this._wrapper = document.createElement('div');
     this._wrapper.className = 'au-carousel';
+    this._wrapper.tabIndex = -1;
+    this._wrapper.setAttribute('role','group');
 
     // Pagination first: users learn how many slides exist before the content.
     this._pagination = document.createElement('div');
@@ -258,8 +280,8 @@ class AuCarousel extends HTMLElement {
     this._onSlotChange = this._onSlotChange.bind(this);
     this._onPaginationKeydown = this._onPaginationKeydown.bind(this);
     this._onPrevKeydown = this._onPrevKeydown.bind(this);
-    this._onPrevClick = () => this.slideTo(this._current - 1);
-    this._onNextClick = () => this.slideTo(this._current + 1);
+    this._onPrevClick = () => { if (this._current > 0) this.slideTo(this._current - 1); };
+    this._onNextClick = () => { if (this._current < this._maxIndex()) this.slideTo(this._current + 1); };
     this._onFocusIn = this._onFocusIn.bind(this);
     this._onScroll = this._onScroll.bind(this);
     this._onSettled = this._onSettled.bind(this);
@@ -281,6 +303,8 @@ class AuCarousel extends HTMLElement {
   }
 
   connectedCallback() {
+    let initial;
+    if (Object.hasOwn(this,'current')) { initial=this.current;delete this.current; }
     this._applyText();
     this._slot.addEventListener('slotchange', this._onSlotChange);
     this._pagination.addEventListener('keydown', this._onPaginationKeydown);
@@ -300,6 +324,8 @@ class AuCarousel extends HTMLElement {
       attributeFilter: ['data-title'],
     });
     this._rebuild();
+    if (initial !== undefined) this.current=initial;
+    this._observeLabelRoot();
   }
 
   disconnectedCallback() {
@@ -312,19 +338,39 @@ class AuCarousel extends HTMLElement {
     this._track.removeEventListener('scroll', this._onScroll);
     this._resizeObserver.disconnect();
     this._contentObserver.disconnect();
+    this._labelObserver?.disconnect();
     clearTimeout(this._settle);
     clearTimeout(this._contentTimer);
   }
 
-  attributeChangedCallback() {
+  attributeChangedCallback(name) {
     if (!this.isConnected) return;
     this._applyText();
     // Names/announcements depend on templates; rebuild dots so labels refresh.
     this._rebuild();
+    if(name==='aria-labelledby') this._observeLabelRoot();
+  }
+
+  _observeLabelRoot() {
+    this._labelObserver?.disconnect();
+    if(!this.getAttribute('aria-labelledby')?.trim()) return;
+    this._labelObserver ??= new MutationObserver(()=>this._applyName());
+    this._labelObserver.observe(this.getRootNode(),{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['id','aria-label']});
+    this._applyName();
+  }
+
+  _applyName() {
+    const root=this.getRootNode();
+    const labels=(this.getAttribute('aria-labelledby') || '').trim().split(/\s+/).filter(Boolean).map(id=>root.getElementById?.(id)).filter(el=>el&&el!==this);
+    const fallback=this.getAttribute('aria-label') || 'Carousel';
+    if('ariaLabelledByElements' in this._wrapper){this._wrapper.ariaLabelledByElements=labels;this._wrapper.setAttribute('aria-label',fallback);}
+    else this._wrapper.setAttribute('aria-label',labels.map(el=>el.getAttribute('aria-label') || el.textContent).join(' ').trim() || fallback);
+    this._wrapper.setAttribute('aria-roledescription',this.getAttribute('data-text-roledescription') || 'carousel');
   }
 
   // ---- i18n text (aria-labels + templates) ----
   _applyText() {
+    this._applyName();
     this._prevBtn.setAttribute('aria-label', this.getAttribute('data-text-prev') || 'Previous slide');
     this._nextBtn.setAttribute('aria-label', this.getAttribute('data-text-next') || 'Next slide');
     // Decorative glyphs (screen readers use the aria-labels above). Authors can
@@ -367,6 +413,11 @@ class AuCarousel extends HTMLElement {
 
   // ---- (re)build the dots from the slotted slides ----
   _rebuild() {
+    const oldSlides = this._slides;
+    const selected = oldSlides[this._current];
+    const focusedDot = this._dots.indexOf(this.shadowRoot.activeElement);
+    const focusedSlide = oldSlides[focusedDot];
+    const oldDots = new Map(oldSlides.map((slide,i)=>[slide,this._dots[i]]));
     this._slides = this._slot.assignedElements();
     const total = this._slides.length;
     const resolved = this._slides.map((el, i) => this._resolveName(el, i));
@@ -376,47 +427,50 @@ class AuCarousel extends HTMLElement {
     const dotTemplate = this.getAttribute('data-dot-template') || '{title}, {current} of {total}';
     this._dotLabels = resolved.map((r, i) => (r.real ? this._fill(dotTemplate, r.name, i) : r.name));
 
-    // A rebuild may fire while a dot is focused (e.g. a runtime locale switch
-    // that re-renders titles); remember which so focus can be restored after
-    // replaceChildren() destroys the old dots.
-    const focusedDot = this._dots.indexOf(this.shadowRoot.activeElement);
-
-    // Rebuild the dot row (shell) from the current slides.
-    this._pagination.replaceChildren();
+    // Identity belongs to the consumer's actual slide node, not its old index.
+    // Translation patches existing dots; moves retain their listeners/focus.
     this._dots = this._dotLabels.map((label, i) => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'au-carousel-dot';
+      const slide = this._slides[i];
+      let b = oldDots.get(slide);
+      if (!b) {
+        b = document.createElement('button');
+        b.type = 'button';b.className = 'au-carousel-dot';b.tabIndex=-1;
+        b.addEventListener('click', () => {
+          const index=this._slides.indexOf(slide);
+          if (index < 0) return;
+          this._setRoving(index);this.slideTo(index);
+        });
+      }
       b.setAttribute('aria-label', label);
-      b.tabIndex = i === 0 ? 0 : -1;
-      b.addEventListener('click', () => {
-        this._setRoving(i);
-        this.slideTo(i);
-      });
-      this._pagination.appendChild(b);
+      if (this._pagination.children[i] !== b) this._pagination.insertBefore(b,this._pagination.children[i] || null);
       return b;
     });
+    for (const dot of oldDots.values()) if (!this._dots.includes(dot)) dot.remove();
 
     if (!total) {
       this._current = -1;
-      this._prevBtn.disabled = true;
-      this._nextBtn.disabled = true;
+      this._live.textContent='';this._apply();
+      if (focusedDot >= 0) this._wrapper.focus({preventScroll:true});
       return;
     }
     // Re-anchor current within the new range (0 on first build). Update the
     // shell directly rather than via setCurrent() so a rebuild never fires the
     // live region or a slide-change event — those belong to user navigation.
-    this._current = this._current < 0 ? 0 : Math.min(this._current, this._maxIndex());
+    const retained = this._slides.indexOf(selected);
+    this._current = retained >= 0 ? retained : this._normalizeIndex(this._current);
     this._apply();
-    if (focusedDot >= 0 && this._dots[focusedDot]) this._dots[focusedDot].focus();
+    if (focusedDot >= 0) {
+      const retainedFocus = this._slides.indexOf(focusedSlide);
+      const index = retainedFocus >= 0 ? retainedFocus : this._current;
+      this._setRoving(index);this._dots[index].focus({preventScroll:true});
+    }
+    if (oldSlides.length !== total || oldSlides.some((slide,i)=>slide!==this._slides[i])) this._scrollToIndex(this._current,'instant');
   }
 
   /**
    * Re-read the slotted slides and rebuild the dots. Call this after changing a
-   * slide's `data-title` or heading text at runtime (e.g. a framework locale
-   * switch), since those live in author light-DOM and are not observed
-   * attributes of the host. Content that changes a host attribute or adds/removes
-   * slides refreshes on its own; this covers the "only the titles changed" case.
+   * slide's data-title or heading text when an immediate refresh is needed.
+   * The content observer also refreshes those edits after its debounce.
    */
   refresh() {
     this._rebuild();
@@ -444,7 +498,14 @@ class AuCarousel extends HTMLElement {
 
   _firstFocusable(i) {
     const el = this._slides[i];
-    return el && el.querySelector ? el.querySelector(this._FOCUSABLE) : null;
+    if (!el) return null;
+    return [el,...el.querySelectorAll(this._FOCUSABLE)].find(node=>{
+      if(node.tabIndex < 0 || node.matches(':disabled') || !node.getClientRects().length) return false;
+      for(let parent=node;parent;parent=parent.assignedSlot || parent.parentNode || parent.host){
+        if(parent instanceof Element && (parent.hasAttribute('inert') || getComputedStyle(parent).visibility==='hidden')) return false;
+      }
+      return true;
+    }) || null;
   }
 
   _apply() {
@@ -456,8 +517,11 @@ class AuCarousel extends HTMLElement {
     this._dots.forEach((d, j) => {
       d.setAttribute('aria-current', j === this._current ? 'true' : 'false');
     });
-    this._prevBtn.disabled = this._current <= 0;
-    this._nextBtn.disabled = this._current >= this._maxIndex();
+    // Keep boundary controls focusable so reaching the end does not discard focus.
+    this._prevBtn.disabled = this._slides.length === 0;
+    this._nextBtn.disabled = this._slides.length === 0;
+    this._prevBtn.setAttribute('aria-disabled',String(this._current <= 0));
+    this._nextBtn.setAttribute('aria-disabled',String(!this._slides.length || this._current >= this._maxIndex()));
     // Keep the tab stop on the current dot only when focus is OUTSIDE the dot
     // group; while the user is arrowing inside it, leave their focus alone.
     if (!this._pagination.contains(this.shadowRoot.activeElement)) {
@@ -466,7 +530,8 @@ class AuCarousel extends HTMLElement {
   }
 
   setCurrent(i) {
-    const idx = Math.max(0, Math.min(this._maxIndex(), i));
+    if (!this._slides.length) { this._current=-1;this._apply();return; }
+    const idx = this._normalizeIndex(i);
     const changed = idx !== this._current;
     this._current = idx;
     this._apply();
@@ -490,10 +555,27 @@ class AuCarousel extends HTMLElement {
 
   slideTo(i) {
     if (!this._slides.length) return;
-    const idx = Math.max(0, Math.min(this._maxIndex(), i));
-    const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-    this._slides[idx].scrollIntoView({ behavior, inline: 'start', block: 'nearest' });
+    const idx = this._normalizeIndex(i);
+    const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth';
+    this._scrollToIndex(idx,behavior);
     this.setCurrent(idx);
+  }
+
+  _normalizeIndex(value) {
+    const number = typeof value==='number' || typeof value==='string' ? Number(value) : NaN;
+    return Math.max(0,Math.min(this._maxIndex(),Number.isFinite(number) ? Math.trunc(number) : 0));
+  }
+
+  _startDistance(slide) {
+    const rect=this._track.getBoundingClientRect(),item=slide.getBoundingClientRect();
+    return getComputedStyle(this._track).direction==='rtl'
+      ? item.right-(rect.left+this._track.clientLeft+this._track.clientWidth)
+      : item.left-(rect.left+this._track.clientLeft);
+  }
+
+  _scrollToIndex(index,behavior) {
+    if(!this._slides[index]) return;
+    this._track.scrollTo({left:this._track.scrollLeft+this._startDistance(this._slides[index]),behavior});
   }
 
   // ---- event handlers ----
@@ -502,6 +584,9 @@ class AuCarousel extends HTMLElement {
   }
 
   _onPaginationKeydown(e) {
+    // Safari's full keyboard traversal uses Option+Tab when plain Tab skips
+    // controls. Allow that native traversal chord, but leave other shortcuts alone.
+    if(e.ctrlKey || (e.altKey && e.key!=='Tab') || e.metaKey || e.isComposing) return;
     const idx = this._dots.indexOf(this.shadowRoot.activeElement);
     if (idx < 0) return;
     // Tab forward out of the dots enters the content at the CURRENT slide.
@@ -515,8 +600,9 @@ class AuCarousel extends HTMLElement {
     }
     const last = this._slides.length - 1;
     let to = null;
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') to = Math.min(last, idx + 1);
-    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') to = Math.max(0, idx - 1);
+    const rtl=getComputedStyle(this._track).direction==='rtl';
+    if (e.key === (rtl?'ArrowLeft':'ArrowRight') || e.key === 'ArrowDown') to = Math.min(last, idx + 1);
+    else if (e.key === (rtl?'ArrowRight':'ArrowLeft') || e.key === 'ArrowUp') to = Math.max(0, idx - 1);
     else if (e.key === 'Home') to = 0;
     else if (e.key === 'End') to = last;
     if (to === null) return;
@@ -527,6 +613,7 @@ class AuCarousel extends HTMLElement {
   }
 
   _onPrevKeydown(e) {
+    if(e.ctrlKey || (e.altKey && e.key!=='Tab') || e.metaKey || e.isComposing) return;
     // Shift+Tab back from the prev button (buttons sit after the content) should
     // enter the content at the CURRENT slide, not the last visible one.
     if (e.key !== 'Tab' || !e.shiftKey) return;
@@ -540,7 +627,7 @@ class AuCarousel extends HTMLElement {
   _onFocusIn(e) {
     // Tab / Shift+Tab through slide content: if focus lands on a slide that is
     // off-screen, scroll it into view (a visible slide is left where it is).
-    const li = this._slides.find((s) => s === e.target || (s.contains && s.contains(e.target)));
+    const li = this._slides.find(s=>e.composedPath().includes(s));
     if (!li) return;
     const i = this._slides.indexOf(li);
     if (i < this._current || i >= this._current + this.visibleCount()) this.slideTo(i);
@@ -555,11 +642,12 @@ class AuCarousel extends HTMLElement {
   // scrolling settles (deterministic for N-per-view; no mid-scroll chatter).
   _onSettled() {
     if (this._slides.length < 1) return;
-    const stride =
-      this._slides.length > 1
-        ? this._slides[1].offsetLeft - this._slides[0].offsetLeft
-        : this._slides[0].offsetWidth;
-    this.setCurrent(stride > 0 ? Math.round(this._track.scrollLeft / stride) : 0);
+    let nearest=0,distance=Infinity;
+    this._slides.forEach((slide,i)=>{
+      const delta=Math.abs(this._startDistance(slide));
+      if(delta<distance){distance=delta;nearest=i;}
+    });
+    this.setCurrent(nearest);
   }
 
   // ---- public properties ----

@@ -1,0 +1,13 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Card standalone checks</title><style>body{margin:16px;font:16px system-ui}.layout{display:grid;grid-template-columns:minmax(0,1fr);max-width:480px}input{max-width:100%;box-sizing:border-box}button,a{display:inline-block;min-height:24px}button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #333;outline-offset:2px}</style>
+<button id="before">Before</button>
+<div class="layout"><form id="example"><au-card id="card">
+<div slot="footer"><button type="submit" id="save">Save guide</button></div>
+<div slot="content"><label for="notes">Guide notes</label><input id="notes" name="notes" value="Initial"></div>
+<div slot="media"><a id="media-link" href="#after">Media details</a></div>
+<div slot="heading"><h2 id="title">Travel guide</h2><button id="heading-action" type="button">Preview guide</button></div>
+</au-card></form></div><button id="after">After</button>
+<script src="../../../dist/accesserty-ui-kit.min.js" defer></script><script>
+window.card=document.getElementById('card');window.cardForm=document.getElementById('example');window.submissions=[];
+cardForm.addEventListener('submit',e=>{e.preventDefault();submissions.push(new FormData(cardForm).get('notes'));});
+</script></html>
