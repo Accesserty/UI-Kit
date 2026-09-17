@@ -241,12 +241,15 @@ code {
   /* --au-accordion-heading-border-style:; */
   --au-accordion-heading-border-color: var(--color-primary-500);
   --au-accordion-heading-bg: var(--color-primary-500);
-  --au-accordion-heading-hover-bg: var(--color-primary-400);
-  --au-accordion-heading-hover-border-color: var(--color-primary-400);
-  --au-accordion-heading-active-bg: var(--color-primary-600);
-  --au-accordion-heading-active-border-color: var(--color-primary-600);
+  /* Darker on hover/active: white text stays at 7:1+ (blue-400 would be 3.4:1). */
+  --au-accordion-heading-hover-bg: var(--color-primary-600);
+  --au-accordion-heading-hover-border-color: var(--color-primary-600);
+  --au-accordion-heading-active-bg: var(--color-primary-700);
+  --au-accordion-heading-active-border-color: var(--color-primary-700);
   /* --au-accordion-heading-focus-shadow-width:; */
-  /* --au-accordion-heading-focus-shadow-color:; */
+  /* The default dark focus outline is inset over the heading background, so a
+     blue heading needs a light outline (white on blue-500: 4.7:1). */
+  --au-accordion-heading-focus-shadow-color: var(--color-white);
   --au-accordion-content-bg: var(--color-blue-50);
   --au-accordion-content-text-color: var(--color-blue-600);
   /* --au-accordion-content-padding-top:; */
@@ -396,6 +399,8 @@ code {
   /* --au-file-upload-delete-active-border-color:; */
   /* --au-file-upload-delete-focus-shadow-width:; */
   /* --au-file-upload-delete-focus-shadow-color:; */
+  /* --au-file-upload-trigger-focus-outline-width:; */
+  /* --au-file-upload-trigger-focus-outline-color:; */
   &::part(delete) {
     text-transform: uppercase;
     color: var(--color-danger-700);
@@ -409,7 +414,7 @@ code {
   /* --au-input-label-text-size:; */
   /* --au-input-padding-vertical:; */
   /* --au-input-padding-horizontal:; */
-  --au-input-text-color: var(--color-green-500);
+  --au-input-text-color: var(--color-green-600);
   /* --au-input-text-size:; */
   /* --au-input-border-radius:; */
   --au-input-bg: var(--color-gray-100);

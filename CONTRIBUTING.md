@@ -7,7 +7,7 @@ This document explains how to set up your development environment, create new co
 
 ## Prerequisites
 
-- **Node.js 20 or higher** — components are tested in a real Chromium instance via `@web/test-runner`
+- **Node.js 22 or higher** — components are tested in a real Chromium instance via `@web/test-runner`
 - **Git**
 
 ```bash
@@ -59,7 +59,9 @@ Use `npm run test:css -- chrome`, `npm run test:controls -- chrome`, and
 `npm run test:pagination -- chrome` for Chrome-only runs. Omitting the argument
 runs Chrome, Firefox and Safari; the latter two require `UI_KIT_WEBDRIVER_MODULE`
 pointing to an installed Selenium client, their browser drivers, and (for Safari)
-remote automation permission. Safari needs macOS.
+remote automation permission. Safari needs macOS. The component scripts in
+`test/browser/` take the same argument, for example
+`node test/browser/carousel.mjs chrome`.
 
 A full check builds fresh bundles first, then runs the documentation, Chrome
 integration, SSR and Angular AOT checks. SSR runs separately through

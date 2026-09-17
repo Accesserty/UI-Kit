@@ -83,14 +83,14 @@ CSS variables: 11 (--au-dropdown-menu-*, --au-dropdown-item-*, --au-dropdown-foc
 
 ### au-file-upload
 Tag: `<au-file-upload>`
-Attributes: accept, multiple, name, disabled, required, label, max-files, max-size-mb, max-total-size-mb, msg-drop-text, msg-remove-text, msg-remove-file-label, msg-added, msg-removed, msg-required, msg-type-error, msg-size-error, msg-count-error, msg-total-size-error
+Attributes: accept, multiple, name, disabled, required, label, max-files, max-size-mb, max-total-size-mb, msg-drop-text, msg-remove-text, msg-remove-file-label, msg-added, msg-removed, msg-required, msg-type-error, msg-size-error, msg-count-error, msg-total-size-error (file-upload uses the msg- prefix; other components use data-text-)
 Localization templates: msg-remove-file-label and msg-removed support `{fileName}`; msg-added supports `{count}`; msg-size-error supports `{fileName}` and `{maxSize}`; msg-count-error supports `{fileName}` and `{maxFiles}`; msg-total-size-error supports `{maxTotalSize}`
 Properties: value (getter/setter: File[])
 Methods: handleFiles(files), removeFile(file), checkValidity(), reportValidity()
 Events: change, remove-file (detail: File)
 Form-associated: Yes (ElementInternals FormData with actual File entries)
 Default trigger: native button named by label; a custom trigger should be a named button type=button. Disabled fields/fieldsets block picker/drop/removal and omit submission without losing selection. Validation focuses a visible region and shows inline errors. Drag/drop handling is scoped to the component. Without multiple, selection is capped at one; remove before replacement. Picker limits default to 5 files, 5MB each and 20MB total; invalid limits use defaults and zero is valid. Extensions/MIME matching is case-insensitive; same name/size duplicates are ignored. The controlled value setter copies File entries, bypasses picker limits, and emits no change. Removal emits remove-file then change once; reset is silent. Translation retains remove-button identity. Pre-registration value assignments survive deferred loading. Client-only registration is required for SSR; File values cannot be serialized as an HTML attribute.
-CSS variables: 20+ (--au-file-upload-label-*, --au-file-upload-area-*, --au-file-upload-delete-*, --au-file-upload-file-list-*)
+CSS variables: 20+ (--au-file-upload-label-*, --au-file-upload-area-*, --au-file-upload-delete-*, --au-file-upload-file-list-*, --au-file-upload-trigger-focus-outline-*)
 
 ### au-input
 Tag: `<au-input>`

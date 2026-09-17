@@ -1,5 +1,6 @@
 // npm install in test/ssr first. Rebuild dist before running. No framework is
 // loaded by the HTML fixtures. WebDriver is needed for installed Firefox/Safari.
+// node test/browser/breadcrumbs-html.mjs [chrome|firefox|safari]
 import assert from 'node:assert/strict';
 import {readFile,stat,mkdtemp} from 'node:fs/promises';
 import {createServer} from 'node:http';
@@ -8,6 +9,8 @@ import {resolve,extname,join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {chromium} from '../ssr/node_modules/playwright/index.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
+const browsers=process.argv[2]?[process.argv[2]]:['chrome','firefox','safari'];
+assert.ok(browsers.every(n=>['chrome','firefox','safari'].includes(n)));
 const output=await mkdtemp(join(tmpdir(),'breadcrumbs-html-'));
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8'};
 const server=createServer(async(req,res)=>{try{
@@ -45,6 +48,7 @@ const updateTrail=()=>{
   return retained&&recovered;
 };
 try {
+  if(browsers.includes('chrome')){
   const browser=await chromium.launch({channel:'chrome',headless:true});
   try {
     const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(String(e)));
@@ -54,6 +58,10 @@ try {
       assert.equal(await page.evaluate(updateTrail),true);
       await page.evaluate(focus);await page.keyboard.press('Tab');
       assert.equal(await page.evaluate(()=>document.querySelector('au-breadcrumbs').shadowRoot.activeElement===window.linkNodes[1]),true);
+      // Forced colours drop the inset box-shadow, so the link must fall back to an outline.
+      await page.emulateMedia({forcedColors:'active'});
+      assert.equal(await page.evaluate(()=>{const a=document.querySelector('au-breadcrumbs').shadowRoot.activeElement,s=getComputedStyle(a);return a.matches(':focus-visible')&&s.outlineStyle!=='none'&&parseFloat(s.outlineWidth)>=2;}),true);
+      await page.emulateMedia({forcedColors:'none'});
       await page.keyboard.press('Tab');assert.equal(await page.evaluate(()=>document.activeElement.id),'after');
       await page.evaluate(()=>window.linkNodes[1].focus());await page.keyboard.press('Enter');
       await page.waitForURL(new URL('./breadcrumbs-target.html#components',url).href);
@@ -67,12 +75,15 @@ try {
       await first.click();await page.waitForURL(new URL('demo/index.html',base).href);
       assert.equal(await page.locator('#components').textContent(),'Components');
     }
-    assert.deepEqual(errors,[]);console.log('Chrome: source/bundle/min classic scripts on file + HTTP, real keyboard navigation, tab order, underline, actual demo links PASS');
+    assert.deepEqual(errors,[]);console.log('Chrome: source/bundle/min classic scripts on file + HTTP, real keyboard navigation, tab order, forced-colors focus, underline, actual demo links PASS');
   }finally{await browser.close();}
+  }
+  const webdriverBrowsers=browsers.filter(n=>n!=='chrome');
+  if(webdriverBrowsers.length){
   if(!process.env.UI_KIT_WEBDRIVER_MODULE)throw Error('Set UI_KIT_WEBDRIVER_MODULE for required Firefox/Safari checks');
   const moduleURL=pathToFileURL(process.env.UI_KIT_WEBDRIVER_MODULE);
   const {default:webdriver}=await import(moduleURL.href),{default:firefox}=await import(new URL('./firefox.js',moduleURL).href);
-  for(const name of ['firefox','safari']){
+  for(const name of webdriverBrowsers){
     let driver;
     try{
       let builder=new webdriver.Builder().forBrowser(name);
@@ -102,6 +113,7 @@ try {
       }
       console.log(name+': source/bundle/min classic scripts on file + HTTP, native keyboard link activation PASS');
     }finally{if(driver)await driver.quit();}
+  }
   }
   console.log('Screenshots: '+output);
 }finally{await new Promise(r=>server.close(r));}

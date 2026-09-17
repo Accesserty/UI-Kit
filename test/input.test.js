@@ -393,6 +393,44 @@ describe('AuInput', () => {
     expect(new FormData(form).get('color')).to.equal(el.input.value);
   });
 
+  it('keeps a usable field inside a 320px container when prefix and affix are wide', async () => {
+    const box = await fixture(html`<div style="width:320px">
+      <au-input label="Date"><span slot="prefix">Type a Date</span>
+        <div slot="affix"><button>Today(.suggest())</button> <button>Clear(.clear())</button></div></au-input>
+      <au-input label="Color" type="color" value="#3b82f6"></au-input></div>`);
+    await nextFrame();
+    const [withAffix, color] = box.querySelectorAll('au-input');
+    const hostRight = withAffix.getBoundingClientRect().right;
+    const innerRight = Math.max(...[...withAffix.shadowRoot.querySelectorAll('*')].map(el => el.getBoundingClientRect().right));
+    expect(innerRight).to.be.at.most(hostRight + 1);
+    expect(withAffix.input.getBoundingClientRect().width).to.be.at.least(128);
+    expect(color.input.getBoundingClientRect().width).to.be.at.least(24);
+  });
+
+  it('forwards only input attributes when upgraded from existing markup', async () => {
+    // Parse in a document without the registry so the element upgrades on
+    // insertion with its attributes already present, as with <script defer>.
+    const inert = document.implementation.createHTMLDocument('');
+    inert.body.innerHTML = `<au-input label="Name" name="n" placeholder="p" required hidden inert
+      title="tip" class="x" style="outline:4px solid red" onclick="window.__auInputClicks=(window.__auInputClicks||0)+1"></au-input>`;
+    const container = await fixture(html`<div></div>`);
+    const el = document.adoptNode(inert.body.firstElementChild);
+    container.append(el);
+    const inner = el.shadowRoot.querySelector('input');
+    for (const name of ['hidden', 'inert', 'title', 'class', 'style', 'onclick', 'label']) {
+      expect(inner.hasAttribute(name), name).to.be.false;
+    }
+    expect(inner.getAttribute('name')).to.equal('n');
+    expect(inner.getAttribute('placeholder')).to.equal('p');
+    expect(inner.required).to.be.true;
+    el.hidden = false;
+    el.inert = false;
+    expect(inner.getBoundingClientRect().width).to.be.greaterThan(0);
+    window.__auInputClicks = 0;
+    inner.click();
+    expect(window.__auInputClicks).to.equal(1);
+  });
+
   it('submits the sanitized reset value when the input type has changed', async () => {
     const form=await fixture(html`<form><au-input name="quantity" value="Text"></au-input></form>`);
     const el=form.firstElementChild;

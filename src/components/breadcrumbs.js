@@ -245,6 +245,12 @@ class AuBreadcrumbs extends HTMLElement {
                 &:focus-visible {
                   outline: none;
                   box-shadow: inset 0 0 0 var(--au-breadcrumbs-focus-shadow-width, 3px) var(--au-breadcrumbs-focus-shadow-color, oklch(0.45 0.15 260));
+                  /* Forced colours drop box-shadow. Nested here so it outranks the
+                     outline: none above; a top-level a:focus-visible would not. */
+                  @media (forced-colors: active) {
+                    outline: 2px solid Highlight;
+                    outline-offset: -2px;
+                  }
                 }
                 &+span {
                   font-size: var(--au-breadcrumbs-text-size, 1rem);
@@ -254,7 +260,7 @@ class AuBreadcrumbs extends HTMLElement {
           }
         }
         @media (forced-colors: active) {
-          nav:focus-visible, a:focus-visible {
+          nav:focus-visible {
             outline: 2px solid Highlight;
             outline-offset: -2px;
           }

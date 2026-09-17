@@ -78,15 +78,24 @@ class AuInput extends HTMLElement {
         border-radius: var(--au-input-border-radius, 0.25rem);
         padding: var(--au-input-container-padding-vertical, 0.25rem) var(--au-input-container-padding-horizontal, 0.25rem);
         gap: var(--au-input-container-gap, 0.625rem);
-        /* prefix/affix 不可被壓縮;窄容器時維持同一行,由 input 彈性縮小
-           (原本 <768px 轉 column 會讓 prefix/affix 與輸入框折行) */
+        /* prefix/affix 不可被壓縮;窄容器時優先維持同一行,由 input 彈性縮小。
+           只有在放不下「可用寬度的輸入框」時才換行,避免 input 被擠到幾乎為零、
+           內容溢出元件(WCAG 1.4.10)。 */
         .prefix, .affix {
           flex-shrink: 0;
+          max-inline-size: 100%;
         }
         @container (width < 768px) {
+          flex-wrap: wrap;
           input {
-            flex: 1;
+            flex: 1 1 8rem;
             min-width: 0;
+          }
+          /* A colour swatch keeps its own width; stretching it would push the
+             colour code onto a second line. */
+          input[type="color"] {
+            flex: 0 0 auto;
+            inline-size: 3.125rem;
           }
         }
       }
@@ -442,15 +451,18 @@ class AuInput extends HTMLElement {
     return `au-input-${Math.random().toString(36).slice(2)}`;
   }
 
+  // Forward only the documented input attributes. Copying every host attribute
+  // would also copy hidden, inert, style and inline handlers, which then stay on
+  // the inner input after the host changes (and run twice for handlers).
   syncAttributes() {
-    Array.from(this.attributes).forEach(attr => {
-      if (!['data-size', 'data-layout', 'data-clear', 'data-clear-label'].includes(attr.name)) {
-        this.input.setAttribute(attr.name, attr.value);
-        if (attr.name === 'value') {
-          this.input.defaultValue = attr.value;
-        }
-      }
-    });
+    const handledElsewhere = new Set(['id', 'label', 'list', 'aria-label', 'aria-labelledby',
+      'aria-describedby', 'data-size', 'data-layout', 'data-clear', 'data-clear-label']);
+    for (const name of this.constructor.observedAttributes) {
+      if (handledElsewhere.has(name) || !this.hasAttribute(name)) continue;
+      const value = this.getAttribute(name);
+      this.input.setAttribute(name, value);
+      if (name === 'value') this.input.defaultValue = value;
+    }
   }
 
   _syncValidity() {

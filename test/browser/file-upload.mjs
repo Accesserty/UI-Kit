@@ -52,6 +52,9 @@ try{
     const browser=await chromium.launch({channel:'chrome',headless:true});
     try{
       const page=await browser.newPage({viewport:{width:320,height:900}}),errors=[];page.on('pageerror',e=>errors.push(String(e)));
+      // Playwright enables file-chooser interception lazily without awaiting it; subscribe
+      // up front so a key press cannot open the native dialog before interception is on.
+      page.on('filechooser',()=>{});
       for(const url of urls){
         await page.goto(url);await page.waitForFunction(()=>window.u?.fileInput);
         if(!url.includes('-source.html')){
@@ -72,6 +75,15 @@ try{
         assert.equal(await page.evaluate(()=>{const s=getComputedStyle(u.shadowRoot.activeElement);return s.outlineStyle!=='none'&&parseFloat(s.outlineWidth)>=2&&s.transitionDuration==='0s';}),true);
         await page.emulateMedia({forcedColors:'none',reducedMotion:'no-preference'});
         await page.locator('#fallback .default-trigger').focus();
+        // The default trigger's indicator must reach 3:1 on the page ground (WCAG 1.4.11).
+        assert.equal(await page.evaluate(()=>{
+          const trigger=document.getElementById('fallback').shadowRoot.querySelector('.default-trigger');
+          const c=document.createElement('canvas').getContext('2d',{willReadFrequently:true});
+          c.fillStyle='#fff';c.fillRect(0,0,1,1);c.fillStyle=getComputedStyle(trigger).outlineColor;c.fillRect(0,0,1,1);
+          const lum=[...c.getImageData(0,0,1,1).data.slice(0,3)].map(v=>{v/=255;return v<=0.04045?v/12.92:((v+0.055)/1.055)**2.4;});
+          const l=0.2126*lum[0]+0.7152*lum[1]+0.0722*lum[2];
+          return trigger.matches(':focus-visible')&&getComputedStyle(trigger).outlineStyle!=='none'&&1.05/(l+0.05)>=3;
+        }),true);
         const fallbackChooser=page.waitForEvent('filechooser');await page.keyboard.press('Space');await (await fallbackChooser).setFiles(paths.slice(0,1));
         assert.equal(await page.locator('au-file-upload#fallback').evaluate(el=>el.value[0]?.name),'upload-one.txt');
         console.log('Chrome '+url+' PASS: real Enter filechooser, File submission, fieldset, stable focus, reset, synthetic drop, AX, narrow RTL');

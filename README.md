@@ -344,6 +344,9 @@ Accesserty UI Kit components are framework-agnostic Web Components. Pass transla
 <au-switch label="接收通知" on="開啟" off="關閉"></au-switch>
 ```
 
+Text attributes use the `data-text-` prefix, except on `au-file-upload`, whose
+text attributes use `msg-` (for example `msg-drop-text`).
+
 For framework use, bind these attributes to your normal i18n strings, such as `:label="t('upload.label')"`, `data-text-page-announcement={t('pagination.announcement')}`, or `[attr.data-text-toggle]="treeToggleLabel"`.
 
 
@@ -439,6 +442,13 @@ Now change `--color-primary-500` once, and every component you connected follows
 `tokens-variables.css` is loaded by the shared stylesheet from Step 2. Without that
 stylesheet, define the same tokens in your own CSS; the connections work the same
 way.
+
+**Check contrast whenever you change a colour.** Text needs at least 4.5:1
+against its background; focus outlines and control borders need at least 3:1
+(WCAG 2.2). Several components draw their focus outline *inside* the element,
+on top of its background, so a darker or more saturated background also needs a
+new focus colour — for example `--au-accordion-heading-focus-shadow-color`.
+Check the hover and active backgrounds too, not only the resting state.
 
 **See a complete example.** [`demo/demo.css`](demo/demo.css) connects tokens to a
 themed button under `.custom-btn--primary-flat`. The result is on
@@ -598,7 +608,7 @@ transitions. Verify custom themes and application-level accessibility separately
 
 ## Development
 
-Requires **Node.js 20 or higher**.
+Requires **Node.js 22 or higher** (the version CI runs).
 
 ```bash
 # Install dependencies

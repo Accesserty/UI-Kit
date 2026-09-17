@@ -164,12 +164,20 @@ class AuFileUpload extends HTMLElement {
         }
       }
       .trigger-area { min-inline-size: 0; }
-      .trigger-area:focus-visible, .default-trigger:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
+      /* Highlight is a forced-colors system colour; in normal mode its value is
+         browser-chosen (Chrome: translucent light blue, 1.5:1 on white). */
+      .trigger-area:focus-visible, .default-trigger:focus-visible {
+        outline: max(2px, var(--au-file-upload-trigger-focus-outline-width, 2px)) solid var(--au-file-upload-trigger-focus-outline-color, oklch(0.45 0.15 260));
+        outline-offset: 2px;
+      }
       .default-trigger { font: inherit; min-block-size: 24px; min-inline-size: 24px; padding: 0.625rem; max-inline-size: 100%; overflow-wrap: anywhere; }
       .file-upload-container[aria-disabled="true"] { opacity: 0.65; }
       @media (max-width: 360px) { .file-list [role=listitem] { flex-wrap: wrap; } }
       @media (prefers-reduced-motion: reduce) { .upload-area, .file-list [role=listitem] .delete { transition: none; } }
-      @media (forced-colors: active) { .file-list [role=listitem] .delete:focus-visible { outline: 2px solid Highlight; } }
+      @media (forced-colors: active) {
+        .file-list [role=listitem] .delete:focus-visible,
+        .trigger-area:focus-visible, .default-trigger:focus-visible { outline: 2px solid Highlight; }
+      }
     `;
 
     this.wrapper = document.createElement('div');
