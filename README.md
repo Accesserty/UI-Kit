@@ -627,8 +627,9 @@ npm run build
 Tests run in a real Chromium browser via `@web/test-runner`. No mocking — components are tested as they behave in production.
 
 `npm run test:css` checks the shared stylesheet's token, Popover and select-direction
-contracts in installed Chrome, Firefox and Safari; Firefox and Safari require
-`UI_KIT_WEBDRIVER_MODULE`.
+contracts in installed Chrome, Firefox and Safari. `npm run test:firefox` and
+`npm run test:safari` run all WebDriver browser checks in one browser; see
+[CONTRIBUTING.md](CONTRIBUTING.md#integration-tests) for setup.
 
 
 ## Contributing

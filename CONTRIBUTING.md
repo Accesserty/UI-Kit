@@ -56,15 +56,23 @@ before testing consumers. `npm run test:docs` also checks the audited CSS defaul
 in demo tables and Playground; it is not a complete CSS parser or theme audit.
 
 Use `npm run test:css -- chrome`, `npm run test:controls -- chrome`, and
-`npm run test:pagination -- chrome` for Chrome-only runs. Omitting the argument
-runs Chrome, Firefox and Safari; the latter two require `UI_KIT_WEBDRIVER_MODULE`
-pointing to an installed Selenium client, their browser drivers, and (for Safari)
-remote automation permission. Safari needs macOS. The component scripts in
+`npm run test:pagination -- chrome` for Chrome-only runs. The component scripts in
 `test/browser/` take the same argument, for example
 `node test/browser/carousel.mjs chrome`.
 
+Firefox and Safari run through WebDriver, using the `selenium-webdriver` installed
+in `test/ssr` (set `UI_KIT_WEBDRIVER_MODULE` to use a different copy):
+
+- `npm run test:firefox` runs every WebDriver check in headless Firefox. CI runs
+  it; Selenium downloads the matching geckodriver on first use.
+- `npm run test:safari` runs the same checks in Safari, which needs macOS and
+  opens visible windows. Enable it once with `safaridriver --enable` and, in
+  Safari, Develop → Allow Remote Automation. A failed check is run once more and
+  listed as "passed on retry", because focus checks fail if the window loses
+  focus while the Mac is in use.
+
 A full check builds fresh bundles first, then runs the documentation, Chrome
-integration, SSR and Angular AOT checks. SSR runs separately through
+integration, Firefox, SSR and Angular AOT checks. SSR runs separately through
 `npm test --prefix test/ssr`; installing its dependencies does not run it.
 For Angular AOT, install `test/angular-aot` dependencies and use
 `npm run runtime --prefix test/angular-aot`; its preruntime hook builds first.
@@ -288,3 +296,6 @@ When opening an issue, use these labels:
 ## Release Format
 
 Tags follow `vX.X.X` semantic versioning.
+
+Before tagging a release, run `npm run test:safari` on a Mac; CI covers Chrome
+and Firefox but cannot run Safari.
