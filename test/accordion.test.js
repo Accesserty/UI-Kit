@@ -197,7 +197,45 @@ describe('AuAccordion and AuAccordionItem', () => {
   it('non-exclusive mode removes aria-describedby from container', async () => {
     const el = await fixture(html`<au-accordion></au-accordion>`);
     const container = el.shadowRoot.querySelector('.au-accordion');
+    const hint = el.shadowRoot.querySelector('[id^="au-accordion-hint-"]');
     expect(container.hasAttribute('aria-describedby')).to.be.false;
+    expect(hint.hidden).to.be.true;
+    expect(hint.textContent).to.equal('');
+  });
+
+  it('exposes instructions only while exclusive and restores the current language when re-enabled', async () => {
+    const el = await fixture(html`<au-accordion data-text-exclusive-hint="一次只能展開一項">
+      <au-accordion-item open><span slot="heading">One</span></au-accordion-item>
+      <au-accordion-item open><span slot="heading">Two</span></au-accordion-item>
+    </au-accordion>`);
+    const hint = el.shadowRoot.querySelector('[id^="au-accordion-hint-"]');
+    const [first, second] = el.children;
+    expect(first.open && second.open).to.be.true;
+    expect(hint.textContent).to.equal('');
+    first.button.focus();
+
+    el.exclusive = true;
+    expect(hint.hidden).to.be.false;
+    expect(hint.textContent).to.equal('一次只能展開一項');
+    expect(second.open).to.be.false;
+    expect(first.button.getAttribute('aria-describedby')).to.equal(first._hint.id);
+    expect(first._hint.textContent).to.equal(hint.textContent);
+
+    el.exclusive = false;
+    expect(hint.hidden).to.be.true;
+    expect(hint.textContent).to.equal('');
+    expect(first._hint.textContent).to.equal('');
+    expect(first.button.hasAttribute('aria-describedby')).to.be.false;
+    el.setAttribute('data-text-exclusive-hint', 'Only one panel at a time.');
+    expect(hint.textContent).to.equal('');
+    second.open = true;
+    expect(first.open && second.open).to.be.true;
+
+    el.exclusive = true;
+    expect(hint.hidden).to.be.false;
+    expect(hint.textContent).to.equal('Only one panel at a time.');
+    expect(first._hint.textContent).to.equal(hint.textContent);
+    expect(first.shadowRoot.activeElement).to.equal(first.button);
   });
 
   it('non-exclusive mode allows multiple items open', async () => {

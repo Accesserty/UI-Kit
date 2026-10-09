@@ -5,6 +5,11 @@
 
 A framework-agnostic library of **15 Web Components** designed to support accessible semantics, keyboard navigation and focus management. Names, content, themes and framework integration still require appropriate configuration and testing.
 
+Visit the [Accesserty UI Kit overview](https://accesserty.com/en/uikit/) for
+getting-started guidance, or try the [online Playground](https://accesserty.com/en/uikit/playground/)
+to explore component styles and copy examples. The API reference and local demos
+are available in [`demo/`](demo/index.html); framework setup is covered below.
+
 > **Philosophy:** Copy a single JS file, drop in a `<script>` tag, start using `<au-*>` elements. No build step, no npm install, no framework lock-in.
 
 

@@ -17,7 +17,7 @@ class AuAccordion extends HTMLElement {
     this._exclusiveHint.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;padding:0;';
     const hintId = `au-accordion-hint-${Math.random().toString(36).slice(2)}`;
     this._exclusiveHint.id = hintId;
-    this._exclusiveHint.textContent = 'Only one section may be expanded at a time.';
+    this._exclusiveHint.hidden = true;
 
     this.shadowRoot.appendChild(this._exclusiveHint);
     this.shadowRoot.appendChild(this._container);
@@ -33,7 +33,6 @@ class AuAccordion extends HTMLElement {
     this.addEventListener('au-toggle', this._onToggle);
     this._childrenObserver.observe(this, { childList: true });
     this._updateExclusiveAria();
-    this._syncItems();
   }
 
   disconnectedCallback() {
@@ -60,7 +59,6 @@ class AuAccordion extends HTMLElement {
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'exclusive' && oldValue !== newValue) {
       this._updateExclusiveAria();
-      this._syncItems();
     }
     if (name === 'data-text-exclusive-hint' && oldValue !== newValue) {
       this._updateExclusiveHint();
@@ -69,7 +67,10 @@ class AuAccordion extends HTMLElement {
 
   _updateExclusiveHint() {
     if (!this._exclusiveHint) return;
-    this._exclusiveHint.textContent = this.getAttribute('data-text-exclusive-hint') || 'Only one section may be expanded at a time.';
+    this._exclusiveHint.hidden = !this.exclusive;
+    this._exclusiveHint.textContent = this.exclusive
+      ? this.getAttribute('data-text-exclusive-hint') || 'Only one section may be expanded at a time.'
+      : '';
     this._syncItems();
   }
 
@@ -79,6 +80,7 @@ class AuAccordion extends HTMLElement {
     } else {
       this._container.removeAttribute('aria-describedby');
     }
+    this._updateExclusiveHint();
   }
 
   _handleToggle(e) {

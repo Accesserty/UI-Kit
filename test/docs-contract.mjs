@@ -6,6 +6,13 @@ import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
+const packageInfo = JSON.parse(await readFile(resolve(root, 'package.json'), 'utf8'));
+const readme = await readFile(resolve(root, 'README.md'), 'utf8');
+assert.equal(packageInfo.homepage, 'https://accesserty.com/en/uikit/');
+assert.equal(packageInfo.private, true, 'documentation changes must not enable npm publication');
+for (const href of [packageInfo.homepage, `${packageInfo.homepage}playground/`]) {
+  assert.ok(readme.includes(`](${href})`), `README missing official destination: ${href}`);
+}
 const demoFiles = (await readdir(resolve(root, 'demo')))
   .filter(name => name.endsWith('.html'))
   .map(name => resolve(root, 'demo', name));
