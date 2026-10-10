@@ -513,6 +513,7 @@ au-tree:not(:defined) {
   display: block;
 }
 
+/* Labels use line-height: normal, so reserve one line in lh: it follows the font. */
 au-input:not(:defined) {
   container-type: inline-size;
 
@@ -525,26 +526,44 @@ au-input:not(:defined) {
   &[data-size="large"]::before { block-size: 4.5rem; }
 
   @container (width < 768px) {
-    &::before { block-size: 5.75rem; }
-    &[data-size="small"]::before { block-size: 4.25rem; }
-    &[data-size="large"]::before { block-size: 7.9375rem; }
+    &::before { block-size: calc(4.625rem + 1lh); }
+    &[data-size="small"]::before { block-size: calc(3.125rem + 1lh); }
+    &[data-size="large"]::before { font-size: 1.25rem; block-size: calc(6.5rem + 1lh); }
   }
-  &[data-layout="vertical"]::before { block-size: 5.75rem; }
-  &[data-layout="vertical"][data-size="small"]::before { block-size: 4.25rem; }
-  &[data-layout="vertical"][data-size="large"]::before { block-size: 7.9375rem; }
+  &[data-layout="vertical"]::before { block-size: calc(4.625rem + 1lh); }
+  &[data-layout="vertical"][data-size="small"]::before { block-size: calc(3.125rem + 1lh); }
+  &[data-layout="vertical"][data-size="large"]::before { font-size: 1.25rem; block-size: calc(6.5rem + 1lh); }
 }
 
-au-textarea:not(:defined) { min-block-size: 6rem; }
+au-textarea:not(:defined) { min-block-size: calc(4.875rem + 1lh); }
 
-au-file-upload:not(:defined) { min-block-size: calc(8.0625rem + 2 * clamp(0.75rem, 4vw, 2rem)); }
+/* Three 1rem lines (label, button, drop text) and one 0.875rem line (usage). */
+au-file-upload:not(:defined) {
+  &::before {
+    content: "";
+    display: block;
+    block-size: calc(3.625rem + 2 * clamp(0.75rem, 4vw, 2rem) + 3lh);
+  }
+  &::after {
+    content: "";
+    display: block;
+    font-size: 0.875rem;
+    block-size: 1lh;
+  }
+}
 
 /* One 2.5rem row per visible node; set --tree-rows on each tree. */
 au-tree:not(:defined) { min-block-size: calc(var(--tree-rows, 1) * 2.5rem); }
 ```
 
 The values match the default tokens with a single-line label, no description or
-error message; a test keeps them in step with the components. `au-input` sizes
-itself with a container query at 768px, which the reserved `::before` mirrors.
+error message; a test keeps them in step with the components in several fonts,
+including Traditional Chinese ones. Labels use `line-height: normal`, whose height
+depends on the font, so each text line is reserved as `1lh` (the line height of the
+current font) rather than in pixels. `au-input` sizes itself with a container query
+at 768px, which the reserved `::before` mirrors. Browsers without the `lh` unit
+(before Chrome 109, Firefox 120, Safari 16.4) ignore those declarations and reserve
+nothing, as before.
 Measure again (`element.getBoundingClientRect().height` after registration) if you
 change sizes, padding, fonts or line heights, add descriptions, or use another
 `rows` value. Measured on the demo pages under simulated Slow 4G with 4× CPU

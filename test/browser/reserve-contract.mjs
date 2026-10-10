@@ -1,6 +1,7 @@
 // node test/browser/reserve-contract.mjs
 // The README's :not(:defined) reservation CSS must reserve exactly the registered
-// height of each default variant, at widths on both sides of au-input's 768px query.
+// height of each default variant, at widths on both sides of au-input's 768px query,
+// in several fonts: labels use line-height: normal, so heights follow the font.
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createServer} from 'node:http';
@@ -27,7 +28,8 @@ const server=createServer(async(req,res)=>{try{
   if(url.pathname==='/reserve.html'){
     res.setHeader('Content-Type','text/html');
     const script=url.searchParams.get('registered')==='1'?'<script src="/dist/accesserty-ui-kit.min.js"></script>':'';
-    res.end(`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="stylesheet" href="/src/css/au-style.css"><style>${css}</style>${script}<body style="margin:16px">${body}</body></html>`);
+    const font=url.searchParams.get('font');
+    res.end(`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="stylesheet" href="/src/css/au-style.css"><style>${css}</style>${script}<style>${font==='default'?'':`:root{font-family:${font}}`}</style><body style="margin:16px">${body}</body></html>`);
     return;
   }
   const file=resolve(root,'.'+url.pathname);
@@ -38,18 +40,21 @@ const server=createServer(async(req,res)=>{try{
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const browser=await chromium.launch({channel:'chrome',headless:true});
 try{
-  for(const width of [320,600,767,800,1280]){
+  // Generic families exist everywhere (a lone "monospace" would trigger Chrome's 13px
+  // monospace size quirk); the CJK list covers macOS (PingFang) and Linux CI (Noto CJK).
+  const fonts=['default','serif','"Courier New",monospace','"PingFang TC","Noto Sans CJK TC",sans-serif'];
+  for(const font of fonts)for(const width of [320,600,767,800,1280]){
     const page=await browser.newPage({viewport:{width,height:900}});
     const heights=async registered=>{
-      await page.goto(`http://127.0.0.1:${server.address().port}/reserve.html?registered=${registered}`);
+      await page.goto(`http://127.0.0.1:${server.address().port}/reserve.html?registered=${registered}&font=${encodeURIComponent(font)}`);
       await page.waitForFunction(r=>[...document.querySelectorAll('body > [label],body > au-tree')].every(e=>!!e.shadowRoot===r),registered===1);
       return page.evaluate(()=>[...document.querySelectorAll('body > [label],body > au-tree')].map(e=>({
         name:e.outerHTML.slice(0,e.outerHTML.indexOf('>')+1),height:Math.round(e.getBoundingClientRect().height*10)/10})));
     };
     const reserved=await heights(0),registered=await heights(1);
     registered.forEach((item,i)=>assert.ok(Math.abs(item.height-reserved[i].height)<=0.5,
-      `${width}px ${item.name}: reserved ${reserved[i].height}px, registered ${item.height}px`));
+      `${font} ${width}px ${item.name}: reserved ${reserved[i].height}px, registered ${item.height}px`));
     await page.close();
   }
-  console.log('PASS README reservation CSS: 10 variants at 320/600/767/800/1280px reserve their registered heights');
+  console.log('PASS README reservation CSS: 10 variants × 4 fonts × 320/600/767/800/1280px reserve their registered heights');
 }finally{await browser.close();server.close();}
