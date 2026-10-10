@@ -347,4 +347,26 @@ describe('AuRating', () => {
     rating.disabled = false; rating.readonly = true;
     expect(new FormData(form).get('review')).to.equal('2');
   });
+
+  it('has the new value when the native input event reaches the host', async () => {
+    // Vue v-model reads value on input; reading the old value wrote it back.
+    const rating = await fixture(html`<au-rating label="Score" value="3"></au-rating>`);
+    const seen = [];
+    rating.addEventListener('input', () => seen.push(['input', rating.value]));
+    rating.addEventListener('change', e => seen.push(['change', rating.value, e.detail.value]));
+    rating.shadowRoot.querySelector('input[value="4"]').click();
+    rating.shadowRoot.querySelector('input[value="4"]').focus();
+    rating.shadowRoot.activeElement.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowRight', bubbles: true, composed: true}));
+    expect(seen).to.deep.equal([['input', 4], ['change', 4, 4], ['input', 5], ['change', 5, 5]]);
+  });
+
+  it('ignores input while readonly or disabled', async () => {
+    const rating = await fixture(html`<au-rating label="Score" value="2" readonly></au-rating>`);
+    const radio = rating.shadowRoot.querySelector('input[value="4"]');
+    radio.disabled = false; radio.dispatchEvent(new Event('input', {bubbles: true, composed: true}));
+    expect(rating.value).to.equal(2);
+    rating.readonly = false; rating.disabled = true;
+    radio.disabled = false; radio.dispatchEvent(new Event('input', {bubbles: true, composed: true}));
+    expect(rating.value).to.equal(2);
+  });
 });

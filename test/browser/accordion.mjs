@@ -31,7 +31,21 @@ const setup=()=>{
 const nested=()=>accordionFixture.first.open&&accordionFixture.inner.open&&eventLog.length===0;
 const collapsed=()=>{
   const f=accordionFixture;
-  return !f.first.open&&f.first.region.hidden&&f.first.region.inert&&f.first.shadowRoot.activeElement===f.first.button&&eventLog.length===1;
+  const region=f.first.region,untilFound=region.getAttribute('hidden')==='until-found';
+  return !f.first.open&&region.hasAttribute('hidden')&&region.inert===!untilFound&&f.first.shadowRoot.activeElement===f.first.button&&eventLog.length===1;
+};
+// A fragment link into collapsed nested content must open every enclosing item
+// where the browser supports hidden="until-found"; elsewhere regions stay hidden + inert.
+const reveal=()=>{
+  const host=document.createElement('div');
+  host.innerHTML='<au-accordion-item><span slot="heading">Findable</span><div slot="content"><au-accordion-item><span slot="heading">Inner</span><div slot="content"><p id="findable-text">Found by link</p></div></au-accordion-item></div></au-accordion-item>';
+  document.body.append(host);
+  const item=host.firstElementChild,inner=item.querySelector('au-accordion-item'),region=item.region,log=[];item.addEventListener('au-toggle',e=>log.push(e.detail.open));
+  const done=result=>{host.remove();history.replaceState(null,'',location.pathname+location.search);return result;};
+  if(!customElements.get('au-accordion-item').supportsUntilFound)return done(region.getAttribute('hidden')===''&&region.inert?'fallback':'bad fallback');
+  if(region.getAttribute('hidden')!=='until-found'||region.inert||region.getBoundingClientRect().height!==0)return done('bad collapsed region');
+  location.hash='findable-text';
+  return new Promise(r=>setTimeout(r,300)).then(()=>done(item.open&&inner.open&&!region.hasAttribute('hidden')&&!inner.region.hasAttribute('hidden')&&item.button.getAttribute('aria-expanded')==='true'&&document.getElementById('findable-text').checkVisibility()&&log.join()==='true,true'?'revealed':'not revealed: '+JSON.stringify({outer:item.open,inner:inner.open,log})));
 };
 const translated=()=>{
   const f=accordionFixture,button=f.first.button;
@@ -50,7 +64,9 @@ async function scenario(api){
   assert.equal(await api.evaluate(()=>!accordionFixture.first.open&&accordionFixture.second.open&&eventLog.length===4&&accordionFixture.second.shadowRoot.activeElement===accordionFixture.second.button),true);
   await api.key('Space');assert.equal(await api.evaluate(()=>!accordionFixture.second.open&&eventLog.length===5),true);
   await api.tab();assert.equal(await api.evaluate(()=>document.activeElement.id),'after');
+  const found=await api.evaluate(reveal);assert.ok(['revealed','fallback'].includes(found),found);
   await api.evaluate(()=>{accordionFixture.first.open=true;accordionFixture.first.button.focus();});
+  return found;
 }
 try{
   if(browsers.includes('chrome')){
@@ -60,7 +76,7 @@ try{
       page.on('pageerror',e=>errors.push(String(e)));
       for(const url of urls){
         await page.goto(url);await page.waitForFunction(ready);
-        await scenario({evaluate:fn=>page.evaluate(fn),key:key=>page.keyboard.press(key),tab:()=>page.keyboard.press('Tab')});
+        assert.equal(await scenario({evaluate:fn=>page.evaluate(fn),key:key=>page.keyboard.press(key),tab:()=>page.keyboard.press('Tab')}),'revealed');
         const cdp=await page.context().newCDPSession(page),ax=await cdp.send('Accessibility.getFullAXTree');
         const button=ax.nodes.find(n=>n.role?.value==='button'&&n.name?.value==='第一個答案 Optional');
         assert.equal(button.description.value,'一次只能展開一個區塊');
@@ -75,7 +91,7 @@ try{
         assert.equal(await page.evaluate(()=>getComputedStyle(accordionFixture.first.button).outlineStyle),'solid');
         assert.equal(await page.evaluate(()=>getComputedStyle(accordionFixture.first.button).transitionDuration),'0s');
         await page.emulateMedia({forcedColors:'none',reducedMotion:'no-preference'});
-        console.log('Chrome '+url.split('/').at(-1)+' '+new URL(url).protocol+' PASS');
+        console.log('Chrome '+url.split('/').at(-1)+' '+new URL(url).protocol+' PASS: until-found revealed by link');
       }
       const output=await mkdtemp(join(tmpdir(),'accordion-check-'));await page.screenshot({path:join(output,'accordion-narrow.png')});
       assert.deepEqual(errors,[]);console.log('Screenshot: '+output);
@@ -100,10 +116,10 @@ try{
             if(optionTab){await driver.executeScript('document.getElementById("p1").focus()');await driver.actions().keyDown(webdriver.Key.ALT).sendKeys(webdriver.Key.TAB).keyUp(webdriver.Key.ALT).perform();assert.equal(await driver.executeScript('return document.activeElement.id'),'p2');}
             await driver.executeScript('probe.remove()');
           }
-          await scenario({evaluate:fn=>driver.executeScript(fn),key:k=>key(k==='Space'?webdriver.Key.SPACE:webdriver.Key.ENTER),tab:()=>optionTab?driver.actions().keyDown(webdriver.Key.ALT).sendKeys(webdriver.Key.TAB).keyUp(webdriver.Key.ALT).perform():key(webdriver.Key.TAB)});
+          const found=await scenario({evaluate:fn=>driver.executeScript(fn),key:k=>key(k==='Space'?webdriver.Key.SPACE:webdriver.Key.ENTER),tab:()=>optionTab?driver.actions().keyDown(webdriver.Key.ALT).sendKeys(webdriver.Key.TAB).keyUp(webdriver.Key.ALT).perform():key(webdriver.Key.TAB)});
           const button=await driver.executeScript('return accordionFixture.first.button'),region=await driver.executeScript('return accordionFixture.first.region');
           assert.equal(await button.getAccessibleName(),'第一個答案 Optional');assert.equal(await region.getAccessibleName(),'第一個答案 Optional');
-          console.log(name+' '+url.split('/').at(-1)+' '+new URL(url).protocol+' PASS: nested exclusivity, focus, events, names, '+(optionTab?'Option+Tab':'Tab'));
+          console.log(name+' '+url.split('/').at(-1)+' '+new URL(url).protocol+' PASS: nested exclusivity, focus, events, names, '+(optionTab?'Option+Tab':'Tab')+', until-found '+found);
         }
       }finally{if(driver)await driver.quit();}
     }

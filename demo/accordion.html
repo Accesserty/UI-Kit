@@ -702,7 +702,9 @@ document.querySelector('au-accordion-item').addEventListener('au-toggle', (e) =&
     <section>
       <h2>Integration limits</h2>
       <p>
-        Panels show and hide immediately; collapsed content is hidden and inert. Header and icon transitions
+        Panels show and hide immediately. Collapsed content stays out of the Tab order and accessibility tree;
+        where the browser supports <code>hidden="until-found"</code>, find-in-page and links into it open the panel,
+        otherwise it is hidden and inert. Header and icon transitions
         respect reduced-motion preferences. Focus outlines remain visible in forced-colors mode.
       </p>
       <p>

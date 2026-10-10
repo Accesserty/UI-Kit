@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-/*! Accesserty UI Kit v2.0.3 */
+/*! Accesserty UI Kit v2.0.5 */
 (function() {
   "use strict";
   class AuAccordion extends HTMLElement {
@@ -90,7 +90,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
     }
   }
-  class AuAccordionItem extends HTMLElement {
+  const _AuAccordionItem = class _AuAccordionItem extends HTMLElement {
     constructor() {
       super();
       this.attachShadow({ mode: "open" });
@@ -224,8 +224,15 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
             border-right: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
             border-bottom: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
             border-radius: var(--au-accordion-content-border-radius, 0);
-            &[hidden] {
+            &[hidden]:not([hidden="until-found" i]) {
               display: none !important;
+            }
+            /* Collapsed but searchable: find-in-page and fragment links can reveal it.
+               Zero the box so no padded strip shows, even under ::part() overrides. */
+            &[hidden="until-found" i] {
+              content-visibility: hidden;
+              padding-block: 0 !important;
+              border-bottom-width: 0 !important;
             }
           }
           .exclusive-hint { position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap; }
@@ -246,7 +253,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         </button>
         </div>
         <span class="exclusive-hint" id="${regionId}-hint"></span>
-        <div class="region" role="region" id="${regionId}" aria-labelledby="${titleId}" hidden inert part="region">
+        <div class="region" role="region" id="${regionId}" aria-labelledby="${titleId}" hidden part="region">
             <slot name="content"></slot>
         </div>
       `;
@@ -256,6 +263,15 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.heading = this.shadowRoot.querySelector('[role="heading"]');
       this._hint = this.shadowRoot.querySelector(".exclusive-hint");
       this.button.addEventListener("click", () => this.toggleAccordion());
+      this.region.addEventListener("beforematch", () => {
+        this._revealing = true;
+        try {
+          this.open = true;
+        } finally {
+          this._revealing = false;
+        }
+        setTimeout(() => this.updateExpanded());
+      });
     }
     connectedCallback() {
       if (Object.hasOwn(this, "open")) {
@@ -309,8 +325,17 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         }
       }
       this.button.setAttribute("aria-expanded", isOpen);
-      this.region.hidden = !isOpen;
-      this.region.inert = !isOpen;
+      if (isOpen && this._revealing) return;
+      if (isOpen) {
+        this.region.removeAttribute("hidden");
+        this.region.inert = false;
+      } else if (_AuAccordionItem.supportsUntilFound) {
+        this.region.setAttribute("hidden", "until-found");
+        this.region.inert = false;
+      } else {
+        this.region.hidden = true;
+        this.region.inert = true;
+      }
     }
     updateSemantics() {
       const level = Number(this.getAttribute("heading-level"));
@@ -341,7 +366,9 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     toggleAccordion() {
       this.open = !this.open;
     }
-  }
+  };
+  __publicField(_AuAccordionItem, "supportsUntilFound", typeof HTMLElement !== "undefined" && "onbeforematch" in HTMLElement.prototype);
+  let AuAccordionItem = _AuAccordionItem;
   if (typeof customElements !== "undefined" && !customElements.get("au-accordion-item")) {
     customElements.define("au-accordion-item", AuAccordionItem);
   }
@@ -4428,6 +4455,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this._legend = this.shadowRoot.querySelector("legend");
       this._scoreEl = this.shadowRoot.querySelector(".score");
       this._internals = this.attachInternals();
+      this._fieldset.addEventListener("input", (e) => this.handleInput(e));
       this._fieldset.addEventListener("change", (e) => this.handleChange(e));
       this._fieldset.addEventListener("keydown", (e) => this.handleKeyDown(e));
     }
@@ -4641,6 +4669,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         max: this.max,
         scoreInfo: this.scoreInfo
       });
+    }
+    handleInput(e) {
+      if (e.target.type !== "radio" || this.disabled || this._formDisabled || this.readonly) return;
+      this.value = parseInt(e.target.value);
     }
     handleChange(e) {
       if (e.target.type === "radio") {
@@ -6092,7 +6124,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       for (const node of this._container.children) node.setExpanded(true);
     }
   }
-  class AuTreeNode extends HTMLElement {
+  const _AuTreeNode = class _AuTreeNode extends HTMLElement {
     constructor() {
       super();
       this.attachShadow({ mode: "open" });
@@ -6107,7 +6139,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       <style>
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
         :host {display:block;min-width:0;outline:none;}
-        [hidden] {display:none!important;}
+        [hidden]:not([hidden="until-found" i]) {display:none!important;}
+        [role=group][hidden="until-found" i] {content-visibility:hidden;}
         .node-content {
           display:flex;align-items:center;min-width:0;box-sizing:border-box;
           gap:var(--au-tree-node-padding-horizontal,0.25rem);
@@ -6164,7 +6197,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       <div class="node-content">
         <button type="button" class="toggle-btn" tabindex="-1"><svg class="toggle-icon" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
         <span class="label"><span class="checkmark" aria-hidden="true"></span><span class="text"></span></span>
-      </div><div role="group" hidden inert></div>`;
+      </div><div role="group" hidden></div>`;
       this._row = this.shadowRoot.querySelector(".node-content");
       this._group = this.shadowRoot.querySelector("[role=group]");
       this._checkmark = this.shadowRoot.querySelector(".checkmark");
@@ -6173,6 +6206,16 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this._button.addEventListener("click", () => {
         this.setExpanded(!this.expanded);
         this.focus();
+      });
+      this._group.addEventListener("beforematch", (event) => {
+        if (event.target !== this._group) return;
+        this._revealing = true;
+        try {
+          this.setExpanded(true);
+        } finally {
+          this._revealing = false;
+        }
+        setTimeout(() => this.syncPresentation());
       });
       this._row.addEventListener("click", (event) => {
         if (event.target.closest("button")) return;
@@ -6323,8 +6366,18 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this._button.classList.toggle("hidden", !this.hasChildren);
       this._button.setAttribute("aria-hidden", String(!this.hasChildren));
       this._checkmark.hidden = !this.hasCheckbox;
-      this._group.hidden = !this.hasChildren || !this.expanded;
-      this._group.inert = this._group.hidden;
+      if (this.hasChildren && this.expanded) {
+        if (!this._revealing) {
+          this._group.removeAttribute("hidden");
+          this._group.inert = false;
+        }
+      } else if (this.hasChildren && _AuTreeNode.supportsUntilFound) {
+        this._group.setAttribute("hidden", "until-found");
+        this._group.inert = false;
+      } else {
+        this._group.hidden = true;
+        this._group.inert = true;
+      }
       if (this._data.lang) this.setAttribute("lang", String(this._data.lang));
       else this.removeAttribute("lang");
     }
@@ -6386,7 +6439,9 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       if (tree && before === after) return;
       this.dispatchEvent(new CustomEvent("au-tree-node-check-change", { bubbles: true, composed: true, detail: { checked: this.checked, node: this } }));
     }
-  }
+  };
+  __publicField(_AuTreeNode, "supportsUntilFound", typeof HTMLElement !== "undefined" && "onbeforematch" in HTMLElement.prototype);
+  let AuTreeNode = _AuTreeNode;
   if (typeof customElements !== "undefined") {
     if (!customElements.get("au-tree-node")) customElements.define("au-tree-node", AuTreeNode);
     if (!customElements.get("au-tree")) customElements.define("au-tree", AuTree);

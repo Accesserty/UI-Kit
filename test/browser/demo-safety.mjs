@@ -34,7 +34,7 @@ try {
     const title = document.getElementById(el.getAttribute('aria-labelledby'));
     return title && el.contains(title) && title.textContent.trim();
   })), true);
-  const opener = page.locator('button[onclick*="dialog-basic"]').first();
+  const opener = page.locator('button[command="show-modal"][commandfor="dialog-basic"]');
   await opener.click();
   const dialogAXSession = await page.context().newCDPSession(page);
   const dialogAX = await dialogAXSession.send('Accessibility.getFullAXTree');
@@ -42,7 +42,7 @@ try {
   await dialogAXSession.detach();
   await page.keyboard.press('Escape');
   assert.equal(await opener.evaluate(el => el === document.activeElement), true);
-  await page.locator('button[onclick*="dialog-backdrop"]').click();
+  await page.locator('button[command="show-modal"][commandfor="dialog-backdrop"]').click();
   await page.locator('#dialog-backdrop').click({position:{x:2,y:2}});
   assert.equal(await page.locator('#dialog-backdrop').evaluate(el => el.open), true, 'dialog padding is not the backdrop');
   await page.keyboard.press('Escape');

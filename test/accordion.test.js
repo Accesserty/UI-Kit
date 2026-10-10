@@ -2,6 +2,11 @@
 import { html, fixture, expect, nextFrame } from '@open-wc/testing';
 import '../src/components/accordion.js';
 
+// Collapsed regions stay searchable (hidden="until-found") where the browser can
+// reveal them, and fall back to hidden + inert elsewhere.
+const untilFound = customElements.get('au-accordion-item').supportsUntilFound;
+const collapsedHidden = untilFound ? 'until-found' : '';
+
 describe('AuAccordion and AuAccordionItem', () => {
   it('renders the correct number of AuAccordionItem components', async () => {
     const el = await fixture(html`
@@ -37,7 +42,7 @@ describe('AuAccordion and AuAccordionItem', () => {
     const button = accordionItem.shadowRoot.querySelector('button');
     const region = accordionItem.shadowRoot.querySelector('div[role="region"]');
     expect(button.getAttribute('aria-expanded')).to.equal('false');
-    expect(region.getAttribute('hidden')).to.equal('');
+    expect(region.getAttribute('hidden')).to.equal(collapsedHidden);
     // Simulate click to expand
     button.click();
     await accordionItem.updateComplete;
@@ -50,7 +55,7 @@ describe('AuAccordion and AuAccordionItem', () => {
     await accordionItem.updateComplete;
     expect(accordionItem.hasAttribute('open')).to.be.false;
     expect(button.getAttribute('aria-expanded')).to.equal('false');
-    expect(region.getAttribute('hidden')).to.equal('');
+    expect(region.getAttribute('hidden')).to.equal(collapsedHidden);
 
   });
 
@@ -116,7 +121,7 @@ describe('AuAccordion and AuAccordionItem', () => {
     item.open = false;
     expect(item.hasAttribute('open')).to.be.false;
     expect(button.getAttribute('aria-expanded')).to.equal('false');
-    expect(region.getAttribute('hidden')).to.equal('');
+    expect(region.getAttribute('hidden')).to.equal(collapsedHidden);
   });
 
   it('dispatches au-toggle event with correct detail on click', async () => {
@@ -347,7 +352,7 @@ describe('AuAccordion and AuAccordionItem', () => {
     </au-accordion-item></div>`);
     const item=host.querySelector('au-accordion-item');
     host.querySelector('#inside').focus();item.open=false;
-    expect(item.shadowRoot.activeElement).to.equal(item.button);expect(item.region.inert).to.be.true;
+    expect(item.shadowRoot.activeElement).to.equal(item.button);expect(item.region.inert).to.equal(!untilFound);
     item.open=true;
     const shadow=host.querySelector('#nested').attachShadow({mode:'open'});shadow.innerHTML='<button>Nested</button>';
     shadow.firstElementChild.focus();item.open=false;
@@ -396,5 +401,59 @@ describe('AuAccordion and AuAccordionItem', () => {
     expect(Object.hasOwn(item,'open')).to.be.false;expect(Object.hasOwn(root,'exclusive')).to.be.false;
     expect(item.hasAttribute('open')).to.be.true;expect(root.hasAttribute('exclusive')).to.be.true;
     expect(item.region.hidden).to.be.false;
+  });
+
+  it('opens a collapsed item when find-in-page or a link reveals its content', async () => {
+    const el = await fixture(html`<au-accordion exclusive>
+      <au-accordion-item open><span slot="heading">Returns</span><div slot="content">Seven days.</div></au-accordion-item>
+      <au-accordion-item><span slot="heading">Shipping</span><div slot="content">
+        <au-accordion-item id="ship-inner"><span slot="heading">Rates</span><div slot="content"><p id="ship-free">Free over 1000.</p></div></au-accordion-item>
+      </div></au-accordion-item>
+    </au-accordion>`);
+    const [first, second] = el.children;
+    expect(second.region.getAttribute('hidden')).to.equal(collapsedHidden);
+    expect(second.region.inert).to.equal(!untilFound);
+    if (!untilFound) return;
+    const events = [];
+    el.addEventListener('au-toggle', e => events.push(e.detail.open));
+    second.region.dispatchEvent(new Event('beforematch'));
+    expect(second.open).to.be.true;
+    expect(second.button.getAttribute('aria-expanded')).to.equal('true');
+    // The browser removes hidden after the event; removing it during the event
+    // stops Chrome from revealing enclosing items. The item resyncs afterwards.
+    expect(second.region.getAttribute('hidden')).to.equal('until-found');
+    await new Promise(resolve => setTimeout(resolve));
+    expect(second.region.hasAttribute('hidden')).to.be.false;
+    expect(first.open).to.be.false;
+    expect(first.region.getAttribute('hidden')).to.equal('until-found');
+    // The group closes the other item while the opening event is still dispatching.
+    expect(events).to.deep.equal([false, true]);
+    // A real fragment navigation into collapsed content runs the same path,
+    // including nested items: the outer one must open too.
+    const inner = el.querySelector('#ship-inner');
+    second.open = false; first.open = false; events.length = 0;
+    location.hash = 'ship-free';
+    await new Promise(resolve => setTimeout(resolve, 100));
+    expect(inner.open).to.be.true;
+    expect(second.open).to.be.true;
+    expect(el.querySelector('#ship-free').checkVisibility()).to.be.true;
+    expect(events).to.deep.equal([true, true]);
+    history.replaceState(null, '', location.pathname + location.search);
+  });
+
+  it('falls back to hidden + inert where until-found is unsupported', async () => {
+    const Item = customElements.get('au-accordion-item'), saved = Item.supportsUntilFound;
+    Item.supportsUntilFound = false;
+    try {
+      const item = await fixture(html`<au-accordion-item><span slot="heading">Q</span><div slot="content"><button>A</button></div></au-accordion-item>`);
+      expect(item.region.getAttribute('hidden')).to.equal('');
+      expect(item.region.inert).to.be.true;
+      expect(getComputedStyle(item.region).display).to.equal('none');
+      item.open = true;
+      expect(item.region.hasAttribute('hidden')).to.be.false;
+      expect(item.region.inert).to.be.false;
+    } finally {
+      Item.supportsUntilFound = saved;
+    }
   });
 });

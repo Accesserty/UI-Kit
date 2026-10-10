@@ -180,6 +180,9 @@ class AuRating extends HTMLElement {
     this._legend = this.shadowRoot.querySelector('legend');
     this._scoreEl = this.shadowRoot.querySelector('.score');
     this._internals = this.attachInternals();
+    // The native input event leaves the shadow root before change; update the value
+    // first so host listeners reading value on input (e.g. Vue v-model) see the new one.
+    this._fieldset.addEventListener('input', (e) => this.handleInput(e));
     this._fieldset.addEventListener('change', (e) => this.handleChange(e));
     this._fieldset.addEventListener('keydown', (e) => this.handleKeyDown(e));
   }
@@ -419,6 +422,11 @@ class AuRating extends HTMLElement {
         max: this.max,
         scoreInfo: this.scoreInfo
     });
+  }
+
+  handleInput(e) {
+    if (e.target.type !== 'radio' || this.disabled || this._formDisabled || this.readonly) return;
+    this.value = parseInt(e.target.value);
   }
 
   handleChange(e) {

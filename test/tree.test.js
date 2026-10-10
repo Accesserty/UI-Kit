@@ -89,7 +89,10 @@ describe('AuTree', () => {
     const child=el.getAllNodes()[1];el.focusNode(child);root.setExpanded(false);
     expect(el.shadowRoot.activeElement).to.equal(root);
     expect(root.tabIndex).to.equal(0);expect(child.tabIndex).to.equal(-1);
-    expect(root.shadowRoot.querySelector('[role=group]').inert).to.be.true;
+    const group=root.shadowRoot.querySelector('[role=group]');
+    // Collapsed children stay searchable (until-found) where supported, else hidden + inert.
+    expect(group.inert).to.equal(!customElements.get('au-tree-node').supportsUntilFound);
+    expect(child.checkVisibility()).to.be.false;
   });
 
   it('expands only the current sibling level with *', async () => {
@@ -169,7 +172,9 @@ describe('AuTree', () => {
     // Check internal structure
     const group = rootNode.shadowRoot.querySelector('div[role="group"]');
     expect(group).to.exist;
-    expect(window.getComputedStyle(group).display).to.equal('none');
+    // until-found keeps the box but skips its contents; the fallback is display:none.
+    expect(group.getBoundingClientRect().height).to.equal(0);
+    expect(group.firstElementChild.checkVisibility()).to.be.false;
   });
 
   it('has accessible roles', async () => {
@@ -330,6 +335,51 @@ describe('AuTree', () => {
 
       expect(rootNode.indeterminate).to.be.true;
       expect(rootNode.checked).to.be.false;
+    });
+  });
+
+  describe('collapsed children and find-in-page', () => {
+    const data = () => [{id:'docs',label:'Docs',children:[{id:'guides',label:'Guides',children:[{id:'deep',label:'Deep item'}]}]}];
+    const Node = () => customElements.get('au-tree-node');
+
+    it('keeps collapsed children searchable and expands on beforematch without moving focus', async () => {
+      const tree = await fixture(html`<au-tree aria-label="Files"></au-tree>`);
+      tree.data = data();
+      const [docs, guides] = tree.getAllNodes();
+      if (!Node().supportsUntilFound) { expect(docs._group.getAttribute('hidden')).to.equal(''); return; }
+      expect(docs._group.getAttribute('hidden')).to.equal('until-found');
+      expect(docs._group.inert).to.be.false;
+      expect(tree.collectNodes(tree.shadowRoot, true)).to.deep.equal([docs]);
+      tree.focus();
+      guides._group.dispatchEvent(new Event('beforematch', {bubbles: true}));
+      docs._group.dispatchEvent(new Event('beforematch', {bubbles: true}));
+      expect(docs.expanded).to.be.true;
+      expect(guides.expanded).to.be.true;
+      // The browser removes hidden after the event; removing it during the event
+      // stops Chrome from revealing collapsed ancestors. Nodes resync afterwards.
+      expect(docs._group.getAttribute('hidden')).to.equal('until-found');
+      await new Promise(resolve => setTimeout(resolve));
+      expect(docs._group.hasAttribute('hidden')).to.be.false;
+      expect(guides._group.hasAttribute('hidden')).to.be.false;
+      expect(tree.findActiveNode().activeNode).to.equal(docs);
+      expect(tree.collectNodes(tree.shadowRoot, true).map(node => node.data.id)).to.deep.equal(['docs','guides','deep']);
+    });
+
+    it('falls back to hidden + inert where until-found is unsupported', async () => {
+      const saved = Node().supportsUntilFound;
+      Node().supportsUntilFound = false;
+      try {
+        const tree = await fixture(html`<au-tree aria-label="Files"></au-tree>`);
+        tree.data = data();
+        const [docs] = tree.getAllNodes();
+        expect(docs._group.getAttribute('hidden')).to.equal('');
+        expect(docs._group.inert).to.be.true;
+        docs.setExpanded(true);
+        expect(docs._group.hasAttribute('hidden')).to.be.false;
+        expect(docs._group.inert).to.be.false;
+      } finally {
+        Node().supportsUntilFound = saved;
+      }
     });
   });
 });

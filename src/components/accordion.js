@@ -237,8 +237,15 @@ class AuAccordionItem extends HTMLElement {
             border-right: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
             border-bottom: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
             border-radius: var(--au-accordion-content-border-radius, 0);
-            &[hidden] {
+            &[hidden]:not([hidden="until-found" i]) {
               display: none !important;
+            }
+            /* Collapsed but searchable: find-in-page and fragment links can reveal it.
+               Zero the box so no padded strip shows, even under ::part() overrides. */
+            &[hidden="until-found" i] {
+              content-visibility: hidden;
+              padding-block: 0 !important;
+              border-bottom-width: 0 !important;
             }
           }
           .exclusive-hint { position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap; }
@@ -259,7 +266,7 @@ class AuAccordionItem extends HTMLElement {
         </button>
         </div>
         <span class="exclusive-hint" id="${regionId}-hint"></span>
-        <div class="region" role="region" id="${regionId}" aria-labelledby="${titleId}" hidden inert part="region">
+        <div class="region" role="region" id="${regionId}" aria-labelledby="${titleId}" hidden part="region">
             <slot name="content"></slot>
         </div>
       `;
@@ -271,6 +278,15 @@ class AuAccordionItem extends HTMLElement {
     this.heading = this.shadowRoot.querySelector('[role="heading"]');
     this._hint = this.shadowRoot.querySelector('.exclusive-hint');
     this.button.addEventListener('click', () => this.toggleAccordion());
+    // Find-in-page or a link into collapsed content opens the item; the usual
+    // au-toggle follows, so framework bindings and exclusive groups stay in step.
+    // The browser removes hidden itself after this event. Removing it here would
+    // stop Chrome from revealing enclosing items, so the region is resynced later.
+    this.region.addEventListener('beforematch', () => {
+      this._revealing = true;
+      try { this.open = true; } finally { this._revealing = false; }
+      setTimeout(() => this.updateExpanded());
+    });
   }
 
   connectedCallback() {
@@ -281,6 +297,8 @@ class AuAccordionItem extends HTMLElement {
     this.updateSemantics();
     this.updateExclusiveHint();
   }
+
+  static supportsUntilFound = typeof HTMLElement !== 'undefined' && 'onbeforematch' in HTMLElement.prototype;
 
   static get observedAttributes() {
     return ["open", "heading-level", "no-region"];
@@ -323,8 +341,18 @@ class AuAccordionItem extends HTMLElement {
       if (node === this.region) { this.button.focus({preventScroll:true}); break; }
     }
     this.button.setAttribute('aria-expanded', isOpen);
-    this.region.hidden = !isOpen;
-    this.region.inert = !isOpen;
+    if (isOpen && this._revealing) return;
+    if (isOpen) {
+      this.region.removeAttribute('hidden');
+      this.region.inert = false;
+    } else if (AuAccordionItem.supportsUntilFound) {
+      // inert would also block find-in-page, so until-found stands alone here.
+      this.region.setAttribute('hidden', 'until-found');
+      this.region.inert = false;
+    } else {
+      this.region.hidden = true;
+      this.region.inert = true;
+    }
   }
 
   updateSemantics() {

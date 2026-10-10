@@ -211,32 +211,20 @@ select {
 }
 
 [popover] {
-  transition: opacity 0.5s;
+  /* Fade in and out with transitions only. overlay and display keep a closing
+     popover painted in the top layer until the fade ends; the browser already
+     treats it as closed, so it takes no clicks, focus or AT announcements. */
+  opacity: 0;
+  transition:
+    opacity 0.5s,
+    overlay 0.5s allow-discrete,
+    display 0.5s allow-discrete;
 }
 
 [popover]:popover-open {
-  @starting-style {
-    opacity: 0;
-  }
-
   opacity: 1;
-}
 
-[popover]:not(:popover-open) {
-  animation: popover-fade-out 0.5s;
-}
-
-@keyframes popover-fade-out {
-  0% {
-    display: block;
-    opacity: 1;
-  }
-
-  99% {
-    opacity: 0.01;
-  }
-
-  100% {
+  @starting-style {
     opacity: 0;
   }
 }

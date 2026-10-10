@@ -8,6 +8,42 @@
   <title>Dialog Component Demo</title>
   <link rel="stylesheet" href="../src/css/au-style.css">
   <link rel="stylesheet" href="demo.css" />
+  <style>
+    .demo-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .code {
+      background: #f4f4f4;
+      padding: 1rem;
+      overflow: auto;
+    }
+
+    .support-list code {
+      white-space: nowrap;
+    }
+
+    .note-editor textarea {
+      display: block;
+      box-sizing: border-box;
+      inline-size: 100%;
+      min-block-size: 6rem;
+      font: inherit;
+    }
+
+    .confirm[hidden] {
+      display: none;
+    }
+
+    .confirm {
+      margin-block: 1rem;
+      padding: 0.75rem;
+      border: 2px solid currentColor;
+    }
+  </style>
 </head>
 
 <body>
@@ -16,73 +52,217 @@
     <h1>Accesserty UI Kit Dialog</h1>
     <section>
       <h2>Key Point</h2>
-      <p>Using Html dialog element with <a
-          href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog"
-          title="(Open new window) Go to Mozilla" target="_blank" rel="noreferrer noopener">dialog</a></p>
+      <ul>
+        <li>Use the native <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog"
+            title="(Open new window) Go to Mozilla" target="_blank" rel="noreferrer noopener">dialog</a> element. As a
+          modal it moves focus in, keeps Tab inside, makes the page behind it inert, closes on Esc and returns focus
+          to the button that opened it.</li>
+        <li>Open and close it with Invoker Commands: <code>command="show-modal"</code>, <code>close</code> and
+          <code>request-close</code>, with <code>commandfor</code> naming the dialog.
+        </li>
+        <li>Decide what closes it with <code>closedby</code>, and stop accidental closing of unsaved work by
+          handling the <code>cancel</code> event that <code>request-close</code> and Esc fire.</li>
+        <li>Name every dialog with <code>aria-labelledby</code> pointing at its heading, and place initial focus
+          with <code>autofocus</code> on the safest control.</li>
+      </ul>
+      <p>Your browser supports:</p>
+      <ul class="support-list" id="support-list">
+        <li>Checking support needs JavaScript.</li>
+      </ul>
     </section>
+
     <section>
-      <h2>Basic Dialog</h2>
-      <button class="btn" onclick="document.getElementById('dialog-basic').showModal()">Open Modal Dialog</button>
-      <button class="btn" onclick="document.getElementById('dialog-basic').show()">Open Non-Modal Dialog</button>
+      <h2>Modal and non-modal</h2>
+      <div class="demo-row">
+        <button type="button" class="btn" command="show-modal" commandfor="dialog-basic">Open Modal Dialog</button>
+        <button type="button" class="btn" id="open-non-modal">Open Non-Modal Dialog</button>
+      </div>
 
       <dialog id="dialog-basic" aria-labelledby="dialog-basic-title">
         <form method="dialog">
           <h3 id="dialog-basic-title">Dialog Title</h3>
-          <p>This is a native HTML dialog component.</p>
-          <p>It supports accessibility features out of the box.</p>
+          <p>As a modal, the page behind me is inert, Tab stays inside, Esc closes me and focus returns to the
+            button that opened me.</p>
+          <p>Opened with <code>show()</code>, the page stays usable, Tab leaves me, Esc does nothing and there is no
+            backdrop.</p>
           <div class="spacer"></div>
           <button class="btn" value="cancel">Cancel</button>
           <button class="btn" value="confirm" autofocus>Confirm</button>
         </form>
       </dialog>
+      <table>
+        <tr>
+          <th scope="col"></th>
+          <th scope="col"><code>show()</code>, non-modal</th>
+          <th scope="col"><code>showModal()</code> or <code>command="show-modal"</code></th>
+        </tr>
+        <tr>
+          <th scope="row">Page behind</th>
+          <td>Still usable</td>
+          <td>Inert</td>
+        </tr>
+        <tr>
+          <th scope="row">Tab</th>
+          <td>Leaves the dialog</td>
+          <td>Stays in the dialog and browser interface</td>
+        </tr>
+        <tr>
+          <th scope="row">Esc</th>
+          <td>Does nothing</td>
+          <td>Closes it</td>
+        </tr>
+        <tr>
+          <th scope="row"><code>::backdrop</code></th>
+          <td>None</td>
+          <td>Shown</td>
+        </tr>
+      </table>
+      <p class="note">There is no command for a non-modal dialog, so its button calls <code>show()</code>. A
+        <code>&lt;dialog open&gt;</code> written in HTML is also non-modal. When users must finish the task first,
+        use a modal.
+      </p>
+      <pre class="code"><code>&lt;button type="button" command="show-modal" commandfor="confirm"&gt;Delete file&lt;/button&gt;
+&lt;dialog id="confirm" aria-labelledby="confirm-title"&gt;
+  &lt;h2 id="confirm-title"&gt;Delete this file?&lt;/h2&gt;
+  &lt;button type="button" command="close" commandfor="confirm" autofocus&gt;Cancel&lt;/button&gt;
+&lt;/dialog&gt;</code></pre>
     </section>
 
     <section>
-      <h2>Dialog with Backdrop Click Close</h2>
-      <p>Custom JavaScript is needed to close on backdrop click for native dialogs.</p>
-      <button class="btn" onclick="document.getElementById('dialog-backdrop').showModal()">Open Dialog</button>
+      <h2>closedby: who can close it</h2>
+      <div class="demo-row">
+        <button type="button" class="btn" command="show-modal" commandfor="dialog-backdrop">closedby="any"</button>
+        <button type="button" class="btn" command="show-modal" commandfor="dialog-closerequest">
+          closedby="closerequest"</button>
+        <button type="button" class="btn" command="show-modal" commandfor="dialog-none">closedby="none"</button>
+      </div>
 
-      <dialog id="dialog-backdrop" aria-labelledby="dialog-backdrop-title">
+      <dialog id="dialog-backdrop" closedby="any" aria-labelledby="dialog-backdrop-title">
+        <h3 id="dialog-backdrop-title">Click Outside to Close</h3>
+        <p><code>closedby="any"</code>: clicking the backdrop, pressing Esc or the button closes me. Clicking my own
+          padding does not.</p>
+        <button type="button" class="btn" command="close" commandfor="dialog-backdrop" autofocus>Close</button>
+      </dialog>
+      <dialog id="dialog-closerequest" closedby="closerequest" aria-labelledby="dialog-closerequest-title">
+        <h3 id="dialog-closerequest-title">Esc or the Button</h3>
+        <p><code>closedby="closerequest"</code>: Esc or the button closes me; clicking the backdrop does not. This is
+          the default for a modal.</p>
+        <button type="button" class="btn" command="close" commandfor="dialog-closerequest" autofocus>Close</button>
+      </dialog>
+      <dialog id="dialog-none" closedby="none" aria-labelledby="dialog-none-title">
+        <h3 id="dialog-none-title">Only the Button</h3>
+        <p><code>closedby="none"</code>: neither Esc nor the backdrop closes me. Removing Esc takes away the exit
+          keyboard users know best, so keep a visible close button.</p>
+        <button type="button" class="btn" command="close" commandfor="dialog-none" autofocus>Close</button>
+      </dialog>
+      <table>
+        <tr>
+          <th scope="col"><code>closedby</code></th>
+          <th scope="col">Backdrop click</th>
+          <th scope="col">Esc</th>
+          <th scope="col">Close button</th>
+          <th scope="col">Use for</th>
+        </tr>
+        <tr>
+          <td><code>any</code></td>
+          <td>Closes</td>
+          <td>Closes</td>
+          <td>Closes</td>
+          <td>Information and settings</td>
+        </tr>
+        <tr>
+          <td><code>closerequest</code></td>
+          <td>No</td>
+          <td>Closes</td>
+          <td>Closes</td>
+          <td>Forms and important actions (modal default)</td>
+        </tr>
+        <tr>
+          <td><code>none</code></td>
+          <td>No</td>
+          <td>No</td>
+          <td>Closes</td>
+          <td>Rarely; always keep a visible close button</td>
+        </tr>
+      </table>
+      <p class="note">A browser without <code>closedby</code> ignores it and keeps the default: a modal closes on Esc
+        but not on a backdrop click. <code>closedby="none"</code> blocks the user's close requests only; your own
+        <code>close()</code> and <code>requestClose()</code> calls still close it.</p>
+    </section>
+
+    <section>
+      <h2>request-close: ask before losing unsaved work</h2>
+      <div class="demo-row">
+        <button type="button" class="btn" command="show-modal" commandfor="note-editor" id="edit-note">Edit
+          note</button>
+      </div>
+      <p>Saved note: <span id="saved-note">(none yet)</span></p>
+
+      <dialog id="note-editor" class="note-editor" aria-labelledby="note-editor-title">
         <form method="dialog">
-          <h3 id="dialog-backdrop-title">Click Outside to Close</h3>
-          <p>Try clicking the backdrop.</p>
-          <button class="btn">Close</button>
+          <h3 id="note-editor-title">Edit Note</h3>
+          <label for="note-text">Note</label>
+          <textarea id="note-text" name="note" autofocus></textarea>
+          <div class="confirm" id="discard-confirm" tabindex="-1" hidden>
+            <p>You have unsaved changes. Discard them?</p>
+            <button type="button" class="btn" id="keep-editing">Keep editing</button>
+            <button type="button" class="btn" command="close" commandfor="note-editor" value="discard">Discard
+              changes</button>
+          </div>
+          <div class="spacer"></div>
+          <button type="button" class="btn" command="request-close" commandfor="note-editor">Cancel</button>
+          <button class="btn" value="save">Save</button>
         </form>
       </dialog>
-      <script>
-        const dialog = document.getElementById('dialog-backdrop');
-        dialog.addEventListener('click', (event) => {
-          const rect = dialog.getBoundingClientRect();
-          const outside = event.clientX < rect.left || event.clientX > rect.right ||
-            event.clientY < rect.top || event.clientY > rect.bottom;
-          if (event.target === dialog && outside) {
-            dialog.close();
-          }
-        });
-      </script>
+      <p>Type something, then press <strong>Cancel</strong> or Esc. Instead of closing, the dialog asks whether to
+        discard your changes.</p>
+      <ul>
+        <li><strong>Cancel</strong> uses <code>command="request-close"</code>. Like Esc, it fires a cancellable
+          <code>cancel</code> event; calling <code>preventDefault()</code> keeps the dialog open.
+        </li>
+        <li>The confirmation sits inside the dialog instead of <code>window.confirm()</code>, and receives focus so
+          screen readers announce it.</li>
+        <li><strong>Discard changes</strong> uses <code>command="close"</code>, which does not fire
+          <code>cancel</code>, so it closes without asking again.
+        </li>
+        <li><strong>Save</strong> submits the <code>&lt;form method="dialog"&gt;</code>: the dialog closes and its
+          <code>returnValue</code> is the button's <code>value</code>.
+        </li>
+        <li>After closing nothing on screen says the note was saved, so the page announces "Note saved" or "Changes
+          discarded" with <code>ariaNotify()</code>, or a live region where it is unsupported.</li>
+      </ul>
+      <pre class="code"><code>editor.addEventListener('cancel', (event) =&gt; {
+  if (hasUnsavedChanges()) {
+    event.preventDefault();
+    showConfirmation();
+  }
+});
+editor.addEventListener('close', () =&gt; {
+  if (editor.returnValue === 'save') saveNote();
+});</code></pre>
     </section>
 
     <section>
       <h2>Nested</h2>
-      <button class="btn" onclick="document.getElementById('dialog-nested').showModal()">Open Modal Dialog</button>
+      <button type="button" class="btn" command="show-modal" commandfor="dialog-nested">Open Modal Dialog</button>
 
       <dialog id="dialog-nested" aria-labelledby="dialog-nested-title">
         <form method="dialog">
           <h3 id="dialog-nested-title">Dialog Title</h3>
           <p>This is a native HTML dialog component.</p>
-          <p>It supports accessibility features out of the box.</p>
+          <p>Opening another modal from here stacks it on top. Esc closes the top dialog first.</p>
           <div class="spacer"></div>
           <button class="btn" value="cancel">Cancel</button>
           <button class="btn" value="confirm" autofocus>Confirm</button>
         </form>
-        <button class="btn" onclick="document.getElementById('dialog-nested2').showModal()">Open Nested Dialog</button>
+        <button type="button" class="btn" command="show-modal" commandfor="dialog-nested2">Open Nested
+          Dialog</button>
       </dialog>
 
       <dialog id="dialog-nested2" aria-labelledby="dialog-nested2-title">
         <form method="dialog">
-          <h3 id="dialog-nested2-title">Dialog Title</h3>
-          <p>This is a native HTML dialog component.</p>
-          <p>It supports accessibility features out of the box.</p>
+          <h3 id="dialog-nested2-title">Nested Dialog Title</h3>
+          <p>Closing me returns focus to the button inside the first dialog.</p>
           <div class="spacer"></div>
           <button class="btn" value="cancel">Cancel</button>
           <button class="btn" value="confirm" autofocus>Confirm</button>
@@ -92,21 +272,36 @@
 
     <section>
       <h2>Custom Dialog Style</h2>
-      <button class="btn" onclick="document.getElementsByClassName('dialog-custom')[0].showModal()">Open Modal
-        Dialog</button>
-      <button class="btn" onclick="document.getElementsByClassName('dialog-custom')[0].show()">Open Non-Modal
-        Dialog</button>
+      <div class="demo-row">
+        <button type="button" class="btn" command="show-modal" commandfor="dialog-custom">Open Modal Dialog</button>
+      </div>
 
-      <dialog class="dialog-custom" aria-labelledby="dialog-custom-title">
+      <dialog id="dialog-custom" class="dialog-custom" aria-labelledby="dialog-custom-title">
         <form method="dialog">
           <h3 id="dialog-custom-title">Dialog Custom Title</h3>
           <p>This is a custom styled dialog component.</p>
-          <p>It supports accessibility features out of the box.</p>
+          <p>The shared stylesheet animates opening and closing with <code>@starting-style</code> and
+            <code>allow-discrete</code> transitions, and turns them off for reduced motion.
+          </p>
           <div class="spacer"></div>
           <button class="btn" value="cancel">Cancel</button>
           <button class="btn" value="confirm" autofocus>Confirm</button>
         </form>
       </dialog>
+    </section>
+
+    <section>
+      <h2>Accessibility Checklist</h2>
+      <ul>
+        <li>Give the dialog a name: <code>aria-labelledby</code> pointing at its heading.</li>
+        <li>Place initial focus on the safest control with <code>autofocus</code>, for example Cancel rather than
+          Delete, or the first field.</li>
+        <li>Focus returns to the opening button automatically. If that button is removed while the dialog is open,
+          move focus somewhere sensible yourself.</li>
+        <li>Always show a close button; not everyone knows Esc.</li>
+        <li>Do not interrupt with a modal for supplementary information; a popover or an expandable section is
+          usually better.</li>
+      </ul>
     </section>
 
     <section>
@@ -185,6 +380,106 @@
       </table>
     </section>
   </main>
+
+  <script>
+    (() => {
+      const supports = {
+        command: 'command' in HTMLButtonElement.prototype,
+        closedby: 'closedBy' in HTMLDialogElement.prototype,
+        requestClose: typeof HTMLDialogElement.prototype.requestClose === 'function',
+        ariaNotify: typeof Element.prototype.ariaNotify === 'function',
+      };
+
+      const list = document.getElementById('support-list');
+      list.replaceChildren(...[
+        ['Invoker Commands', supports.command],
+        ['<dialog closedby>', supports.closedby],
+        ['dialog.requestClose()', supports.requestClose],
+        ['ariaNotify()', supports.ariaNotify],
+      ].map(([name, ok]) => {
+        const item = document.createElement('li');
+        const code = document.createElement('code');
+        code.textContent = name;
+        item.append(code, ok ? ': supported' : ': not supported, this page uses a fallback');
+        return item;
+      }));
+
+      document.getElementById('open-non-modal').addEventListener('click', () => {
+        document.getElementById('dialog-basic').show();
+      });
+
+      // Invoker Commands fallback for the three dialog commands.
+      if (!supports.command) {
+        document.addEventListener('click', (event) => {
+          const button = event.target.closest('button[command][commandfor]');
+          if (!button) return;
+          const dialog = document.getElementById(button.getAttribute('commandfor'));
+          if (!(dialog instanceof HTMLDialogElement)) return;
+          const command = button.getAttribute('command');
+          if (command === 'show-modal' && !dialog.open) dialog.showModal();
+          else if (command === 'close') dialog.close(button.value);
+          else if (command === 'request-close') {
+            if (supports.requestClose) dialog.requestClose();
+            else if (dialog.dispatchEvent(new Event('cancel', { cancelable: true }))) dialog.close();
+          }
+        });
+      }
+
+      // Announce a status message. ariaNotify() speaks from the element, in its language;
+      // the fallback live region is emptied first so a repeated message is spoken again.
+      function announce(host, message) {
+        if (supports.ariaNotify) {
+          host.ariaNotify(message);
+          return;
+        }
+        let region = document.getElementById('dialog-announcer');
+        if (!region) {
+          region = document.createElement('div');
+          region.id = 'dialog-announcer';
+          region.className = 'visually-hidden';
+          region.setAttribute('aria-live', 'polite');
+          document.body.append(region);
+        }
+        region.textContent = '';
+        setTimeout(() => { region.textContent = message; }, 100);
+      }
+      if (!supports.ariaNotify) announce(document.body, '');
+
+      // Unsaved-changes guard for the note editor.
+      const editor = document.getElementById('note-editor');
+      const field = document.getElementById('note-text');
+      const confirmation = document.getElementById('discard-confirm');
+      const savedNote = document.getElementById('saved-note');
+      const opener = document.getElementById('edit-note');
+      let saved = '';
+
+      editor.addEventListener('toggle', (event) => {
+        if (event.newState !== 'open') return;
+        field.value = saved;
+        confirmation.hidden = true;
+        editor.returnValue = '';
+      });
+      editor.addEventListener('cancel', (event) => {
+        if (field.value === saved) return;
+        event.preventDefault();
+        confirmation.hidden = false;
+        confirmation.focus();
+      });
+      document.getElementById('keep-editing').addEventListener('click', () => {
+        confirmation.hidden = true;
+        field.focus();
+      });
+      editor.addEventListener('close', () => {
+        if (editor.returnValue === 'save') {
+          saved = field.value;
+          savedNote.textContent = saved || '(empty)';
+          announce(opener, 'Note saved');
+        } else if (editor.returnValue === 'discard') {
+          announce(opener, 'Changes discarded');
+        }
+      });
+    })();
+  </script>
 </body>
 
 </html>

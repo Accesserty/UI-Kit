@@ -289,7 +289,8 @@ class AuTreeNode extends HTMLElement {
       <style>
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
         :host {display:block;min-width:0;outline:none;}
-        [hidden] {display:none!important;}
+        [hidden]:not([hidden="until-found" i]) {display:none!important;}
+        [role=group][hidden="until-found" i] {content-visibility:hidden;}
         .node-content {
           display:flex;align-items:center;min-width:0;box-sizing:border-box;
           gap:var(--au-tree-node-padding-horizontal,0.25rem);
@@ -346,7 +347,7 @@ class AuTreeNode extends HTMLElement {
       <div class="node-content">
         <button type="button" class="toggle-btn" tabindex="-1"><svg class="toggle-icon" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
         <span class="label"><span class="checkmark" aria-hidden="true"></span><span class="text"></span></span>
-      </div><div role="group" hidden inert></div>`;
+      </div><div role="group" hidden></div>`;
     this._row = this.shadowRoot.querySelector('.node-content');
     this._group = this.shadowRoot.querySelector('[role=group]');
     this._checkmark = this.shadowRoot.querySelector('.checkmark');
@@ -354,6 +355,15 @@ class AuTreeNode extends HTMLElement {
     this._text = this.shadowRoot.querySelector('.text');
     // Stable listeners are installed once, not on every connection.
     this._button.addEventListener('click',()=>{this.setExpanded(!this.expanded);this.focus();});
+    // Find-in-page matching a collapsed descendant expands this node; focus stays put.
+    // The browser removes hidden itself after this event; removing it here would stop
+    // Chrome from revealing collapsed ancestors, so the group is resynced later.
+    this._group.addEventListener('beforematch',event=>{
+      if(event.target!==this._group) return;
+      this._revealing=true;
+      try {this.setExpanded(true);} finally {this._revealing=false;}
+      setTimeout(()=>this.syncPresentation());
+    });
     this._row.addEventListener('click',event=>{
       if (event.target.closest('button')) return;
       this.focus();
@@ -377,6 +387,7 @@ class AuTreeNode extends HTMLElement {
     });
   }
 
+  static supportsUntilFound = typeof HTMLElement !== 'undefined' && 'onbeforematch' in HTMLElement.prototype;
   static get observedAttributes() {return ['expanded','checked','indeterminate','show-checkbox'];}
   connectedCallback() {this.syncPresentation();}
   attributeChangedCallback(name,oldValue,newValue) {
@@ -451,8 +462,14 @@ class AuTreeNode extends HTMLElement {
     this._button.classList.toggle('hidden',!this.hasChildren);
     this._button.setAttribute('aria-hidden',String(!this.hasChildren));
     this._checkmark.hidden=!this.hasCheckbox;
-    this._group.hidden=!this.hasChildren || !this.expanded;
-    this._group.inert=this._group.hidden;
+    if (this.hasChildren && this.expanded) {
+      if (!this._revealing) {this._group.removeAttribute('hidden');this._group.inert=false;}
+    } else if (this.hasChildren && AuTreeNode.supportsUntilFound) {
+      // Collapsed children stay searchable; inert would block find-in-page.
+      this._group.setAttribute('hidden','until-found');this._group.inert=false;
+    } else {
+      this._group.hidden=true;this._group.inert=true;
+    }
     if(this._data.lang) this.setAttribute('lang',String(this._data.lang)); else this.removeAttribute('lang');
   }
 

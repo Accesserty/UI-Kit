@@ -189,6 +189,15 @@ try{for(const [name,port] of [['next',41791],['nuxt',41792],['angular',41793]]){
  await page.evaluate(()=>{const item=document.getElementById('ssr-accordion-item'),parent=item.parentElement;item.remove();parent.append(item);item.button.focus();});
  await page.keyboard.press('Space');await page.waitForFunction(()=>document.getElementById('accordion-model').textContent==='true'&&document.getElementById('accordion-events').textContent==='3');
  assert.equal(await page.evaluate(()=>Object.entries(window.ssrAccordion).every(([id,element])=>element===document.getElementById(id))),true);
+ // A link into collapsed content opens it through the same au-toggle the framework binds.
+ await page.keyboard.press('Space');await page.waitForFunction(()=>document.getElementById('accordion-model').textContent==='false'&&document.getElementById('accordion-events').textContent==='4');
+ assert.equal(await page.evaluate(()=>{const region=document.getElementById('ssr-accordion-item').region;return region.getAttribute('hidden')==='until-found'&&!region.inert;}),true);
+ await page.evaluate(()=>{location.hash='ssr-accordion-content';});
+ await page.waitForFunction(()=>document.getElementById('accordion-model').textContent==='true'&&document.getElementById('accordion-events').textContent==='5');
+ await page.waitForTimeout(200);
+ assert.equal(await page.evaluate(()=>{const item=document.getElementById('ssr-accordion-item');return item.open&&!item.region.hasAttribute('hidden')&&item.button.getAttribute('aria-expanded')==='true'&&document.getElementById('accordion-events').textContent==='5';}),true);
+ assert.equal(await page.evaluate(()=>Object.entries(window.ssrAccordion).every(([id,element])=>element===document.getElementById(id))),true);
+ await page.evaluate(()=>history.replaceState(history.state,'',location.pathname+location.search));
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.waitForFunction(()=>document.querySelector('au-carousel')?._dots?.length===2);
  assert.equal(await page.locator('#carousel-events').textContent(),'0');

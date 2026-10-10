@@ -36,6 +36,18 @@ const translate=()=>{
   tree.data=[{id:'root',label:'檔案',children:[{id:'alpha',label:'甲',lang:'zh-Hant'},{id:'beta',label:'Beta',disabled:true},{id:'gamma',label:'Gamma',children:[{id:'deep',label:'Deep item'}]}]},{id:'last',label:'Last'}];
   return tree.getAllNodes()[1]===alpha&&alpha.shadowRoot.querySelector('.checkmark')===alphaInput&&tree.findActiveNode().activeNode===alpha&&alpha.checked&&tree.getAllNodes()[0].expanded;
 };
+// A text-fragment link to a collapsed third-level node must expand every ancestor
+// where hidden="until-found" is supported; elsewhere nothing expands. Safari's text
+// fragments do not match Shadow DOM text at all (even visible text), so there the
+// link leaves the tree untouched; a partial expansion is always a failure.
+const fragment='#:~:text=Deep%20item';
+const revealed=()=>{
+  const nodes=document.getElementById('files').getAllNodes(),byId=id=>nodes.find(n=>n.data.id===id);
+  if(!customElements.get('au-tree-node').supportsUntilFound)return nodes.every(n=>!n.expanded)?'fallback':'bad fallback';
+  if(byId('root').expanded&&byId('gamma').expanded&&byId('deep').checkVisibility())return 'revealed';
+  const untouched=nodes.every(n=>!n.expanded&&(!n.hasChildren||n._group.getAttribute('hidden')==='until-found'));
+  return untouched?'shadow text not reached':'partially revealed: '+nodes.filter(n=>n.expanded).map(n=>n.data.id);
+};
 const collapsed=()=>tree.findActiveNode().activeNode?.data.id==='root'&&!tree.getAllNodes()[0].expanded&&tree.getAllNodes()[1].tabIndex===-1;
 try{
   if(browsers.includes('chrome')) {
@@ -44,6 +56,8 @@ try{
       const page=await browser.newPage({viewport:{width:320,height:900}}),errors=[];
       page.on('pageerror',e=>errors.push(String(e)));
       for(const url of urls){
+        await page.goto(url+fragment);await page.waitForFunction(()=>document.getElementById('files')?.getAllNodes?.().length===6);
+        await page.waitForTimeout(500);assert.equal(await page.evaluate(revealed),'revealed');
         await page.goto(url);await page.waitForFunction(()=>document.getElementById('files')?.getAllNodes?.().length===6);
         await page.evaluate(setup);await page.keyboard.press('ArrowRight');await page.keyboard.press('ArrowRight');await page.keyboard.press('Space');
         assert.deepEqual(await page.evaluate(state),{active:'alpha',checked:['alpha'],events:1});
@@ -82,7 +96,7 @@ try{
         assert.deepEqual(await page.evaluate(()=>({checked:tree.getAllNodes()[0].checked,count:pointerEvents})),{checked:false,count:2});
       }
       const output=await mkdtemp(join(tmpdir(),'tree-check-'));await page.screenshot({path:join(output,'tree-narrow.png')});
-      assert.deepEqual(errors,[]);console.log('Chrome PASS: source/bundle/min on file/HTTP, nested shadow, pre-definition data, reconnection, keyboard, disabled cascading, translated focus, AX tree/levels/check state, Tab exit, 320px and forced colors. Screenshot: '+output);
+      assert.deepEqual(errors,[]);console.log('Chrome PASS: source/bundle/min on file/HTTP, nested shadow, pre-definition data, reconnection, keyboard, disabled cascading, translated focus, AX tree/levels/check state, text-fragment reveal of nested collapsed nodes, Tab exit, 320px and forced colors. Screenshot: '+output);
     }finally{await browser.close();}
   }
   if(browsers.some(name=>name!=='chrome')){
@@ -96,6 +110,8 @@ try{
         driver=await builder.build();
         const key=async value=>driver.actions().sendKeys(value).perform();
         for(const url of urls){
+          await driver.get(url+fragment);await driver.wait(()=>driver.executeScript('return document.getElementById("files")?.getAllNodes?.().length===6'),3000);
+          await driver.sleep(500);const found=await driver.executeScript(revealed);assert.ok(['revealed','fallback','shadow text not reached'].includes(found),found);
           await driver.get(url);await driver.wait(()=>driver.executeScript('return document.getElementById("files")?.getAllNodes?.().length===6'),3000);
           let optionTab=false;
           if(name==='safari'){
@@ -119,7 +135,7 @@ try{
           await key(webdriver.Key.ARROW_LEFT);assert.equal(await driver.executeScript('return tree.getAllNodes()[0].expanded'),true);
           await key(webdriver.Key.ARROW_LEFT);assert.equal((await driver.executeScript(state)).active,'alpha');
           await key(webdriver.Key.ARROW_RIGHT);assert.equal((await driver.executeScript(state)).active,'root');
-          console.log(name+' '+url.split('/').at(-1)+' '+new URL(url).protocol+' PASS: real keys, translated focus, single events, disabled cascading, names, collapse and '+(optionTab?'Option+Tab':'Tab')+' exit');
+          console.log(name+' '+url.split('/').at(-1)+' '+new URL(url).protocol+' PASS: real keys, translated focus, single events, disabled cascading, names, collapse and '+(optionTab?'Option+Tab':'Tab')+' exit, text fragment: '+found);
         }
       }finally{if(driver)await driver.quit();}
     }

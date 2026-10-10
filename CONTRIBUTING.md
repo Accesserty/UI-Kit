@@ -54,6 +54,9 @@ Install `test/ssr` dependencies (`npm ci --prefix test/ssr`) and Google Chrome
 before running Playwright-based checks. Build fresh bundles with `npm run build`
 before testing consumers. `npm run test:docs` also checks the audited CSS defaults
 in demo tables and Playground; it is not a complete CSS parser or theme audit.
+`npm run test:reserve` checks that the README's `:not(:defined)` reservation CSS
+still reserves each component's registered height; update the README values when
+a component's default size changes.
 
 Use `npm run test:css -- chrome`, `npm run test:controls -- chrome`, and
 `npm run test:pagination -- chrome` for Chrome-only runs. The component scripts in

@@ -265,6 +265,13 @@ excludes disabled child branches. The component does not mutate input objects or
 submit native form values. Use `change.detail.checkedNodes` to update application
 state; data and text updates do not emit user change events.
 
+Collapsed branches use `hidden="until-found"` where the browser supports it, so
+find-in-page can match a collapsed node label and expand every ancestor branch
+without moving focus; collapsed nodes stay out of the Tab order, arrow-key order
+and accessibility tree. Elsewhere collapsed branches are `hidden` and `inert`.
+Node labels live in Shadow DOM, which Safari's text-fragment links (`#:~:text=`)
+do not search; Chrome's do.
+
 Vue/Nuxt use `:data.prop="treeData"` and `@change`; Angular uses `[data]="treeData"`
 and `(change)` with `CUSTOM_ELEMENTS_SCHEMA`. In React/Next, assign `ref.current.data`
 after client-side registration and again when data changes. The concrete
@@ -490,6 +497,62 @@ an RTL-aware select fallback, and disables its own transitions and animations
 when `prefers-reduced-motion: reduce` is active. Application styles and custom
 component themes still need their own contrast, focus, and motion review.
 
+### Reserving space before registration
+
+Until the script registers a component, its host is an empty inline element with
+no height. When registration happens after first paint (a deferred or slow
+bundle), the fields that appear push the content below them down: a layout shift.
+Reserve each registered height while the element is `:not(:defined)`:
+
+<!-- reserve-css: test/browser/reserve-contract.mjs checks these values -->
+```css
+au-input:not(:defined),
+au-textarea:not(:defined),
+au-file-upload:not(:defined),
+au-tree:not(:defined) {
+  display: block;
+}
+
+au-input:not(:defined) {
+  container-type: inline-size;
+
+  &::before {
+    content: "";
+    display: block;
+    block-size: 3.375rem;
+  }
+  &[data-size="small"]::before { block-size: 2.625rem; }
+  &[data-size="large"]::before { block-size: 4.5rem; }
+
+  @container (width < 768px) {
+    &::before { block-size: 5.75rem; }
+    &[data-size="small"]::before { block-size: 4.25rem; }
+    &[data-size="large"]::before { block-size: 7.9375rem; }
+  }
+  &[data-layout="vertical"]::before { block-size: 5.75rem; }
+  &[data-layout="vertical"][data-size="small"]::before { block-size: 4.25rem; }
+  &[data-layout="vertical"][data-size="large"]::before { block-size: 7.9375rem; }
+}
+
+au-textarea:not(:defined) { min-block-size: 6rem; }
+
+au-file-upload:not(:defined) { min-block-size: calc(8.0625rem + 2 * clamp(0.75rem, 4vw, 2rem)); }
+
+/* One 2.5rem row per visible node; set --tree-rows on each tree. */
+au-tree:not(:defined) { min-block-size: calc(var(--tree-rows, 1) * 2.5rem); }
+```
+
+The values match the default tokens with a single-line label, no description or
+error message; a test keeps them in step with the components. `au-input` sizes
+itself with a container query at 768px, which the reserved `::before` mirrors.
+Measure again (`element.getBoundingClientRect().height` after registration) if you
+change sizes, padding, fonts or line heights, add descriptions, or use another
+`rows` value. Measured on the demo pages under simulated Slow 4G with 4× CPU
+slowdown, this reduced cumulative layout shift from 0.296 to 0.023 (input), 0.318
+to 0.010 (form), 0.111 to 0.002 (textarea) and 0.305 to 0.036 (file-upload).
+Checkboxes, switches, radios, ratings and display components shifted little or
+nothing in the same measurement.
+
 
 ## Card content and native behavior
 
@@ -584,8 +647,16 @@ state after synchronous handlers. Native Enter/Space and Tab/Shift+Tab operate
 the buttons and visible content. Collapsing focused content returns focus to its
 header without stealing external focus. Translation retains the button and slots.
 
+Collapsed panels use `hidden="until-found"` where the browser supports it
+(detected through `onbeforematch`). Find-in-page, text-fragment links and `#id`
+links that match collapsed slotted content open that item and any enclosing
+items, emitting the usual `au-toggle` and closing siblings in exclusive mode. Until then the content stays
+out of the Tab order and accessibility tree. Browsers without support keep
+collapsed panels `hidden` and `inert`, so their find-in-page skips them.
+
 The real Next/Nuxt/Angular fixtures verify host and slotted-content hydration,
-reactive open state, events and keyboard interaction with client-only registration.
+reactive open state, events, keyboard interaction and a fragment link that opens a
+collapsed item, with client-only registration.
 React binds Boolean `open` and `onau-toggle`; Nuxt uses
 `:open.attr="isOpen ? '' : null"` / `@au-toggle`; Angular uses
 `[attr.open]="isOpen ? '' : null"` / `(au-toggle)`. Synchronize the Boolean model
