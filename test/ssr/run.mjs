@@ -32,13 +32,12 @@ function cleanup(){for(const child of children)if(child.exitCode===null)child.ki
 process.once('SIGINT',()=>{cleanup();process.exit(130);});
 process.once('SIGTERM',()=>{cleanup();process.exit(143);});
 try {
-  for(const port of [41791,41792,41793])await checkPort(port);
+  for(const port of [41791,41792])await checkPort(port);
   console.log('Building Next and Nuxt production SSR fixtures');
   await finished(launch([`${root}node_modules/next/dist/bin/next`,'build','--webpack'],`${root}next`));
   await finished(launch([`${root}node_modules/nuxt/bin/nuxt.mjs`,'build'],`${root}nuxt`));
   const next=launch([`${root}node_modules/next/dist/bin/next`,'start','--hostname','127.0.0.1','--port','41791'],`${root}next`);
   const nuxt=launch(['.output/server/index.mjs'],`${root}nuxt`,{PORT:'41792',HOST:'127.0.0.1'});
-  const angular=launch(['angular/server.mjs']);
-  await Promise.all([ready(41791,next),ready(41792,nuxt),ready(41793,angular)]);
+  await Promise.all([ready(41791,next),ready(41792,nuxt)]);
   await finished(launch(['ssr-check.mjs']));
 } finally {cleanup();}

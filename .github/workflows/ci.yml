@@ -55,7 +55,7 @@ jobs:
       - run: npm run test:docs
 
   integration:
-    name: Browsers, SSR and Angular AOT
+    name: Browsers and SSR
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -67,7 +67,6 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             test/ssr/package-lock.json
-            test/angular-aot/package-lock.json
       - name: Print environment
         run: echo "arch=$(uname -m) node=$(node -v) npm=$(npm -v)"
       - name: Install CJK fonts
@@ -86,6 +85,7 @@ jobs:
         run: |
           echo "playwright: $(npm --prefix test/ssr exec -- playwright --version)"
       - run: npm run test:css -- chrome
+      - run: npm run test:reserve
       - run: npm run test:controls -- chrome
       - run: npm run test:pagination -- chrome
       - run: npm run test:visibility
@@ -98,10 +98,5 @@ jobs:
       - run: node test/browser/card.mjs chrome
       - run: node test/browser/carousel.mjs chrome
       - run: node test/browser/file-upload.mjs chrome
-      - name: SSR across Next, Nuxt and Angular
+      - name: SSR across Next and Nuxt
         run: npm test --prefix test/ssr
-      - run: npm ci --prefix test/angular-aot
-      - run: npm run check --prefix test/angular-aot
-      - name: Angular AOT consumer runtime
-        # preruntime builds the fixture first.
-        run: npm run runtime --prefix test/angular-aot

@@ -75,11 +75,8 @@ in `test/ssr` (set `UI_KIT_WEBDRIVER_MODULE` to use a different copy):
   focus while the Mac is in use.
 
 A full check builds fresh bundles first, then runs the documentation, Chrome
-integration, Firefox, SSR and Angular AOT checks. SSR runs separately through
+integration, Firefox and SSR checks. SSR runs separately through
 `npm test --prefix test/ssr`; installing its dependencies does not run it.
-For Angular AOT, install `test/angular-aot` dependencies and use
-`npm run runtime --prefix test/angular-aot`; its preruntime hook builds first.
-The Angular fixture's `dist/` is local generated output, not versioned product code.
 Passing these checks does not establish Safari behavior, actual screen-reader
 speech, or complete accessibility conformance.
 

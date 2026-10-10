@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {checkUpload} from './upload-check.mjs';
 const browser=await chromium.launch({channel:'chrome',headless:true});
-try{for(const [name,port] of [['next',41791],['nuxt',41792],['angular',41793]]){
+try{for(const [name,port] of [['next',41791],['nuxt',41792]]){
  if(process.argv[2]&&name!==process.argv[2])continue;
  const url=`http://127.0.0.1:${port}`;
  const response=await fetch(url),html=await response.text();assert.equal(response.status,200);assert.match(html,/<au-rating[^>]*name="review"/);assert.match(html,/<au-rating[^>]*value="1"/);
@@ -53,7 +53,6 @@ try{for(const [name,port] of [['next',41791],['nuxt',41792],['angular',41793]]){
   });observer.observe(document,{childList:true,subtree:true});
  });
  await page.goto(url);await page.waitForFunction(()=>document.querySelector('au-rating')?.shadowRoot?.querySelector('input:checked')?.value==='1'&&document.querySelector('#ready')?.textContent==='true');
- if(name==='angular')await page.waitForFunction(()=>window.hydrated===true);
  assert.equal(await page.evaluate(()=>document.characterSet),'UTF-8');
  assert.equal(await page.locator('#ssr-crumb-icon').textContent(),'⌂');
  assert.equal(await page.evaluate(()=>Object.entries(window.ssrElements).length===15&&Object.entries(window.ssrElements).every(([tag,element])=>element===document.querySelector(tag))),true);

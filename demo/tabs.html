@@ -145,9 +145,6 @@ document.querySelector('au-tabs').addEventListener('tab-change', (e) => {
 // Vue
 // &lt;au-tabs @tab-change="onTabChange"&gt;
 
-// Angular
-// &lt;au-tabs (tab-change)="onTabChange($event)"&gt;
-
 // React (ref)
 // tabsRef.current.addEventListener('tab-change', handler);</code></pre>
     </section>
@@ -160,7 +157,7 @@ document.querySelector('au-tabs').addEventListener('tab-change', (e) => {
       <p>Only use this automatic-activation pattern when panel content is already available without a noticeable delay.
         This component does not implement vertical tabs, delayed/manual activation, or closable-tab commands.</p>
       <p>Bind <code>selected-index</code> (or the selectedIndex property after registration) and update your model from
-        <code>tab-change.detail.index</code>. Register only on the client. The Next/Nuxt/Angular fixtures verify
+        <code>tab-change.detail.index</code>. Register only on the client. The Next/Nuxt fixtures verify
         server-produced hosts and light-DOM panels, hydration identity, reactive labels and keyboard interaction;
         they do not server-render the shadow tab buttons or guarantee no-JavaScript tab behavior.</p>
       <p>Tab-to-panel relations use native element references. Older engines without that API retain named panels,

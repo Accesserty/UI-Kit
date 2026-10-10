@@ -193,7 +193,7 @@ pagination.addEventListener('page-size-change', (e) => {
         becomes disabled or is removed, focus moves to the current page or available navigation fallback.
         Jump accepts whole pages within its range; invalid entries use native browser validation.
         Page announcements do not certify that asynchronously loaded results have finished loading.</p>
-      <p>For Next, Nuxt and Angular SSR, register the component only on the client, bind
+      <p>For Next and Nuxt SSR, register the component only on the client, bind
         <code>data-current-page</code>/<code>data-page-size</code>, and consume the numeric custom-event details.
         Servers render the host, not the interactive shadow controls. See <code>test/ssr/</code> for executable examples.
         These checks are not a WCAG conformance or screen-reader certification.</p>

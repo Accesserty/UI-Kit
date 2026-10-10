@@ -260,10 +260,9 @@ ta.value = 'Prefilled content';
 ta.readonly = true;</code></pre>
       <p><code>focus(options)</code> focuses the internal textarea. Form reset restores the value at first connection,
         preserves textarea focus and rebinds accessible references. Reset and state restoration do not emit input/change.</p>
-      <p>Register the component on the client, not through a server-side module import. The Next, Nuxt and Angular
+      <p>Register the component on the client, not through a server-side module import. The Next and Nuxt
         fixtures in <code>test/ssr/</code> cover host hydration and client interaction; the server does not render the
-        internal textarea. Use explicit <code>:value="notes" @input="notes = $event.target.value"</code> for Nuxt SSR.
-        Angular form directives require a value accessor in addition to custom-element schema configuration.</p>
+        internal textarea. Use explicit <code>:value="notes" @input="notes = $event.target.value"</code> for Nuxt SSR.</p>
     </section>
     <section>
       <h2>Events</h2>

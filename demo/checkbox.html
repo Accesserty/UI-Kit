@@ -246,8 +246,7 @@ cb.disabled = true;</code></pre>
         element-reference support; older engines use plain text and should receive an explicit localized
         <code>aria-label</code> for rich labels. Do not place interactive elements inside the label slot.</p>
       <p>Vue/Nuxt: use <code>:checked="agreed" @change="agreed = $event.detail"</code>, not direct text-style
-        <code>v-model</code>. React can bind <code>checked</code> and <code>onchange</code>. Angular form directives need
-        a value accessor; template property/event binding is separate. Register components only on the client in SSR apps.</p>
+        <code>v-model</code>. React can bind <code>checked</code> and <code>onchange</code>. Register components only on the client in SSR apps.</p>
     </section>
     <section>
       <h2>Events</h2>

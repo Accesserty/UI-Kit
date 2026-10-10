@@ -353,9 +353,6 @@
 &lt;!-- Vue --&gt;
 &lt;au-accordion-item @au-toggle="onToggle"&gt;...&lt;/au-accordion-item&gt;
 
-&lt;!-- Angular --&gt;
-&lt;au-accordion-item (au-toggle)="onToggle($event)"&gt;...&lt;/au-accordion-item&gt;
-
 &lt;!-- Vanilla JS --&gt;
 document.querySelector('au-accordion-item').addEventListener('au-toggle', (e) =&gt; {
   console.log(e.detail.open); // true | false
@@ -709,7 +706,7 @@ document.querySelector('au-accordion-item').addEventListener('au-toggle', (e) =&
       </p>
       <p>
         Use client-only registration in SSR applications. Server-produced hosts and slotted content are retained
-        in the Next, Nuxt and Angular fixtures, while internal controls are created in the browser. Consumer content,
+        in the Next and Nuxt fixtures, while internal controls are created in the browser. Consumer content,
         themes and real screen-reader interaction still require verification; using this component does not guarantee WCAG conformance.
       </p>
     </section>

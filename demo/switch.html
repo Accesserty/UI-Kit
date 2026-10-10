@@ -108,8 +108,7 @@ console.log(sw.checked); // boolean</code></pre>
         when no internal label is supplied. Older engines use plain-text reference fallbacks; supply a localized
         <code>aria-label</code> for rich labels there. Avoid interactive content inside the label slot.</p>
       <p>Vue/Nuxt: bind <code>:checked="enabled" @change="enabled = $event.detail"</code>, not text-style <code>v-model</code>.
-        React supports checked/property and onchange binding. Angular form directives need a value accessor beyond
-        custom-element schema configuration. SSR fixtures verify client registration after server-rendered hosts,
+        React supports checked/property and onchange binding. SSR fixtures verify client registration after server-rendered hosts,
         not server-rendered shadow controls.</p>
     </section>
     <section>

@@ -187,8 +187,8 @@ group.disabled = true;</code></pre>
     <section>
       <h2>Framework and accessibility boundaries</h2>
       <p>Bind the group value and handle <code>change.detail.value</code> to update your model.
-        Vue/Nuxt use explicit <code>:value</code> and <code>@change</code>; Angular form directives still need a value accessor.
-        Register the component only on the client. The Next/Nuxt/Angular fixtures verify host SSR and hydration,
+        Vue/Nuxt use explicit <code>:value</code> and <code>@change</code>.
+        Register the component only on the client. The Next/Nuxt fixtures verify host SSR and hydration,
         not server-rendered shadow controls or operation without JavaScript.</p>
       <p>Provide a visible group name and meaningful option text. Native element-reference labeling is used where supported;
         older engines use a plain-text fallback, so rich labels may need an explicit localized aria-label.

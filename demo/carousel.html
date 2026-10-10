@@ -287,7 +287,7 @@ useEffect(() =&gt; {
   <h2>Naming and integration boundaries</h2>
   <p>Give the carousel an <code>aria-label</code> or an <code>aria-labelledby</code> reference in its containing document/shadow root. Localize <code>data-text-roledescription</code> (default: carousel) as needed. Names and translations preserve controls; older browsers use a plain-text label fallback.</p>
   <p>Tab from the dot group enters the current slide's first eligible native control (also Option+Tab in Safari); hidden, inert and negative-tabindex targets are skipped. The helper does not traverse controls inside a slide's nested Shadow DOM. Those components must expose their own accessible focus entry. Content without an eligible target follows native Tab order.</p>
-  <p>Keep the same keyed slide elements during framework updates to retain selection identity. Next assigns <code>ref.current.current</code> after client registration, Nuxt uses <code>:current.prop</code>, and Angular uses <code>[current]</code>. Real SSR fixtures preserve host and slide nodes but render internal controls only in the browser. No autoplay is provided; this continuous scroll layout is not a tabpanel carousel.</p>
+  <p>Keep the same keyed slide elements during framework updates to retain selection identity. Next assigns <code>ref.current.current</code> after client registration and Nuxt uses <code>:current.prop</code>. Real SSR fixtures preserve host and slide nodes but render internal controls only in the browser. No autoplay is provided; this continuous scroll layout is not a tabpanel carousel.</p>
   </main>
 </body>
 </html>

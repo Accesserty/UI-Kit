@@ -1,6 +1,6 @@
 # Accesserty UI Kit
 
-> A framework-agnostic library of 15 accessibility-first Web Components with zero runtime dependencies and WCAG 2.2 AA as a design target. Automated and targeted browser checks are not complete conformance or screen-reader verification. Supports plain HTML and configured Vue, React, Angular and Nuxt integrations via a single JS file; SSR registration remains client-only.
+> A framework-agnostic library of 15 accessibility-first Web Components with zero runtime dependencies and WCAG 2.2 AA as a design target. Automated and targeted browser checks are not complete conformance or screen-reader verification. Supports plain HTML and configured Vue, React, Nuxt and Next integrations via a single JS file; SSR registration remains client-only.
 
 ## Key Links
 
@@ -44,7 +44,7 @@ Tag: `<au-card>`
 Slots: heading, media, content, footer
 Only named slots are projected, in that order; no default slot. The card adds no role, tabindex, automatic heading semantics or custom events. Native child controls retain forms, reset and event behavior. render() is idempotent and retains the shell/slots/focus. Default block/min-inline-size/wrapping styles respect hidden; consumers own media sizes, content semantics, themes and focus styling.
 CSS Parts: au-card-container, heading, media, content, footer
-Parts refer to the container and slot elements; style assigned content through consumer selectors. Real Next/Nuxt/Angular fixtures retain server host/content nodes and native event/form behavior, with client-only registration. These are not screen-reader results.
+Parts refer to the container and slot elements; style assigned content through consumer selectors. Real Next/Nuxt fixtures retain server host/content nodes and native event/form behavior, with client-only registration. These are not screen-reader results.
 Form-associated: No
 CSS variables: 0 (styled via ::part())
 

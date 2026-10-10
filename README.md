@@ -17,7 +17,7 @@ are available in [`demo/`](demo/index.html); framework setup is covered below.
 
 - **Designed with WCAG 2.2 AA as the target** — reusable semantics, keyboard support and focus behavior, with component tests and targeted integration checks
 - **Zero runtime dependencies** — one self-contained JS file
-- **Framework-agnostic** — works in plain HTML, Vue, React, Angular, Nuxt, or any other stack
+- **Framework-agnostic** — works in plain HTML, Vue, React, Nuxt, Next or any other stack that renders custom elements
 - **Form-integrated** — form-associated components participate in native `<form>` submission and validation via the ElementInternals API
 - **SSR-friendly** — register client-side in SSR frameworks (see [Nuxt 3](#nuxt-3)); the `customElements.define()` guard keeps re-importing on the client safe
 - **Fully themeable** — every visual detail is a CSS Custom Property
@@ -87,9 +87,8 @@ deferred script registers the element are retained and use the public setters
 after registration. Rendering and navigation still require JavaScript.
 
 For SSR, serialize breadcrumb items into the HTML attribute: React
-`items={JSON.stringify(items)}`, Nuxt `:items.attr="JSON.stringify(items)"`,
-Angular `[attr.items]="serializedItems"`. Register the component only on the
-client. The server supplies the host/data and icon slots, not the internal
+`items={JSON.stringify(items)}`, Nuxt `:items.attr="JSON.stringify(items)"`.
+Register the component only on the client. The server supplies the host/data and icon slots, not the internal
 navigation links. The [SSR fixtures](test/ssr/README.md) test these bindings,
 translation focus and native fragment navigation; framework router interception
 is not provided or verified.
@@ -175,26 +174,11 @@ function EmailField({ onChange }) {
 }
 ```
 
-### Angular
+### Other frameworks
 
-Add `CUSTOM_ELEMENTS_SCHEMA` to allow `au-*` elements:
-
-```typescript
-// app.module.ts
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core'
-
-@NgModule({
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
-})
-export class AppModule {}
-```
-
-Load the script in `angular.json` or `index.html`:
-
-```json
-// angular.json
-"scripts": ["src/assets/accesserty-ui-kit.min.js"]
-```
+The components are standard custom elements, so any framework that renders them
+can use the kit. Only Vue/Nuxt and React/Next integrations are tested; the
+Angular fixtures were removed in 2.0.6.
 
 ### Nuxt 3
 
@@ -272,10 +256,9 @@ and accessibility tree. Elsewhere collapsed branches are `hidden` and `inert`.
 Node labels live in Shadow DOM, which Safari's text-fragment links (`#:~:text=`)
 do not search; Chrome's do.
 
-Vue/Nuxt use `:data.prop="treeData"` and `@change`; Angular uses `[data]="treeData"`
-and `(change)` with `CUSTOM_ELEMENTS_SCHEMA`. In React/Next, assign `ref.current.data`
-after client-side registration and again when data changes. The concrete
-Next/Nuxt/Angular examples in `test/ssr/` verify host hydration and client-rendered
+Vue/Nuxt use `:data.prop="treeData"` and `@change`. In React/Next, assign
+`ref.current.data` after client-side registration and again when data changes.
+The concrete Next/Nuxt examples in `test/ssr/` verify host hydration and client-rendered
 tree nodes; they do not server-render the tree's shadow content.
 
 ## Localization
@@ -602,7 +585,7 @@ application-level checks; CSS reordering is not a reading-order guarantee.
 
 No special framework state adapter is needed for Card: use the framework's
 normal content and native event bindings, with client-only component registration
-in SSR applications. Real Next/Nuxt/Angular fixtures preserve the host/content
+in SSR applications. Real Next/Nuxt fixtures preserve the host/content
 nodes, translated heading focus and native form values. Internal slots are built
 on the client; this is not server-rendered Shadow DOM or screen-reader verification.
 
@@ -627,8 +610,7 @@ control; nested shadow widgets need their own focus entry. RTL movement uses
 the track's right edge. Forced colors and reduced motion have explicit styles.
 
 Next assigns `ref.current.current` after client registration; Nuxt uses
-`:current.prop="index"` / `@slide-change`; Angular uses `[current]="index"` /
-`(slide-change)`. Copy `event.detail.index` into the model. The real SSR fixtures
+`:current.prop="index"` / `@slide-change`. Copy `event.detail.index` into the model. The real SSR fixtures
 retain server-produced host/slide nodes but create controls only in the browser;
 they do not establish full framework navigation or screen-reader behavior.
 
@@ -673,12 +655,11 @@ items, emitting the usual `au-toggle` and closing siblings in exclusive mode. Un
 out of the Tab order and accessibility tree. Browsers without support keep
 collapsed panels `hidden` and `inert`, so their find-in-page skips them.
 
-The real Next/Nuxt/Angular fixtures verify host and slotted-content hydration,
+The real Next/Nuxt fixtures verify host and slotted-content hydration,
 reactive open state, events, keyboard interaction and a fragment link that opens a
 collapsed item, with client-only registration.
 React binds Boolean `open` and `onau-toggle`; Nuxt uses
-`:open.attr="isOpen ? '' : null"` / `@au-toggle`; Angular uses
-`[attr.open]="isOpen ? '' : null"` / `(au-toggle)`. Synchronize the Boolean model
+`:open.attr="isOpen ? '' : null"` / `@au-toggle`. Synchronize the Boolean model
 from `event.detail.open`. This is not server-rendered Shadow DOM or a full
 screen-reader/conformance result.
 
