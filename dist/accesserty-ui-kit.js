@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-/*! Accesserty UI Kit v2.0.6 */
+/*! Accesserty UI Kit v2.0.7 */
 (function() {
   "use strict";
   class AuAccordion extends HTMLElement {
@@ -953,7 +953,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         attributeFilter: ["data-title"]
       });
       this._rebuild();
-      if (initial !== void 0) this.current = initial;
+      if (initial !== void 0) {
+        this._scrollToIndex(this._normalizeIndex(initial), "instant");
+        this.setCurrent(initial);
+      }
       this._observeLabelRoot();
     }
     disconnectedCallback() {

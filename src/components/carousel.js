@@ -324,7 +324,13 @@ class AuCarousel extends HTMLElement {
       attributeFilter: ['data-title'],
     });
     this._rebuild();
-    if (initial !== undefined) this.current=initial;
+    // A current set before the upgrade is the starting position, not a move:
+    // jump there. Safari can drop a smooth scroll started during page load,
+    // which left the dots on the new slide and the track on the first.
+    if (initial !== undefined) {
+      this._scrollToIndex(this._normalizeIndex(initial),'instant');
+      this.setCurrent(initial);
+    }
     this._observeLabelRoot();
   }
 
