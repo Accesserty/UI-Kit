@@ -265,7 +265,9 @@ class AuRadioGroup extends HTMLElement {
   }
 
   handleKeyDown(event, currentInput) {
-    const step = {ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1}[event.key];
+    // Left and right follow the reading direction, as they do for native radios.
+    const rtl = getComputedStyle(currentInput).direction === 'rtl';
+    const step = {ArrowRight: rtl ? -1 : 1, ArrowDown: 1, ArrowLeft: rtl ? 1 : -1, ArrowUp: -1}[event.key];
     if (!step || event.altKey || event.ctrlKey || event.metaKey) return;
     event.preventDefault();
     const enabled = [...this._entries.values()].map(entry => entry.input).filter(input => !input.disabled);

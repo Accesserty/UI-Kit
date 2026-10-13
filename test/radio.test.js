@@ -124,6 +124,28 @@ describe('AuRadioGroup', () => {
     expect(document.activeElement.shadowRoot.activeElement).to.equal(radios[1]);
   });
 
+  it('keyboard navigation: left and right follow a right-to-left reading direction', async () => {
+    const el = await fixture(html`
+      <au-radio-group dir="rtl">
+        <div value="1">1</div>
+        <div value="2">2</div>
+        <div value="3">3</div>
+      </au-radio-group>
+    `);
+    await nextFrame();
+
+    const radios = el.shadowRoot.querySelectorAll('input[type="radio"]');
+    radios[0].focus();
+    radios[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect(el.value).to.equal('2');
+    radios[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(el.value).to.equal('1');
+    radios[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(el.value).to.equal('3');
+    radios[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(el.value).to.equal('1');
+  });
+
   it('adds aria-label to radiogroup when attribute is present', async () => {
     const el = await fixture(html`
       <au-radio-group aria-label="Options">

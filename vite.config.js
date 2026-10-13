@@ -15,6 +15,9 @@ const banner = `/*! Accesserty UI Kit v${pkg.version}${sourceDate} */`;
 
 export default defineConfig({
   build: {
+    // 元件原本就用到 ES2022（static 欄位、Object.hasOwn），不需降轉。
+    // 降轉 static 欄位時，esbuild 會把 __defProp 等輔助函式放在 IIFE 外，變成全域變數。
+    target: 'es2022',
     // esbuild minify 會剝掉所有註解(包含 /*! banner),改由第二個 output 的 terser 負責壓縮
     minify: false,
     rollupOptions: {

@@ -1,7 +1,4 @@
-var __defProp = Object.defineProperty;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-/*! Accesserty UI Kit v2.0.7 */
+/*! Accesserty UI Kit v2.0.8 */
 (function() {
   "use strict";
   class AuAccordion extends HTMLElement {
@@ -75,22 +72,20 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this._updateExclusiveHint();
     }
     _handleToggle(e) {
-      var _a;
       const item = e.composedPath()[0];
-      if ((item == null ? void 0 : item.parentElement) !== this || item.localName !== "au-accordion-item") return;
-      if (this.exclusive && ((_a = e.detail) == null ? void 0 : _a.open)) this._syncItems(item);
+      if (item?.parentElement !== this || item.localName !== "au-accordion-item") return;
+      if (this.exclusive && e.detail?.open) this._syncItems(item);
     }
     _syncItems(preferred) {
-      var _a;
       const items = [...this.children].filter((el) => el.localName === "au-accordion-item");
       const keep = preferred || items.find((item) => item.hasAttribute("open"));
       for (const item of items) {
-        (_a = item.updateExclusiveHint) == null ? void 0 : _a.call(item);
+        item.updateExclusiveHint?.();
         if (this.exclusive && item !== keep && item.hasAttribute("open")) item.removeAttribute("open");
       }
     }
   }
-  const _AuAccordionItem = class _AuAccordionItem extends HTMLElement {
+  class AuAccordionItem extends HTMLElement {
     constructor() {
       super();
       this.attachShadow({ mode: "open" });
@@ -283,6 +278,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.updateSemantics();
       this.updateExclusiveHint();
     }
+    static supportsUntilFound = typeof HTMLElement !== "undefined" && "onbeforematch" in HTMLElement.prototype;
     static get observedAttributes() {
       return ["open", "heading-level", "no-region"];
     }
@@ -314,10 +310,9 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
     }
     updateExpanded() {
-      var _a;
       const isOpen = this.hasAttribute("open");
       let active = this.ownerDocument.activeElement;
-      while ((_a = active == null ? void 0 : active.shadowRoot) == null ? void 0 : _a.activeElement) active = active.shadowRoot.activeElement;
+      while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
       for (let node = active; !isOpen && node; node = node.assignedSlot || node.parentNode || node.host) {
         if (node === this.region) {
           this.button.focus({ preventScroll: true });
@@ -329,7 +324,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       if (isOpen) {
         this.region.removeAttribute("hidden");
         this.region.inert = false;
-      } else if (_AuAccordionItem.supportsUntilFound) {
+      } else if (AuAccordionItem.supportsUntilFound) {
         this.region.setAttribute("hidden", "until-found");
         this.region.inert = false;
       } else {
@@ -350,7 +345,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     }
     updateExclusiveHint() {
       const owner = this.parentElement;
-      const exclusive = (owner == null ? void 0 : owner.localName) === "au-accordion" && owner.hasAttribute("exclusive");
+      const exclusive = owner?.localName === "au-accordion" && owner.hasAttribute("exclusive");
       this._hint.textContent = exclusive ? owner.getAttribute("data-text-exclusive-hint") || "Only one section may be expanded at a time." : "";
       if (exclusive) this.button.setAttribute("aria-describedby", this._hint.id);
       else this.button.removeAttribute("aria-describedby");
@@ -366,9 +361,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     toggleAccordion() {
       this.open = !this.open;
     }
-  };
-  __publicField(_AuAccordionItem, "supportsUntilFound", typeof HTMLElement !== "undefined" && "onbeforematch" in HTMLElement.prototype);
-  let AuAccordionItem = _AuAccordionItem;
+  }
   if (typeof customElements !== "undefined" && !customElements.get("au-accordion-item")) {
     customElements.define("au-accordion-item", AuAccordionItem);
   }
@@ -392,8 +385,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.observeLabelRoot();
     }
     disconnectedCallback() {
-      var _a;
-      (_a = this._labelObserver) == null ? void 0 : _a.disconnect();
+      this._labelObserver?.disconnect();
     }
     static get observedAttributes() {
       return [
@@ -458,10 +450,9 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
     }
     observeLabelRoot() {
-      var _a, _b;
-      (_a = this._labelObserver) == null ? void 0 : _a.disconnect();
-      if (!((_b = this.getAttribute("aria-labelledby")) == null ? void 0 : _b.trim())) return;
-      this._labelObserver ?? (this._labelObserver = new MutationObserver(() => this.syncAccessibleLabel()));
+      this._labelObserver?.disconnect();
+      if (!this.getAttribute("aria-labelledby")?.trim()) return;
+      this._labelObserver ??= new MutationObserver(() => this.syncAccessibleLabel());
       this._labelObserver.observe(this.getRootNode(), {
         childList: true,
         subtree: true,
@@ -472,21 +463,17 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.syncAccessibleLabel();
     }
     syncAccessibleLabel() {
-      var _a, _b, _c;
       if (!this._nav) return;
       const root = this.getRootNode();
       const ids = (this.getAttribute("aria-labelledby") || "").trim().split(/\s+/).filter(Boolean);
-      const labels = ids.map((id) => {
-        var _a2;
-        return (_a2 = root.getElementById) == null ? void 0 : _a2.call(root, id);
-      }).filter((el) => el && el !== this);
-      const fallback = ((_a = this.getAttribute("aria-label")) == null ? void 0 : _a.trim()) || ((_b = this.getAttribute("label")) == null ? void 0 : _b.trim()) || "Breadcrumbs";
+      const labels = ids.map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
+      const fallback = this.getAttribute("aria-label")?.trim() || this.getAttribute("label")?.trim() || "Breadcrumbs";
       if ("ariaLabelledByElements" in this._nav) {
         this._nav.ariaLabelledByElements = labels;
         this._nav.setAttribute("aria-label", fallback);
       } else {
         const text = labels.map((el) => el.getAttribute("aria-label") || el.textContent).join(" ").trim();
-        this._nav.setAttribute("aria-label", ((_c = this.getAttribute("aria-label")) == null ? void 0 : _c.trim()) || text || fallback);
+        this._nav.setAttribute("aria-label", this.getAttribute("aria-label")?.trim() || text || fallback);
       }
     }
     renderItems() {
@@ -518,7 +505,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           content.title = template ? this.formatText(template, { text: item.text ?? "", index: index + 1 }) : `${prefix} ${item.text ?? ""}`;
         }
         let separator = li.querySelector('[aria-hidden="true"]');
-        if (current) separator == null ? void 0 : separator.remove();
+        if (current) separator?.remove();
         else {
           if (!separator) {
             separator = document.createElement("span");
@@ -960,7 +947,6 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this._observeLabelRoot();
     }
     disconnectedCallback() {
-      var _a;
       this._slot.removeEventListener("slotchange", this._onSlotChange);
       this._pagination.removeEventListener("keydown", this._onPaginationKeydown);
       this._prevBtn.removeEventListener("click", this._onPrevClick);
@@ -970,7 +956,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this._track.removeEventListener("scroll", this._onScroll);
       this._resizeObserver.disconnect();
       this._contentObserver.disconnect();
-      (_a = this._labelObserver) == null ? void 0 : _a.disconnect();
+      this._labelObserver?.disconnect();
       clearTimeout(this._settle);
       clearTimeout(this._contentTimer);
     }
@@ -981,19 +967,15 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       if (name === "aria-labelledby") this._observeLabelRoot();
     }
     _observeLabelRoot() {
-      var _a, _b;
-      (_a = this._labelObserver) == null ? void 0 : _a.disconnect();
-      if (!((_b = this.getAttribute("aria-labelledby")) == null ? void 0 : _b.trim())) return;
-      this._labelObserver ?? (this._labelObserver = new MutationObserver(() => this._applyName()));
+      this._labelObserver?.disconnect();
+      if (!this.getAttribute("aria-labelledby")?.trim()) return;
+      this._labelObserver ??= new MutationObserver(() => this._applyName());
       this._labelObserver.observe(this.getRootNode(), { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["id", "aria-label"] });
       this._applyName();
     }
     _applyName() {
       const root = this.getRootNode();
-      const labels = (this.getAttribute("aria-labelledby") || "").trim().split(/\s+/).filter(Boolean).map((id) => {
-        var _a;
-        return (_a = root.getElementById) == null ? void 0 : _a.call(root, id);
-      }).filter((el) => el && el !== this);
+      const labels = (this.getAttribute("aria-labelledby") || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
       const fallback = this.getAttribute("aria-label") || "Carousel";
       if ("ariaLabelledByElements" in this._wrapper) {
         this._wrapper.ariaLabelledByElements = labels;
@@ -1254,6 +1236,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     customElements.define("au-carousel", AuCarousel);
   }
   class AuCheckbox extends HTMLElement {
+    static formAssociated = true;
     constructor() {
       super();
       this.attachShadow({ mode: "open", delegatesFocus: true });
@@ -1384,8 +1367,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       });
     }
     get checked() {
-      var _a;
-      return ((_a = this.shadowRoot.querySelector("input")) == null ? void 0 : _a.checked) ?? false;
+      return this.shadowRoot.querySelector("input")?.checked ?? false;
     }
     set checked(val) {
       this.toggleAttribute("checked", Boolean(val));
@@ -1449,16 +1431,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     syncAccessibleLabel() {
       const input = this.inputElement;
       const root = this.getRootNode();
-      const resolve = (attribute) => (this.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => {
-        var _a;
-        return (_a = root.getElementById) == null ? void 0 : _a.call(root, id);
-      }).filter((element) => element && element !== this);
+      const resolve = (attribute) => (this.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((element) => element && element !== this);
       const explicit = this.getAttribute("aria-label");
       let labels = resolve("aria-labelledby");
-      const hasSlotText = this._labelSlot.assignedNodes({ flatten: true }).some((node) => {
-        var _a;
-        return (_a = node.textContent) == null ? void 0 : _a.trim();
-      });
+      const hasSlotText = this._labelSlot.assignedNodes({ flatten: true }).some((node) => node.textContent?.trim());
       if (!labels.length && !explicit && !hasSlotText && this.isConnected) {
         labels = [...this.internals.labels];
       }
@@ -1484,9 +1460,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
     }
     _observeLabels() {
-      var _a;
-      (_a = this._labelObserver) == null ? void 0 : _a.disconnect();
-      this._labelObserver ?? (this._labelObserver = new MutationObserver(() => this.syncAccessibleLabel()));
+      this._labelObserver?.disconnect();
+      this._labelObserver ??= new MutationObserver(() => this.syncAccessibleLabel());
       this._labelObserver.observe(this.getRootNode(), {
         subtree: true,
         childList: true,
@@ -1497,8 +1472,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.syncAccessibleLabel();
     }
     disconnectedCallback() {
-      var _a;
-      (_a = this._labelObserver) == null ? void 0 : _a.disconnect();
+      this._labelObserver?.disconnect();
     }
     _upgradeProperties() {
       for (const name of ["checked", "disabled", "required", "name", "value"]) {
@@ -1583,7 +1557,6 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.checked = this._initialChecked;
     }
   }
-  __publicField(AuCheckbox, "formAssociated", true);
   if (typeof customElements !== "undefined" && !customElements.get("au-checkbox")) {
     customElements.define("au-checkbox", AuCheckbox);
   }
@@ -1789,9 +1762,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
     }
     disconnectedCallback() {
-      var _a;
       clearTimeout(this._tabCloseTimer);
-      (_a = this._restoreTabStops) == null ? void 0 : _a.call(this);
+      this._restoreTabStops?.();
       this._stopPositionTracking();
       if (!this._nativePopover) this.menu.hidden = true;
       this._returnFocusOnClose = true;
@@ -1842,8 +1814,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.close();
     }
     _leaveInlineMenuWithTab() {
-      var _a;
-      (_a = this._restoreTabStops) == null ? void 0 : _a.call(this);
+      this._restoreTabStops?.();
       const saved = [...this.querySelectorAll("a[href],button,input,select,textarea,[tabindex]")].filter((el) => el.closest("au-dropdown") === this && !el.closest('[slot="trigger"]')).map((el) => [el, el.getAttribute("tabindex")]);
       for (const [el] of saved) el.setAttribute("tabindex", "-1");
       this._restoreTabStops = () => {
@@ -1856,8 +1827,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       };
       clearTimeout(this._tabCloseTimer);
       this._tabCloseTimer = setTimeout(() => {
-        var _a2;
-        (_a2 = this._restoreTabStops) == null ? void 0 : _a2.call(this);
+        this._restoreTabStops?.();
         this.closeWithoutReturningFocus();
       }, 0);
     }
@@ -1891,7 +1861,6 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
     }
     _startPositionTracking() {
-      var _a, _b;
       if (!this._nativePopover) return;
       this._positionMenu();
       if (this._trackingPosition) return;
@@ -1899,30 +1868,29 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       const view = this.ownerDocument.defaultView;
       view.addEventListener("resize", this._positionMenu);
       view.addEventListener("scroll", this._positionMenu, true);
-      (_a = view.visualViewport) == null ? void 0 : _a.addEventListener("resize", this._positionMenu);
-      (_b = view.visualViewport) == null ? void 0 : _b.addEventListener("scroll", this._positionMenu);
+      view.visualViewport?.addEventListener("resize", this._positionMenu);
+      view.visualViewport?.addEventListener("scroll", this._positionMenu);
       if (typeof ResizeObserver !== "undefined") {
-        this._sizeObserver ?? (this._sizeObserver = new ResizeObserver(this._positionMenu));
+        this._sizeObserver ??= new ResizeObserver(this._positionMenu);
         this._sizeObserver.observe(this.trigger);
         this._sizeObserver.observe(this.menu);
       }
     }
     _stopPositionTracking() {
-      var _a, _b, _c;
       this._trackingPosition = false;
-      (_a = this._sizeObserver) == null ? void 0 : _a.disconnect();
+      this._sizeObserver?.disconnect();
       const view = this.ownerDocument.defaultView;
       view.removeEventListener("resize", this._positionMenu);
       view.removeEventListener("scroll", this._positionMenu, true);
-      (_b = view.visualViewport) == null ? void 0 : _b.removeEventListener("resize", this._positionMenu);
-      (_c = view.visualViewport) == null ? void 0 : _c.removeEventListener("scroll", this._positionMenu);
+      view.visualViewport?.removeEventListener("resize", this._positionMenu);
+      view.visualViewport?.removeEventListener("scroll", this._positionMenu);
     }
     _positionMenu() {
       if (!this.isConnected || !this._nativePopover || !this.isOpen) return;
       const view = this.ownerDocument.defaultView, viewport = view.visualViewport;
-      const left = ((viewport == null ? void 0 : viewport.offsetLeft) || 0) + 8, top = ((viewport == null ? void 0 : viewport.offsetTop) || 0) + 8;
-      const right = left + ((viewport == null ? void 0 : viewport.width) || view.innerWidth) - 16;
-      const bottom = top + ((viewport == null ? void 0 : viewport.height) || view.innerHeight) - 16;
+      const left = (viewport?.offsetLeft || 0) + 8, top = (viewport?.offsetTop || 0) + 8;
+      const right = left + (viewport?.width || view.innerWidth) - 16;
+      const bottom = top + (viewport?.height || view.innerHeight) - 16;
       const anchor = this.trigger.getBoundingClientRect();
       const width = Math.max(0, right - left);
       this.menu.style.maxWidth = width + "px";
@@ -2085,6 +2053,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     if (!customElements.get("au-dropdown-item")) customElements.define("au-dropdown-item", AuDropdownItem);
   }
   class AuFileUpload extends HTMLElement {
+    static formAssociated = true;
     static get observedAttributes() {
       return [
         "accept",
@@ -2351,7 +2320,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         if (this.effectiveDisabled) return;
         this.dropZone.classList.remove("dragover");
         const dt = e.dataTransfer;
-        if (dt == null ? void 0 : dt.files) this.handleFiles(dt.files);
+        if (dt?.files) this.handleFiles(dt.files);
       });
       const actionGroup = document.createElement("div");
       actionGroup.className = "actions";
@@ -2442,8 +2411,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this._observeDescriptions();
     }
     disconnectedCallback() {
-      var _a;
-      (_a = this._descriptionObserver) == null ? void 0 : _a.disconnect();
+      this._descriptionObserver?.disconnect();
       cancelAnimationFrame(this._announcementFrame);
       this.liveRegion.textContent = "";
       this.revokeAllPreviewUrls();
@@ -2452,10 +2420,9 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       return this.hasAttribute("disabled") || !!this._formDisabled;
     }
     _observeDescriptions() {
-      var _a;
-      (_a = this._descriptionObserver) == null ? void 0 : _a.disconnect();
+      this._descriptionObserver?.disconnect();
       if (this.hasAttribute("aria-describedby")) {
-        this._descriptionObserver ?? (this._descriptionObserver = new MutationObserver(() => this._syncDescriptions()));
+        this._descriptionObserver ??= new MutationObserver(() => this._syncDescriptions());
         this._descriptionObserver.observe(this.getRootNode(), {
           subtree: true,
           childList: true,
@@ -2468,10 +2435,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     }
     _syncDescriptions() {
       const root = this.getRootNode();
-      const external = [...new Set((this.getAttribute("aria-describedby") || "").trim().split(/\s+/))].filter(Boolean).map((id) => {
-        var _a;
-        return (_a = root.getElementById) == null ? void 0 : _a.call(root, id);
-      }).filter((el) => el && el !== this);
+      const external = [...new Set((this.getAttribute("aria-describedby") || "").trim().split(/\s+/))].filter(Boolean).map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
       for (const target of [this.container, this.triggerArea, this.defaultTrigger]) {
         if (typeof target.ariaDescribedByElements !== "undefined") {
           target.ariaDescribedByElements = [this.errorMessage, this.dropZone, ...external];
@@ -2550,7 +2514,6 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.previewUrls.clear();
     }
     handleFiles(fileList) {
-      var _a;
       if (this.effectiveDisabled) return;
       const maxTotalSizeMB = this.limit("max-total-size-mb", 20);
       const maxFiles = Math.min(Math.floor(this.limit("max-files", 5)), this.hasAttribute("multiple") ? Infinity : 1);
@@ -2606,7 +2569,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       });
       const totalSize = this.files.reduce((sum, f) => sum + f.size, 0) + filesToAdd.reduce((sum, f) => sum + f.size, 0);
       if (totalSize > maxTotalSizeMB * 1024 * 1024) {
-        const totalSizeMessage = ((_a = this.getAttribute("msg-total-size-error")) == null ? void 0 : _a.includes("{")) ? this.formatMessage("msg-total-size-error", "Total file size exceeds limit of {maxTotalSize}MB.", { maxTotalSize: maxTotalSizeMB }) : `${this.getText("msg-total-size-error", "Total file size exceeds limit of")} ${maxTotalSizeMB}MB.`;
+        const totalSizeMessage = this.getAttribute("msg-total-size-error")?.includes("{") ? this.formatMessage("msg-total-size-error", "Total file size exceeds limit of {maxTotalSize}MB.", { maxTotalSize: maxTotalSizeMB }) : `${this.getText("msg-total-size-error", "Total file size exceeds limit of")} ${maxTotalSizeMB}MB.`;
         errorMessages.push(totalSizeMessage);
         filesToAdd.length = 0;
       }
@@ -2672,8 +2635,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       const previousButtons = [...this.fileList.querySelectorAll("button.delete")];
       const focused = this.shadowRoot.activeElement;
       const focusedIndex = previousButtons.indexOf(focused);
-      const focusedFile = focused == null ? void 0 : focused._file;
-      this._fileRows ?? (this._fileRows = /* @__PURE__ */ new Map());
+      const focusedFile = focused?._file;
+      this._fileRows ??= /* @__PURE__ */ new Map();
       for (const [file, row] of this._fileRows) {
         if (!this.files.includes(file)) {
           row.remove();
@@ -2682,14 +2645,13 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         }
       }
       this.files.forEach((file, index) => {
-        var _a;
         let li = this._fileRows.get(file);
         if (!li) {
           li = this.createFileRow(file);
           this._fileRows.set(file, li);
         }
         const removeBtn = li.querySelector("button.delete");
-        const visibleLabel = ((_a = this.getAttribute("msg-remove-text")) == null ? void 0 : _a.trim()) || "Remove";
+        const visibleLabel = this.getAttribute("msg-remove-text")?.trim() || "Remove";
         const requestedName = this.formatMessage("msg-remove-file-label", "{action} {fileName}", { action: visibleLabel, fileName: file.name });
         removeBtn.textContent = visibleLabel;
         removeBtn.setAttribute("aria-label", requestedName.includes(visibleLabel) ? requestedName : `${visibleLabel} ${requestedName}`);
@@ -2710,7 +2672,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     }
     removeFile(file) {
       if (this.effectiveDisabled) return;
-      const index = this.files.findIndex((f) => f === file || f.name === (file == null ? void 0 : file.name) && f.size === (file == null ? void 0 : file.size));
+      const index = this.files.findIndex((f) => f === file || f.name === file?.name && f.size === file?.size);
       if (index < 0) return;
       const removed = this.files[index];
       this.revokePreviewUrl(removed);
@@ -2740,7 +2702,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     }
     limit(name, fallback) {
       const raw = this.getAttribute(name);
-      const value = (raw == null ? void 0 : raw.trim()) ? Number(raw) : NaN;
+      const value = raw?.trim() ? Number(raw) : NaN;
       return Number.isFinite(value) && value >= 0 ? value : fallback;
     }
     focus(options) {
@@ -2809,11 +2771,11 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       return `au-file-upload-${Math.random().toString(36).slice(2)}`;
     }
   }
-  __publicField(AuFileUpload, "formAssociated", true);
   if (typeof customElements !== "undefined" && !customElements.get("au-file-upload")) {
     customElements.define("au-file-upload", AuFileUpload);
   }
   class AuInput extends HTMLElement {
+    static formAssociated = true;
     constructor() {
       super();
       this.attachShadow({ mode: "open" });
@@ -3171,12 +3133,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       if (wasFocused) this.input.focus();
     }
     formStateRestoreCallback(state, mode) {
-      var _a;
-      if (typeof state === "string" && ((_a = this.input) == null ? void 0 : _a.type) !== "file") this.value = state;
+      if (typeof state === "string" && this.input?.type !== "file") this.value = state;
     }
     get value() {
-      var _a;
-      return (_a = this.input) == null ? void 0 : _a.value;
+      return this.input?.value;
     }
     set value(val) {
       if (this.input) {
@@ -3230,8 +3190,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     }
     /** ✅ 開發者用：聚焦 input 欄位 */
     focus(options) {
-      var _a;
-      (_a = this.input) == null ? void 0 : _a.focus(options);
+      this.input?.focus(options);
     }
     generateId() {
       if (typeof crypto !== "undefined" && crypto.getRandomValues) {
@@ -3293,16 +3252,14 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this._syncValidity();
     }
     _observeExternalReferences() {
-      var _a;
-      (_a = this._referenceObserver) == null ? void 0 : _a.disconnect();
-      this._referenceObserver ?? (this._referenceObserver = new MutationObserver(() => {
-        var _a2, _b;
+      this._referenceObserver?.disconnect();
+      this._referenceObserver ??= new MutationObserver(() => {
         this._syncAccessibleReferences();
         const listId = this.getAttribute("list");
-        const found = (_b = (_a2 = this.getRootNode()).getElementById) == null ? void 0 : _b.call(_a2, listId);
-        const target = (found == null ? void 0 : found.tagName) === "DATALIST" ? found : null;
+        const found = this.getRootNode().getElementById?.(listId);
+        const target = found?.tagName === "DATALIST" ? found : null;
         if (listId && target !== this._externalDatalist) this._handleListAttribute(listId);
-      }));
+      });
       this._referenceObserver.observe(this.getRootNode(), {
         subtree: true,
         childList: true,
@@ -3315,10 +3272,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     _syncAccessibleReferences() {
       if (!this.input) return;
       const root = this.getRootNode();
-      const resolve = (attribute) => (this.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => {
-        var _a;
-        return (_a = root.getElementById) == null ? void 0 : _a.call(root, id);
-      }).filter((el) => el && el !== this);
+      const resolve = (attribute) => (this.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
       const explicit = this.getAttribute("aria-label");
       let labels = resolve("aria-labelledby");
       if (!labels.length && !explicit && !this.getAttribute("label") && this.isConnected) labels = [...this.internals.labels];
@@ -3405,12 +3359,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
     }
     disconnectedCallback() {
-      var _a;
       this._disconnectDatalistObserver();
-      (_a = this._referenceObserver) == null ? void 0 : _a.disconnect();
+      this._referenceObserver?.disconnect();
     }
   }
-  __publicField(AuInput, "formAssociated", true);
   if (typeof customElements !== "undefined" && !customElements.get("au-input")) {
     customElements.define("au-input", AuInput);
   }
@@ -3878,6 +3830,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     customElements.define("au-pagination", AuPagination);
   }
   class AuRadioGroup extends HTMLElement {
+    static formAssociated = true;
     constructor() {
       super();
       this.attachShadow({ mode: "open", delegatesFocus: true });
@@ -4004,7 +3957,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           this[name] = value;
         }
       }
-      this._mutationObserver ?? (this._mutationObserver = new MutationObserver((records) => {
+      this._mutationObserver ??= new MutationObserver((records) => {
         for (const record of records) {
           if (record.attributeName !== "checked" || !this._entries.has(record.target)) continue;
           if (record.target.hasAttribute("checked")) {
@@ -4017,7 +3970,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           }
         }
         this.renderRadios();
-      }));
+      });
       this._mutationObserver.observe(this, {
         childList: true,
         subtree: true,
@@ -4025,7 +3978,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         attributes: true,
         attributeFilter: ["label", "value", "checked", "disabled", "lang"]
       });
-      this._referenceObserver ?? (this._referenceObserver = new MutationObserver(() => this.updateGroupAttributes()));
+      this._referenceObserver ??= new MutationObserver(() => this.updateGroupAttributes());
       this._referenceObserver.observe(this.getRootNode(), {
         childList: true,
         subtree: true,
@@ -4036,9 +3989,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.renderRadios();
     }
     disconnectedCallback() {
-      var _a, _b;
-      (_a = this._mutationObserver) == null ? void 0 : _a.disconnect();
-      (_b = this._referenceObserver) == null ? void 0 : _b.disconnect();
+      this._mutationObserver?.disconnect();
+      this._referenceObserver?.disconnect();
     }
     renderRadios() {
       const focused = this.shadowRoot.activeElement;
@@ -4105,12 +4057,11 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
     }
     _syncSelection() {
-      var _a;
       let selected = this._entries.get(this._selectedSource);
       if (!selected && this._value !== null) {
         selected = [...this._entries.values()].find((entry) => entry.input.value === this._value);
       }
-      this._selectedSource = (selected == null ? void 0 : selected.source) || null;
+      this._selectedSource = selected?.source || null;
       if (selected) this._value = selected.input.value;
       const enabled = [...this._entries.values()].filter((entry) => !entry.input.disabled);
       const tabStop = selected && !selected.input.disabled ? selected : enabled[0];
@@ -4122,7 +4073,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         selected && !selected.input.disabled ? selected.input.value : null,
         JSON.stringify({ value: this._value })
       );
-      const anchor = (_a = enabled[0]) == null ? void 0 : _a.input;
+      const anchor = enabled[0]?.input;
       if (!anchor || !anchor.willValidate || anchor.validity.valid) this.internals.setValidity({});
       else this.internals.setValidity(anchor.validity, anchor.validationMessage, anchor);
     }
@@ -4141,7 +4092,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }));
     }
     handleKeyDown(event, currentInput) {
-      const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+      const rtl = getComputedStyle(currentInput).direction === "rtl";
+      const step = { ArrowRight: rtl ? -1 : 1, ArrowDown: 1, ArrowLeft: rtl ? 1 : -1, ArrowUp: -1 }[event.key];
       if (!step || event.altKey || event.ctrlKey || event.metaKey) return;
       event.preventDefault();
       const enabled = [...this._entries.values()].map((entry) => entry.input).filter((input) => !input.disabled);
@@ -4167,10 +4119,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     updateGroupAttributes() {
       const container = this._container;
       const root = this.getRootNode();
-      const resolve = (attribute) => (this.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => {
-        var _a;
-        return (_a = root.getElementById) == null ? void 0 : _a.call(root, id);
-      }).filter((element) => element && element !== this);
+      const resolve = (attribute) => (this.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((element) => element && element !== this);
       const explicit = this.getAttribute("aria-label") || this.getAttribute("label");
       let labels = resolve("aria-labelledby");
       if (!labels.length && !explicit && this.isConnected) labels = [...this.internals.labels || []];
@@ -4203,8 +4152,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       else container.removeAttribute("aria-invalid");
     }
     get value() {
-      var _a;
-      return ((_a = this._entries.get(this._selectedSource)) == null ? void 0 : _a.input.value) ?? null;
+      return this._entries.get(this._selectedSource)?.input.value ?? null;
     }
     set value(value) {
       this._value = value == null ? null : String(value);
@@ -4274,7 +4222,6 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       return Math.random().toString(36).slice(2);
     }
   }
-  __publicField(AuRadioGroup, "formAssociated", true);
   if (typeof customElements !== "undefined" && !customElements.get("au-radio-group")) {
     customElements.define("au-radio-group", AuRadioGroup);
   }
@@ -4496,8 +4443,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this._observeDescriptions();
     }
     disconnectedCallback() {
-      var _a;
-      (_a = this._descriptionObserver) == null ? void 0 : _a.disconnect();
+      this._descriptionObserver?.disconnect();
     }
     attributeChangedCallback(name, oldValue, newValue) {
       if (name === "aria-describedby") {
@@ -4507,10 +4453,9 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       if (oldValue !== newValue && this.isConnected) this.render();
     }
     _observeDescriptions() {
-      var _a;
-      (_a = this._descriptionObserver) == null ? void 0 : _a.disconnect();
+      this._descriptionObserver?.disconnect();
       if (this.hasAttribute("aria-describedby")) {
-        this._descriptionObserver ?? (this._descriptionObserver = new MutationObserver(() => this._syncDescriptions()));
+        this._descriptionObserver ??= new MutationObserver(() => this._syncDescriptions());
         this._descriptionObserver.observe(this.getRootNode(), {
           subtree: true,
           childList: true,
@@ -4523,10 +4468,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     }
     _syncDescriptions() {
       const root = this.getRootNode();
-      const external = [...new Set((this.getAttribute("aria-describedby") || "").trim().split(/\s+/))].filter(Boolean).map((id) => {
-        var _a;
-        return (_a = root.getElementById) == null ? void 0 : _a.call(root, id);
-      }).filter((el) => el && el !== this);
+      const external = [...new Set((this.getAttribute("aria-describedby") || "").trim().split(/\s+/))].filter(Boolean).map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
       if (!external.length) {
         if (this._descriptionMirror) this._descriptionMirror.textContent = "";
         this._fieldset.setAttribute("aria-describedby", "score");
@@ -4621,7 +4563,6 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }, template).trim();
     }
     render() {
-      var _a;
       const ariaLabel = this.ratingLabel;
       this._legend.textContent = ariaLabel;
       this._fieldset.setAttribute("aria-label", ariaLabel);
@@ -4659,7 +4600,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
       options.slice(this.max).forEach((option) => option.remove());
       if (previousFocus && !this.shadowRoot.contains(previousFocus) && !disabled && !this.readonly) {
-        (_a = this._fieldset.querySelector('input[tabindex="0"]')) == null ? void 0 : _a.focus();
+        this._fieldset.querySelector('input[tabindex="0"]')?.focus();
       }
       this.updateStars(currentValue);
       this.updateScoreDisplay(currentValue);
@@ -4743,9 +4684,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.value = this._defaultValue ?? 0;
     }
     focus(options) {
-      var _a;
       if (this.disabled || this._formDisabled || this.readonly) return;
-      (_a = this._fieldset.querySelector('input[tabindex="0"]:not(:disabled)')) == null ? void 0 : _a.focus(options);
+      this._fieldset.querySelector('input[tabindex="0"]:not(:disabled)')?.focus(options);
     }
     formStateRestoreCallback(state, mode) {
       if (typeof state === "string") this.value = state;
@@ -4759,6 +4699,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     customElements.define("au-rating", AuRating);
   }
   class AuSwitch extends HTMLElement {
+    static formAssociated = true;
     constructor() {
       super();
       this.attachShadow({ mode: "open", delegatesFocus: true });
@@ -4907,8 +4848,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       });
     }
     get checked() {
-      var _a;
-      return ((_a = this.inputElement) == null ? void 0 : _a.checked) ?? false;
+      return this.inputElement?.checked ?? false;
     }
     set checked(val) {
       this.toggleAttribute("checked", Boolean(val));
@@ -4986,16 +4926,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     syncAccessibleLabel() {
       const input = this.inputElement;
       const root = this.getRootNode();
-      const resolve = (attribute) => (this.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => {
-        var _a;
-        return (_a = root.getElementById) == null ? void 0 : _a.call(root, id);
-      }).filter((element) => element && element !== this);
+      const resolve = (attribute) => (this.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((element) => element && element !== this);
       const explicit = this.getAttribute("aria-label");
       let labels = resolve("aria-labelledby");
-      const hasSlotText = this._labelSlot.assignedNodes({ flatten: true }).some((node) => {
-        var _a;
-        return (_a = node.textContent) == null ? void 0 : _a.trim();
-      });
+      const hasSlotText = this._labelSlot.assignedNodes({ flatten: true }).some((node) => node.textContent?.trim());
       if (!labels.length && !explicit && !hasSlotText && this.isConnected) {
         labels = [...this.internals.labels];
       }
@@ -5021,9 +4955,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
     }
     _observeLabels() {
-      var _a;
-      (_a = this._labelObserver) == null ? void 0 : _a.disconnect();
-      this._labelObserver ?? (this._labelObserver = new MutationObserver(() => this.syncAccessibleLabel()));
+      this._labelObserver?.disconnect();
+      this._labelObserver ??= new MutationObserver(() => this.syncAccessibleLabel());
       this._labelObserver.observe(this.getRootNode(), {
         subtree: true,
         childList: true,
@@ -5034,8 +4967,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.syncAccessibleLabel();
     }
     disconnectedCallback() {
-      var _a;
-      (_a = this._labelObserver) == null ? void 0 : _a.disconnect();
+      this._labelObserver?.disconnect();
     }
     _upgradeProperties() {
       for (const name of ["checked", "disabled", "required", "name", "value"]) {
@@ -5122,7 +5054,6 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.updateFormValue();
     }
   }
-  __publicField(AuSwitch, "formAssociated", true);
   if (typeof customElements !== "undefined" && !customElements.get("au-switch")) {
     customElements.define("au-switch", AuSwitch);
   }
@@ -5291,16 +5222,16 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         delete this.selectedIndex;
         this.selectedIndex = value;
       }
-      this._observer ?? (this._observer = new MutationObserver((records) => {
+      this._observer ??= new MutationObserver((records) => {
         if (records.some((record) => record.target === this || record.target.parentNode === this)) this._renderTabs();
-      }));
+      });
       this._observer.observe(this, {
         childList: true,
         subtree: true,
         attributes: true,
         attributeFilter: ["label", "label-lang", "data-prefix", "data-badge", "data-affix", "id", "class", "slot"]
       });
-      this._referenceObserver ?? (this._referenceObserver = new MutationObserver(() => this._updateLabel()));
+      this._referenceObserver ??= new MutationObserver(() => this._updateLabel());
       this._root = this.getRootNode();
       this._referenceObserver.observe(this._root, {
         childList: true,
@@ -5309,17 +5240,16 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         attributes: true,
         attributeFilter: ["id", "aria-label"]
       });
-      this._onRootFocusIn ?? (this._onRootFocusIn = (event) => {
+      this._onRootFocusIn ??= (event) => {
         this._focusInPanel = this._panels.find((panel) => event.composedPath().includes(panel)) || null;
-      });
+      };
       this._root.addEventListener("focusin", this._onRootFocusIn);
       this._renderTabs();
     }
     disconnectedCallback() {
-      var _a, _b, _c;
-      (_a = this._observer) == null ? void 0 : _a.disconnect();
-      (_b = this._referenceObserver) == null ? void 0 : _b.disconnect();
-      (_c = this._root) == null ? void 0 : _c.removeEventListener("focusin", this._onRootFocusIn);
+      this._observer?.disconnect();
+      this._referenceObserver?.disconnect();
+      this._root?.removeEventListener("focusin", this._onRootFocusIn);
       this._focusInPanel = null;
     }
     attributeChangedCallback(name, oldValue, newValue) {
@@ -5437,10 +5367,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     }
     _updateLabel() {
       const root = this.getRootNode();
-      const labels = (this.getAttribute("aria-labelledby") || "").trim().split(/\s+/).filter(Boolean).map((id) => {
-        var _a;
-        return (_a = root.getElementById) == null ? void 0 : _a.call(root, id);
-      }).filter((element) => element && element !== this);
+      const labels = (this.getAttribute("aria-labelledby") || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((element) => element && element !== this);
       const explicit = this.getAttribute("aria-label");
       this.tabsList.removeAttribute("aria-labelledby");
       if (explicit) this.tabsList.setAttribute("aria-label", explicit);
@@ -5512,6 +5439,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     customElements.define("au-tabs", AuTabs);
   }
   class AuTextarea extends HTMLElement {
+    static formAssociated = true;
     constructor() {
       super();
       this.attachShadow({ mode: "open", delegatesFocus: true });
@@ -5753,9 +5681,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this._syncValidity();
     }
     _observeExternalReferences() {
-      var _a;
-      (_a = this._referenceObserver) == null ? void 0 : _a.disconnect();
-      this._referenceObserver ?? (this._referenceObserver = new MutationObserver(() => this._syncAccessibleReferences()));
+      this._referenceObserver?.disconnect();
+      this._referenceObserver ??= new MutationObserver(() => this._syncAccessibleReferences());
       this._referenceObserver.observe(this.getRootNode(), {
         subtree: true,
         childList: true,
@@ -5767,10 +5694,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     }
     _syncAccessibleReferences() {
       const root = this.getRootNode();
-      const resolve = (attribute) => (this.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => {
-        var _a;
-        return (_a = root.getElementById) == null ? void 0 : _a.call(root, id);
-      }).filter((element) => element && element !== this);
+      const resolve = (attribute) => (this.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((element) => element && element !== this);
       const explicit = this.getAttribute("aria-label");
       let labels = resolve("aria-labelledby");
       if (!labels.length && !explicit && !this.getAttribute("label") && this.isConnected) {
@@ -5801,8 +5725,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
     }
     disconnectedCallback() {
-      var _a;
-      (_a = this._referenceObserver) == null ? void 0 : _a.disconnect();
+      this._referenceObserver?.disconnect();
     }
     _syncFormValue() {
       this.internals.setFormValue(this.textarea.value);
@@ -5817,7 +5740,6 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
     }
   }
-  __publicField(AuTextarea, "formAssociated", true);
   if (typeof customElements !== "undefined" && !customElements.get("au-textarea")) {
     customElements.define("au-textarea", AuTextarea);
   }
@@ -5866,12 +5788,11 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.observeLabelRoot();
     }
     disconnectedCallback() {
-      var _a;
       this.removeEventListener("keydown", this.handleKeyDown);
       this.removeEventListener("focusin", this.handleFocusIn);
       this.removeEventListener("au-tree-node-expand", this.handleNodeExpand);
       this.removeEventListener("au-tree-node-check-change", this.handleNodeCheckChange);
-      (_a = this._labelObserver) == null ? void 0 : _a.disconnect();
+      this._labelObserver?.disconnect();
       this._typeBuffer = "";
     }
     _upgradeProperty(prop) {
@@ -5890,7 +5811,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         const { activeNode, activeElement } = this.findActiveNode();
         this._container.setAttribute("aria-multiselectable", String(this.hasAttribute("show-checkbox")));
         for (const node of this.getAllNodes()) node.syncPresentation();
-        if (activeNode && (activeElement == null ? void 0 : activeElement.hidden)) activeNode.focus();
+        if (activeNode && activeElement?.hidden) activeNode.focus();
         this.updateNodeRegistry();
       }
     }
@@ -5922,10 +5843,9 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       else this.setAttribute("data-text-toggle", value);
     }
     observeLabelRoot() {
-      var _a, _b;
-      (_a = this._labelObserver) == null ? void 0 : _a.disconnect();
-      if (!((_b = this.getAttribute("aria-labelledby")) == null ? void 0 : _b.trim())) return;
-      this._labelObserver ?? (this._labelObserver = new MutationObserver(() => this.syncAccessibleLabel()));
+      this._labelObserver?.disconnect();
+      if (!this.getAttribute("aria-labelledby")?.trim()) return;
+      this._labelObserver ??= new MutationObserver(() => this.syncAccessibleLabel());
       this._labelObserver.observe(this.getRootNode(), {
         childList: true,
         subtree: true,
@@ -5936,14 +5856,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.syncAccessibleLabel();
     }
     syncAccessibleLabel() {
-      var _a;
       const root = this.getRootNode();
       const ids = (this.getAttribute("aria-labelledby") || "").trim().split(/\s+/).filter(Boolean);
-      const labels = ids.map((id) => {
-        var _a2;
-        return (_a2 = root.getElementById) == null ? void 0 : _a2.call(root, id);
-      }).filter((el) => el && el !== this);
-      const fallback = ((_a = this.getAttribute("aria-label")) == null ? void 0 : _a.trim()) || "Tree";
+      const labels = ids.map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
+      const fallback = this.getAttribute("aria-label")?.trim() || "Tree";
       if ("ariaLabelledByElements" in this._container) {
         this._container.ariaLabelledByElements = labels;
         this._container.setAttribute("aria-label", fallback);
@@ -5969,10 +5885,9 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
       const retained = /* @__PURE__ */ new Set();
       records.forEach((item, index) => {
-        var _a;
         const id = idOf(item);
         const identity = id !== void 0 && counts.get(id) === 1 ? id : item;
-        const node = ((_a = available.get(identity)) == null ? void 0 : _a.shift()) || document.createElement("au-tree-node");
+        const node = available.get(identity)?.shift() || document.createElement("au-tree-node");
         node._identity = identity;
         node._tree = tree;
         node.parentTreeNode = parent;
@@ -6003,7 +5918,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.updateNodeRegistry(activeNode || this._activeNode);
       if (activeNode) {
         const target = this._activeNode;
-        if (target === activeNode && (activeElement == null ? void 0 : activeElement.isConnected) && !activeElement.hidden && !activeElement.disabled) {
+        if (target === activeNode && activeElement?.isConnected && !activeElement.hidden && !activeElement.disabled) {
           activeElement.focus({ preventScroll: true });
         } else (target || this._container).focus({ preventScroll: true });
       }
@@ -6020,12 +5935,11 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       return this.collectNodes(this.shadowRoot);
     }
     findActiveNode() {
-      var _a;
       let activeElement = this.shadowRoot.activeElement;
       let activeNode = null;
       while (activeElement) {
         if (activeElement instanceof AuTreeNode) activeNode = activeElement;
-        if (!((_a = activeElement.shadowRoot) == null ? void 0 : _a.activeElement)) break;
+        if (!activeElement.shadowRoot?.activeElement) break;
         activeElement = activeElement.shadowRoot.activeElement;
       }
       return { activeNode, activeElement };
@@ -6047,7 +5961,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     }
     handleFocusIn(event) {
       const node = event.composedPath().find((item) => item instanceof AuTreeNode);
-      if ((node == null ? void 0 : node._tree) === this) this.updateNodeRegistry(node);
+      if (node?._tree === this) this.updateNodeRegistry(node);
     }
     handleNodeExpand(event) {
       if (event.target === this) return;
@@ -6056,15 +5970,13 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       if (activeNode && !this._nodeRegistry.includes(activeNode)) this.focusNode(this._activeNode);
     }
     handleNodeCheckChange(event) {
-      var _a, _b;
-      if (((_b = (_a = event.detail) == null ? void 0 : _a.node) == null ? void 0 : _b._tree) !== this) return;
+      if (event.detail?.node?._tree !== this) return;
       const checkedNodes = this.getAllNodes().filter((node) => node.checked && !node.indeterminate).map((node) => node.data);
       this.dispatchEvent(new CustomEvent("change", { bubbles: true, composed: true, detail: { checkedNodes } }));
     }
     handleKeyDown(event) {
-      var _a;
       const current = event.composedPath().find((item) => item instanceof AuTreeNode);
-      if ((current == null ? void 0 : current._tree) !== this || event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
+      if (current?._tree !== this || event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
       this.updateNodeRegistry(current);
       const index = this._nodeRegistry.indexOf(current);
       let target;
@@ -6094,7 +6006,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           target = this._nodeRegistry.at(-1);
           break;
         case "*":
-          for (const sibling of ((_a = current.parentTreeNode) == null ? void 0 : _a.childNodesList) || [...this._container.children]) sibling.setExpanded(true);
+          for (const sibling of current.parentTreeNode?.childNodesList || [...this._container.children]) sibling.setExpanded(true);
           break;
         default:
           if (event.key.length === 1 && /\S/.test(event.key)) {
@@ -6127,7 +6039,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       for (const node of this._container.children) node.setExpanded(true);
     }
   }
-  const _AuTreeNode = class _AuTreeNode extends HTMLElement {
+  class AuTreeNode extends HTMLElement {
     constructor() {
       super();
       this.attachShadow({ mode: "open" });
@@ -6242,6 +6154,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         }
       });
     }
+    static supportsUntilFound = typeof HTMLElement !== "undefined" && "onbeforematch" in HTMLElement.prototype;
     static get observedAttributes() {
       return ["expanded", "checked", "indeterminate", "show-checkbox"];
     }
@@ -6263,7 +6176,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         const { activeNode, activeElement } = this._tree.findActiveNode();
         this.updateData(value, /* @__PURE__ */ new Set([value]));
         this._tree.updateNodeRegistry(activeNode);
-        if (activeNode && (activeElement == null ? void 0 : activeElement.isConnected)) activeElement.focus({ preventScroll: true });
+        if (activeNode && activeElement?.isConnected) activeElement.focus({ preventScroll: true });
       } else this.updateData(value, /* @__PURE__ */ new Set([value]));
     }
     get childNodesList() {
@@ -6276,8 +6189,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       return this._tree ? this._tree.hasAttribute("show-checkbox") : this.hasAttribute("show-checkbox");
     }
     get disabled() {
-      var _a;
-      return !!this._data.disabled || !!((_a = this.parentTreeNode) == null ? void 0 : _a.disabled);
+      return !!this._data.disabled || !!this.parentTreeNode?.disabled;
     }
     get label() {
       return this.getLabelText();
@@ -6301,8 +6213,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.setChecked(this.checked, value);
     }
     get toggleLabel() {
-      var _a;
-      return ((_a = this._tree) == null ? void 0 : _a.toggleLabel) ?? this._toggleLabel;
+      return this._tree?.toggleLabel ?? this._toggleLabel;
     }
     set toggleLabel(value) {
       this._toggleLabel = value;
@@ -6310,8 +6221,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       for (const child of this.childNodesList) child.toggleLabel = value;
     }
     get fallbackNodeLabel() {
-      var _a;
-      return ((_a = this._tree) == null ? void 0 : _a.fallbackNodeLabel) || this._fallbackNodeLabel;
+      return this._tree?.fallbackNodeLabel || this._fallbackNodeLabel;
     }
     set fallbackNodeLabel(value) {
       this._fallbackNodeLabel = value || "Node";
@@ -6319,8 +6229,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       for (const child of this.childNodesList) child.fallbackNodeLabel = value;
     }
     get toggleLabelTemplate() {
-      var _a;
-      return ((_a = this._tree) == null ? void 0 : _a.toggleLabelTemplate) ?? this._toggleLabelTemplate;
+      return this._tree?.toggleLabelTemplate ?? this._toggleLabelTemplate;
     }
     set toggleLabelTemplate(value) {
       this._toggleLabelTemplate = value;
@@ -6374,7 +6283,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           this._group.removeAttribute("hidden");
           this._group.inert = false;
         }
-      } else if (this.hasChildren && _AuTreeNode.supportsUntilFound) {
+      } else if (this.hasChildren && AuTreeNode.supportsUntilFound) {
         this._group.setAttribute("hidden", "until-found");
         this._group.inert = false;
       } else {
@@ -6391,7 +6300,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         return;
       }
       const tree = this._tree;
-      const active = tree == null ? void 0 : tree.findActiveNode().activeNode;
+      const active = tree?.findActiveNode().activeNode;
       this._expanded = next;
       this.syncPresentation();
       if (tree) {
@@ -6429,7 +6338,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         return;
       }
       const tree = this._tree;
-      const before = tree == null ? void 0 : tree.getAllNodes().map((node) => [node.checked, node.indeterminate].join(":")).join(",");
+      const before = tree?.getAllNodes().map((node) => [node.checked, node.indeterminate].join(":")).join(",");
       const next = value == null ? !this.checked : !!value;
       this.setChecked(next);
       this.setChildrenChecked(next);
@@ -6438,13 +6347,11 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         parent.updateStateFromChildren();
         parent = parent.parentTreeNode;
       }
-      const after = tree == null ? void 0 : tree.getAllNodes().map((node) => [node.checked, node.indeterminate].join(":")).join(",");
+      const after = tree?.getAllNodes().map((node) => [node.checked, node.indeterminate].join(":")).join(",");
       if (tree && before === after) return;
       this.dispatchEvent(new CustomEvent("au-tree-node-check-change", { bubbles: true, composed: true, detail: { checked: this.checked, node: this } }));
     }
-  };
-  __publicField(_AuTreeNode, "supportsUntilFound", typeof HTMLElement !== "undefined" && "onbeforematch" in HTMLElement.prototype);
-  let AuTreeNode = _AuTreeNode;
+  }
   if (typeof customElements !== "undefined") {
     if (!customElements.get("au-tree-node")) customElements.define("au-tree-node", AuTreeNode);
     if (!customElements.get("au-tree")) customElements.define("au-tree", AuTree);

@@ -71,6 +71,14 @@ async function verify(api,url,name){
   await wait(()=>controls.radio.shadowRoot.activeElement===radioNode&&radioNode.labels[0].textContent.includes('Translated express'));
   await key('ArrowRight');assert.equal(await e(()=>controls.radio.value),'a');await tab();assert.equal(await e(()=>document.activeElement.id),'after-radio');
   console.log(`${name} radio PASS: disabled skip, wrapping, FormData, events, translation, Tab`);
+  // Right-to-left: left and right follow the reading direction and wrap, like
+  // au-tabs and au-rating. Native radios disagree here (Chrome 155 mirrors and
+  // wraps, Safari 27 does neither), so they are not the reference.
+  for(const [k,expected] of [['ArrowLeft','b'],['ArrowRight','c'],['ArrowDown','b'],['ArrowUp','c']]){
+    await e(()=>{const group=document.getElementById('radio-rtl');group.value='a';group.shadowRoot.querySelector('input:checked').focus();});
+    await key(k);assert.equal(await e(()=>document.getElementById('radio-rtl').value),expected,`RTL ${k} from the first option`);
+  }
+  console.log(`${name} radio PASS: right-to-left arrows follow the reading direction`);
   await e(()=>document.getElementById('before-rating').focus());await tab();await key('ArrowRight');
   assert.deepEqual(await e(()=>({value:controls.rating.value,count:events.rating.length,submitted:new FormData(document.getElementById('form')).get('rating')})),{value:3,count:1,submitted:'3'});
   await tab();assert.equal(await e(()=>document.activeElement.id),'after-rating');
@@ -114,7 +122,7 @@ try{
         const {default:w}=await import(moduleURL.href),{default:f}=await import(new URL('./firefox.js',moduleURL).href);
         let builder=new w.Builder().forBrowser(name);if(name==='firefox')builder=builder.setFirefoxOptions(new f.Options().addArguments('-headless'));
         driver=await builder.build();
-        api={goto:url=>driver.get(url),evaluate:(fn,arg)=>driver.executeScript(fn,arg),wait:fn=>driver.wait(()=>driver.executeScript(fn),5000),type:t=>driver.actions().sendKeys(t).perform(),key:k=>k==='Alt+Tab'?driver.actions().keyDown(w.Key.ALT).sendKeys(w.Key.TAB).keyUp(w.Key.ALT).perform():driver.actions().sendKeys(({Tab:w.Key.TAB,Enter:w.Key.ENTER,Space:w.Key.SPACE,ArrowRight:w.Key.ARROW_RIGHT,ArrowLeft:w.Key.ARROW_LEFT,ArrowDown:w.Key.ARROW_DOWN})[k]).perform()};
+        api={goto:url=>driver.get(url),evaluate:(fn,arg)=>driver.executeScript(fn,arg),wait:fn=>driver.wait(()=>driver.executeScript(fn),5000),type:t=>driver.actions().sendKeys(t).perform(),key:k=>k==='Alt+Tab'?driver.actions().keyDown(w.Key.ALT).sendKeys(w.Key.TAB).keyUp(w.Key.ALT).perform():driver.actions().sendKeys(({Tab:w.Key.TAB,Enter:w.Key.ENTER,Space:w.Key.SPACE,ArrowRight:w.Key.ARROW_RIGHT,ArrowLeft:w.Key.ARROW_LEFT,ArrowDown:w.Key.ARROW_DOWN,ArrowUp:w.Key.ARROW_UP})[k]).perform()};
       }
       for(const url of urls)await verify(api,url,name);
     }finally{await browser?.close();await driver?.quit();}
