@@ -24,6 +24,7 @@
     </p>
     <section>
       <h2>Attribute</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="The Accesserty UI Kit Tabs tab panel attributes (set on each .au-tab-panel element):">
       <table>
         <caption>
           The Accesserty UI Kit Tabs tab panel attributes (set on each <code>.au-tab-panel</code> element):
@@ -54,6 +55,8 @@
         </tr>
         <tr><td>label-lang</td><td>Language of the generated tab label. Panel content keeps its own language.</td></tr>
       </table>
+      </div>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="Attributes on &lt;au-tabs&gt; for localization:">
       <table>
         <caption>
           Attributes on <code>&lt;au-tabs&gt;</code> for localization:
@@ -77,6 +80,7 @@
         <tr><td>aria-label / aria-labelledby</td><td>Name the tab list, preferably using a visible heading. External label IDs resolve in the containing document or shadow root.</td></tr>
         <tr><td>selected-index</td><td>Zero-based declarative selection, including server output. Attribute changes set current selection; user selection does not reflect it.</td></tr>
       </table>
+      </div>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>&lt;au-tabs aria-label="Example sections"
   data-text-tab="頁籤 {index}"
   data-text-tab-lang="zh-Hant-TW"
@@ -86,6 +90,7 @@
     </section>
     <section>
       <h2>Properties</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="JavaScript properties on &lt;au-tabs&gt;:">
       <table>
         <caption>
           JavaScript properties on <code>&lt;au-tabs&gt;</code>:
@@ -105,6 +110,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>const tabs = document.querySelector('au-tabs');
 // Get current tab index
 console.log(tabs.selectedIndex); // 0
@@ -117,6 +123,7 @@ tabs.selectedIndex = 2;</code></pre>
     </section>
     <section>
       <h2>Events</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="Events dispatched by &lt;au-tabs&gt;:">
       <table>
         <caption>
           Events dispatched by <code>&lt;au-tabs&gt;</code>:
@@ -136,6 +143,7 @@ tabs.selectedIndex = 2;</code></pre>
           </tr>
         </tbody>
       </table>
+      </div>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>// Vanilla JS
 document.querySelector('au-tabs').addEventListener('tab-change', (e) => {
   console.log('Tab index:', e.detail.index);
@@ -208,6 +216,7 @@ document.querySelector('au-tabs').addEventListener('tab-change', (e) => {
     </section>
     <section>
       <h2>CSS Variables</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="CSS Variables">
       <table>
         <thead>
           <tr>
@@ -375,6 +384,7 @@ document.querySelector('au-tabs').addEventListener('tab-change', (e) => {
           </tr>
         </tbody>
       </table>
+      </div>
     </section>
   </main>
 </body>

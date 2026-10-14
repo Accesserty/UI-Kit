@@ -56,6 +56,7 @@
     </section>
     <section>
       <h2>Attributes</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="The Accesserty UI Kit file upload attributes:">
       <table>
         <caption>The Accesserty UI Kit file upload attributes:</caption>
         <thead>
@@ -131,6 +132,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>&lt;au-file-upload
   label="上傳檔案"
   msg-drop-text="將檔案拖曳到這裡"
@@ -160,6 +162,7 @@
     </section>
     <section>
       <h2>CSS Variables</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="CSS Variables">
       <table>
         <thead>
           <tr>
@@ -300,6 +303,16 @@
             <td>1px</td>
           </tr>
           <tr>
+            <td>--au-file-upload-delete-active-border-color</td>
+            <td>Delete button border colour while pressed</td>
+            <td>oklch(0.55 0 0)</td>
+          </tr>
+          <tr>
+            <td>--au-file-upload-delete-tap-highlight-color</td>
+            <td>Delete button tap highlight on touch screens</td>
+            <td>oklch(0 0 0 / 0)</td>
+          </tr>
+          <tr>
             <td>--au-file-upload-delete-border-style</td>
             <td>border style of delete button</td>
             <td>solid</td>
@@ -356,9 +369,11 @@
           </tr>
         </tbody>
       </table>
+      </div>
     </section>
     <section>
       <h2>Properties</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="JavaScript properties on &lt;au-file-upload&gt;:">
       <table>
         <caption>JavaScript properties on <code>&lt;au-file-upload&gt;</code>:</caption>
         <thead>
@@ -385,6 +400,7 @@ fu.value = []; // clear files programmatically</code></pre>
           </tr>
         </tbody>
       </table>
+      </div>
     </section>
     <section>
       <h2>Events</h2>
@@ -394,6 +410,7 @@ fu.value = []; // clear files programmatically</code></pre>
         For native uploads use <code>enctype="multipart/form-data"</code>; when sending
         FormData with fetch, let the browser set the multipart Content-Type boundary.
         The component does not upload anything itself; enforce file-type and size checks on the server.</p>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="Events dispatched by &lt;au-file-upload&gt;:">
       <table>
         <caption>Events dispatched by <code>&lt;au-file-upload&gt;</code>:</caption>
         <thead>
@@ -416,6 +433,7 @@ fu.value = []; // clear files programmatically</code></pre>
           </tr>
         </tbody>
       </table>
+      </div>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>const fu = document.querySelector('au-file-upload');
 
 fu.addEventListener('change', () => {

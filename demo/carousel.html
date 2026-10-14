@@ -211,6 +211,7 @@
   </ol>
 
   <h2>CSS Variables</h2>
+  <div class="table-scroll" role="region" tabindex="0" aria-label="CSS Variables">
   <table>
     <tr><th scope="col">Variable</th><th scope="col">Description</th><th scope="col">Default</th></tr>
     <tr><td><code>--au-carousel-gap</code></td><td>Space between slides</td><td>1rem</td></tr>
@@ -231,8 +232,10 @@
     <tr><td><code>--au-carousel-button-focus-shadow-color</code></td><td>Prev/next focus ring colour (≥3:1 on white)</td><td>oklch(0.55 0.2 256)</td></tr>
     <tr><td><code>--au-carousel-controls-gap</code></td><td>Gap between prev and next</td><td>0.75rem</td></tr>
   </table>
+  </div>
 
   <h2>Attributes</h2>
+  <div class="table-scroll" role="region" tabindex="0" aria-label="Attributes">
   <table>
     <tr><th scope="col">Attribute</th><th scope="col">Description</th><th scope="col">Default</th></tr>
     <tr><td><code>data-title</code> (per slide)</td><td>Accessible name for that slide's dot</td><td>heading → positional</td></tr>
@@ -246,29 +249,36 @@
     <tr><td><code>data-icon-prev</code></td><td>Visible glyph on the previous button (decorative — a screen reader reads <code>data-text-prev</code> instead). Swap it for another character or icon-font glyph; for RTL, set it to <code>›</code></td><td>‹</td></tr>
     <tr><td><code>data-icon-next</code></td><td>Visible glyph on the next button (decorative). For RTL, set it to <code>‹</code></td><td>›</td></tr>
   </table>
+  </div>
 
   <h2>Properties</h2>
+  <div class="table-scroll" role="region" tabindex="0" aria-label="Properties">
   <table>
     <tr><th scope="col">Property</th><th scope="col">Type</th><th scope="col">Description</th></tr>
     <tr><td><code>current</code></td><td>number</td><td>Zero-based start-edge slide index; -1 when empty. Numeric strings are accepted, fractions truncate, invalid/non-finite values become 0 and values clamp to range. Set the DOM property to move; there is no current attribute.</td></tr>
   </table>
+  </div>
   <pre><code>const c = document.querySelector('au-carousel');
 c.current = 2;         // go to the third slide
 c.slideTo(0);          // back to the first
 console.log(c.current);</code></pre>
 
   <h2>Methods</h2>
+  <div class="table-scroll" role="region" tabindex="0" aria-label="Methods">
   <table>
     <tr><th scope="col">Method</th><th scope="col">Description</th></tr>
     <tr><td><code>slideTo(index)</code></td><td>Scroll to <code>index</code> (clamped to range) and make it current.</td></tr>
     <tr><td><code>refresh()</code></td><td>Immediately reread slide titles and structure. Heading/data-title edits also refresh automatically after a short debounce. Retained slide nodes keep their dots and selection when reordered; replacing a slide node creates a new identity.</td></tr>
   </table>
+  </div>
 
   <h2>Events</h2>
+  <div class="table-scroll" role="region" tabindex="0" aria-label="Events">
   <table>
     <tr><th scope="col">Event</th><th scope="col">Detail</th><th scope="col">Description</th></tr>
     <tr><td><code>slide-change</code></td><td><code>{ index, total, title }</code></td><td>Fires for changed navigation/current writes and settled scrolling (bubbles, composed), not refresh/translation/reordering. Same-index writes and boundary clicks do not emit again.</td></tr>
   </table>
+  </div>
   <pre><code>// Vanilla
 document.querySelector('au-carousel')
   .addEventListener('slide-change', (e) =&gt; console.log(e.detail.index));

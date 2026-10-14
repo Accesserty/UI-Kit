@@ -131,6 +131,7 @@
 
     <section>
       <h2>CSS Variables</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="CSS Variables">
       <table>
         <thead>
           <tr>
@@ -307,9 +308,11 @@
           </tr>
         </tbody>
       </table>
+      </div>
     </section>
     <section>
       <h2>Properties</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="JavaScript properties on &lt;au-input&gt;:">
       <table>
         <caption>JavaScript properties on <code>&lt;au-input&gt;</code>:</caption>
         <thead>
@@ -342,6 +345,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>const input = document.querySelector('au-input');
 input.value = 'Hello';
 input.disabled = true;
@@ -360,6 +364,7 @@ input.required = false; // removes required attribute</code></pre>
     </section>
     <section>
       <h2>Events</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="Events dispatched by &lt;au-input&gt;:">
       <table>
         <caption>Events dispatched by <code>&lt;au-input&gt;</code>:</caption>
         <thead>
@@ -379,6 +384,7 @@ input.required = false; // removes required attribute</code></pre>
           </tr>
         </tbody>
       </table>
+      </div>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>document.querySelector('au-input').addEventListener('input', (e) => {
   console.log('Current value:', e.target.value);
 });</code></pre>

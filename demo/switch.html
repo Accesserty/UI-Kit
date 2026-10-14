@@ -19,6 +19,7 @@
     <h1>Accesserty UI Kit Switch</h1>
     <section>
       <h2>Attribute</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="The Accesserty UI Kit Switch attributes:">
       <table>
         <caption>
           The Accesserty UI Kit Switch attributes:
@@ -71,9 +72,11 @@
           <td>required</td><td>Native validation requires this switch to be on.</td>
         </tr>
       </table>
+      </div>
     </section>
     <section>
       <h2>Properties</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="JavaScript properties on &lt;au-switch&gt;:">
       <table>
         <caption>JavaScript properties on <code>&lt;au-switch&gt;</code>:</caption>
         <thead>
@@ -97,6 +100,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>const sw = document.querySelector('au-switch');
 sw.checked = true;   // turns on
 sw.checked = false;  // turns off
@@ -113,6 +117,7 @@ console.log(sw.checked); // boolean</code></pre>
     </section>
     <section>
       <h2>Events</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="Events dispatched by &lt;au-switch&gt;:">
       <table>
         <caption>Events dispatched by <code>&lt;au-switch&gt;</code>:</caption>
         <thead>
@@ -130,6 +135,7 @@ console.log(sw.checked); // boolean</code></pre>
           </tr>
         </tbody>
       </table>
+      </div>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>document.querySelector('au-switch').addEventListener('change', (e) => {
   console.log('Switch is now:', e.detail ? 'On' : 'Off');
 });</code></pre>
@@ -171,6 +177,7 @@ console.log(sw.checked); // boolean</code></pre>
       <p>The default boundary and focus colors target light surfaces. Recheck contrast and target size when overriding
         them. The thumb follows RTL direction, reduced-motion preferences disable transitions, and forced-colors uses
         system colors and a focus outline.</p>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="CSS Variables">
       <table>
         <tr>
           <th scope="col">CSS Variables name</th>
@@ -268,6 +275,7 @@ console.log(sw.checked); // boolean</code></pre>
           <td>3px</td>
         </tr>
       </table>
+      </div>
     </section>
     <section>
       <h2>FAQ</h2>

@@ -63,6 +63,7 @@ customLabelTree.toggleLabel = (node) => {
 
 		<section>
 			<h2>Properties</h2>
+			<div class="table-scroll" role="region" tabindex="0" aria-label="JavaScript properties on &lt;au-tree&gt;:">
 			<table>
 				<caption>JavaScript properties on <code>&lt;au-tree&gt;</code>:</caption>
 				<thead>
@@ -119,6 +120,7 @@ customLabelTree.toggleLabel = (node) => {
 					</tr>
 				</tbody>
 			</table>
+			</div>
 		</section>
 		<section>
 			<h2>Events</h2>
@@ -134,6 +136,7 @@ customLabelTree.toggleLabel = (node) => {
 				does not submit native form values. Optional leaf <code>checked</code> and branch
 				<code>expanded</code> data fields are reapplied on data assignment; omit them to
 				retain interaction state. Optional <code>lang</code> sets each node's language.</p>
+			<div class="table-scroll" role="region" tabindex="0" aria-label="Events dispatched by &lt;au-tree&gt;:">
 			<table>
 				<caption>Events dispatched by <code>&lt;au-tree&gt;</code>:</caption>
 				<thead>
@@ -152,6 +155,7 @@ customLabelTree.toggleLabel = (node) => {
 					</tr>
 				</tbody>
 			</table>
+			</div>
 			<pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>document.querySelector('au-tree').addEventListener('change', (e) => {
   console.log('Checked nodes:', e.detail.checkedNodes);
 });
@@ -161,6 +165,7 @@ customLabelTree.toggleLabel = (node) => {
 		</section>
 		<section>
 			<h2>CSS Variables</h2>
+			<div class="table-scroll" role="region" tabindex="0" aria-label="CSS Variables">
 			<table>
 				<tr>
 					<th scope="col">CSS Variables name</th>
@@ -333,6 +338,11 @@ customLabelTree.toggleLabel = (node) => {
 					<td>'✔'</td>
 				</tr>
 				<tr>
+					<td>--au-tree-node-checkbox-input-indeterminate-symbol</td>
+					<td>Symbol shown when only some children are checked</td>
+					<td>'−'</td>
+				</tr>
+				<tr>
 					<td>--au-tree-node-checkbox-input-checked-text-color</td>
 					<td>Color of the check symbol</td>
 					<td>oklch(0.994 0 0)</td>
@@ -368,6 +378,7 @@ customLabelTree.toggleLabel = (node) => {
 							<td>oklch(0.4 0 0)</td>
 				</tr>
 			</table>
+			</div>
 		</section>
 	</main>
 	<script type="module">

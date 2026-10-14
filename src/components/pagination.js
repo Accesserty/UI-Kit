@@ -183,7 +183,7 @@ class AuPagination extends HTMLElement {
         /* text */
         color: var(--au-btn-text-color, oklch(0.1398 0 0));
         font-size: var(--au-btn-text-size, 1rem);
-        font-family: var(--au-btn-text-family);
+        font-family: var(--au-btn-text-family, inherit);
         line-height: var(--au-btn-text-line-height, 1.5);
 
         /* border */

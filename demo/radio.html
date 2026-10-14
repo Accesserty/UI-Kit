@@ -21,6 +21,7 @@
     </h1>
     <section>
       <h2>Attribute</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="The Accesserty UI Kit radio attributes:">
       <table>
         <caption>
           The Accesserty UI Kit radio attributes:
@@ -61,6 +62,7 @@
         <tr><td>name</td><td>Native form submission key. Unnamed groups submit no entry.</td></tr>
         <tr><td>required</td><td>Require selection using native radio validation when enabled options exist. An empty or entirely disabled option list has no validation anchor.</td></tr>
       </table>
+      </div>
     </section>
     <section>
       <h2>Basic</h2>
@@ -126,6 +128,7 @@
     </section>
     <section>
       <h2>Properties</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="JavaScript properties on &lt;au-radio-group&gt;:">
       <table>
         <caption>JavaScript properties on <code>&lt;au-radio-group&gt;</code>:</caption>
         <thead>
@@ -149,6 +152,7 @@
           <tr><td>name / required</td><td>string / boolean</td><td>Writable native form key and required constraint.</td></tr>
         </tbody>
       </table>
+      </div>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>const group = document.querySelector('au-radio-group');
 group.value = 'express';
 console.log(group.value);
@@ -162,6 +166,7 @@ group.disabled = true;</code></pre>
     </section>
     <section>
       <h2>Events</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="Events dispatched by &lt;au-radio-group&gt;:">
       <table>
         <caption>Events dispatched by <code>&lt;au-radio-group&gt;</code>:</caption>
         <thead>
@@ -180,6 +185,7 @@ group.disabled = true;</code></pre>
           <tr><td>input</td><td>Native event</td><td>FormData is synchronized before the native composed input event reaches the consumer.</td></tr>
         </tbody>
       </table>
+      </div>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>document.querySelector('au-radio-group').addEventListener('change', (e) => {
   console.log('Selected:', e.detail.value);
 });</code></pre>
@@ -196,6 +202,7 @@ group.disabled = true;</code></pre>
     </section>
     <section>
       <h2>CSS Variables</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="CSS Variables">
       <table>
         <tr>
           <th scope="col">CSS Variables nam</th>
@@ -283,6 +290,7 @@ group.disabled = true;</code></pre>
           <td>oklch(0.537 0 0)</td>
         </tr>
       </table>
+      </div>
     </section>
   </main>
   <script>

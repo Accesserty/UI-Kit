@@ -196,6 +196,15 @@ describe('AuCarousel', () => {
     expect(live.textContent).to.equal('Slide 2, item 2 of 3');
   });
 
+  it('announces an untitled slide by its positional name only once', async () => {
+    const el = await mount('<div>One</div><div>Two</div><div>Three</div>');
+    await tick();
+    el.shadowRoot.querySelector('[data-carousel-next]').click();
+    await tick();
+    expect(el.shadowRoot.querySelector('.au-carousel-live').textContent).to.equal('Item 2 of 3');
+    expect(el._dots[1].getAttribute('aria-label')).to.equal('Item 2 of 3');
+  });
+
   it('applies localized aria-labels to prev/next and the pagination group', async () => {
     const el = await mount(slidesHtml(2), {
       'data-text-prev': '上一張',

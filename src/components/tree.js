@@ -18,7 +18,7 @@ class AuTree extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <style>
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
-        :host { display:block; min-width:0; font-family:var(--au-tree-text-family);
+        :host { display:block; min-width:0; font-family:var(--au-tree-text-family, inherit);
           font-size:var(--au-tree-font-size,1rem); color:var(--au-tree-color,oklch(0.1398 0 0)); }
         [role=tree] { margin:0; padding:0; min-width:0; }
         [role=tree]:focus-visible { outline:2px solid var(--au-tree-focus-shadow-color,oklch(0.4 0 0)); }

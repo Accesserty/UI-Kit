@@ -19,6 +19,7 @@
     <h1>Accesserty UI Kit Textarea</h1>
     <section>
       <h2>Attributes</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="The Accesserty UI Kit textarea text and accessibility attributes:">
       <table>
         <caption>The Accesserty UI Kit textarea text and accessibility attributes:</caption>
         <thead>
@@ -50,6 +51,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
     </section>
     <section>
       <h2>Basic</h2>
@@ -84,6 +86,7 @@
       <p>Content-based height is progressive enhancement. Where <code>field-sizing: content</code> is unsupported,
         native rows and scrolling remain available. Vertical resizing is allowed. The default boundary and focus
         colors are intended for light backgrounds; recheck contrast when overriding tokens or using a dark surface.</p>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="CSS Variables">
       <table>
         <thead>
           <tr>
@@ -131,6 +134,11 @@
           <tr>
             <td>--au-textarea-container-padding-vertical</td>
             <td>padding-top/padding-bottom of textarea container</td>
+            <td>0.25rem</td>
+          </tr>
+          <tr>
+            <td>--au-textarea-container-padding-horizontal</td>
+            <td>container horizontal padding</td>
             <td>0.25rem</td>
           </tr>
           <tr>
@@ -220,9 +228,11 @@
           </tr>
         </tbody>
       </table>
+      </div>
     </section>
     <section>
       <h2>Properties</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="JavaScript properties on &lt;au-textarea&gt;:">
       <table>
         <caption>JavaScript properties on <code>&lt;au-textarea&gt;</code>:</caption>
         <thead>
@@ -255,6 +265,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>const ta = document.querySelector('au-textarea');
 ta.value = 'Prefilled content';
 ta.readonly = true;</code></pre>
@@ -266,6 +277,7 @@ ta.readonly = true;</code></pre>
     </section>
     <section>
       <h2>Events</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="Events dispatched by &lt;au-textarea&gt;:">
       <table>
         <caption>Events dispatched by <code>&lt;au-textarea&gt;</code>:</caption>
         <thead>
@@ -285,6 +297,7 @@ ta.readonly = true;</code></pre>
           </tr>
         </tbody>
       </table>
+      </div>
     </section>
   </main>
 </body>

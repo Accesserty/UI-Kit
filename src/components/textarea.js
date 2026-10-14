@@ -28,7 +28,7 @@ class AuTextarea extends HTMLElement {
         padding: var(--au-textarea-label-padding-vertical, 0.625rem) var(--au-textarea-label-padding-horizontal, 0);
         color: var(--au-textarea-label-text-color, oklch(0.1398 0 0));
         font-size: var(--au-textarea-label-text-size, 1rem);
-        font-family: var(--au-textarea-label-text-family);
+        font-family: var(--au-textarea-label-text-family, inherit);
       }
       label[hidden] { display: none; }
 
@@ -49,7 +49,7 @@ class AuTextarea extends HTMLElement {
         padding: var(--au-textarea-padding-vertical, 0.625rem) var(--au-textarea-padding-horizontal, 1rem);
         color: var(--au-textarea-text-color, oklch(0.1398 0 0));
         font-size: var(--au-textarea-text-size, 1rem);
-        font-family: var(--au-textarea-text-family);
+        font-family: var(--au-textarea-text-family, inherit);
         line-height: var(--au-textarea-text-line-height, 1.5);
 
         border: 0;

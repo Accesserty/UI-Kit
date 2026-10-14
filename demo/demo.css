@@ -53,9 +53,16 @@ p {
   margin: 0 0 1rem;
 }
 
+pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 code {
   background-color: var(--color-gray-100);
   color: var(--color-black);
+  /* Long attribute values wrap instead of widening the page on phones. */
+  overflow-wrap: anywhere;
 }
 
 .material-symbols-outlined {
@@ -588,4 +595,16 @@ code {
   /* --au-dropdown-item-hover-bg:; */
   /* --au-dropdown-item-hover-color */
 
+}
+
+/* Wide tables scroll inside their own box instead of widening the page.
+   The box is focusable so keyboard users can scroll it too. */
+.table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary-500, oklch(0.45 0.15 260));
+    outline-offset: 2px;
+  }
 }

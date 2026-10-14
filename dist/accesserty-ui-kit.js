@@ -1,4 +1,4 @@
-/*! Accesserty UI Kit v2.0.8 */
+/*! Accesserty UI Kit v2.0.9 */
 (function() {
   "use strict";
   class AuAccordion extends HTMLElement {
@@ -126,7 +126,7 @@
             /* text */
             color: var(--au-accordion-heading-text-color, oklch(0.1398 0 0));
             font-size: var(--au-accordion-heading-text-size, 1rem);
-            font-family: var(--au-accordion-heading-text-family);
+            font-family: var(--au-accordion-heading-text-family, inherit);
             line-height: var(--au-accordion-heading-text-line-height, 1.5);
             
             /* border */
@@ -1023,6 +1023,7 @@
       const total = this._slides.length;
       const resolved = this._slides.map((el, i) => this._resolveName(el, i));
       this._names = resolved.map((r) => r.name);
+      this._realNames = resolved.map((r) => r.real);
       const dotTemplate = this.getAttribute("data-dot-template") || "{title}, {current} of {total}";
       this._dotLabels = resolved.map((r, i) => r.real ? this._fill(dotTemplate, r.name, i) : r.name);
       this._dots = this._dotLabels.map((label, i) => {
@@ -1124,7 +1125,7 @@
       if (changed && this._slides.length) {
         if (!this._pagination.contains(this.shadowRoot.activeElement)) {
           const tpl = this.getAttribute("data-live-template") || "{title}, item {current} of {total}";
-          this._live.textContent = this._fill(tpl, this._names[idx], idx);
+          this._live.textContent = this._realNames[idx] ? this._fill(tpl, this._names[idx], idx) : this._names[idx];
         }
         this.dispatchEvent(
           new CustomEvent("slide-change", {
@@ -1597,7 +1598,7 @@
           /* text */
           color: var(--au-btn-text-color, oklch(0.1398 0 0));
           font-size: var(--au-btn-text-size, 1rem);
-          font-family: var(--au-btn-text-family);
+          font-family: var(--au-btn-text-family, inherit);
           line-height: var(--au-btn-text-line-height, 1.5);
 
           /* border */
@@ -2874,7 +2875,7 @@
         }
       }
       .color-code {
-        font-family: var(--au-input-text-family);
+        font-family: var(--au-input-text-family, inherit);
         font-size: var(--au-input-text-size, 1rem);
         color: var(--au-input-text-color, oklch(0.1398 0 0));
         user-select: text; /* Allow copying */
@@ -3571,7 +3572,7 @@
         /* text */
         color: var(--au-btn-text-color, oklch(0.1398 0 0));
         font-size: var(--au-btn-text-size, 1rem);
-        font-family: var(--au-btn-text-family);
+        font-family: var(--au-btn-text-family, inherit);
         line-height: var(--au-btn-text-line-height, 1.5);
 
         /* border */
@@ -5121,7 +5122,7 @@
         /* text */
         color: var(--au-tabs-text-color, oklch(0.1398 0 0));
         font-size: var(--au-tabs-text-size, 1rem);
-        font-family: var(--au-tabs-text-family);
+        font-family: var(--au-tabs-text-family, inherit);
         line-height: var(--au-tabs-text-line-height, 1.5);
         white-space: normal;
         box-sizing: border-box;
@@ -5465,7 +5466,7 @@
         padding: var(--au-textarea-label-padding-vertical, 0.625rem) var(--au-textarea-label-padding-horizontal, 0);
         color: var(--au-textarea-label-text-color, oklch(0.1398 0 0));
         font-size: var(--au-textarea-label-text-size, 1rem);
-        font-family: var(--au-textarea-label-text-family);
+        font-family: var(--au-textarea-label-text-family, inherit);
       }
       label[hidden] { display: none; }
 
@@ -5486,7 +5487,7 @@
         padding: var(--au-textarea-padding-vertical, 0.625rem) var(--au-textarea-padding-horizontal, 1rem);
         color: var(--au-textarea-text-color, oklch(0.1398 0 0));
         font-size: var(--au-textarea-text-size, 1rem);
-        font-family: var(--au-textarea-text-family);
+        font-family: var(--au-textarea-text-family, inherit);
         line-height: var(--au-textarea-text-line-height, 1.5);
 
         border: 0;
@@ -5759,7 +5760,7 @@
       this.shadowRoot.innerHTML = `
       <style>
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
-        :host { display:block; min-width:0; font-family:var(--au-tree-text-family);
+        :host { display:block; min-width:0; font-family:var(--au-tree-text-family, inherit);
           font-size:var(--au-tree-font-size,1rem); color:var(--au-tree-color,oklch(0.1398 0 0)); }
         [role=tree] { margin:0; padding:0; min-width:0; }
         [role=tree]:focus-visible { outline:2px solid var(--au-tree-focus-shadow-color,oklch(0.4 0 0)); }

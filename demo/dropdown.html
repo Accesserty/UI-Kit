@@ -35,6 +35,7 @@
     <section>
       <h2>Basic &lt;slot&gt;</h2>
       <h3>&lt;au-dropdown&gt;</h3>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="&lt;au-dropdown&gt;">
       <table>
         <tr>
           <th>Name</th>
@@ -49,8 +50,10 @@
           <td>Container for <code>&lt;au-dropdown-item&gt;</code> elements</td>
         </tr>
       </table>
+      </div>
 
       <h3>&lt;au-dropdown-item&gt;</h3>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="&lt;au-dropdown-item&gt;">
       <table>
         <tr>
           <th>Name</th>
@@ -61,8 +64,10 @@
           <td>Content of the menu item</td>
         </tr>
       </table>
+      </div>
 
       <h3>Attributes</h3>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="Attributes">
       <table>
         <tr>
           <th scope="col">Name</th>
@@ -73,6 +78,7 @@
           <td>Fallback trigger text when no <code>slot="trigger"</code> content is provided.</td>
         </tr>
       </table>
+      </div>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>&lt;au-dropdown data-text-trigger="更多操作"&gt;
   &lt;au-dropdown-item value="edit"&gt;編輯&lt;/au-dropdown-item&gt;
 &lt;/au-dropdown&gt;</code></pre>
@@ -190,6 +196,7 @@
       </p>
 
       <h3>Menu</h3>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="Menu">
       <table>
         <tr>
           <th scope="col">Variable</th>
@@ -222,8 +229,10 @@
           <td>0</td>
         </tr>
       </table>
+      </div>
 
       <h3>Menu Item</h3>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="Menu Item">
       <table>
         <tr>
           <th scope="col">Variable</th>
@@ -260,11 +269,23 @@
           <td>Focus ring color</td>
           <td>oklch(0.4 0 0)</td>
         </tr>
+        <tr>
+          <td>--au-dropdown-arrow-down-icon</td>
+          <td>Trigger arrow while closed (falls back to --au-control-arrow-down-icon)</td>
+          <td>'▼'</td>
+        </tr>
+        <tr>
+          <td>--au-dropdown-arrow-up-icon</td>
+          <td>Trigger arrow while open (falls back to --au-control-arrow-up-icon)</td>
+          <td>'▲'</td>
+        </tr>
       </table>
+      </div>
     </section>
 
     <section>
       <h2>Properties</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="JavaScript properties on &lt;au-dropdown&gt;:">
       <table>
         <caption>JavaScript properties on <code>&lt;au-dropdown&gt;</code>:</caption>
         <thead>
@@ -290,6 +311,7 @@ dd.isOpen = false; // closes the menu</code></pre>
           </tr>
         </tbody>
       </table>
+      </div>
     </section>
 
     <section>

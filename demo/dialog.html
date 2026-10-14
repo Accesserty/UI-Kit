@@ -90,9 +90,10 @@
           <button class="btn" value="confirm" autofocus>Confirm</button>
         </form>
       </dialog>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="Dialog Title">
       <table>
         <tr>
-          <th scope="col"></th>
+          <th scope="col">Aspect</th>
           <th scope="col"><code>show()</code>, non-modal</th>
           <th scope="col"><code>showModal()</code> or <code>command="show-modal"</code></th>
         </tr>
@@ -117,6 +118,7 @@
           <td>Shown</td>
         </tr>
       </table>
+      </div>
       <p class="note">There is no command for a non-modal dialog, so its button calls <code>show()</code>. A
         <code>&lt;dialog open&gt;</code> written in HTML is also non-modal. When users must finish the task first,
         use a modal.
@@ -155,6 +157,7 @@
           keyboard users know best, so keep a visible close button.</p>
         <button type="button" class="btn" command="close" commandfor="dialog-none" autofocus>Close</button>
       </dialog>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="Only the Button">
       <table>
         <tr>
           <th scope="col"><code>closedby</code></th>
@@ -185,6 +188,7 @@
           <td>Rarely; always keep a visible close button</td>
         </tr>
       </table>
+      </div>
       <p class="note">A browser without <code>closedby</code> ignores it and keeps the default: a modal closes on Esc
         but not on a backdrop click. <code>closedby="none"</code> blocks the user's close requests only; your own
         <code>close()</code> and <code>requestClose()</code> calls still close it.</p>
@@ -306,6 +310,7 @@ editor.addEventListener('close', () =&gt; {
 
     <section>
       <h2>CSS Variables</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="CSS Variables">
       <table>
         <tr>
           <th scope="col">CSS Variables name</th>
@@ -378,6 +383,7 @@ editor.addEventListener('close', () =&gt; {
           <td>2px</td>
         </tr>
       </table>
+      </div>
     </section>
   </main>
 

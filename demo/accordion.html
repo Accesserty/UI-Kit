@@ -38,6 +38,7 @@
 
     <section>
       <h2>Basic &lt;slot&gt;</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="Basic &lt;slot&gt;">
       <table>
         <tr>
           <th>Name</th>
@@ -60,6 +61,7 @@
           <td>Content of accordion item</td>
         </tr>
       </table>
+      </div>
       <br>
       <div role="group" aria-labelledby="group-label-basic">
         <span id="group-label-basic" hidden>Basic</span>
@@ -73,7 +75,7 @@
             <div slot="content">Content</div>
           </au-accordion-item>
           <au-accordion-item>
-            <div slot="heading">Heading2</div>
+            <div slot="heading">Basic item 2</div>
             <div slot="sub">
               sub
             </div>
@@ -88,6 +90,7 @@
 
     <section>
       <h2>Attributes</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="The Accesserty UI Kit accordion attributes:">
       <table>
         <caption>The Accesserty UI Kit accordion attributes:</caption>
         <thead>
@@ -111,6 +114,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>&lt;au-accordion
   exclusive
   data-text-exclusive-hint="一次只能展開一個區塊"&gt;
@@ -124,7 +128,7 @@
         <span id="group-label-default-open" hidden>Default Open</span>
         <au-accordion>
           <au-accordion-item open>
-            <div slot="heading">Heading</div>
+            <div slot="heading">Default open item 1</div>
             <div slot="sub">
               sub
             </div>
@@ -134,7 +138,7 @@
             <div slot="content">Content</div>
           </au-accordion-item>
           <au-accordion-item>
-            <div slot="heading">Heading2</div>
+            <div slot="heading">Default open item 2</div>
             <div slot="sub">
               sub
             </div>
@@ -178,7 +182,7 @@
         <span id="group-label-nested" hidden>Nested</span>
         <au-accordion>
           <au-accordion-item>
-            <div slot="heading">Heading</div>
+            <div slot="heading">Nested outer item</div>
             <div slot="sub">
               sub
             </div>
@@ -188,7 +192,7 @@
             <div slot="content">
               <au-accordion>
                 <au-accordion-item heading-level="4">
-                  <div slot="heading">Heading</div>
+                  <div slot="heading">Nested inner item 1</div>
                   <div slot="sub">
                     sub
                   </div>
@@ -198,7 +202,7 @@
                   <div slot="content">Content</div>
                 </au-accordion-item>
                 <au-accordion-item heading-level="4">
-                  <div slot="heading">Heading2</div>
+                  <div slot="heading">Nested inner item 2</div>
                   <div slot="sub">
                     sub
                   </div>
@@ -257,7 +261,7 @@
         <span id="group-label-custom" hidden>custom</span>
         <au-accordion class="f-l-au-accordion">
           <au-accordion-item>
-            <h4 slot="heading">Heading</h4>
+            <h4 slot="heading">First child</h4>
             <div slot="sub">
               sub
             </div>
@@ -267,7 +271,7 @@
             <div slot="content">Content</div>
           </au-accordion-item>
           <au-accordion-item>
-            <h4 slot="heading">Heading2</h4>
+            <h4 slot="heading">Middle child</h4>
             <div slot="sub">
               sub
             </div>
@@ -277,7 +281,7 @@
             <div slot="content">Content2</div>
           </au-accordion-item>
           <au-accordion-item>
-            <h4 slot="heading">Heading3</h4>
+            <h4 slot="heading">Last child</h4>
             <div slot="sub">
               sub
             </div>
@@ -293,6 +297,7 @@
     <section>
       <h2>Attributes &amp; Properties</h2>
       <h3><code>&lt;au-accordion&gt;</code></h3>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="&lt;au-accordion&gt;">
       <table>
         <tr>
           <th scope="col">Attribute / Property</th>
@@ -307,8 +312,10 @@
           <td>When present, only one item can be open at a time. Opening an item closes all siblings.</td>
         </tr>
       </table>
+      </div>
       <br>
       <h3><code>&lt;au-accordion-item&gt;</code></h3>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="&lt;au-accordion-item&gt;">
       <table>
         <tr>
           <th scope="col">Attribute / Property</th>
@@ -325,10 +332,12 @@
         <tr><td>heading-level</td><td>integer attribute, 1–6</td><td>3</td><td>Heading level surrounding the native button. Choose a level appropriate to the page outline; invalid values fall back to 3.</td></tr>
         <tr><td>no-region</td><td>boolean attribute</td><td>false</td><td>Omits the panel landmark role. Use when many simultaneously open panels would create too many regions; visibility and keyboard behavior remain unchanged.</td></tr>
       </table>
+      </div>
     </section>
 
     <section>
       <h2>Events</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="Events">
       <table>
         <tr>
           <th scope="col">Event</th>
@@ -347,6 +356,7 @@
           <td>Fires for each actual connected open-state change, including programmatic changes and exclusive sibling closures. Same-value writes do not repeat events. Group listeners should filter the originating item to avoid treating nested events as their own.</td>
         </tr>
       </table>
+      </div>
       <br>
       <h3>Framework usage examples</h3>
       <code style="display: block; white-space: pre-wrap;">
@@ -362,6 +372,7 @@ document.querySelector('au-accordion-item').addEventListener('au-toggle', (e) =&
 
     <section>
       <h2>CSS Variables</h2>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="CSS Variables">
       <table>
         <tr>
           <th scope="col">CSS Variables name</th>
@@ -504,6 +515,7 @@ document.querySelector('au-accordion-item').addEventListener('au-toggle', (e) =&
           <td>0</td>
         </tr>
       </table>
+      </div>
       <div role="group" aria-labelledby="group-label-custom2">
         <span id="group-label-custom2" hidden>custom2</span>
         <au-accordion class="custom-au-accordion">
@@ -564,6 +576,7 @@ document.querySelector('au-accordion-item').addEventListener('au-toggle', (e) =&
       </div>
 
       <br>
+      <div class="table-scroll" role="region" tabindex="0" aria-label="How about HTML tag &lt;details&gt;">
       <table>
         <tr>
           <th scope="col">CSS Variables name</th>
@@ -694,6 +707,7 @@ document.querySelector('au-accordion-item').addEventListener('au-toggle', (e) =&
           <td>oklch(0.8315 0.15681888825079074 78.05241467152487)</td>
         </tr>
       </table>
+      </div>
     </section>
 
     <section>

@@ -430,6 +430,7 @@ class AuCarousel extends HTMLElement {
     // Plain titles for the live region / event; position-bearing labels for the
     // dots so each dot announces "{title}, {current} of {total}".
     this._names = resolved.map((r) => r.name);
+    this._realNames = resolved.map((r) => r.real);
     const dotTemplate = this.getAttribute('data-dot-template') || '{title}, {current} of {total}';
     this._dotLabels = resolved.map((r, i) => (r.real ? this._fill(dotTemplate, r.name, i) : r.name));
 
@@ -547,7 +548,8 @@ class AuCarousel extends HTMLElement {
       // still fires for prev/next, swipe/scroll and programmatic changes.
       if (!this._pagination.contains(this.shadowRoot.activeElement)) {
         const tpl = this.getAttribute('data-live-template') || '{title}, item {current} of {total}';
-        this._live.textContent = this._fill(tpl, this._names[idx], idx);
+        // A positional fallback name already says where the slide is.
+        this._live.textContent = this._realNames[idx] ? this._fill(tpl, this._names[idx], idx) : this._names[idx];
       }
       this.dispatchEvent(
         new CustomEvent('slide-change', {
