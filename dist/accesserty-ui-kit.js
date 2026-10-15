@@ -1,4 +1,4 @@
-/*! Accesserty UI Kit v2.0.9 */
+/*! Accesserty UI Kit v2.0.10 */
 (function() {
   "use strict";
   class AuAccordion extends HTMLElement {
@@ -906,6 +906,9 @@
       this._onFocusIn = this._onFocusIn.bind(this);
       this._onScroll = this._onScroll.bind(this);
       this._onSettled = this._onSettled.bind(this);
+      this._onUserScroll = () => {
+        this._scrollTarget = null;
+      };
       this._resizeObserver = new ResizeObserver(() => {
         if (this._current > this._maxIndex()) this.setCurrent(this._maxIndex());
         else this._apply();
@@ -931,6 +934,7 @@
       this._prevBtn.addEventListener("keydown", this._onPrevKeydown);
       this.addEventListener("focusin", this._onFocusIn);
       this._track.addEventListener("scroll", this._onScroll, { passive: true });
+      for (const type of ["pointerdown", "wheel", "touchstart"]) this._track.addEventListener(type, this._onUserScroll, { passive: true });
       this._resizeObserver.observe(this);
       this._contentObserver.observe(this, {
         childList: true,
@@ -954,6 +958,7 @@
       this._prevBtn.removeEventListener("keydown", this._onPrevKeydown);
       this.removeEventListener("focusin", this._onFocusIn);
       this._track.removeEventListener("scroll", this._onScroll);
+      for (const type of ["pointerdown", "wheel", "touchstart"]) this._track.removeEventListener(type, this._onUserScroll);
       this._resizeObserver.disconnect();
       this._contentObserver.disconnect();
       this._labelObserver?.disconnect();
@@ -1153,6 +1158,8 @@
     }
     _scrollToIndex(index, behavior) {
       if (!this._slides[index]) return;
+      this._scrollTarget = behavior === "smooth" ? this._slides[index] : null;
+      this._scrollTargetSince = performance.now();
       this._track.scrollTo({ left: this._track.scrollLeft + this._startDistance(this._slides[index]), behavior });
     }
     // ---- event handlers ----
@@ -1207,6 +1214,16 @@
     // scrolling settles (deterministic for N-per-view; no mid-scroll chatter).
     _onSettled() {
       if (this._slides.length < 1) return;
+      const target = this._scrollTarget;
+      if (target) {
+        const arrived = !this._slides.includes(target) || Math.abs(this._startDistance(target)) < 2;
+        if (!arrived && performance.now() - this._scrollTargetSince < 1e3) {
+          clearTimeout(this._settle);
+          this._settle = setTimeout(this._onSettled, 120);
+          return;
+        }
+        this._scrollTarget = null;
+      }
       let nearest = 0, distance = Infinity;
       this._slides.forEach((slide, i) => {
         const delta = Math.abs(this._startDistance(slide));

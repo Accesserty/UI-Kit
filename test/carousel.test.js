@@ -493,6 +493,23 @@ describe('AuCarousel', () => {
     el._scrollToIndex(2,'instant');el._onSettled();expect(el.current).to.equal(2);
   });
 
+  it('does not report a slide a smooth scroll only passes, even if it pauses', async () => {
+    const el = await mount(slidesHtml(3), {style: 'width:300px;display:block'});
+    await tick();
+    const events = [];
+    el.addEventListener('slide-change', e => events.push(e.detail.index));
+    el._scrollToIndex(2, 'smooth'); el.setCurrent(2);
+    // Model a settle timer that fires mid-animation (a busy machine pausing
+    // the scroll longer than the settle delay).
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    expect(Math.abs(el._startDistance(el._slides[2]))).to.be.above(2);
+    el._onSettled();
+    expect(el.current).to.equal(2);
+    await new Promise(r => setTimeout(r, 1200));
+    expect(el.current).to.equal(2);
+    expect(events).to.deep.equal([2]);
+  });
+
   it('retains dots and one notification through reconnection', async () => {
     const wrapper=await fixture(document.createElement('div')),el=document.createElement('au-carousel');el.innerHTML=slidesHtml(3);wrapper.append(el);await tick();
     const dot=el._dots[1],events=[];el.addEventListener('slide-change',e=>events.push(e.detail.index));
