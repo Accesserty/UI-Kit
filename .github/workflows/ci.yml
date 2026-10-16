@@ -53,6 +53,7 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run test:docs
+      - run: npm run test:ssr-stream
 
   integration:
     name: Browsers and SSR
@@ -94,9 +95,11 @@ jobs:
       - run: npm run test:dropdown:chrome
       - run: node test/browser/tree.mjs chrome
       - run: node test/browser/accordion.mjs chrome
+      - run: node test/browser/declarative.mjs chrome
       - run: node test/browser/breadcrumbs-html.mjs chrome
       - run: node test/browser/card.mjs chrome
       - run: node test/browser/carousel.mjs chrome
       - run: node test/browser/file-upload.mjs chrome
+      - run: node test/browser/standalone.mjs chrome
       - name: SSR across Next and Nuxt
         run: npm test --prefix test/ssr

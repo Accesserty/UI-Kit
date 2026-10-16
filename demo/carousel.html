@@ -211,11 +211,11 @@
   </ol>
 
   <h2>CSS Variables</h2>
+  <p>Slides per view follow the carousel's own width: one slide, two from 34rem, three from 52rem. It is not a setting.</p>
   <div class="table-scroll" role="region" tabindex="0" aria-label="CSS Variables">
   <table>
     <tr><th scope="col">Variable</th><th scope="col">Description</th><th scope="col">Default</th></tr>
     <tr><td><code>--au-carousel-gap</code></td><td>Space between slides</td><td>1rem</td></tr>
-    <tr><td><code>--au-carousel-visible</code></td><td>Slides per view (set by <code>@container</code>: 1 → 2 → 3)</td><td>1</td></tr>
     <tr><td><code>--au-carousel-dot-target</code></td><td>Dot focus/click hit area (≥24px)</td><td>1.75rem</td></tr>
     <tr><td><code>--au-carousel-dot-size</code></td><td>Visible dot diameter</td><td>0.7rem</td></tr>
     <tr><td><code>--au-carousel-dot-color</code></td><td>Dot colour (≥3:1 on white)</td><td>oklch(0.62 0 0)</td></tr>
@@ -227,7 +227,7 @@
     <tr><td><code>--au-carousel-button-bg</code></td><td>Prev/next background</td><td>oklch(0.2 0 0)</td></tr>
     <tr><td><code>--au-carousel-button-text-color</code></td><td>Prev/next glyph colour</td><td>oklch(0.99 0 0)</td></tr>
     <tr><td><code>--au-carousel-button-radius</code></td><td>Prev/next corner radius</td><td>999px</td></tr>
-    <tr><td><code>--au-carousel-button-disabled-opacity</code></td><td>Prev/next opacity when disabled</td><td>0.35</td></tr>
+    <tr><td><code>--au-carousel-button-disabled-opacity</code></td><td>Prev/next opacity when disabled</td><td>0.6</td></tr>
     <tr><td><code>--au-carousel-button-focus-shadow-width</code></td><td>Prev/next focus ring width</td><td>3px</td></tr>
     <tr><td><code>--au-carousel-button-focus-shadow-color</code></td><td>Prev/next focus ring colour (≥3:1 on white)</td><td>oklch(0.55 0.2 256)</td></tr>
     <tr><td><code>--au-carousel-controls-gap</code></td><td>Gap between prev and next</td><td>0.75rem</td></tr>
@@ -276,24 +276,24 @@ console.log(c.current);</code></pre>
   <div class="table-scroll" role="region" tabindex="0" aria-label="Events">
   <table>
     <tr><th scope="col">Event</th><th scope="col">Detail</th><th scope="col">Description</th></tr>
-    <tr><td><code>slide-change</code></td><td><code>{ index, total, title }</code></td><td>Fires for changed navigation/current writes and settled scrolling (bubbles, composed), not refresh/translation/reordering. Same-index writes and boundary clicks do not emit again.</td></tr>
+    <tr><td><code>au-slide-change</code></td><td><code>{ index, total, title }</code></td><td>Fires for changed navigation/current writes and settled scrolling (bubbles, composed), not refresh/translation/reordering. Same-index writes and boundary clicks do not emit again.</td></tr>
   </table>
   </div>
   <pre><code>// Vanilla
 document.querySelector('au-carousel')
-  .addEventListener('slide-change', (e) =&gt; console.log(e.detail.index));
+  .addEventListener('au-slide-change', (e) =&gt; console.log(e.detail.index));
 
 // React
 &lt;au-carousel ref={ref} /&gt;
 useEffect(() =&gt; {
   const el = ref.current;
   const on = (e) =&gt; setIndex(e.detail.index);
-  el.addEventListener('slide-change', on);
-  return () =&gt; el.removeEventListener('slide-change', on);
+  el.addEventListener('au-slide-change', on);
+  return () =&gt; el.removeEventListener('au-slide-change', on);
 }, []);
 
 // Vue
-&lt;au-carousel :current.prop="index" @slide-change="e =&gt; index = e.detail.index" /&gt;</code></pre>
+&lt;au-carousel :current.prop="index" @au-slide-change="e =&gt; index = e.detail.index" /&gt;</code></pre>
   <h2>Naming and integration boundaries</h2>
   <p>Give the carousel an <code>aria-label</code> or an <code>aria-labelledby</code> reference in its containing document/shadow root. Localize <code>data-text-roledescription</code> (default: carousel) as needed. Names and translations preserve controls; older browsers use a plain-text label fallback.</p>
   <p>Tab from the dot group enters the current slide's first eligible native control (also Option+Tab in Safari); hidden, inert and negative-tabindex targets are skipped. The helper does not traverse controls inside a slide's nested Shadow DOM. Those components must expose their own accessible focus entry. Content without an eligible target follows native Tab order.</p>

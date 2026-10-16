@@ -8,7 +8,7 @@
   <title>Accesserty UI Kit File Upload</title>
   <link rel="stylesheet" href="../src/css/au-style.css" />
   <link rel="stylesheet" href="demo.css" />
-  <script src="../src/components/file-upload.js" defer></script>
+  <script src="../dist/accesserty-ui-kit.js" defer></script>
 </head>
 
 <body>
@@ -367,6 +367,7 @@
             <td>Focus outline color of the default trigger button</td>
             <td>oklch(0.45 0.15 260)</td>
           </tr>
+          <tr><td>--au-file-upload-disabled-opacity</td><td>Opacity of the disabled state (text stays at least 4.5:1 on white)</td><td>0.6</td></tr>
         </tbody>
       </table>
       </div>
@@ -398,6 +399,26 @@ console.log(fu.value); // File[]
 fu.value = []; // clear files programmatically</code></pre>
             </td>
           </tr>
+          <tr>
+            <td>validity / validationMessage / willValidate</td>
+            <td>read-only</td>
+            <td>The field's validation state, as on a native field.</td>
+          </tr>
+          <tr>
+            <td>checkValidity() / reportValidity()</td>
+            <td>method</td>
+            <td>Check the field; <code>reportValidity()</code> also shows the message and moves focus to the field.</td>
+          </tr>
+          <tr>
+            <td>setCustomValidity(message)</td>
+            <td>method</td>
+            <td>Mark the field invalid with your own message (for example &quot;This address is already registered.&quot;); it blocks submission. Pass <code>''</code> to remove it. The field's own checks, such as <code>required</code>, keep working.</td>
+          </tr>
+          <tr>
+            <td>form</td>
+            <td>HTMLFormElement | null (read-only)</td>
+            <td>The form the field belongs to, including through the <code>form</code> attribute.</td>
+          </tr>
         </tbody>
       </table>
       </div>
@@ -427,7 +448,7 @@ fu.value = []; // clear files programmatically</code></pre>
             <td>Fired when files are accepted by <code>handleFiles()</code> or removed by the button or <code>removeFile(file)</code>. Bubbles and is composed. Use <code>el.value</code> to read the current file list. Assigning <code>value</code> or resetting the form does not emit change.</td>
           </tr>
           <tr>
-            <td>remove-file</td>
+            <td>au-remove-file</td>
             <td><code>File</code></td>
             <td>Fired once for an actual removal, through either the button or <code>removeFile(file)</code>, before change. <code>e.detail</code> is the removed <code>File</code> object. Bubbles and is composed. Removing an absent file does nothing.</td>
           </tr>
@@ -440,7 +461,7 @@ fu.addEventListener('change', () => {
   console.log('Files:', fu.value.map(f => f.name));
 });
 
-fu.addEventListener('remove-file', (e) => {
+fu.addEventListener('au-remove-file', (e) => {
   console.log('Removed:', e.detail.name);
 });</code></pre>
     </section>

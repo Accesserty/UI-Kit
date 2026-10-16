@@ -6,7 +6,7 @@
 <article id="two" data-title="City"><button id="city">City guide</button></article>
 <article id="three" data-title="Forest"><button id="forest">Forest guide</button></article>
 </au-carousel><button id="after">After</button>
-<script src="../../../src/components/carousel.js" defer></script><script>
+<script type="module" src="../../../src/components/carousel.js"></script><script>
 window.gallery=document.getElementById('gallery');gallery.current=1;window.changes=[];
-gallery.addEventListener('slide-change',e=>changes.push(e.detail.index));
+gallery.addEventListener('au-slide-change',e=>changes.push(e.detail.index));
 </script></html>

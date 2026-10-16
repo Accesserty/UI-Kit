@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="demo.css" />
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-  <script src="../src/components/dropdown.js" defer></script>
+  <script src="../dist/accesserty-ui-kit.js" defer></script>
 </head>
 
 <body>
@@ -22,7 +22,7 @@
     <section>
       <h2>How to use</h2>
       <ol>
-        <li>Copy file (dropdown.js or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
+        <li>Copy file (dist/components/dropdown.js or dropdown.min.js, or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
         <li>
           Add the JavaScript file to HTML using the
           <code>&lt;script src=&quot;&quot; defer&gt;</code> tag
@@ -269,16 +269,9 @@
           <td>Focus ring color</td>
           <td>oklch(0.4 0 0)</td>
         </tr>
-        <tr>
-          <td>--au-dropdown-arrow-down-icon</td>
-          <td>Trigger arrow while closed (falls back to --au-control-arrow-down-icon)</td>
-          <td>'▼'</td>
-        </tr>
-        <tr>
-          <td>--au-dropdown-arrow-up-icon</td>
-          <td>Trigger arrow while open (falls back to --au-control-arrow-up-icon)</td>
-          <td>'▲'</td>
-        </tr>
+        <tr><td>--au-dropdown-disabled-opacity</td><td>Opacity of the disabled state (text stays at least 4.5:1 on white)</td><td>0.6</td></tr>
+        <tr><td>--au-dropdown-arrow-down-icon</td><td>Trigger arrow while closed (falls back to --au-control-arrow-down-icon)</td><td>'▼'</td></tr>
+        <tr><td>--au-dropdown-arrow-up-icon</td><td>Trigger arrow while open (falls back to --au-control-arrow-up-icon)</td><td>'▲'</td></tr>
       </table>
       </div>
     </section>
@@ -316,14 +309,14 @@ dd.isOpen = false; // closes the menu</code></pre>
 
     <section>
       <h2>Event listeners</h2>
-      <p>The <code>&lt;au-dropdown&gt;</code> component dispatches a <code>selected</code> event when an item is
+      <p>The <code>&lt;au-dropdown&gt;</code> component dispatches an <code>au-select</code> event when an item is
         clicked.</p>
       <code style="display: block; white-space: pre-wrap; background: #f4f4f4; padding: 1rem; border-radius: 4px;">
-  document.querySelector('au-dropdown').addEventListener('selected', (e) => {
+  document.querySelector('au-dropdown').addEventListener('au-select', (e) => {
     console.log('Selected value:', e.detail.value);
   });
         </code>
-      <p>Each activation emits one bubbling, composed <code>selected</code> event
+      <p>Each activation emits one bubbling, composed <code>au-select</code> event
         with the item's current <code>value</code>, including after reconnecting
         the same item. Updating item text or value does not select it.</p>
       <p>Enter, Space and the arrow keys on the trigger open the menu and focus
@@ -331,7 +324,7 @@ dd.isOpen = false; // closes the menu</code></pre>
         trigger; Tab leaves the menu using the browser's keyboard navigation
         settings. Translating existing text preserves the focused item.</p>
       <p>Use text in the trigger slot and either an action label or a native link
-        per item. Consumers handle actions through <code>selected</code>; links
+        per item. Consumers handle actions through <code>au-select</code>; links
         retain their own destinations. Custom colors need separate contrast checks.
         Native Popover is detected automatically. Its top-layer menu uses JavaScript
         positioning with viewport limits and LTR/RTL start alignment, without CSS
@@ -351,7 +344,7 @@ dd.isOpen = false; // closes the menu</code></pre>
     for (const name of ['basic', 'custom']) {
       const dropdown = document.getElementById(`${name}-dropdown`);
       const status = document.getElementById(`${name}-status`);
-      dropdown.addEventListener('selected', (e) => {
+      dropdown.addEventListener('au-select', (e) => {
         status.textContent = `Last selected: ${e.detail.value}`;
       });
     }

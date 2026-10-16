@@ -1,35 +1,27 @@
+import { setupShadow } from '../core/declarative.js';
+import { DEFAULT_EXCLUSIVE_HINT, renderAccordion, renderAccordionItem } from '../views/accordion.js';
+import { upgradeProperties } from '../core/upgrade.js';
+
+// Both elements adopt a server-rendered declarative shadow root when present
+// (see core/declarative.js). Until the root is ready (_bound), lifecycle
+// callbacks do nothing; bind() then runs the connected setup once.
+
 class AuAccordion extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: "open" });
-
-    const visibilityStyle = document.createElement('style');
-    visibilityStyle.textContent = ':host([hidden]:not([hidden="until-found" i])) { display: none; }';
-    this.shadowRoot.append(visibilityStyle);
-
-    this._container = document.createElement('div');
-    this._container.setAttribute('class', 'au-accordion');
-
-    const slot = document.createElement('slot');
-    this._container.appendChild(slot);
-
-    this._exclusiveHint = document.createElement('span');
-    this._exclusiveHint.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;padding:0;';
-    const hintId = `au-accordion-hint-${Math.random().toString(36).slice(2)}`;
-    this._exclusiveHint.id = hintId;
-    this._exclusiveHint.hidden = true;
-
-    this.shadowRoot.appendChild(this._exclusiveHint);
-    this.shadowRoot.appendChild(this._container);
-
     this._onToggle = this._handleToggle.bind(this);
     this._childrenObserver = new MutationObserver(() => this._syncItems());
+    setupShadow(this, () => renderAccordion(), root => {
+      this._exclusiveHint = root.getElementById('hint');
+      this._container = root.querySelector('.au-accordion');
+      this._bound = true;
+      if (this.isConnected) this.connectedCallback();
+    });
   }
 
   connectedCallback() {
-    if (Object.hasOwn(this, 'exclusive')) {
-      const value = this.exclusive; delete this.exclusive; this.exclusive = value;
-    }
+    if (!this._bound) return;
+    upgradeProperties(this, ['exclusive']);
     this.addEventListener('au-toggle', this._onToggle);
     this._childrenObserver.observe(this, { childList: true });
     this._updateExclusiveAria();
@@ -57,6 +49,7 @@ class AuAccordion extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
+    if (!this._bound) return;
     if (name === 'exclusive' && oldValue !== newValue) {
       this._updateExclusiveAria();
     }
@@ -69,7 +62,7 @@ class AuAccordion extends HTMLElement {
     if (!this._exclusiveHint) return;
     this._exclusiveHint.hidden = !this.exclusive;
     this._exclusiveHint.textContent = this.exclusive
-      ? this.getAttribute('data-text-exclusive-hint') || 'Only one section may be expanded at a time.'
+      ? this.getAttribute('data-text-exclusive-hint') || DEFAULT_EXCLUSIVE_HINT
       : '';
     this._syncItems();
   }
@@ -103,196 +96,32 @@ class AuAccordion extends HTMLElement {
 class AuAccordionItem extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: "open" });
-
-    const regionId = this.generateId();
-    const titleId = this.generateId();
-
-    const content = document.createElement('div');
-    content.setAttribute('class', 'au-accordion-item');
-
-    content.innerHTML = `
-        <style>
-      :host([hidden]:not([hidden="until-found" i])) { display: none; }
-          .au-accordion-item {
-            box-sizing: border-box;
-            margin-bottom: var(--au-accordion-item-margin-bottom, 1rem);
-          }
-          :host {
-            display: block;
-            max-width: 100%;
-            min-width: 0;
-          }
-          [role="heading"] { margin: 0; }
-          button {
-            /* behavior */
-            cursor: pointer;
-            -webkit-tap-highlight-color: oklch(0 0 0 / 0);
-            box-sizing: border-box;
-            
-            /* spacing */
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 1rem;
-            word-break: break-word;
-            width: 100%;
-            text-align: start;
-            min-height: 24px;
-            padding: var(--au-accordion-heading-padding-vertical, 0.625rem) var(--au-accordion-heading-padding-horizontal, 1rem);
-            
-            /* text */
-            color: var(--au-accordion-heading-text-color, oklch(0.1398 0 0));
-            font-size: var(--au-accordion-heading-text-size, 1rem);
-            font-family: var(--au-accordion-heading-text-family, inherit);
-            line-height: var(--au-accordion-heading-text-line-height, 1.5);
-            
-            /* border */
-            border: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
-            border-radius: var(--au-accordion-heading-border-radius, 0);
-            
-            /* others decoration */
-            background-color: var(--au-accordion-heading-bg, oklch(0.994 0 0));
-            transition: background-color 160ms ease-in;
-
-            .heading {
-              min-width: 0;
-              flex: 1 1 0;
-              max-width: 100%;
-              overflow-wrap: break-word;
-              overflow-wrap: anywhere;
-              word-break: break-word;
-
-              slot,
-              ::slotted(*),
-              * {
-                display: block;
-                width: 100%;
-              }
-            }
-
-            .info {
-              display: flex;
-              align-items: center;
-              gap: 1rem;
-              flex: 0 0 auto;
-              min-width: 0;
-              max-width: min(50%, var(--au-accordion-info-max-width, 12rem));
-              & > *:first-child  {
-                flex: 1;
-                min-width: 20px;
-                text-overflow: ellipsis;
-                overflow: hidden;
-                white-space: nowrap;
-
-                slot,
-                ::slotted(*),
-                * {
-                  text-overflow: ellipsis;
-                  overflow: hidden;
-                  white-space: nowrap;
-                  display: block;
-                  width: 100%;
-                }
-              }
-            }
-
-            .icon {
-              transition: transform 300ms ease-in;
-              display: flex;
-              align-items: center;
-              flex: 0 0 auto;
-            }
-
-            &[aria-expanded="true"] {
-              .icon {
-                transform: rotate3d(0, 0, 1, 180deg);
-                transform-origin: center;
-              }
-            }
-
-            &:hover {
-              background-color: var(--au-accordion-heading-hover-bg, oklch(0.9466 0 0));
-              border-color: var(--au-accordion-heading-hover-border-color, oklch(0.55 0 0));
-            }
-            
-            &:active {
-              background-color: var(--au-accordion-heading-active-bg, oklch(0.8689 0 0));
-              border-color: var(--au-accordion-heading-active-border-color, oklch(0.55 0 0));
-            }
-            
-            &:focus-visible {
-              outline: var(--au-accordion-heading-focus-shadow-width, 3px) solid var(--au-accordion-heading-focus-shadow-color, oklch(0.4 0 0));
-              outline-offset: -3px;
-            }
-          }
-
-          .region {
-            overflow-wrap: anywhere;
-            background-color: var(--au-accordion-content-bg, oklch(0.9731 0 0));
-            color: var(--au-accordion-content-text-color, oklch(0.1398 0 0));
-            padding: var(--au-accordion-content-padding-top, 1rem)  var(--au-accordion-content-padding-right, 1rem)  var(--au-accordion-content-padding-bottom, 1rem)  var(--au-accordion-content-padding-left, 1rem);
-            overscroll-behavior: var(--au-accordion-content-overscroll-behavior, auto);
-            border-left: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
-            border-right: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
-            border-bottom: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
-            border-radius: var(--au-accordion-content-border-radius, 0);
-            &[hidden]:not([hidden="until-found" i]) {
-              display: none !important;
-            }
-            /* Collapsed but searchable: find-in-page and fragment links can reveal it.
-               Zero the box so no padded strip shows, even under ::part() overrides. */
-            &[hidden="until-found" i] {
-              content-visibility: hidden;
-              padding-block: 0 !important;
-              border-bottom-width: 0 !important;
-            }
-          }
-          .exclusive-hint { position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap; }
-          @media (forced-colors: active) { button:focus-visible { outline: 2px solid Highlight; outline-offset:-2px; } }
-          @media (prefers-reduced-motion: reduce) { button, button .icon { transition: none; } }
-        </style>
-        <div role="heading" aria-level="3">
-        <button type="button" id="${titleId}" aria-expanded="false" aria-controls="${regionId}" part="button">
-            <div class="heading"><slot name="heading"></slot></div>
-            <div class="info">
-              <div>
-                <slot name="sub"></slot>
-              </div>
-              <div class="icon" aria-hidden="true">
-                <slot name="icon"></slot>
-              </div>
-            </div>
-        </button>
-        </div>
-        <span class="exclusive-hint" id="${regionId}-hint"></span>
-        <div class="region" role="region" id="${regionId}" aria-labelledby="${titleId}" hidden part="region">
-            <slot name="content"></slot>
-        </div>
-      `;
-
-    this.shadowRoot.append(content);
-
-    this.button = this.shadowRoot.querySelector('button');
-    this.region = this.shadowRoot.querySelector('.region');
-    this.heading = this.shadowRoot.querySelector('[role="heading"]');
-    this._hint = this.shadowRoot.querySelector('.exclusive-hint');
-    this.button.addEventListener('click', () => this.toggleAccordion());
-    // Find-in-page or a link into collapsed content opens the item; the usual
-    // au-toggle follows, so framework bindings and exclusive groups stay in step.
-    // The browser removes hidden itself after this event. Removing it here would
-    // stop Chrome from revealing enclosing items, so the region is resynced later.
-    this.region.addEventListener('beforematch', () => {
-      this._revealing = true;
-      try { this.open = true; } finally { this._revealing = false; }
-      setTimeout(() => this.updateExpanded());
+    // An element upgraded in place gets one callback per attribute it already
+    // has. That is its initial state, not a change, so it emits no au-toggle.
+    this._initialOpen = this.isConnected && this.hasAttribute('open');
+    setupShadow(this, () => renderAccordionItem(), root => {
+      this.button = root.getElementById('title');
+      this.region = root.getElementById('region');
+      this.heading = root.querySelector('[role="heading"]');
+      this._hint = root.getElementById('hint');
+      this.button.addEventListener('click', () => this.toggleAccordion());
+      // Find-in-page or a link into collapsed content opens the item; the usual
+      // au-toggle follows, so framework bindings and exclusive groups stay in step.
+      // The browser removes hidden itself after this event. Removing it here would
+      // stop Chrome from revealing enclosing items, so the region is resynced later.
+      this.region.addEventListener('beforematch', () => {
+        this._revealing = true;
+        try { this.open = true; } finally { this._revealing = false; }
+        setTimeout(() => this.updateExpanded());
+      });
+      this._bound = true;
+      if (this.isConnected) this.connectedCallback();
     });
   }
 
   connectedCallback() {
-    if (Object.hasOwn(this, 'open')) {
-      const value = this.open; delete this.open; this.open = value;
-    }
+    if (!this._bound) return;
+    upgradeProperties(this, ['open']);
     this.updateExpanded();
     this.updateSemantics();
     this.updateExclusiveHint();
@@ -317,21 +146,22 @@ class AuAccordionItem extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (oldValue === newValue) return;
+    if (oldValue === newValue || !this._bound) return;
     if (name !== 'open') { this.updateSemantics(); return; }
-    if (name === "open" && oldValue !== newValue) {
-      this.updateExpanded();
-      if (this.isConnected) {
-        this.dispatchEvent(new CustomEvent('au-toggle', {
-          bubbles: true,
-          composed: true,
-          detail: { open: this.open },
-        }));
-      }
+    this.updateExpanded();
+    const initial = this._initialOpen && oldValue === null;
+    this._initialOpen = false;
+    if (this.isConnected && !initial) {
+      this.dispatchEvent(new CustomEvent('au-toggle', {
+        bubbles: true,
+        composed: true,
+        detail: { open: this.open },
+      }));
     }
   }
 
   updateExpanded() {
+    if (!this._bound) return;
     const isOpen = this.hasAttribute('open');
     // Walk the composed ancestry so slotted controls and nested shadow controls
     // return to their own header before the panel becomes hidden/inert.
@@ -356,6 +186,7 @@ class AuAccordionItem extends HTMLElement {
   }
 
   updateSemantics() {
+    if (!this._bound) return;
     const level = Number(this.getAttribute('heading-level'));
     this.heading.setAttribute('aria-level', String(Number.isInteger(level) && level >= 1 && level <= 6 ? level : 3));
     if (this.hasAttribute('no-region')) {
@@ -366,20 +197,12 @@ class AuAccordionItem extends HTMLElement {
   }
 
   updateExclusiveHint() {
+    if (!this._bound) return;
     const owner = this.parentElement;
     const exclusive = owner?.localName === 'au-accordion' && owner.hasAttribute('exclusive');
-    this._hint.textContent = exclusive ? owner.getAttribute('data-text-exclusive-hint') || 'Only one section may be expanded at a time.' : '';
+    this._hint.textContent = exclusive ? owner.getAttribute('data-text-exclusive-hint') || DEFAULT_EXCLUSIVE_HINT : '';
     if (exclusive) this.button.setAttribute('aria-describedby', this._hint.id);
     else this.button.removeAttribute('aria-describedby');
-  }
-
-  generateId() {
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const byteArray = new Uint32Array(1);
-      crypto.getRandomValues(byteArray);
-      return `au-accordion-item-${byteArray[0].toString(36)}`;
-    }
-    return `au-accordion-item-${Math.random().toString(36).slice(2)}`;
   }
 
   toggleAccordion() {

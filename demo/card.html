@@ -15,7 +15,7 @@
     au-card :is(button,a):focus-visible { outline:2px solid #333;outline-offset:2px; }
     @media(forced-colors:active) { au-card :is(button,a):focus-visible { outline-color:Highlight; } }
   </style>
-  <script src="../src/components/card.js" defer></script>
+  <script src="../dist/accesserty-ui-kit.js" defer></script>
 </head>
 
 <body>
@@ -97,7 +97,8 @@
       <p>Use heading, media, content and footer slots. There is no default slot: unassigned content is not projected.
         CSS Parts identify the container and slot elements; style actual light-DOM content using your own selectors.
         Repeated render calls keep the existing slot structure. The hidden attribute hides the card.</p>
-      <p>For SSR, register only on the client. Next and Nuxt fixtures preserve server-produced hosts and
+      <p>With server rendering, the element is defined in the browser (the Nuxt module and React's
+        <code>defineElements()</code> do this). Next and Nuxt fixtures preserve server-produced hosts and
         content nodes while creating the internal slots in the browser. Browser tests are not VoiceOver or full WCAG verification.</p>
     </section>
   </main>

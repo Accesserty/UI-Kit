@@ -13,6 +13,9 @@ screen-reader string updates, including dot names sourced from slide titles).
 |---|---|---|
 | `react.html` | React 19 | en ⇄ zh switch updates prev/next, pagination label, hint, and dot names |
 | `vue.html` | Vue 3 | same, with `isCustomElement` configured |
+
+The Vue and Nuxt pages predate the kit's Vue integration; the setup sections
+below describe the current way.
 | `nuxt-ssr-output.html` | Nuxt (SSR) | server-rendered zh attributes consumed on client upgrade |
 
 ## React
@@ -33,50 +36,38 @@ screen-reader string updates, including dot names sourced from slide titles).
 </au-carousel>
 ```
 
-- Events: React 19 supports `onslide-change={…}`. On React 18, attach with a
-  `ref` + `addEventListener('slide-change', …)`.
+- Events: React 19 supports `onau-slide-change={…}`. On React 18, attach with a
+  `ref` + `addEventListener('au-slide-change', …)`.
 
 ## Vue 3
 
-Tell Vue that `<au-*>` are native custom elements (otherwise it warns and tries
-to resolve them as Vue components):
-
-```js
-// main.ts
-app.config.compilerOptions.isCustomElement = (tag) => tag.startsWith('au-');
-```
+Set up the kit as the README's Vue 3 section describes: the kit's
+`isCustomElement` in your build config and `app.use(AccessertyVue)`. Use the
+kit's `isCustomElement` rather than `tag => tag.startsWith('au-')`: the form
+components are Vue components, so that `v-model` works on them.
 
 ```vue
 <au-carousel
   :data-text-prev="t('carousel.prev')"
   :data-dot-template="t('carousel.dotTemplate')"
-  @slide-change="e => onChange(e.detail)"
+  @au-slide-change="e => onChange(e.detail)"
 >
   <div v-for="(s, i) in slides" :key="i" :data-title="t(s.titleKey)">…</div>
 </au-carousel>
 ```
 
-## Nuxt (SSR) — important
+## Nuxt (SSR)
 
-The kit's components `extend HTMLElement`, which **does not exist in Node**, so the
-bundle **cannot be imported in server code** — doing so throws
-`ReferenceError: HTMLElement is not defined`. (The SSR guard on
-`customElements.define()` only prevents re-registration; it does not make the
-module server-importable.) This is normal for web components. Register them
-**client-only**:
+The kit's components `extend HTMLElement`, which does not exist in Node, so the
+component bundle cannot run on the server. The kit's Nuxt module handles that:
+it defines the elements in the browser only, registers the `v-model`
+components, and configures the Vue compiler.
 
 ```ts
-// plugins/accesserty.client.ts   ← the .client suffix keeps it off the server
-export default defineNuxtPlugin(async () => {
-  await import('accesserty-ui-kit/min');
-});
-```
-
-```js
-// nuxt.config.ts
+// nuxt.config.ts — dist/ copied to vendor/accesserty/
 export default defineNuxtConfig({
-  vue: { compilerOptions: { isCustomElement: (tag) => tag.startsWith('au-') } },
-});
+  modules: ['./vendor/accesserty/accesserty-ui-kit-nuxt.js'],
+})
 ```
 
 What happens at runtime:

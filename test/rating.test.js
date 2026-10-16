@@ -185,17 +185,17 @@ describe('AuRating', () => {
     const rating = await fixture(html`<au-rating value="3" max="5"></au-rating>`);
     const wrappers = rating.shadowRoot.querySelectorAll('.star-wrapper');
     
-    expect(wrappers[0].style.getPropertyValue('--au-rating-clip')).to.equal('0%');
-    expect(wrappers[3].style.getPropertyValue('--au-rating-clip')).to.equal('100%');
+    expect(wrappers[0].style.getPropertyValue('--_rating-clip')).to.equal('0%');
+    expect(wrappers[3].style.getPropertyValue('--_rating-clip')).to.equal('100%');
   });
 
   it('fills stars correctly based on fractional value', async () => {
     const rating = await fixture(html`<au-rating value="3.5" max="5"></au-rating>`);
     const wrappers = rating.shadowRoot.querySelectorAll('.star-wrapper');
     
-    expect(wrappers[2].style.getPropertyValue('--au-rating-clip')).to.equal('0%');
-    expect(wrappers[3].style.getPropertyValue('--au-rating-clip')).to.equal('50%');
-    expect(wrappers[4].style.getPropertyValue('--au-rating-clip')).to.equal('100%');
+    expect(wrappers[2].style.getPropertyValue('--_rating-clip')).to.equal('0%');
+    expect(wrappers[3].style.getPropertyValue('--_rating-clip')).to.equal('50%');
+    expect(wrappers[4].style.getPropertyValue('--_rating-clip')).to.equal('100%');
   });
 
   // --- Form Participation ---
@@ -237,7 +237,7 @@ describe('AuRating', () => {
     expect(rating.getAttribute('name')).to.equal('review');
     expect(new FormData(form).get('review')).to.equal('4');
     expect(rating.shadowRoot.querySelector('input:checked').value).to.equal('4');
-    expect(rating.shadowRoot.querySelectorAll('.star-wrapper')[3].style.getPropertyValue('--au-rating-clip')).to.equal('0%');
+    expect(rating.shadowRoot.querySelectorAll('.star-wrapper')[3].style.getPropertyValue('--_rating-clip')).to.equal('0%');
     rating.name = 'updated';
     expect(new FormData(form).has('review')).to.be.false;
     expect(new FormData(form).get('updated')).to.equal('4');

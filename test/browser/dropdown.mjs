@@ -20,11 +20,12 @@ const server=createServer(async(req,res)=>{
   } catch {res.writeHead(404).end();}
 });
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
+// ES module sources do not load from file:// URLs; the bundles are checked both ways.
 const urls=['source','bundle','min'].flatMap(variant => {
   const file=`test/browser/fixtures/dropdown-${variant}.html`;
   return [`http://127.0.0.1:${server.address().port}/${file}`,pathToFileURL(join(root,file)).href]
     .flatMap(url => [url, url+'?fallback=1']);
-});
+}).filter(url => !(url.startsWith('file:') && url.includes('-source.html')));
 const setup=()=>{
   window.dd=document.getElementById('actions');window.selections=[];
   if(new URL(location.href).searchParams.has('fallback')) {
@@ -33,7 +34,7 @@ const setup=()=>{
     Object.defineProperty(dd.menu,'hidePopover',{value:undefined,configurable:true});
     parent.insertBefore(dd,next);
   }
-  dd.addEventListener('selected',e=>selections.push(e.detail.value));
+  dd.addEventListener('au-select',e=>selections.push(e.detail.value));
   window.menuEvents=[];
   dd.trigger.addEventListener('keydown',e=>menuEvents.push(['key',e.key,e.defaultPrevented]));
   dd.menu.addEventListener('toggle',e=>menuEvents.push(['toggle',e.newState]));

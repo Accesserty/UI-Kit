@@ -3,6 +3,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width">
 <title>Shared CSS contract</title>
 <link rel="stylesheet" href="../../../src/css/au-style.css">
+<!-- An unlayered consumer rule with lower specificity than the kit's [popover] rule must still win. -->
+<style>div { border-top-left-radius: 7px; }</style>
 <h1>Shared CSS contract</h1>
 <span id="black" style="color:var(--color-pure-black)">Black</span>
 <span id="white" style="color:var(--color-pure-white);background:black">White</span>

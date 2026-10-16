@@ -1,4 +1,7 @@
-@layer components;
+/* The native control rules live in the "accesserty" cascade layer, so any of your
+   own unlayered rules win without specificity tricks. The token files stay
+   unlayered: they only define custom properties. */
+@layer accesserty;
 @import url(basic-variables.css);
 @import url(tokens-variables.css);
-@import url(components.css) layer(components);
+@import url(components.css) layer(accesserty);

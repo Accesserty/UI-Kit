@@ -57,7 +57,14 @@ try{
       page.on('pageerror',e=>errors.push(String(e)));
       for(const url of urls){
         await page.goto(url+fragment);await page.waitForFunction(()=>document.getElementById('files')?.getAllNodes?.().length===6);
-        await page.waitForTimeout(500);assert.equal(await page.evaluate(revealed),'revealed');
+        await page.waitForTimeout(500);
+        // Seen once on CI and never locally: dump the state so a repeat says why.
+        const outcome=await page.evaluate(revealed);
+        if(outcome!=='revealed')assert.fail(`${url}: ${outcome} ${JSON.stringify(await page.evaluate(()=>({
+          readyState:document.readyState,ms:Math.round(performance.now()),hash:location.hash,
+          fragmentDirective:'fragmentDirective' in document,
+          nodes:document.getElementById('files').getAllNodes().map(n=>[n.data.id,n.expanded,n._group?.getAttribute('hidden')??null,n.checkVisibility()]),
+        })))}`);
         await page.goto(url);await page.waitForFunction(()=>document.getElementById('files')?.getAllNodes?.().length===6);
         await page.evaluate(setup);await page.keyboard.press('ArrowRight');await page.keyboard.press('ArrowRight');await page.keyboard.press('Space');
         assert.deepEqual(await page.evaluate(state),{active:'alpha',checked:['alpha'],events:1});

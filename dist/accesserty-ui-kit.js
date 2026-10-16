@@ -1,33 +1,198 @@
-/*! Accesserty UI Kit v2.0.10 */
+/*! Accesserty UI Kit v3.0.0 */
 (function() {
   "use strict";
+  function setupShadow(host, render, bind) {
+    const internals = host.attachInternals();
+    const ready = () => {
+      const adopted = !!internals.shadowRoot;
+      const root = internals.shadowRoot ?? host.attachShadow({ mode: "open" });
+      if (!adopted) {
+        host.querySelector(":scope > template[shadowrootmode]")?.remove();
+        root.innerHTML = render();
+      }
+      bind(root, adopted);
+    };
+    if (internals.shadowRoot || host.ownerDocument.readyState !== "loading") ready();
+    else host.ownerDocument.addEventListener("DOMContentLoaded", ready, { once: true });
+  }
+  const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (character) => entities[character]);
+  }
+  const DEFAULT_EXCLUSIVE_HINT = "Only one section may be expanded at a time.";
+  const VISUALLY_HIDDEN = "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;padding:0;";
+  const accordionStyles = `:host([hidden]:not([hidden="until-found" i])) { display: none; }`;
+  function renderAccordion({ exclusive = false, hint = DEFAULT_EXCLUSIVE_HINT } = {}) {
+    return `<style>${accordionStyles}</style><span id="hint" style="${VISUALLY_HIDDEN}"${exclusive ? "" : " hidden"}>${exclusive ? escapeHTML(hint) : ""}</span><div class="au-accordion"${exclusive ? ' aria-describedby="hint"' : ""}><slot></slot></div>`;
+  }
+  const accordionItemStyles = `
+  :host([hidden]:not([hidden="until-found" i])) { display: none; }
+      .au-accordion-item {
+        box-sizing: border-box;
+        margin-bottom: var(--au-accordion-item-margin-bottom, 1rem);
+      }
+      :host {
+        display: block;
+        max-width: 100%;
+        min-width: 0;
+      }
+      [role="heading"] { margin: 0; }
+      button {
+        /* behavior */
+        cursor: pointer;
+        -webkit-tap-highlight-color: oklch(0 0 0 / 0);
+        box-sizing: border-box;
+
+        /* spacing */
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        word-break: break-word;
+        width: 100%;
+        text-align: start;
+        min-height: 24px;
+        padding: var(--au-accordion-heading-padding-vertical, 0.625rem) var(--au-accordion-heading-padding-horizontal, 1rem);
+
+        /* text */
+        color: var(--au-accordion-heading-text-color, oklch(0.1398 0 0));
+        font-size: var(--au-accordion-heading-text-size, 1rem);
+        font-family: var(--au-accordion-heading-text-family, inherit);
+        line-height: var(--au-accordion-heading-text-line-height, 1.5);
+
+        /* border */
+        border: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
+        border-radius: var(--au-accordion-heading-border-radius, 0);
+
+        /* others decoration */
+        background-color: var(--au-accordion-heading-bg, oklch(0.994 0 0));
+        transition: background-color 160ms ease-in;
+
+        .heading {
+          min-width: 0;
+          flex: 1 1 0;
+          max-width: 100%;
+          overflow-wrap: break-word;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+
+          slot,
+          ::slotted(*),
+          * {
+            display: block;
+            width: 100%;
+          }
+        }
+
+        .info {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          flex: 0 0 auto;
+          min-width: 0;
+          max-width: min(50%, var(--au-accordion-info-max-width, 12rem));
+          & > *:first-child  {
+            flex: 1;
+            min-width: 20px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+
+            slot,
+            ::slotted(*),
+            * {
+              text-overflow: ellipsis;
+              overflow: hidden;
+              white-space: nowrap;
+              display: block;
+              width: 100%;
+            }
+          }
+        }
+
+        .icon {
+          transition: transform 300ms ease-in;
+          display: flex;
+          align-items: center;
+          flex: 0 0 auto;
+        }
+
+        &[aria-expanded="true"] {
+          .icon {
+            transform: rotate3d(0, 0, 1, 180deg);
+            transform-origin: center;
+          }
+        }
+
+        &:hover {
+          background-color: var(--au-accordion-heading-hover-bg, oklch(0.9466 0 0));
+          border-color: var(--au-accordion-heading-hover-border-color, oklch(0.55 0 0));
+        }
+
+        &:active {
+          background-color: var(--au-accordion-heading-active-bg, oklch(0.8689 0 0));
+          border-color: var(--au-accordion-heading-active-border-color, oklch(0.55 0 0));
+        }
+
+        &:focus-visible {
+          outline: var(--au-accordion-heading-focus-shadow-width, 3px) solid var(--au-accordion-heading-focus-shadow-color, oklch(0.4 0 0));
+          outline-offset: -3px;
+        }
+      }
+
+      .region {
+        overflow-wrap: anywhere;
+        background-color: var(--au-accordion-content-bg, oklch(0.9731 0 0));
+        color: var(--au-accordion-content-text-color, oklch(0.1398 0 0));
+        padding: var(--au-accordion-content-padding-top, 1rem)  var(--au-accordion-content-padding-right, 1rem)  var(--au-accordion-content-padding-bottom, 1rem)  var(--au-accordion-content-padding-left, 1rem);
+        overscroll-behavior: var(--au-accordion-content-overscroll-behavior, auto);
+        border-left: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
+        border-right: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
+        border-bottom: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
+        border-radius: var(--au-accordion-content-border-radius, 0);
+        &[hidden]:not([hidden="until-found" i]) {
+          display: none !important;
+        }
+        /* Collapsed but searchable: find-in-page and fragment links can reveal it.
+           Zero the box so no padded strip shows, even under ::part() overrides. */
+        &[hidden="until-found" i] {
+          content-visibility: hidden;
+          padding-block: 0 !important;
+          border-bottom-width: 0 !important;
+        }
+      }
+      .exclusive-hint { position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap; }
+      @media (forced-colors: active) { button:focus-visible { outline: 2px solid Highlight; outline-offset:-2px; } }
+      @media (prefers-reduced-motion: reduce) { button, button .icon { transition: none; } }
+`;
+  function renderAccordionItem({ open = false, headingLevel = 3, region = true, hint = "" } = {}) {
+    const level = Number.isInteger(headingLevel) && headingLevel >= 1 && headingLevel <= 6 ? headingLevel : 3;
+    return `<div class="au-accordion-item"><style>${accordionItemStyles}</style><div role="heading" aria-level="${level}"><button type="button" id="title" aria-expanded="${open}" aria-controls="region" part="button"${hint ? ' aria-describedby="hint"' : ""}><div class="heading"><slot name="heading"></slot></div><div class="info"><div><slot name="sub"></slot></div><div class="icon" aria-hidden="true"><slot name="icon"></slot></div></div></button></div><span class="exclusive-hint" id="hint">${escapeHTML(hint)}</span><div class="region"${region ? ' role="region" aria-labelledby="title"' : ""} id="region"${open ? "" : ' hidden="until-found"'} part="region"><slot name="content"></slot></div></div>`;
+  }
+  function upgradeProperties(element, names) {
+    for (const name of names) {
+      if (Object.hasOwn(element, name)) {
+        const value = element[name];
+        delete element[name];
+        element[name] = value;
+      }
+    }
+  }
   class AuAccordion extends HTMLElement {
     constructor() {
       super();
-      this.attachShadow({ mode: "open" });
-      const visibilityStyle = document.createElement("style");
-      visibilityStyle.textContent = ':host([hidden]:not([hidden="until-found" i])) { display: none; }';
-      this.shadowRoot.append(visibilityStyle);
-      this._container = document.createElement("div");
-      this._container.setAttribute("class", "au-accordion");
-      const slot = document.createElement("slot");
-      this._container.appendChild(slot);
-      this._exclusiveHint = document.createElement("span");
-      this._exclusiveHint.style.cssText = "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;padding:0;";
-      const hintId = `au-accordion-hint-${Math.random().toString(36).slice(2)}`;
-      this._exclusiveHint.id = hintId;
-      this._exclusiveHint.hidden = true;
-      this.shadowRoot.appendChild(this._exclusiveHint);
-      this.shadowRoot.appendChild(this._container);
       this._onToggle = this._handleToggle.bind(this);
       this._childrenObserver = new MutationObserver(() => this._syncItems());
+      setupShadow(this, () => renderAccordion(), (root) => {
+        this._exclusiveHint = root.getElementById("hint");
+        this._container = root.querySelector(".au-accordion");
+        this._bound = true;
+        if (this.isConnected) this.connectedCallback();
+      });
     }
     connectedCallback() {
-      if (Object.hasOwn(this, "exclusive")) {
-        const value = this.exclusive;
-        delete this.exclusive;
-        this.exclusive = value;
-      }
+      if (!this._bound) return;
+      upgradeProperties(this, ["exclusive"]);
       this.addEventListener("au-toggle", this._onToggle);
       this._childrenObserver.observe(this, { childList: true });
       this._updateExclusiveAria();
@@ -50,6 +215,7 @@
       }
     }
     attributeChangedCallback(name, oldValue, newValue) {
+      if (!this._bound) return;
       if (name === "exclusive" && oldValue !== newValue) {
         this._updateExclusiveAria();
       }
@@ -60,7 +226,7 @@
     _updateExclusiveHint() {
       if (!this._exclusiveHint) return;
       this._exclusiveHint.hidden = !this.exclusive;
-      this._exclusiveHint.textContent = this.exclusive ? this.getAttribute("data-text-exclusive-hint") || "Only one section may be expanded at a time." : "";
+      this._exclusiveHint.textContent = this.exclusive ? this.getAttribute("data-text-exclusive-hint") || DEFAULT_EXCLUSIVE_HINT : "";
       this._syncItems();
     }
     _updateExclusiveAria() {
@@ -88,192 +254,29 @@
   class AuAccordionItem extends HTMLElement {
     constructor() {
       super();
-      this.attachShadow({ mode: "open" });
-      const regionId = this.generateId();
-      const titleId = this.generateId();
-      const content = document.createElement("div");
-      content.setAttribute("class", "au-accordion-item");
-      content.innerHTML = `
-        <style>
-      :host([hidden]:not([hidden="until-found" i])) { display: none; }
-          .au-accordion-item {
-            box-sizing: border-box;
-            margin-bottom: var(--au-accordion-item-margin-bottom, 1rem);
+      this._initialOpen = this.isConnected && this.hasAttribute("open");
+      setupShadow(this, () => renderAccordionItem(), (root) => {
+        this.button = root.getElementById("title");
+        this.region = root.getElementById("region");
+        this.heading = root.querySelector('[role="heading"]');
+        this._hint = root.getElementById("hint");
+        this.button.addEventListener("click", () => this.toggleAccordion());
+        this.region.addEventListener("beforematch", () => {
+          this._revealing = true;
+          try {
+            this.open = true;
+          } finally {
+            this._revealing = false;
           }
-          :host {
-            display: block;
-            max-width: 100%;
-            min-width: 0;
-          }
-          [role="heading"] { margin: 0; }
-          button {
-            /* behavior */
-            cursor: pointer;
-            -webkit-tap-highlight-color: oklch(0 0 0 / 0);
-            box-sizing: border-box;
-            
-            /* spacing */
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 1rem;
-            word-break: break-word;
-            width: 100%;
-            text-align: start;
-            min-height: 24px;
-            padding: var(--au-accordion-heading-padding-vertical, 0.625rem) var(--au-accordion-heading-padding-horizontal, 1rem);
-            
-            /* text */
-            color: var(--au-accordion-heading-text-color, oklch(0.1398 0 0));
-            font-size: var(--au-accordion-heading-text-size, 1rem);
-            font-family: var(--au-accordion-heading-text-family, inherit);
-            line-height: var(--au-accordion-heading-text-line-height, 1.5);
-            
-            /* border */
-            border: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
-            border-radius: var(--au-accordion-heading-border-radius, 0);
-            
-            /* others decoration */
-            background-color: var(--au-accordion-heading-bg, oklch(0.994 0 0));
-            transition: background-color 160ms ease-in;
-
-            .heading {
-              min-width: 0;
-              flex: 1 1 0;
-              max-width: 100%;
-              overflow-wrap: break-word;
-              overflow-wrap: anywhere;
-              word-break: break-word;
-
-              slot,
-              ::slotted(*),
-              * {
-                display: block;
-                width: 100%;
-              }
-            }
-
-            .info {
-              display: flex;
-              align-items: center;
-              gap: 1rem;
-              flex: 0 0 auto;
-              min-width: 0;
-              max-width: min(50%, var(--au-accordion-info-max-width, 12rem));
-              & > *:first-child  {
-                flex: 1;
-                min-width: 20px;
-                text-overflow: ellipsis;
-                overflow: hidden;
-                white-space: nowrap;
-
-                slot,
-                ::slotted(*),
-                * {
-                  text-overflow: ellipsis;
-                  overflow: hidden;
-                  white-space: nowrap;
-                  display: block;
-                  width: 100%;
-                }
-              }
-            }
-
-            .icon {
-              transition: transform 300ms ease-in;
-              display: flex;
-              align-items: center;
-              flex: 0 0 auto;
-            }
-
-            &[aria-expanded="true"] {
-              .icon {
-                transform: rotate3d(0, 0, 1, 180deg);
-                transform-origin: center;
-              }
-            }
-
-            &:hover {
-              background-color: var(--au-accordion-heading-hover-bg, oklch(0.9466 0 0));
-              border-color: var(--au-accordion-heading-hover-border-color, oklch(0.55 0 0));
-            }
-            
-            &:active {
-              background-color: var(--au-accordion-heading-active-bg, oklch(0.8689 0 0));
-              border-color: var(--au-accordion-heading-active-border-color, oklch(0.55 0 0));
-            }
-            
-            &:focus-visible {
-              outline: var(--au-accordion-heading-focus-shadow-width, 3px) solid var(--au-accordion-heading-focus-shadow-color, oklch(0.4 0 0));
-              outline-offset: -3px;
-            }
-          }
-
-          .region {
-            overflow-wrap: anywhere;
-            background-color: var(--au-accordion-content-bg, oklch(0.9731 0 0));
-            color: var(--au-accordion-content-text-color, oklch(0.1398 0 0));
-            padding: var(--au-accordion-content-padding-top, 1rem)  var(--au-accordion-content-padding-right, 1rem)  var(--au-accordion-content-padding-bottom, 1rem)  var(--au-accordion-content-padding-left, 1rem);
-            overscroll-behavior: var(--au-accordion-content-overscroll-behavior, auto);
-            border-left: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
-            border-right: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
-            border-bottom: var(--au-accordion-heading-border-width, 1px) var(--au-accordion-heading-border-style, solid) var(--au-accordion-heading-border-color, oklch(0.55 0 0));
-            border-radius: var(--au-accordion-content-border-radius, 0);
-            &[hidden]:not([hidden="until-found" i]) {
-              display: none !important;
-            }
-            /* Collapsed but searchable: find-in-page and fragment links can reveal it.
-               Zero the box so no padded strip shows, even under ::part() overrides. */
-            &[hidden="until-found" i] {
-              content-visibility: hidden;
-              padding-block: 0 !important;
-              border-bottom-width: 0 !important;
-            }
-          }
-          .exclusive-hint { position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap; }
-          @media (forced-colors: active) { button:focus-visible { outline: 2px solid Highlight; outline-offset:-2px; } }
-          @media (prefers-reduced-motion: reduce) { button, button .icon { transition: none; } }
-        </style>
-        <div role="heading" aria-level="3">
-        <button type="button" id="${titleId}" aria-expanded="false" aria-controls="${regionId}" part="button">
-            <div class="heading"><slot name="heading"></slot></div>
-            <div class="info">
-              <div>
-                <slot name="sub"></slot>
-              </div>
-              <div class="icon" aria-hidden="true">
-                <slot name="icon"></slot>
-              </div>
-            </div>
-        </button>
-        </div>
-        <span class="exclusive-hint" id="${regionId}-hint"></span>
-        <div class="region" role="region" id="${regionId}" aria-labelledby="${titleId}" hidden part="region">
-            <slot name="content"></slot>
-        </div>
-      `;
-      this.shadowRoot.append(content);
-      this.button = this.shadowRoot.querySelector("button");
-      this.region = this.shadowRoot.querySelector(".region");
-      this.heading = this.shadowRoot.querySelector('[role="heading"]');
-      this._hint = this.shadowRoot.querySelector(".exclusive-hint");
-      this.button.addEventListener("click", () => this.toggleAccordion());
-      this.region.addEventListener("beforematch", () => {
-        this._revealing = true;
-        try {
-          this.open = true;
-        } finally {
-          this._revealing = false;
-        }
-        setTimeout(() => this.updateExpanded());
+          setTimeout(() => this.updateExpanded());
+        });
+        this._bound = true;
+        if (this.isConnected) this.connectedCallback();
       });
     }
     connectedCallback() {
-      if (Object.hasOwn(this, "open")) {
-        const value = this.open;
-        delete this.open;
-        this.open = value;
-      }
+      if (!this._bound) return;
+      upgradeProperties(this, ["open"]);
       this.updateExpanded();
       this.updateSemantics();
       this.updateExclusiveHint();
@@ -293,23 +296,24 @@
       }
     }
     attributeChangedCallback(name, oldValue, newValue) {
-      if (oldValue === newValue) return;
+      if (oldValue === newValue || !this._bound) return;
       if (name !== "open") {
         this.updateSemantics();
         return;
       }
-      if (name === "open" && oldValue !== newValue) {
-        this.updateExpanded();
-        if (this.isConnected) {
-          this.dispatchEvent(new CustomEvent("au-toggle", {
-            bubbles: true,
-            composed: true,
-            detail: { open: this.open }
-          }));
-        }
+      this.updateExpanded();
+      const initial = this._initialOpen && oldValue === null;
+      this._initialOpen = false;
+      if (this.isConnected && !initial) {
+        this.dispatchEvent(new CustomEvent("au-toggle", {
+          bubbles: true,
+          composed: true,
+          detail: { open: this.open }
+        }));
       }
     }
     updateExpanded() {
+      if (!this._bound) return;
       const isOpen = this.hasAttribute("open");
       let active = this.ownerDocument.activeElement;
       while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
@@ -333,6 +337,7 @@
       }
     }
     updateSemantics() {
+      if (!this._bound) return;
       const level = Number(this.getAttribute("heading-level"));
       this.heading.setAttribute("aria-level", String(Number.isInteger(level) && level >= 1 && level <= 6 ? level : 3));
       if (this.hasAttribute("no-region")) {
@@ -344,19 +349,12 @@
       }
     }
     updateExclusiveHint() {
+      if (!this._bound) return;
       const owner = this.parentElement;
       const exclusive = owner?.localName === "au-accordion" && owner.hasAttribute("exclusive");
-      this._hint.textContent = exclusive ? owner.getAttribute("data-text-exclusive-hint") || "Only one section may be expanded at a time." : "";
+      this._hint.textContent = exclusive ? owner.getAttribute("data-text-exclusive-hint") || DEFAULT_EXCLUSIVE_HINT : "";
       if (exclusive) this.button.setAttribute("aria-describedby", this._hint.id);
       else this.button.removeAttribute("aria-describedby");
-    }
-    generateId() {
-      if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-        const byteArray = new Uint32Array(1);
-        crypto.getRandomValues(byteArray);
-        return `au-accordion-item-${byteArray[0].toString(36)}`;
-      }
-      return `au-accordion-item-${Math.random().toString(36).slice(2)}`;
     }
     toggleAccordion() {
       this.open = !this.open;
@@ -368,19 +366,127 @@
   if (typeof customElements !== "undefined" && !customElements.get("au-accordion")) {
     customElements.define("au-accordion", AuAccordion);
   }
-  class AuBreadcrumbs extends HTMLElement {
-    constructor() {
-      super();
-      this.attachShadow({ mode: "open" });
-      for (const name of ["items", "separator"]) {
-        if (Object.hasOwn(this, name)) {
-          const value = this[name];
-          delete this[name];
-          this[name] = value;
+  const DEFAULT_LABEL = "Breadcrumbs";
+  const DEFAULT_SEPARATOR = "/";
+  const DEFAULT_LINK_TITLE_PREFIX = "go to";
+  const breadcrumbsStyles = `
+  :host([hidden]:not([hidden="until-found" i])) { display: none; }
+    nav {
+      background-color: var(--au-breadcrumbs-bg, transparent);
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: normal;
+      &:focus-visible {
+        outline: 2px solid var(--au-breadcrumbs-focus-shadow-color, oklch(0.45 0.15 260));
+        outline-offset: -2px;
+      }
+      ol {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        li {
+          font-size: 0;
+          max-width: 100%;
+          overflow-wrap: anywhere;
+          >span.item {
+            display: inline-block;
+            box-sizing: border-box;
+            max-width: 100%;
+            padding: var(--au-breadcrumbs-link-padding-vertical, 0.375rem) var(--au-breadcrumbs-link-padding-horizontal, 0.625rem);
+            font-size: var(--au-breadcrumbs-text-size, 1rem);
+            color: var(--au-breadcrumbs-link-currentpage-color, oklch(0.1398 0 0));
+          }
+          >span[aria-hidden="true"] { font-size: var(--au-breadcrumbs-text-size, 1rem); }
+          &:last-child {
+            a {
+              text-decoration: none;
+            }
+            >span {
+              padding-left: var(--au-breadcrumbs-link-padding-horizontal, 0.625rem);
+              font-size: var(--au-breadcrumbs-text-size, 1rem);
+              color: var(--au-breadcrumbs-link-currentpage-color, oklch(0.1398 0 0));
+            }
+          }
+          a {
+            display: inline-block;
+            box-sizing: border-box;
+            max-width: 100%;
+            padding: var(--au-breadcrumbs-link-padding-vertical, 0.375rem) var(--au-breadcrumbs-link-padding-horizontal, 0.625rem);
+            font-size: var(--au-breadcrumbs-text-size, 1rem);
+            text-decoration: var(--au-breadcrumbs-text-deco, underline);
+            color: var(--au-breadcrumbs-link-color, oklch(0.429 0.2972777928415759 264.05202063805507));
+            -webkit-tap-highlight-color: oklch(0 0 0 / 0);
+            &:hover {
+              text-decoration: underline;
+            }
+            &:active {
+              opacity: 1;
+            }
+            &:visited {
+              color: var(--au-breadcrumbs-link-visited-color, oklch(0.3748 0.167 303.51));
+            }
+            &:focus-visible {
+              outline: none;
+              box-shadow: inset 0 0 0 var(--au-breadcrumbs-focus-shadow-width, 3px) var(--au-breadcrumbs-focus-shadow-color, oklch(0.45 0.15 260));
+              /* Forced colours drop box-shadow. Nested here so it outranks the
+                 outline: none above; a top-level a:focus-visible would not. */
+              @media (forced-colors: active) {
+                outline: 2px solid Highlight;
+                outline-offset: -2px;
+              }
+            }
+            &+span {
+              font-size: var(--au-breadcrumbs-text-size, 1rem);
+            }
+          }
         }
       }
     }
+    @media (forced-colors: active) {
+      nav:focus-visible {
+        outline: 2px solid Highlight;
+        outline-offset: -2px;
+      }
+    }
+`;
+  function parseItems(value) {
+    if (!value) return [];
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed.filter((item) => item && typeof item === "object" && !Array.isArray(item) && "text" in item) : [];
+    } catch {
+      return [];
+    }
+  }
+  function linkTitle(text, index, { template, prefix } = {}) {
+    return template ? template.replaceAll("{text}", String(text ?? "")).replaceAll("{index}", String(index + 1)) : `${prefix || DEFAULT_LINK_TITLE_PREFIX} ${text ?? ""}`;
+  }
+  function renderBreadcrumbs({ id, className, label, separator = DEFAULT_SEPARATOR, items = [] } = {}) {
+    const list = items.map((item, index) => {
+      const current = index === items.length - 1;
+      const content = `<slot name="icon-${index + 1}"></slot><span>${escapeHTML(item.text ?? "")}</span>`;
+      const link = !current && item.href ? `<a class="item" href="${escapeHTML(item.href)}" title="${escapeHTML(item.title ?? "")}">${content}</a>` : `<span class="item"${current ? ' aria-current="page"' : ""}>${content}</span>`;
+      return `<li>${link}${current ? "" : `<span aria-hidden="true">${escapeHTML(separator)}</span>`}</li>`;
+    }).join("");
+    const attrs = (id ? ` id="${escapeHTML(id)}"` : "") + (className ? ` class="${escapeHTML(className)}"` : "") + (label ? ` aria-label="${escapeHTML(label)}"` : "");
+    return `<style>${breadcrumbsStyles}</style><nav tabindex="-1"${attrs}><ol>${list}</ol></nav>`;
+  }
+  class AuBreadcrumbs extends HTMLElement {
+    constructor() {
+      super();
+      upgradeProperties(this, ["items", "separator"]);
+      setupShadow(this, () => renderBreadcrumbs(), (root) => {
+        this._nav = root.querySelector("nav");
+        this._bound = true;
+        if (this.isConnected) this.connectedCallback();
+      });
+    }
     connectedCallback() {
+      if (!this._bound) return;
       this.render();
       this.observeLabelRoot();
     }
@@ -407,14 +513,7 @@
       }
     }
     get items() {
-      const attr = this.getAttribute("items");
-      if (!attr) return [];
-      try {
-        const parsed = JSON.parse(attr);
-        return Array.isArray(parsed) ? parsed.filter((item) => item && typeof item === "object" && !Array.isArray(item) && "text" in item) : [];
-      } catch {
-        return [];
-      }
+      return parseItems(this.getAttribute("items"));
     }
     set items(val) {
       if (typeof val === "string") {
@@ -428,7 +527,7 @@
       }
     }
     get separator() {
-      return this.getAttribute("separator") || "/";
+      return this.getAttribute("separator") || DEFAULT_SEPARATOR;
     }
     set separator(val) {
       this.setAttribute("separator", val);
@@ -467,7 +566,7 @@
       const root = this.getRootNode();
       const ids = (this.getAttribute("aria-labelledby") || "").trim().split(/\s+/).filter(Boolean);
       const labels = ids.map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
-      const fallback = this.getAttribute("aria-label")?.trim() || this.getAttribute("label")?.trim() || "Breadcrumbs";
+      const fallback = this.getAttribute("aria-label")?.trim() || this.getAttribute("label")?.trim() || DEFAULT_LABEL;
       if ("ariaLabelledByElements" in this._nav) {
         this._nav.ariaLabelledByElements = labels;
         this._nav.setAttribute("aria-label", fallback);
@@ -480,8 +579,7 @@
       const items = this.items;
       const list = this._nav.querySelector("ol");
       const active = this.shadowRoot.activeElement;
-      const prefix = this.getAttribute("data-link-title-prefix") || "go to";
-      const template = this.getAttribute("data-link-title-template");
+      const titles = { template: this.getAttribute("data-link-title-template"), prefix: this.getAttribute("data-link-title-prefix") || DEFAULT_LINK_TITLE_PREFIX };
       items.forEach((item, index) => {
         const current = index === items.length - 1;
         const url = current ? null : this.navigationURL(item.url);
@@ -502,7 +600,7 @@
         current ? content.setAttribute("aria-current", "page") : content.removeAttribute("aria-current");
         if (url) {
           content.href = url;
-          content.title = template ? this.formatText(template, { text: item.text ?? "", index: index + 1 }) : `${prefix} ${item.text ?? ""}`;
+          content.title = linkTitle(item.text, index, titles);
         }
         let separator = li.querySelector('[aria-hidden="true"]');
         if (current) separator?.remove();
@@ -519,97 +617,7 @@
       if (active && !this.shadowRoot.contains(active)) this._nav.focus();
     }
     render() {
-      if (!this.shadowRoot) return;
-      if (!this._nav) {
-        this.shadowRoot.innerHTML = `
-      <style>
-      :host([hidden]:not([hidden="until-found" i])) { display: none; }
-        nav {
-          background-color: var(--au-breadcrumbs-bg, transparent);
-          overflow-x: auto;
-          overflow-y: hidden;
-          white-space: normal;
-          &:focus-visible {
-            outline: 2px solid var(--au-breadcrumbs-focus-shadow-color, oklch(0.45 0.15 260));
-            outline-offset: -2px;
-          }
-          ol {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            width: 100%;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            li {
-              font-size: 0;
-              max-width: 100%;
-              overflow-wrap: anywhere;
-              >span.item {
-                display: inline-block;
-                box-sizing: border-box;
-                max-width: 100%;
-                padding: var(--au-breadcrumbs-link-padding-vertical, 0.375rem) var(--au-breadcrumbs-link-padding-horizontal, 0.625rem);
-                font-size: var(--au-breadcrumbs-text-size, 1rem);
-                color: var(--au-breadcrumbs-link-currentpage-color, oklch(0.1398 0 0));
-              }
-              >span[aria-hidden="true"] { font-size: var(--au-breadcrumbs-text-size, 1rem); }
-              &:last-child {
-                a {
-                  text-decoration: none;
-                }
-                >span {
-                  padding-left: var(--au-breadcrumbs-link-padding-horizontal, 0.625rem);
-                  font-size: var(--au-breadcrumbs-text-size, 1rem);
-                  color: var(--au-breadcrumbs-link-currentpage-color, oklch(0.1398 0 0));
-                }
-              }
-              a {
-                display: inline-block;
-                box-sizing: border-box;
-                max-width: 100%;
-                padding: var(--au-breadcrumbs-link-padding-vertical, 0.375rem) var(--au-breadcrumbs-link-padding-horizontal, 0.625rem);
-                font-size: var(--au-breadcrumbs-text-size, 1rem);
-                text-decoration: var(--au-breadcrumbs-text-deco, underline);
-                color: var(--au-breadcrumbs-link-color, oklch(0.429 0.2972777928415759 264.05202063805507));
-                -webkit-tap-highlight-color: oklch(0 0 0 / 0);
-                &:hover {
-                  text-decoration: underline;
-                }
-                &:active {
-                  opacity: 1;
-                }
-                &:visited {
-                  color: var(--au-breadcrumbs-link-visited-color, oklch(0.3748 0.167 303.51));
-                }
-                &:focus-visible {
-                  outline: none;
-                  box-shadow: inset 0 0 0 var(--au-breadcrumbs-focus-shadow-width, 3px) var(--au-breadcrumbs-focus-shadow-color, oklch(0.45 0.15 260));
-                  /* Forced colours drop box-shadow. Nested here so it outranks the
-                     outline: none above; a top-level a:focus-visible would not. */
-                  @media (forced-colors: active) {
-                    outline: 2px solid Highlight;
-                    outline-offset: -2px;
-                  }
-                }
-                &+span {
-                  font-size: var(--au-breadcrumbs-text-size, 1rem);
-                }
-              }
-            }
-          }
-        }
-        @media (forced-colors: active) {
-          nav:focus-visible {
-            outline: 2px solid Highlight;
-            outline-offset: -2px;
-          }
-        }
-      </style>
-      <nav tabindex="-1"><ol></ol></nav>
-    `;
-        this._nav = this.shadowRoot.querySelector("nav");
-      }
+      if (!this._bound) return;
       for (const name of ["id", "class"]) {
         this.hasAttribute(name) ? this._nav.setAttribute(name, this.getAttribute(name)) : this._nav.removeAttribute(name);
       }
@@ -647,6 +655,9 @@
   }
   if (typeof customElements !== "undefined" && !customElements.get("au-card")) {
     customElements.define("au-card", AuCard);
+  }
+  function uid(prefix = "") {
+    return prefix + crypto.getRandomValues(new Uint32Array(1))[0].toString(36);
   }
   class AuCarousel extends HTMLElement {
     static get observedAttributes() {
@@ -701,7 +712,7 @@
         --au-carousel-button-bg: oklch(0.2 0 0);
         --au-carousel-button-text-color: oklch(0.99 0 0);
         --au-carousel-button-radius: 999px;
-        --au-carousel-button-disabled-opacity: 0.35;
+        --au-carousel-button-disabled-opacity: 0.6;
         --au-carousel-button-focus-shadow-width: 3px;
         --au-carousel-button-focus-shadow-color: oklch(0.55 0.2 256); /* >=3:1 on white */
 
@@ -866,7 +877,7 @@
       this._pagination = document.createElement("div");
       this._pagination.className = "au-carousel-pagination";
       this._pagination.setAttribute("role", "group");
-      this._hintId = this.generateId();
+      this._hintId = uid("au-carousel-");
       this._hint = document.createElement("div");
       this._hint.className = "au-carousel-sr-hint";
       this._hint.id = this._hintId;
@@ -1005,7 +1016,7 @@
     // positional fallback. `real` marks whether a genuine title/heading was found
     // (vs the positional fallback), so the dot label can add "{current} of
     // {total}" to real titles without doubling it onto an already-positional
-    // fallback. The plain title is what the live region and slide-change event
+    // fallback. The plain title is what the live region and au-slide-change event
     // use for {title}.
     _resolveName(el, i) {
       if (el.dataset && el.dataset.title) return { name: el.dataset.title, real: true };
@@ -1133,7 +1144,7 @@
           this._live.textContent = this._realNames[idx] ? this._fill(tpl, this._names[idx], idx) : this._names[idx];
         }
         this.dispatchEvent(
-          new CustomEvent("slide-change", {
+          new CustomEvent("au-slide-change", {
             bubbles: true,
             composed: true,
             detail: { index: idx, total: this._slides.length, title: this._names[idx] }
@@ -1241,26 +1252,108 @@
     set current(val) {
       this.slideTo(val);
     }
-    generateId() {
-      if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-        const byteArray = new Uint32Array(1);
-        crypto.getRandomValues(byteArray);
-        return `au-carousel-${byteArray[0].toString(36)}`;
-      }
-      return `au-carousel-${Math.random().toString(36).slice(2)}`;
-    }
   }
   if (typeof customElements !== "undefined" && !customElements.get("au-carousel")) {
     customElements.define("au-carousel", AuCarousel);
   }
-  class AuCheckbox extends HTMLElement {
+  function idRefs(host, attribute) {
+    const root = host.getRootNode();
+    return (host.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((element) => element && element !== host);
+  }
+  function forwardAria(host, target, { explicit, hasOwnLabel, mirrorPrefix }) {
+    let labels = idRefs(host, "aria-labelledby");
+    if (!labels.length && !explicit && !hasOwnLabel && host.isConnected) labels = [...host.internals.labels || []];
+    const descriptions = idRefs(host, "aria-describedby");
+    target.removeAttribute("aria-labelledby");
+    target.removeAttribute("aria-describedby");
+    if (explicit) target.setAttribute("aria-label", explicit);
+    else target.removeAttribute("aria-label");
+    if ("ariaLabelledByElements" in target) target.ariaLabelledByElements = labels;
+    else if (!explicit && labels.length) {
+      target.setAttribute("aria-label", labels.map((element) => element.getAttribute("aria-label") || element.textContent).join(" ").trim());
+    }
+    if ("ariaDescribedByElements" in target) target.ariaDescribedByElements = descriptions;
+    else if (descriptions.length) {
+      if (!host._descriptionMirror) {
+        host._descriptionMirror = document.createElement("span");
+        host._descriptionMirror.id = uid(mirrorPrefix);
+        host._descriptionMirror.hidden = true;
+        host.shadowRoot.append(host._descriptionMirror);
+      }
+      host._descriptionMirror.textContent = descriptions.map((element) => element.textContent).join(" ").trim();
+      target.setAttribute("aria-describedby", host._descriptionMirror.id);
+    }
+  }
+  const VALIDITY_FLAGS = [
+    "valueMissing",
+    "typeMismatch",
+    "patternMismatch",
+    "tooLong",
+    "tooShort",
+    "rangeUnderflow",
+    "rangeOverflow",
+    "stepMismatch",
+    "badInput"
+  ];
+  class AuFormElement extends HTMLElement {
     static formAssociated = true;
     constructor() {
       super();
+      const internals = this.attachInternals();
+      this.internals = internals;
+      const setValidity = internals.setValidity.bind(internals);
+      let own = { flags: {}, message: "", anchor: void 0 };
+      this._customValidity = "";
+      this._applyValidity = () => {
+        if (!this._customValidity) {
+          setValidity(own.flags, own.message, own.anchor);
+          return;
+        }
+        const flags = { customError: true };
+        for (const flag of VALIDITY_FLAGS) if (own.flags[flag]) flags[flag] = true;
+        setValidity(flags, this._customValidity, own.anchor || this._validityAnchor());
+      };
+      internals.setValidity = (flags = {}, message = "", anchor) => {
+        own = { flags, message, anchor };
+        this._applyValidity();
+      };
+    }
+    get form() {
+      return this.internals.form;
+    }
+    get validity() {
+      return this.internals.validity;
+    }
+    get validationMessage() {
+      return this.internals.validationMessage;
+    }
+    get willValidate() {
+      return this.internals.willValidate;
+    }
+    checkValidity() {
+      return this.internals.checkValidity();
+    }
+    reportValidity() {
+      return this.internals.reportValidity();
+    }
+    // As on a native control: a non-empty message makes the field invalid with
+    // that message (validity.customError); an empty one removes it. The
+    // component's own checks, such as required, keep working underneath.
+    setCustomValidity(message) {
+      this._customValidity = message == null ? "" : String(message);
+      this._applyValidity();
+    }
+    // Where the browser points (and focuses) when it reports a custom error.
+    _validityAnchor() {
+      return this.shadowRoot?.querySelector("input:not([type=hidden]), textarea, button, [tabindex]") || void 0;
+    }
+  }
+  class AuCheckbox extends AuFormElement {
+    constructor() {
+      super();
       this.attachShadow({ mode: "open", delegatesFocus: true });
-      this.internals = this.attachInternals();
       this.addEventListener("click", (event) => this._activateFromHost(event));
-      const inputID = this.generateId();
+      const inputID = uid("au-checkbox-");
       const style = document.createElement("style");
       style.textContent = `
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
@@ -1329,7 +1422,7 @@
         &:has(input[type="checkbox"]:disabled) {
           cursor: not-allowed;
           input[type="checkbox"] {
-            opacity: 0.5;
+            opacity: var(--au-checkbox-disabled-opacity, 0.6);
           }
           .text {
             pointer-events: none;
@@ -1398,14 +1491,6 @@
     set disabled(val) {
       val ? this.setAttribute("disabled", "") : this.removeAttribute("disabled");
     }
-    generateId() {
-      if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-        const byteArray = new Uint32Array(1);
-        crypto.getRandomValues(byteArray);
-        return `au-checkbox-${byteArray[0].toString(36)}`;
-      }
-      return `au-checkbox-${Math.random().toString(36).slice(2)}`;
-    }
     static get observedAttributes() {
       return ["name", "value", "checked", "disabled", "required", "label", "aria-label", "aria-labelledby", "aria-describedby", "aria-invalid"];
     }
@@ -1447,35 +1532,8 @@
       }
     }
     syncAccessibleLabel() {
-      const input = this.inputElement;
-      const root = this.getRootNode();
-      const resolve = (attribute) => (this.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((element) => element && element !== this);
-      const explicit = this.getAttribute("aria-label");
-      let labels = resolve("aria-labelledby");
       const hasSlotText = this._labelSlot.assignedNodes({ flatten: true }).some((node) => node.textContent?.trim());
-      if (!labels.length && !explicit && !hasSlotText && this.isConnected) {
-        labels = [...this.internals.labels];
-      }
-      const descriptions = resolve("aria-describedby");
-      input.removeAttribute("aria-labelledby");
-      input.removeAttribute("aria-describedby");
-      if (explicit) input.setAttribute("aria-label", explicit);
-      else input.removeAttribute("aria-label");
-      if ("ariaLabelledByElements" in input) input.ariaLabelledByElements = labels;
-      else if (!explicit && labels.length) {
-        input.setAttribute("aria-label", labels.map((element) => element.getAttribute("aria-label") || element.textContent).join(" ").trim());
-      }
-      if ("ariaDescribedByElements" in input) input.ariaDescribedByElements = descriptions;
-      else if (descriptions.length) {
-        if (!this._descriptionMirror) {
-          this._descriptionMirror = document.createElement("span");
-          this._descriptionMirror.id = this.generateId();
-          this._descriptionMirror.hidden = true;
-          this.shadowRoot.append(this._descriptionMirror);
-        }
-        this._descriptionMirror.textContent = descriptions.map((element) => element.textContent).join(" ").trim();
-        input.setAttribute("aria-describedby", this._descriptionMirror.id);
-      }
+      forwardAria(this, this.inputElement, { explicit: this.getAttribute("aria-label"), hasOwnLabel: hasSlotText, mirrorPrefix: "au-checkbox-" });
     }
     _observeLabels() {
       this._labelObserver?.disconnect();
@@ -1493,13 +1551,7 @@
       this._labelObserver?.disconnect();
     }
     _upgradeProperties() {
-      for (const name of ["checked", "disabled", "required", "name", "value"]) {
-        if (Object.hasOwn(this, name)) {
-          const value = this[name];
-          delete this[name];
-          this[name] = value;
-        }
-      }
+      upgradeProperties(this, ["checked", "disabled", "required", "name", "value"]);
     }
     get name() {
       return this.getAttribute("name") || "";
@@ -1518,21 +1570,6 @@
     }
     set required(value) {
       this.toggleAttribute("required", Boolean(value));
-    }
-    get validity() {
-      return this.internals.validity;
-    }
-    get validationMessage() {
-      return this.internals.validationMessage;
-    }
-    get willValidate() {
-      return this.internals.willValidate;
-    }
-    checkValidity() {
-      return this.internals.checkValidity();
-    }
-    reportValidity() {
-      return this.internals.reportValidity();
     }
     focus(options) {
       this.inputElement.focus(options);
@@ -1585,8 +1622,8 @@
     constructor() {
       super();
       this.attachShadow({ mode: "open" });
-      this.triggerId = this.generateId("trigger");
-      this.menuId = this.generateId("menu");
+      this.triggerId = uid("au-dropdown-");
+      this.menuId = uid("au-dropdown-");
       this._returnFocusOnClose = true;
       const template = document.createElement("template");
       template.innerHTML = `
@@ -1638,7 +1675,7 @@
           &:disabled {
             cursor: not-allowed;
             pointer-events: none;
-            opacity: 0.4;
+            opacity: var(--au-dropdown-disabled-opacity, 0.6);
           }
 
           &:hover {
@@ -1792,14 +1829,6 @@
       this.trigger.removeEventListener("click", this._handleFallbackClick);
       this.ownerDocument.removeEventListener("pointerdown", this._dismissFallback);
       this.ownerDocument.removeEventListener("focusin", this._dismissFallback);
-    }
-    generateId() {
-      if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-        const byteArray = new Uint32Array(1);
-        crypto.getRandomValues(byteArray);
-        return `au-dropdown-${byteArray[0].toString(36)}`;
-      }
-      return `au-dropdown-${Math.random().toString(36).slice(2)}`;
     }
     updateTriggerFallback() {
       if (!this.triggerFallback) return;
@@ -2043,7 +2072,7 @@
       this.item.removeEventListener("keydown", this.handleItemKeyDown);
     }
     handleClick() {
-      this.dispatchEvent(new CustomEvent("selected", {
+      this.dispatchEvent(new CustomEvent("au-select", {
         bubbles: true,
         composed: true,
         detail: { value: this.getAttribute("value") }
@@ -2070,8 +2099,7 @@
     if (!customElements.get("au-dropdown")) customElements.define("au-dropdown", AuDropdown);
     if (!customElements.get("au-dropdown-item")) customElements.define("au-dropdown-item", AuDropdownItem);
   }
-  class AuFileUpload extends HTMLElement {
-    static formAssociated = true;
+  class AuFileUpload extends AuFormElement {
     static get observedAttributes() {
       return [
         "accept",
@@ -2100,7 +2128,6 @@
     constructor() {
       super();
       this.attachShadow({ mode: "open" });
-      this.internals = this.attachInternals();
       this.files = [];
       this.previewUrls = /* @__PURE__ */ new Map();
       const style = document.createElement("style");
@@ -2241,7 +2268,7 @@
         outline-offset: 2px;
       }
       .default-trigger { font: inherit; min-block-size: 24px; min-inline-size: 24px; padding: 0.625rem; max-inline-size: 100%; overflow-wrap: anywhere; }
-      .file-upload-container[aria-disabled="true"] { opacity: 0.65; }
+      .file-upload-container[aria-disabled="true"] { opacity: var(--au-file-upload-disabled-opacity, 0.6); }
       @media (max-width: 360px) { .file-list [role=listitem] { flex-wrap: wrap; } }
       @media (prefers-reduced-motion: reduce) { .upload-area, .file-list [role=listitem] .delete { transition: none; } }
       @media (forced-colors: active) {
@@ -2256,7 +2283,7 @@
       this.container.setAttribute("role", "group");
       this.container.setAttribute("aria-labelledby", "upload-label");
       this.container.setAttribute("aria-describedby", "upload-errors upload-drop");
-      this._id = this.getAttribute("id") || this.generateId();
+      this._id = this.getAttribute("id") || uid("au-file-upload-");
       this.labelEl = document.createElement("label");
       this.labelEl.id = "upload-label";
       this.labelEl.textContent = this.getAttribute("label") || "Upload files";
@@ -2375,7 +2402,7 @@
           this.updateValidity();
           break;
         case "id":
-          this._id = newValue || this.generateId();
+          this._id = newValue || uid("au-file-upload-");
           if (this.labelEl) this.labelEl.setAttribute("for", this._id);
           if (this.fileInput) this.fileInput.id = this._id;
           break;
@@ -2414,11 +2441,7 @@
       }
     }
     connectedCallback() {
-      if (Object.hasOwn(this, "value")) {
-        const value = this.value;
-        delete this.value;
-        this.value = value;
-      }
+      upgradeProperties(this, ["value"]);
       this.updateLabelText();
       this.updateDropText();
       this.updateFileList();
@@ -2700,7 +2723,7 @@
       this.announce(this.formatMessage("msg-removed", "{fileName} removed.", { fileName: removed.name }));
       this.syncFormValue();
       this.updateValidity();
-      this.dispatchEvent(new CustomEvent("remove-file", { bubbles: true, composed: true, detail: removed }));
+      this.dispatchEvent(new CustomEvent("au-remove-file", { bubbles: true, composed: true, detail: removed }));
       this.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
     }
     updateUsage() {
@@ -2748,13 +2771,17 @@
       this.internals.setValidity({});
       return true;
     }
+    // A custom error points at the visible trigger, not the hidden file input.
+    _validityAnchor() {
+      return this.triggerArea;
+    }
     checkValidity() {
       this.updateValidity();
-      return this.internals.checkValidity();
+      return super.checkValidity();
     }
     reportValidity() {
       this.updateValidity();
-      return this.internals.reportValidity();
+      return super.reportValidity();
     }
     formResetCallback() {
       this.revokeAllPreviewUrls();
@@ -2780,25 +2807,15 @@
         this.updateValidity();
       }
     }
-    generateId() {
-      if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-        const byteArray = new Uint32Array(1);
-        crypto.getRandomValues(byteArray);
-        return `au-file-upload-${byteArray[0].toString(36)}`;
-      }
-      return `au-file-upload-${Math.random().toString(36).slice(2)}`;
-    }
   }
   if (typeof customElements !== "undefined" && !customElements.get("au-file-upload")) {
     customElements.define("au-file-upload", AuFileUpload);
   }
-  class AuInput extends HTMLElement {
-    static formAssociated = true;
+  class AuInput extends AuFormElement {
     constructor() {
       super();
       this.attachShadow({ mode: "open" });
-      this.internals = this.attachInternals();
-      this._id = this.getAttribute("id") || this.generateId();
+      this._id = this.getAttribute("id") || uid("au-input-");
       const style = document.createElement("style");
       style.textContent = `
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
@@ -2870,6 +2887,11 @@
         border-radius: var(--au-input-border-radius, 0.25rem);
         padding: var(--au-input-container-padding-vertical, 0.25rem) var(--au-input-container-padding-horizontal, 0.25rem);
         gap: var(--au-input-container-gap, 0.625rem);
+        &:has(input:disabled) {
+          cursor: not-allowed;
+          opacity: var(--au-input-disabled-opacity, 0.6);
+          input { cursor: not-allowed; }
+        }
         /* prefix/affix 不可被壓縮;窄容器時優先維持同一行,由 input 彈性縮小。
            只有在放不下「可用寬度的輸入框」時才換行,避免 input 被擠到幾乎為零、
            內容溢出元件(WCAG 1.4.10)。 */
@@ -3070,7 +3092,7 @@
       } else if (name === "list") {
         this._handleListAttribute(newValue);
       } else if (name === "id") {
-        this._id = newValue || this.generateId();
+        this._id = newValue || uid("au-input-");
         this.input.id = this._id;
         this.labelEl.htmlFor = this._id;
       } else if (["aria-label", "aria-labelledby", "aria-describedby"].includes(name)) {
@@ -3095,29 +3117,8 @@
       this._syncControlState();
       this._syncAccessibleReferences();
     }
-    get validity() {
-      return this.internals.validity;
-    }
-    get validationMessage() {
-      return this.internals.validationMessage;
-    }
-    get willValidate() {
-      return this.internals.willValidate;
-    }
-    checkValidity() {
-      return this.internals.checkValidity();
-    }
-    reportValidity() {
-      return this.internals.reportValidity();
-    }
     connectedCallback() {
-      for (const name of ["value", "disabled", "required", "readonly"]) {
-        if (Object.hasOwn(this, name)) {
-          const value = this[name];
-          delete this[name];
-          this[name] = value;
-        }
-      }
+      upgradeProperties(this, ["value", "disabled", "required", "readonly"]);
       if (!this._initialValueSet) {
         this._initialValue = this.input.value;
         this._initialValueSet = true;
@@ -3166,6 +3167,25 @@
         this._updateColorCode();
       }
     }
+    // As on a native input: a number (or Date) for number, range and date-like
+    // types, NaN (or null) otherwise. Setting goes through value, so the form
+    // value and validity follow.
+    get valueAsNumber() {
+      return this.input ? this.input.valueAsNumber : NaN;
+    }
+    set valueAsNumber(number) {
+      if (!this.input) return;
+      this.input.valueAsNumber = number;
+      this.value = this.input.value;
+    }
+    get valueAsDate() {
+      return this.input ? this.input.valueAsDate : null;
+    }
+    set valueAsDate(date) {
+      if (!this.input) return;
+      this.input.valueAsDate = date;
+      this.value = this.input.value;
+    }
     /** ✅ 開發者用：清空 input 值 */
     clear() {
       if (this.input.disabled || this.input.readOnly || !this.input.value) return;
@@ -3209,14 +3229,6 @@
     /** ✅ 開發者用：聚焦 input 欄位 */
     focus(options) {
       this.input?.focus(options);
-    }
-    generateId() {
-      if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-        const byteArray = new Uint32Array(1);
-        crypto.getRandomValues(byteArray);
-        return `au-input-${byteArray[0].toString(36)}`;
-      }
-      return `au-input-${Math.random().toString(36).slice(2)}`;
     }
     // Forward only the documented input attributes. Copying every host attribute
     // would also copy hidden, inert, style and inline handlers, which then stay on
@@ -3289,29 +3301,8 @@
     }
     _syncAccessibleReferences() {
       if (!this.input) return;
-      const root = this.getRootNode();
-      const resolve = (attribute) => (this.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
-      const explicit = this.getAttribute("aria-label");
-      let labels = resolve("aria-labelledby");
-      if (!labels.length && !explicit && !this.getAttribute("label") && this.isConnected) labels = [...this.internals.labels];
-      const descriptions = resolve("aria-describedby");
-      this.input.removeAttribute("aria-labelledby");
-      this.input.removeAttribute("aria-describedby");
-      explicit ? this.input.setAttribute("aria-label", explicit) : this.input.removeAttribute("aria-label");
+      forwardAria(this, this.input, { explicit: this.getAttribute("aria-label"), hasOwnLabel: !!this.getAttribute("label"), mirrorPrefix: "au-input-" });
       this.labelEl.hidden = !this.labelEl.textContent;
-      if ("ariaLabelledByElements" in this.input) this.input.ariaLabelledByElements = labels;
-      else if (!explicit && labels.length) this.input.setAttribute("aria-label", labels.map((el) => el.getAttribute("aria-label") || el.textContent).join(" ").trim());
-      if ("ariaDescribedByElements" in this.input) this.input.ariaDescribedByElements = descriptions;
-      else if (descriptions.length) {
-        if (!this._descriptionMirror) {
-          this._descriptionMirror = document.createElement("span");
-          this._descriptionMirror.id = this.generateId();
-          this._descriptionMirror.hidden = true;
-          this.shadowRoot.append(this._descriptionMirror);
-        }
-        this._descriptionMirror.textContent = descriptions.map((el) => el.textContent).join(" ").trim();
-        this.input.setAttribute("aria-describedby", this._descriptionMirror.id);
-      }
     }
     _updateColorCode() {
       if (this.input.type === "color") {
@@ -3408,20 +3399,11 @@
         "data-text-page-announcement"
       ];
     }
-    // generate unique IDs for input and select
-    static generateId() {
-      if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-        const byteArray = new Uint32Array(1);
-        crypto.getRandomValues(byteArray);
-        return `au-pagination-${byteArray[0].toString(36)}`;
-      }
-      return `au-pagination-${Math.random().toString(36).slice(2)}`;
-    }
     constructor() {
       super();
       this.attachShadow({ mode: "open" });
-      this._selectId = AuPagination.generateId();
-      this._jumpId = AuPagination.generateId();
+      this._selectId = uid("au-pagination-");
+      this._jumpId = uid("au-pagination-");
       this.liveRegion = document.createElement("div");
       this.liveRegion.setAttribute("aria-live", "polite");
       this.liveRegion.setAttribute("role", "status");
@@ -3432,13 +3414,7 @@
       this._render();
     }
     connectedCallback() {
-      for (const key of ["total", "currentPage", "pageSize", "pagerCount", "layout", "pageSizeOptions"]) {
-        if (Object.hasOwn(this, key)) {
-          const value = this[key];
-          delete this[key];
-          this[key] = value;
-        }
-      }
+      upgradeProperties(this, ["total", "currentPage", "pageSize", "pagerCount", "layout", "pageSizeOptions"]);
       this._requestRender();
     }
     disconnectedCallback() {
@@ -3603,7 +3579,7 @@
         &:disabled {
           cursor: not-allowed;
           pointer-events: none;
-          opacity: 0.4;
+          opacity: var(--au-btn-disabled-opacity, 0.6);
         }
 
         &:hover {
@@ -3745,7 +3721,7 @@
           if (size === this.pageSize) return;
           this.pageSize = size;
           this.currentPage = 1;
-          this.dispatchEvent(new CustomEvent("page-size-change", { detail: size, bubbles: true, composed: true }));
+          this.dispatchEvent(new CustomEvent("au-page-size-change", { detail: size, bubbles: true, composed: true }));
           this.announce(this.formatText(this.texts.pageAnnouncement, { page: this.currentPage }));
         };
         info.push(label, select, node("size-suffix", "span", t.totalItemsSuffix));
@@ -3831,7 +3807,7 @@
       if (page > this.totalPages) page = this.totalPages;
       if (page === this.currentPage) return;
       this.currentPage = page;
-      this.dispatchEvent(new CustomEvent("page-change", { detail: page, bubbles: true, composed: true }));
+      this.dispatchEvent(new CustomEvent("au-page-change", { detail: page, bubbles: true, composed: true }));
       this.announce(this.formatText(this.texts.pageAnnouncement, { page: this.currentPage }));
     }
     announce(message) {
@@ -3847,12 +3823,10 @@
   if (typeof customElements !== "undefined" && !customElements.get("au-pagination")) {
     customElements.define("au-pagination", AuPagination);
   }
-  class AuRadioGroup extends HTMLElement {
-    static formAssociated = true;
+  class AuRadioGroup extends AuFormElement {
     constructor() {
       super();
       this.attachShadow({ mode: "open", delegatesFocus: true });
-      this.internals = this.attachInternals();
       const style = document.createElement("style");
       style.textContent = `
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
@@ -3934,7 +3908,7 @@
         &:has(input[type="radio"]:disabled) {
           cursor: not-allowed;
           input[type="radio"] {
-            opacity: 0.5;
+            opacity: var(--au-radio-disabled-opacity, 0.6);
           }
           .text {
             pointer-events: none;
@@ -3955,7 +3929,7 @@
       const container = document.createElement("div");
       container.setAttribute("class", "au-radio-group");
       container.setAttribute("role", "radiogroup");
-      this.groupName = "radio-group-name-" + this.generateId();
+      this.groupName = "radio-group-name-" + uid();
       const slot = document.createElement("slot");
       slot.style.display = "none";
       container.tabIndex = -1;
@@ -3968,13 +3942,7 @@
       this.shadowRoot.append(style, container, slot);
     }
     connectedCallback() {
-      for (const name of ["value", "name", "disabled", "required"]) {
-        if (Object.hasOwn(this, name)) {
-          const value = this[name];
-          delete this[name];
-          this[name] = value;
-        }
-      }
+      upgradeProperties(this, ["value", "name", "disabled", "required"]);
       this._mutationObserver ??= new MutationObserver((records) => {
         for (const record of records) {
           if (record.attributeName !== "checked" || !this._entries.has(record.target)) continue;
@@ -4021,7 +3989,7 @@
           const label = document.createElement("label");
           const input = document.createElement("input");
           input.type = "radio";
-          input.id = "radio-" + this.generateId();
+          input.id = "radio-" + uid();
           input.name = this.groupName;
           label.htmlFor = input.id;
           const text = document.createElement("div");
@@ -4136,31 +4104,7 @@
     }
     updateGroupAttributes() {
       const container = this._container;
-      const root = this.getRootNode();
-      const resolve = (attribute) => (this.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((element) => element && element !== this);
-      const explicit = this.getAttribute("aria-label") || this.getAttribute("label");
-      let labels = resolve("aria-labelledby");
-      if (!labels.length && !explicit && this.isConnected) labels = [...this.internals.labels || []];
-      const descriptions = resolve("aria-describedby");
-      container.removeAttribute("aria-labelledby");
-      container.removeAttribute("aria-describedby");
-      if (explicit) container.setAttribute("aria-label", explicit);
-      else container.removeAttribute("aria-label");
-      if ("ariaLabelledByElements" in container) container.ariaLabelledByElements = labels;
-      else if (!explicit && labels.length) {
-        container.setAttribute("aria-label", labels.map((element) => element.getAttribute("aria-label") || element.textContent).join(" ").trim());
-      }
-      if ("ariaDescribedByElements" in container) container.ariaDescribedByElements = descriptions;
-      else if (descriptions.length) {
-        if (!this._descriptionMirror) {
-          this._descriptionMirror = document.createElement("span");
-          this._descriptionMirror.id = "radio-description-" + this.generateId();
-          this._descriptionMirror.hidden = true;
-          this.shadowRoot.append(this._descriptionMirror);
-        }
-        this._descriptionMirror.textContent = descriptions.map((element) => element.textContent).join(" ").trim();
-        container.setAttribute("aria-describedby", this._descriptionMirror.id);
-      }
+      forwardAria(this, container, { explicit: this.getAttribute("aria-label") || this.getAttribute("label"), hasOwnLabel: false, mirrorPrefix: "radio-description-" });
       container.classList.toggle("au-radio-group--vertical", this.getAttribute("direction") === "vertical");
       if (this.required) container.setAttribute("aria-required", "true");
       else container.removeAttribute("aria-required");
@@ -4196,21 +4140,6 @@
     set disabled(value) {
       this.toggleAttribute("disabled", Boolean(value));
     }
-    get validity() {
-      return this.internals.validity;
-    }
-    get validationMessage() {
-      return this.internals.validationMessage;
-    }
-    get willValidate() {
-      return this.internals.willValidate;
-    }
-    checkValidity() {
-      return this.internals.checkValidity();
-    }
-    reportValidity() {
-      return this.internals.reportValidity();
-    }
     focus(options) {
       const inputs = [...this._entries.values()].map((entry) => entry.input);
       const target = inputs.find((input) => input.tabIndex === 0 && !input.disabled);
@@ -4231,23 +4160,15 @@
       } catch {
       }
     }
-    generateId() {
-      if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-        const byteArray = new Uint32Array(1);
-        crypto.getRandomValues(byteArray);
-        return `${byteArray[0].toString(36)}`;
-      }
-      return Math.random().toString(36).slice(2);
-    }
   }
   if (typeof customElements !== "undefined" && !customElements.get("au-radio-group")) {
     customElements.define("au-radio-group", AuRadioGroup);
   }
-  class AuRating extends HTMLElement {
+  class AuRating extends AuFormElement {
     constructor() {
       super();
       this.attachShadow({ mode: "open" });
-      this._groupName = "rating-" + this.generateId();
+      this._groupName = "rating-" + uid();
       const template = document.createElement("template");
       template.innerHTML = `
       <style>
@@ -4261,7 +4182,7 @@
         }
 
         :host([disabled]) {
-          opacity: 0.6;
+          opacity: var(--au-rating-disabled-opacity, 0.6);
           pointer-events: none;
           cursor: not-allowed;
         }
@@ -4352,13 +4273,13 @@
           top: 0;
           left: 0;
           fill: var(--au-rating-star-filled-color, oklch(0.75 0.15 85));
-          clip-path: inset(0 var(--au-rating-clip, 100%) 0 0);
+          clip-path: inset(0 var(--_rating-clip, 100%) 0 0);
           transition: clip-path 150ms ease;
         }
         
         /* Animation for filled stars */
         :host(:dir(rtl)) .star-fill {
-          clip-path: inset(0 0 0 var(--au-rating-clip, 100%));
+          clip-path: inset(0 0 0 var(--_rating-clip, 100%));
         }
 
         @keyframes pulse {
@@ -4422,13 +4343,9 @@
       this._fieldset = this.shadowRoot.querySelector(".au-rating");
       this._legend = this.shadowRoot.querySelector("legend");
       this._scoreEl = this.shadowRoot.querySelector(".score");
-      this._internals = this.attachInternals();
       this._fieldset.addEventListener("input", (e) => this.handleInput(e));
       this._fieldset.addEventListener("change", (e) => this.handleChange(e));
       this._fieldset.addEventListener("keydown", (e) => this.handleKeyDown(e));
-    }
-    static get formAssociated() {
-      return true;
     }
     static get observedAttributes() {
       return [
@@ -4449,13 +4366,7 @@
       ];
     }
     connectedCallback() {
-      for (const name of ["name", "value", "max", "disabled", "readonly"]) {
-        if (Object.hasOwn(this, name)) {
-          const value = this[name];
-          delete this[name];
-          this[name] = value;
-        }
-      }
+      upgradeProperties(this, ["name", "value", "max", "disabled", "readonly"]);
       if (this._defaultValue === void 0) this._defaultValue = this.value;
       this.render();
       this._observeDescriptions();
@@ -4562,14 +4473,6 @@
       if (val) this.setAttribute("readonly", "");
       else this.removeAttribute("readonly");
     }
-    generateId() {
-      if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-        const byteArray = new Uint32Array(1);
-        crypto.getRandomValues(byteArray);
-        return byteArray[0].toString(36);
-      }
-      return Math.random().toString(36).slice(2);
-    }
     getStarSVG(className = "") {
       return `<svg class="star ${className}" viewBox="0 0 24 24" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -4622,7 +4525,7 @@
       }
       this.updateStars(currentValue);
       this.updateScoreDisplay(currentValue);
-      this._internals.setFormValue(currentValue.toString());
+      this.internals.setFormValue(currentValue.toString());
     }
     updateScoreDisplay(val) {
       this._scoreEl.classList.toggle("visually-hidden", !this.showScore);
@@ -4669,7 +4572,7 @@
           clipRight = 100 - partialFill * 100;
           wrapper.classList.add("animate");
         }
-        wrapper.style.setProperty("--au-rating-clip", `${clipRight}%`);
+        wrapper.style.setProperty("--_rating-clip", `${clipRight}%`);
       });
     }
     handleKeyDown(e) {
@@ -4716,14 +4619,12 @@
   if (typeof customElements !== "undefined" && !customElements.get("au-rating")) {
     customElements.define("au-rating", AuRating);
   }
-  class AuSwitch extends HTMLElement {
-    static formAssociated = true;
+  class AuSwitch extends AuFormElement {
     constructor() {
       super();
       this.attachShadow({ mode: "open", delegatesFocus: true });
-      this.internals = this.attachInternals();
       this.addEventListener("click", (event) => this._activateFromHost(event));
-      const inputID = this.generateId();
+      const inputID = uid("au-switch-");
       const style = document.createElement("style");
       style.textContent = `
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
@@ -4750,7 +4651,7 @@
         } 
         &:has(input:disabled) {
           cursor: not-allowed;
-          opacity: 0.5;
+          opacity: var(--au-switch-disabled-opacity, 0.6);
           text-decoration: none;
         } 
       }
@@ -4882,14 +4783,6 @@
     formResetCallback() {
       this.checked = this._initialChecked;
     }
-    generateId() {
-      if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-        const byteArray = new Uint32Array(1);
-        crypto.getRandomValues(byteArray);
-        return `au-switch-${byteArray[0].toString(36)}`;
-      }
-      return `au-switch-${Math.random().toString(36).slice(2)}`;
-    }
     static get observedAttributes() {
       return ["name", "value", "checked", "disabled", "required", "off", "on", "label", "aria-label", "aria-labelledby", "aria-describedby", "aria-invalid"];
     }
@@ -4942,35 +4835,8 @@
       this.updateFormValue();
     }
     syncAccessibleLabel() {
-      const input = this.inputElement;
-      const root = this.getRootNode();
-      const resolve = (attribute) => (this.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((element) => element && element !== this);
-      const explicit = this.getAttribute("aria-label");
-      let labels = resolve("aria-labelledby");
       const hasSlotText = this._labelSlot.assignedNodes({ flatten: true }).some((node) => node.textContent?.trim());
-      if (!labels.length && !explicit && !hasSlotText && this.isConnected) {
-        labels = [...this.internals.labels];
-      }
-      const descriptions = resolve("aria-describedby");
-      input.removeAttribute("aria-labelledby");
-      input.removeAttribute("aria-describedby");
-      if (explicit) input.setAttribute("aria-label", explicit);
-      else input.removeAttribute("aria-label");
-      if ("ariaLabelledByElements" in input) input.ariaLabelledByElements = labels;
-      else if (!explicit && labels.length) {
-        input.setAttribute("aria-label", labels.map((element) => element.getAttribute("aria-label") || element.textContent).join(" ").trim());
-      }
-      if ("ariaDescribedByElements" in input) input.ariaDescribedByElements = descriptions;
-      else if (descriptions.length) {
-        if (!this._descriptionMirror) {
-          this._descriptionMirror = document.createElement("span");
-          this._descriptionMirror.id = this.generateId();
-          this._descriptionMirror.hidden = true;
-          this.shadowRoot.append(this._descriptionMirror);
-        }
-        this._descriptionMirror.textContent = descriptions.map((element) => element.textContent).join(" ").trim();
-        input.setAttribute("aria-describedby", this._descriptionMirror.id);
-      }
+      forwardAria(this, this.inputElement, { explicit: this.getAttribute("aria-label"), hasOwnLabel: hasSlotText, mirrorPrefix: "au-switch-" });
     }
     _observeLabels() {
       this._labelObserver?.disconnect();
@@ -4988,13 +4854,7 @@
       this._labelObserver?.disconnect();
     }
     _upgradeProperties() {
-      for (const name of ["checked", "disabled", "required", "name", "value"]) {
-        if (Object.hasOwn(this, name)) {
-          const value = this[name];
-          delete this[name];
-          this[name] = value;
-        }
-      }
+      upgradeProperties(this, ["checked", "disabled", "required", "name", "value"]);
     }
     get name() {
       return this.getAttribute("name") || "";
@@ -5013,21 +4873,6 @@
     }
     set required(value) {
       this.toggleAttribute("required", Boolean(value));
-    }
-    get validity() {
-      return this.internals.validity;
-    }
-    get validationMessage() {
-      return this.internals.validationMessage;
-    }
-    get willValidate() {
-      return this.internals.willValidate;
-    }
-    checkValidity() {
-      return this.internals.checkValidity();
-    }
-    reportValidity() {
-      return this.internals.reportValidity();
     }
     focus(options) {
       this.inputElement.focus(options);
@@ -5075,171 +4920,188 @@
   if (typeof customElements !== "undefined" && !customElements.get("au-switch")) {
     customElements.define("au-switch", AuSwitch);
   }
+  const DEFAULT_TAB_LABEL = "Tab {index}";
+  const DEFAULT_BADGE_LABEL_PREFIX = "Additional information:";
+  const tabsStyles = `
+  :host([hidden]:not([hidden="until-found" i])) { display: none; }
+  :host { display: block; min-width: 0; }
+  .au-tabs { min-width: 0; }
+  .au-tablist-item { flex-shrink: 0; max-width: 100%; }
+  .label, .prefix, .badge, .affix { min-width: 0; overflow-wrap: anywhere; }
+  .au-tablist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    overflow: auto;
+    max-width: 100%;
+  }
+
+  .au-tablist-item{
+    &:first-of-type {
+      [role="tab"] {
+        border-top-left-radius: var(--au-tabs-border-radius, 0);
+      }
+    }
+    &:last-of-type {
+      [role="tab"] {
+        border-right: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) var(--au-tabs-border-color, oklch(0.55 0 0));
+        border-top-right-radius: var(--au-tabs-border-radius, 0);
+      }
+    }
+  }
+
+  button[role="tab"] {
+    /* behavior */
+    cursor: pointer;
+    -webkit-tap-highlight-color: oklch(0 0 0 / 0);
+
+    /* spacing */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.25rem;
+    padding: var(--au-tabs-padding-vertical, 0.625rem) var(--au-tabs-padding-horizontal, 1rem);
+
+    /* border */
+    border-top: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) var(--au-tabs-border-color, oklch(0.55 0 0));
+    border-left: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) var(--au-tabs-border-color, oklch(0.55 0 0));
+    border-right: 0;
+    border-bottom: 0;
+
+    /* text */
+    color: var(--au-tabs-text-color, oklch(0.1398 0 0));
+    font-size: var(--au-tabs-text-size, 1rem);
+    font-family: var(--au-tabs-text-family, inherit);
+    line-height: var(--au-tabs-text-line-height, 1.5);
+    white-space: normal;
+    box-sizing: border-box;
+    max-width: 100%;
+    min-width: 24px;
+    min-height: 24px;
+
+    /* background */
+    background-color: var(--au-tabs-bg, oklch(0.9731 0 0));
+    transition: background-color 120ms ease-in;
+
+    &:hover {
+      background-color: var(--au-tabs-hover-bg, oklch(0.9466 0 0));
+    }
+
+    &:active {
+      background-color: var(--au-tabs-active-bg, oklch(0.8689 0 0));
+    }
+
+    &[aria-selected="true"] {
+      text-decoration: underline;
+      text-underline-offset: 0.2em;
+      paint-order: stroke fill;
+      -webkit-text-stroke: var(--au-tabs-selected-text-stroke-width, 0.5px) var(--au-tabs-selected-text-stroke-color, oklch(0.994 0 0));
+      box-shadow: inset 0 0 0 var(--au-tabs-selected-shadow-width, 1px) var(--au-tabs-selected-shadow-color, oklch(0.55 0 0));
+      background-color: var(--au-tabs-selected-bg, oklch(0.1398 0 0));
+      color: var(--au-tabs-selected-text-color, oklch(0.994 0 0));
+    }
+
+    /* focusd */
+    &:focus-visible {
+      outline: none;
+      box-shadow: inset 0 0 0 var(--au-tabs-focus-shadow-width, 3px) var(--au-tabs-focus-shadow-color, oklch(0.45 0.15 260));
+    }
+  }
+
+  button[aria-selected="true"]:focus-visible {
+    box-shadow: inset 0 0 0 var(--au-tabs-focus-shadow-width, 3px) var(--au-tabs-selected-focus-shadow-color, white);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    button[role="tab"] { transition: none; }
+  }
+  @media (forced-colors: active) {
+    button[aria-selected="true"] { border-bottom: 3px solid ButtonText; }
+    button[role="tab"]:focus-visible { outline: 2px solid Highlight; outline-offset: -4px; }
+  }
+  .au-tablist:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+  .au-tabpanels {
+    border: var(--au-tabpanels-border-width, 1px) var(--au-tabpanels-border-style, solid) var(--au-tabpanels-border-color, oklch(0.55 0 0));
+  }
+
+  .au-tab-panel {
+    padding: var(--au-tab-panel-padding-vertical, 0.625rem) var(--au-tab-panel-padding-horizontal, 1rem);
+  }
+
+  .badge {
+    background-color: var(--au-tab-badge-bg, oklch(0.8689 0 0));
+    color: var(--au-tab-badge-text-color, oklch(0.1398 0 0));
+    padding: var(--au-tab-badge-padding-vertical, 0) var(--au-tab-badge-padding-horizontal, 0.625rem);
+    border-radius: var(--au-tab-badge-border-radius, 0.75rem);
+  }
+
+   ::slotted(.au-tab-panel) {
+    box-sizing: border-box;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    padding: var(--au-tab-panel-padding-vertical, 0.75rem) var(--au-tab-panel-padding-horizontal, 1rem);
+    display: none;
+    border: var(--au-tabpanels-border-width, 1px) var(--au-tabpanels-border-style, solid) var(--au-tabpanels-border-color, oklch(0.55 0 0));
+  }
+
+  ::slotted(.au-tab-panel[aria-hidden="false"]) {
+    display: block;
+  }
+  ::slotted(.au-tab-panel:focus-visible) {
+    outline: 2px solid var(--au-tabs-focus-shadow-color, oklch(0.45 0.15 260));
+    outline-offset: -2px;
+  }
+  @media (forced-colors: active) {
+    ::slotted(.au-tab-panel:focus-visible) { outline-color: Highlight; }
+  }
+`;
+  function tabLabel(label, template, index) {
+    return label || String(template || DEFAULT_TAB_LABEL).replaceAll("{index}", String(index + 1));
+  }
+  function renderTabContent({ label, lang, prefix, badge, affix }, badgeLabelPrefix = DEFAULT_BADGE_LABEL_PREFIX) {
+    let html = "";
+    if (prefix) html += `<span class="prefix">${escapeHTML(prefix)}</span>`;
+    if (label) html += `<span class="label"${lang ? ` lang="${escapeHTML(lang)}"` : ""}>${escapeHTML(label)}</span>`;
+    if (badge) html += `<span class="badge" aria-label="${escapeHTML(`${badgeLabelPrefix} ${badge}`)}">${escapeHTML(badge)}</span>`;
+    if (affix) html += `<span class="affix">${escapeHTML(affix)}</span>`;
+    return html;
+  }
+  function renderTab(tab, { id, selected = false, badgeLabelPrefix } = {}) {
+    return `<li role="presentation" class="au-tablist-item${selected ? " au-tablist-item--selected" : ""}"><button type="button" role="tab" id="${id}" aria-selected="${selected}" tabindex="${selected ? 0 : -1}">${renderTabContent(tab, badgeLabelPrefix)}</button></li>`;
+  }
+  function renderTabs({ label, tabs = [], selectedIndex = 0, selectedChild, badgeLabelPrefix } = {}) {
+    const items = tabs.map((tab, index) => renderTab(tab, { id: `tab-${index + 1}`, selected: index === selectedIndex, badgeLabelPrefix })).join("");
+    const preselect = selectedChild ? `<style data-preselect>::slotted(.au-tab-panel:nth-child(${selectedChild})) { display: block; }</style>` : "";
+    return `<div class="au-tabs"><style>${tabsStyles}</style>${preselect}<ul role="tablist" class="au-tablist" tabindex="-1" aria-orientation="horizontal"${label ? ` aria-label="${escapeHTML(label)}"` : ""}>${items}</ul><slot name="panel"></slot></div>`;
+  }
   class AuTabs extends HTMLElement {
     static get observedAttributes() {
       return ["data-text-tab", "data-text-tab-lang", "data-text-badge-label-prefix", "selected-index", "aria-label", "aria-labelledby"];
     }
     constructor() {
       super();
-      this.attachShadow({ mode: "open" });
       this._tabs = [];
       this._panels = [];
       this._selectedIndex = -1;
       this._entries = /* @__PURE__ */ new Map();
-      this.container = document.createElement("div");
-      this.container.classList.add("au-tabs");
-      const style = document.createElement("style");
-      style.textContent = `
-      :host([hidden]:not([hidden="until-found" i])) { display: none; }
-      :host { display: block; min-width: 0; }
-      .au-tabs { min-width: 0; }
-      .au-tablist-item { flex-shrink: 0; max-width: 100%; }
-      .label, .prefix, .badge, .affix { min-width: 0; overflow-wrap: anywhere; }
-      .au-tablist {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        overflow: auto;
-        max-width: 100%;
-      }
-
-      .au-tablist-item{
-        &:first-of-type {
-          [role="tab"] {
-            border-top-left-radius: var(--au-tabs-border-radius, 0);
-          }
+      this._nextTabId = 1;
+      setupShadow(this, () => renderTabs(), (root, adopted) => {
+        this.container = root.querySelector(".au-tabs");
+        this.tabsList = root.querySelector("ul.au-tablist");
+        this._slot = root.querySelector('slot[name="panel"]');
+        this._slot.addEventListener("slotchange", () => this._renderTabs());
+        if (adopted) {
+          this._serverItems = [...this.tabsList.children];
+          this._nextTabId = this._serverItems.length + 1;
         }
-        &:last-of-type {
-          [role="tab"] {
-            border-right: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) var(--au-tabs-border-color, oklch(0.55 0 0));
-            border-top-right-radius: var(--au-tabs-border-radius, 0);
-          }
-        }
-      }
-
-      button[role="tab"] {
-        /* behavior */
-        cursor: pointer;
-        -webkit-tap-highlight-color: oklch(0 0 0 / 0);
-
-        /* spacing */
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 0.25rem;
-        padding: var(--au-tabs-padding-vertical, 0.625rem) var(--au-tabs-padding-horizontal, 1rem);
-
-        /* border */
-        border-top: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) var(--au-tabs-border-color, oklch(0.55 0 0));
-        border-left: var(--au-tabs-border-width, 1px) var(--au-tabs-border-style, solid) var(--au-tabs-border-color, oklch(0.55 0 0));
-        border-right: 0;
-        border-bottom: 0;
-
-        /* text */
-        color: var(--au-tabs-text-color, oklch(0.1398 0 0));
-        font-size: var(--au-tabs-text-size, 1rem);
-        font-family: var(--au-tabs-text-family, inherit);
-        line-height: var(--au-tabs-text-line-height, 1.5);
-        white-space: normal;
-        box-sizing: border-box;
-        max-width: 100%;
-        min-width: 24px;
-        min-height: 24px;
-
-        /* background */
-        background-color: var(--au-tabs-bg, oklch(0.9731 0 0));
-        transition: background-color 120ms ease-in;
-
-        &:hover {
-          background-color: var(--au-tabs-hover-bg, oklch(0.9466 0 0));
-        }
-        
-        &:active {
-          background-color: var(--au-tabs-active-bg, oklch(0.8689 0 0));
-        }
-
-        &[aria-selected="true"] {
-          text-decoration: underline;
-          text-underline-offset: 0.2em;
-          paint-order: stroke fill;
-          -webkit-text-stroke: var(--au-tabs-selected-text-stroke-width, 0.5px) var(--au-tabs-selected-text-stroke-color, oklch(0.994 0 0));
-          box-shadow: inset 0 0 0 var(--au-tabs-selected-shadow-width, 1px) var(--au-tabs-selected-shadow-color, oklch(0.55 0 0));
-          background-color: var(--au-tabs-selected-bg, oklch(0.1398 0 0));
-          color: var(--au-tabs-selected-text-color, oklch(0.994 0 0));
-        }
-
-        /* focusd */
-        &:focus-visible {
-          outline: none;
-          box-shadow: inset 0 0 0 var(--au-tabs-focus-shadow-width, 3px) var(--au-tabs-focus-shadow-color, oklch(0.45 0.15 260));
-        }
-      }
-
-      button[aria-selected="true"]:focus-visible {
-        box-shadow: inset 0 0 0 var(--au-tabs-focus-shadow-width, 3px) var(--au-tabs-selected-focus-shadow-color, white);
-      }
-      @media (prefers-reduced-motion: reduce) {
-        button[role="tab"] { transition: none; }
-      }
-      @media (forced-colors: active) {
-        button[aria-selected="true"] { border-bottom: 3px solid ButtonText; }
-        button[role="tab"]:focus-visible { outline: 2px solid Highlight; outline-offset: -4px; }
-      }
-      .au-tablist:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
-      .au-tabpanels {
-        border: var(--au-tabpanels-border-width, 1px) var(--au-tabpanels-border-style, solid) var(--au-tabpanels-border-color, oklch(0.55 0 0));
-      }
-
-      .au-tab-panel {
-        padding: var(--au-tab-panel-padding-vertical, 0.625rem) var(--au-tab-panel-padding-horizontal, 1rem);
-      }
-
-      .badge {
-        background-color: var(--au-tab-badge-bg, oklch(0.8689 0 0));
-        color: var(--au-tab-badge-text-color, oklch(0.1398 0 0));
-        padding: var(--au-tab-badge-padding-vertical, 0) var(--au-tab-badge-padding-horizontal, 0.625rem);
-        border-radius: var(--au-tab-badge-border-radius, 0.75rem);
-      }
-
-       ::slotted(.au-tab-panel) {
-        box-sizing: border-box;
-        min-width: 0;
-        overflow-wrap: anywhere;
-        padding: var(--au-tab-panel-padding-vertical, 0.75rem) var(--au-tab-panel-padding-horizontal, 1rem);
-        display: none;
-        border: var(--au-tabpanels-border-width, 1px) var(--au-tabpanels-border-style, solid) var(--au-tabpanels-border-color, oklch(0.55 0 0));
-      }
-
-      ::slotted(.au-tab-panel[aria-hidden="false"]) {
-        display: block;
-      }
-      ::slotted(.au-tab-panel:focus-visible) {
-        outline: 2px solid var(--au-tabs-focus-shadow-color, oklch(0.45 0.15 260));
-        outline-offset: -2px;
-      }
-      @media (forced-colors: active) {
-        ::slotted(.au-tab-panel:focus-visible) { outline-color: Highlight; }
-      }
-    `;
-      this.tabsList = document.createElement("ul");
-      this.tabsList.setAttribute("role", "tablist");
-      this.tabsList.classList.add("au-tablist");
-      const slot = document.createElement("slot");
-      slot.name = "panel";
-      this._slot = slot;
-      slot.addEventListener("slotchange", () => this._renderTabs());
-      this.tabsList.tabIndex = -1;
-      this.tabsList.setAttribute("aria-orientation", "horizontal");
-      this.container.append(style, this.tabsList, slot);
-      this.shadowRoot.appendChild(this.container);
+        this._bound = true;
+        if (this.isConnected) this.connectedCallback();
+        root.querySelector("style[data-preselect]")?.remove();
+      });
     }
     connectedCallback() {
-      if (Object.hasOwn(this, "selectedIndex")) {
-        const value = this.selectedIndex;
-        delete this.selectedIndex;
-        this.selectedIndex = value;
-      }
+      if (!this._bound) return;
+      upgradeProperties(this, ["selectedIndex"]);
       this._observer ??= new MutationObserver((records) => {
         if (records.some((record) => record.target === this || record.target.parentNode === this)) this._renderTabs();
       });
@@ -5273,7 +5135,7 @@
     attributeChangedCallback(name, oldValue, newValue) {
       if (oldValue === newValue) return;
       if (name === "selected-index") this.selectedIndex = newValue === null ? 0 : newValue;
-      else if (this.isConnected) this._renderTabs();
+      else if (this._bound && this.isConnected) this._renderTabs();
     }
     formatText(template, values = {}) {
       return Object.entries(values).reduce((message, [key, value]) => {
@@ -5304,41 +5166,32 @@
       for (const [index2, panel] of panels.entries()) {
         let entry = this._entries.get(panel);
         if (!entry) {
-          const li = document.createElement("li");
-          li.setAttribute("role", "presentation");
-          li.className = "au-tablist-item";
-          const button = document.createElement("button");
-          button.type = "button";
-          button.setAttribute("role", "tab");
-          button.id = "tab-" + this.generateId();
-          li.append(button);
+          let li = this._serverItems?.shift();
+          if (!li) {
+            const template = document.createElement("template");
+            template.innerHTML = renderTab({}, { id: `tab-${this._nextTabId++}` });
+            li = template.content.firstElementChild;
+          }
+          const button = li.querySelector('[role="tab"]');
           entry = { panel, li, button, originals: /* @__PURE__ */ new Map(), written: /* @__PURE__ */ new Map() };
           button.addEventListener("click", () => this._selectTab(this._panels.indexOf(panel)));
           button.addEventListener("keydown", (event) => this._onKeydown(event, this._panels.indexOf(panel)));
         }
-        if (!panel.id) this._writePanel(entry, "id", "panel-" + this.generateId());
-        const label = panel.getAttribute("label") || this.formatText(this.getAttribute("data-text-tab") || "Tab {index}", { index: index2 + 1 });
+        if (!panel.id) this._writePanel(entry, "id", "panel-" + uid());
+        const label = tabLabel(panel.getAttribute("label"), this.getAttribute("data-text-tab"), index2);
         const lang = panel.getAttribute("label-lang") || this.getAttribute("data-text-tab-lang") || "";
         entry.label = label;
         this._writePanel(entry, "role", "tabpanel");
         this._writePanel(entry, "aria-label", label);
         if ("ariaControlsElements" in entry.button) entry.button.ariaControlsElements = [panel];
-        const fragment = document.createDocumentFragment();
-        for (const [className, text] of [
-          ["prefix", panel.getAttribute("data-prefix")],
-          ["label", label],
-          ["badge", panel.getAttribute("data-badge")],
-          ["affix", panel.getAttribute("data-affix")]
-        ]) {
-          if (!text) continue;
-          const span = document.createElement("span");
-          span.className = className;
-          span.textContent = text;
-          if (className === "label" && lang) span.lang = lang;
-          if (className === "badge") span.setAttribute("aria-label", `${this.getAttribute("data-text-badge-label-prefix") || "Additional information:"} ${text}`);
-          fragment.append(span);
-        }
-        entry.button.replaceChildren(fragment);
+        const content = renderTabContent({
+          label,
+          lang,
+          prefix: panel.getAttribute("data-prefix"),
+          badge: panel.getAttribute("data-badge"),
+          affix: panel.getAttribute("data-affix")
+        }, this.getAttribute("data-text-badge-label-prefix") || DEFAULT_BADGE_LABEL_PREFIX);
+        if (entry.button.innerHTML !== content) entry.button.innerHTML = content;
         entries.set(panel, entry);
       }
       for (const [panel, entry] of this._entries) {
@@ -5401,7 +5254,7 @@
       this._selectedPanel = this._panels[index];
       this._syncSelection();
       if (focus || focusWasInPanel || this._tabs.includes(this.shadowRoot.activeElement)) this._tabs[index].focus();
-      if (changed && emit) this.dispatchEvent(new CustomEvent("tab-change", {
+      if (changed && emit) this.dispatchEvent(new CustomEvent("au-tab-change", {
         bubbles: true,
         composed: true,
         detail: { index, label: this._entries.get(this._selectedPanel).label }
@@ -5444,25 +5297,15 @@
       }
       this._selectTab(Math.min(index, this._tabs.length - 1), { focus: false, emit: false });
     }
-    generateId() {
-      if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-        const bytes = new Uint32Array(1);
-        crypto.getRandomValues(bytes);
-        return bytes[0].toString(36);
-      }
-      return Math.random().toString(36).slice(2);
-    }
   }
   if (typeof customElements !== "undefined" && !customElements.get("au-tabs")) {
     customElements.define("au-tabs", AuTabs);
   }
-  class AuTextarea extends HTMLElement {
-    static formAssociated = true;
+  class AuTextarea extends AuFormElement {
     constructor() {
       super();
       this.attachShadow({ mode: "open", delegatesFocus: true });
-      this.internals = this.attachInternals();
-      this._id = this.getAttribute("id") || this.generateId();
+      this._id = this.getAttribute("id") || uid("au-textarea-");
       this._initialValue = "";
       this._initialValueSet = false;
       const style = document.createElement("style");
@@ -5535,7 +5378,7 @@
 
         &:disabled {
           cursor: not-allowed;
-          opacity: 0.5;
+          opacity: var(--au-textarea-disabled-opacity, 0.6);
         }        
       }
       @media (forced-colors: active) {
@@ -5580,27 +5423,12 @@
     static get observedAttributes() {
       return ["value", "placeholder", "name", "rows", "cols", "disabled", "readonly", "required", "maxlength", "minlength", "autocomplete", "aria-label", "aria-labelledby", "aria-describedby", "aria-invalid", "label", "id"];
     }
-    get validity() {
-      return this.internals.validity;
-    }
-    get validationMessage() {
-      return this.internals.validationMessage;
-    }
-    get willValidate() {
-      return this.internals.willValidate;
-    }
-    checkValidity() {
-      return this.internals.checkValidity();
-    }
-    reportValidity() {
-      return this.internals.reportValidity();
-    }
     attributeChangedCallback(name, oldValue, newValue) {
       if (oldValue === newValue) return;
       if (name === "label" && this.labelEl) {
         this.labelEl.textContent = newValue;
       } else if (name === "id") {
-        this._id = newValue || this.generateId();
+        this._id = newValue || uid("au-textarea-");
         this.textarea.id = this._id;
         this.labelEl.htmlFor = this._id;
       } else if (name === "value") {
@@ -5616,13 +5444,7 @@
       this._syncAccessibleReferences();
     }
     connectedCallback() {
-      for (const name of ["value", "name", "disabled", "readonly", "required"]) {
-        if (Object.hasOwn(this, name)) {
-          const value = this[name];
-          delete this[name];
-          this[name] = value;
-        }
-      }
+      upgradeProperties(this, ["value", "name", "disabled", "readonly", "required"]);
       if (!this._initialValueSet) {
         this._initialValue = this.textarea.value;
         this._initialValueSet = true;
@@ -5685,14 +5507,6 @@
     set readonly(val) {
       val ? this.setAttribute("readonly", "") : this.removeAttribute("readonly");
     }
-    generateId() {
-      if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-        const byteArray = new Uint32Array(1);
-        crypto.getRandomValues(byteArray);
-        return `au-textarea-${byteArray[0].toString(36)}`;
-      }
-      return `au-textarea-${Math.random().toString(36).slice(2)}`;
-    }
     _syncControlState() {
       this.textarea.disabled = Boolean(this.disabled || this._formDisabled);
       this.textarea.readOnly = this.readonly;
@@ -5711,36 +5525,8 @@
       this._syncAccessibleReferences();
     }
     _syncAccessibleReferences() {
-      const root = this.getRootNode();
-      const resolve = (attribute) => (this.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((element) => element && element !== this);
-      const explicit = this.getAttribute("aria-label");
-      let labels = resolve("aria-labelledby");
-      if (!labels.length && !explicit && !this.getAttribute("label") && this.isConnected) {
-        labels = [...this.internals.labels];
-      }
-      const descriptions = resolve("aria-describedby");
-      this.textarea.removeAttribute("aria-labelledby");
-      this.textarea.removeAttribute("aria-describedby");
-      if (explicit) this.textarea.setAttribute("aria-label", explicit);
-      else this.textarea.removeAttribute("aria-label");
+      forwardAria(this, this.textarea, { explicit: this.getAttribute("aria-label"), hasOwnLabel: !!this.getAttribute("label"), mirrorPrefix: "au-textarea-" });
       this.labelEl.hidden = !this.labelEl.textContent;
-      if ("ariaLabelledByElements" in this.textarea) {
-        this.textarea.ariaLabelledByElements = labels;
-      } else if (!explicit && labels.length) {
-        this.textarea.setAttribute("aria-label", labels.map((element) => element.getAttribute("aria-label") || element.textContent).join(" ").trim());
-      }
-      if ("ariaDescribedByElements" in this.textarea) {
-        this.textarea.ariaDescribedByElements = descriptions;
-      } else if (descriptions.length) {
-        if (!this._descriptionMirror) {
-          this._descriptionMirror = document.createElement("span");
-          this._descriptionMirror.id = this.generateId();
-          this._descriptionMirror.hidden = true;
-          this.shadowRoot.append(this._descriptionMirror);
-        }
-        this._descriptionMirror.textContent = descriptions.map((element) => element.textContent).join(" ").trim();
-        this.textarea.setAttribute("aria-describedby", this._descriptionMirror.id);
-      }
     }
     disconnectedCallback() {
       this._referenceObserver?.disconnect();

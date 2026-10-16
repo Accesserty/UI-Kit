@@ -19,7 +19,9 @@ const server=createServer(async(req,res)=>{try{
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const urls=['source','bundle','min'].flatMap(v=>{
   const path='test/browser/fixtures/accordion-'+v+'.html';
-  return [`http://127.0.0.1:${server.address().port}/`+path,pathToFileURL(join(root,path)).href];
+  // ES module sources do not load from file:// URLs; the bundles are checked both ways.
+  const http=`http://127.0.0.1:${server.address().port}/`+path;
+  return v==='source'?[http]:[http,pathToFileURL(join(root,path)).href];
 });
 const ready=()=>!!window.accordionFixture?.first.button&&accordionFixture.root.exclusive&&accordionFixture.first.open&&!accordionFixture.second.open;
 const setup=()=>{

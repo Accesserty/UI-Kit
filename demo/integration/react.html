@@ -53,7 +53,7 @@
           data-text-pagination=${t.pagination}
           data-text-instructions=${t.instructions}
           data-dot-template=${t.dot}
-          onslide-change=${(e) => console.log('slide-change', e.detail)}
+          onau-slide-change=${(e) => console.log('au-slide-change', e.detail)}
         >
           ${t.slides.map(
             (s, i) => html`

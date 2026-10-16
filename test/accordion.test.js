@@ -182,7 +182,7 @@ describe('AuAccordion and AuAccordionItem', () => {
   it('exclusive mode sets aria-describedby on container', async () => {
     const el = await fixture(html`<au-accordion exclusive></au-accordion>`);
     const container = el.shadowRoot.querySelector('.au-accordion');
-    const hint = el.shadowRoot.querySelector('[id^="au-accordion-hint-"]');
+    const hint = el.shadowRoot.querySelector('#hint');
     expect(hint).to.not.be.null;
     expect(container.getAttribute('aria-describedby')).to.equal(hint.id);
     expect(hint.textContent.length).to.be.greaterThan(0);
@@ -192,7 +192,7 @@ describe('AuAccordion and AuAccordionItem', () => {
     const el = await fixture(html`
       <au-accordion exclusive data-text-exclusive-hint="一次只能展開一個區塊"></au-accordion>
     `);
-    const hint = el.shadowRoot.querySelector('[id^="au-accordion-hint-"]');
+    const hint = el.shadowRoot.querySelector('#hint');
     expect(hint.textContent).to.equal('一次只能展開一個區塊');
 
     el.setAttribute('data-text-exclusive-hint', '一次只能開啟一個項目');
@@ -202,7 +202,7 @@ describe('AuAccordion and AuAccordionItem', () => {
   it('non-exclusive mode removes aria-describedby from container', async () => {
     const el = await fixture(html`<au-accordion></au-accordion>`);
     const container = el.shadowRoot.querySelector('.au-accordion');
-    const hint = el.shadowRoot.querySelector('[id^="au-accordion-hint-"]');
+    const hint = el.shadowRoot.querySelector('#hint');
     expect(container.hasAttribute('aria-describedby')).to.be.false;
     expect(hint.hidden).to.be.true;
     expect(hint.textContent).to.equal('');
@@ -213,7 +213,7 @@ describe('AuAccordion and AuAccordionItem', () => {
       <au-accordion-item open><span slot="heading">One</span></au-accordion-item>
       <au-accordion-item open><span slot="heading">Two</span></au-accordion-item>
     </au-accordion>`);
-    const hint = el.shadowRoot.querySelector('[id^="au-accordion-hint-"]');
+    const hint = el.shadowRoot.querySelector('#hint');
     const [first, second] = el.children;
     expect(first.open && second.open).to.be.true;
     expect(hint.textContent).to.equal('');
@@ -455,5 +455,31 @@ describe('AuAccordion and AuAccordionItem', () => {
     } finally {
       Item.supportsUntilFound = saved;
     }
+  });
+
+  it('does not emit au-toggle for the open state an element is upgraded with', async () => {
+    const tag = 'test-upgrade-item-' + crypto.randomUUID();
+    const host = await fixture(html`<div></div>`);
+    host.innerHTML = `<${tag} open><span slot="heading">A</span></${tag}>`;
+    const events = [];
+    host.addEventListener('au-toggle', e => events.push(e.detail.open));
+    customElements.define(tag, class extends customElements.get('au-accordion-item') {});
+    const item = host.firstElementChild;
+    expect(item.open).to.be.true;
+    expect(item.button.getAttribute('aria-expanded')).to.equal('true');
+    await nextFrame();
+    expect(events).to.deep.equal([]);
+    item.open = false;
+    expect(events).to.deep.equal([false]);
+  });
+
+  it('still emits for a change made right after an element is created', () => {
+    const item = document.createElement('au-accordion-item');
+    document.body.append(item);
+    const events = [];
+    item.addEventListener('au-toggle', e => events.push(e.detail.open));
+    item.open = true;
+    item.remove();
+    expect(events).to.deep.equal([true]);
   });
 });

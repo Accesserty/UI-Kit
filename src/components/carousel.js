@@ -1,3 +1,4 @@
+import { uid } from '../core/id.js';
 class AuCarousel extends HTMLElement {
   static get observedAttributes() {
     return [
@@ -63,7 +64,7 @@ class AuCarousel extends HTMLElement {
         --au-carousel-button-bg: oklch(0.2 0 0);
         --au-carousel-button-text-color: oklch(0.99 0 0);
         --au-carousel-button-radius: 999px;
-        --au-carousel-button-disabled-opacity: 0.35;
+        --au-carousel-button-disabled-opacity: 0.6;
         --au-carousel-button-focus-shadow-width: 3px;
         --au-carousel-button-focus-shadow-color: oklch(0.55 0.2 256); /* >=3:1 on white */
 
@@ -237,7 +238,7 @@ class AuCarousel extends HTMLElement {
     // aria-describedby so a screen reader hears HOW to operate the dots. Kept
     // outside the pagination element so _rebuild()'s replaceChildren() can't
     // wipe it; the idref still resolves anywhere in this shadow root.
-    this._hintId = this.generateId();
+    this._hintId = uid('au-carousel-');
     this._hint = document.createElement('div');
     this._hint.className = 'au-carousel-sr-hint';
     this._hint.id = this._hintId;
@@ -404,7 +405,7 @@ class AuCarousel extends HTMLElement {
   // positional fallback. `real` marks whether a genuine title/heading was found
   // (vs the positional fallback), so the dot label can add "{current} of
   // {total}" to real titles without doubling it onto an already-positional
-  // fallback. The plain title is what the live region and slide-change event
+  // fallback. The plain title is what the live region and au-slide-change event
   // use for {title}.
   _resolveName(el, i) {
     if (el.dataset && el.dataset.title) return { name: el.dataset.title, real: true };
@@ -465,7 +466,7 @@ class AuCarousel extends HTMLElement {
     }
     // Re-anchor current within the new range (0 on first build). Update the
     // shell directly rather than via setCurrent() so a rebuild never fires the
-    // live region or a slide-change event — those belong to user navigation.
+    // live region or a au-slide-change event — those belong to user navigation.
     const retained = this._slides.indexOf(selected);
     this._current = retained >= 0 ? retained : this._normalizeIndex(this._current);
     this._apply();
@@ -555,7 +556,7 @@ class AuCarousel extends HTMLElement {
         this._live.textContent = this._realNames[idx] ? this._fill(tpl, this._names[idx], idx) : this._names[idx];
       }
       this.dispatchEvent(
-        new CustomEvent('slide-change', {
+        new CustomEvent('au-slide-change', {
           bubbles: true,
           composed: true,
           detail: { index: idx, total: this._slides.length, title: this._names[idx] },
@@ -685,14 +686,6 @@ class AuCarousel extends HTMLElement {
     this.slideTo(val);
   }
 
-  generateId() {
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const byteArray = new Uint32Array(1);
-      crypto.getRandomValues(byteArray);
-      return `au-carousel-${byteArray[0].toString(36)}`;
-    }
-    return `au-carousel-${Math.random().toString(36).slice(2)}`;
-  }
 }
 
 if (typeof customElements !== 'undefined' && !customElements.get('au-carousel')) {

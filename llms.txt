@@ -11,12 +11,16 @@
 
 ## Project Structure
 
-- `src/components/` — Source for all 15 custom elements (one .js file each)
-- `src/css/` — Design system CSS (cascade layers: basic-variables, tokens-variables, components)
+- `src/components/` — Source for all 15 custom elements (ES modules, one file per component)
+- `src/views/` — Shadow DOM markup and styles for au-accordion, au-tabs and au-breadcrumbs, shared by the browser and server rendering
+- `src/core/` — Code the components share: `declarative.js` (adopts a server-rendered declarative shadow root or builds one), `form-element.js` (`AuFormElement`, the base class of the 7 form controls), `aria.js` (forwards the host's name and description to the inner control), `upgrade.js` (properties set before definition), `id.js` (`uid()` for shadow-root ids)
+- `src/ssr/inject.js` — Inserts declarative shadow roots into server-rendered HTML (whole strings or streams)
+- `src/integrations/` — Vue (v-model), Nuxt module, React (value/checked + onChange) integrations
+- `src/css/` — Design system CSS (au-style.css imports the variable files unlayered and components.css into the `accesserty` cascade layer)
 - `src/accesserty-ui-kit.js` — Bundle entry point (imports all components)
 - `demo/` — Human-readable documentation with live examples and CSS variable tables
 - `test/` — Browser-based unit tests using @web/test-runner and @open-wc/testing
-- `dist/` — Build output: `accesserty-ui-kit.js` and `accesserty-ui-kit.min.js`
+- `dist/` — Build output: `accesserty-ui-kit.js` and `.min.js` (all components), `components/*.js` and `components/*.min.js` (one self-contained classic script per component, readable and minified), `.d.ts` declarations (`accesserty-ui-kit.d.ts` types every element and event detail), plus ES modules `accesserty-ui-kit-vue.js`, `-nuxt.js` (with its plugin files), `-react.js` and `-ssr.js`
 
 ## Components
 
@@ -56,11 +60,11 @@ Content model: each direct child element is one slide (author-defined native HTM
 Properties: current (getter/setter)
 current is a zero-based DOM property, not an attribute; numeric strings/fractions normalize to a bounded integer, invalid/non-finite inputs become 0, empty is -1. Pre-definition property assignment is supported when slides exist at upgrade. Stable slide element identity preserves the selected slide and dot focus across translation/reordering; new nodes are new identities.
 Methods: slideTo(index), refresh() (re-read slide titles after a runtime/locale change; also automatic via MutationObserver)
-Events: slide-change (detail: { index, total, title })
+Events: au-slide-change (detail: { index, total, title })
 Changed navigation/current writes and settled scrolling emit; refresh/translation/reordering are silent. Boundary arrows remain focusable aria-disabled controls and do not repeat events. Scrolling uses the track start edge in LTR/RTL without scrolling outer containers. Named wrapper references external labels across Shadow DOM; fallback naming is plain text. Forced-colors outlines and a non-color current-dot ring remain visible; dots wrap at narrow widths. Off-screen slides remain readable/tabbable; there is no autoplay or tabpanel model.
 Form-associated: No
-SSR: extends HTMLElement — register client-side only (e.g. Nuxt *.client plugin); not importable in Node
-CSS variables: 17 (--au-carousel-gap, --au-carousel-visible, --au-carousel-dot-*, --au-carousel-button-*, --au-carousel-controls-gap)
+SSR: extends HTMLElement — defined in the browser only (the kit's Nuxt module and React defineElements() do this); not importable in Node
+CSS variables: 16 (--au-carousel-gap, --au-carousel-dot-*, --au-carousel-button-*, --au-carousel-controls-gap)
 
 ### au-checkbox
 Tag: `<au-checkbox>`
@@ -75,8 +79,8 @@ Tags: `<au-dropdown>`, `<au-dropdown-item>`
 Attributes (au-dropdown): data-text-trigger
 Attributes (dropdown-item): value
 Properties: isOpen (getter/setter on au-dropdown)
-Events: selected (detail: { value }) on au-dropdown-item
-Activation: one selected event per click/Enter/Space, including after reconnection; translated text/value updates are silent and retain focus.
+Events: au-select (detail: { value }) on au-dropdown-item
+Activation: one au-select event per click/Enter/Space, including after reconnection; translated text/value updates are silent and retain focus.
 Keyboard: open(index) focuses immediately; arrows/Home/End navigate owned items across containing shadow roots; Escape restores trigger focus and Tab leaves using browser keyboard preferences.
 Form-associated: No
 CSS variables: 11 (--au-dropdown-menu-*, --au-dropdown-item-*, --au-dropdown-focus-shadow-*)
@@ -87,15 +91,15 @@ Attributes: accept, multiple, name, disabled, required, label, max-files, max-si
 Localization templates: msg-remove-file-label and msg-removed support `{fileName}`; msg-added supports `{count}`; msg-size-error supports `{fileName}` and `{maxSize}`; msg-count-error supports `{fileName}` and `{maxFiles}`; msg-total-size-error supports `{maxTotalSize}`
 Properties: value (getter/setter: File[])
 Methods: handleFiles(files), removeFile(file), checkValidity(), reportValidity()
-Events: change, remove-file (detail: File)
+Events: change, au-remove-file (detail: File)
 Form-associated: Yes (ElementInternals FormData with actual File entries)
-Default trigger: native button named by label; a custom trigger should be a named button type=button. Disabled fields/fieldsets block picker/drop/removal and omit submission without losing selection. Validation focuses a visible region and shows inline errors. Drag/drop handling is scoped to the component. Without multiple, selection is capped at one; remove before replacement. Picker limits default to 5 files, 5MB each and 20MB total; invalid limits use defaults and zero is valid. Extensions/MIME matching is case-insensitive; same name/size duplicates are ignored. The controlled value setter copies File entries, bypasses picker limits, and emits no change. Removal emits remove-file then change once; reset is silent. Translation retains remove-button identity. Pre-registration value assignments survive deferred loading. Client-only registration is required for SSR; File values cannot be serialized as an HTML attribute.
+Default trigger: native button named by label; a custom trigger should be a named button type=button. Disabled fields/fieldsets block picker/drop/removal and omit submission without losing selection. Validation focuses a visible region and shows inline errors. Drag/drop handling is scoped to the component. Without multiple, selection is capped at one; remove before replacement. Picker limits default to 5 files, 5MB each and 20MB total; invalid limits use defaults and zero is valid. Extensions/MIME matching is case-insensitive; same name/size duplicates are ignored. The controlled value setter copies File entries, bypasses picker limits, and emits no change. Removal emits au-remove-file then change once; reset is silent. Translation retains remove-button identity. Pre-registration value assignments survive deferred loading. Client-only registration is required for SSR; File values cannot be serialized as an HTML attribute.
 CSS variables: 20+ (--au-file-upload-label-*, --au-file-upload-area-*, --au-file-upload-delete-*, --au-file-upload-file-list-*, --au-file-upload-trigger-focus-outline-*)
 
 ### au-input
 Tag: `<au-input>`
 Attributes: type, name, value, placeholder, required, disabled, readonly, label, aria-label, aria-labelledby, min, max, step, pattern, autocomplete, inputmode, maxlength, minlength, list, data-size (small|large), data-layout (vertical), data-clear, data-clear-label, id
-Properties: value (getter/setter), disabled, required, readonly (all getter/setter), validity, validationMessage, willValidate
+Properties: value (getter/setter), disabled, required, readonly (all getter/setter), validity, validationMessage, willValidate, valueAsNumber and valueAsDate (as on a native input), setCustomValidity() and form (all seven form components)
 Methods: focus(), clear(), suggest(val), checkValidity(), reportValidity()
 Slots: prefix, affix
 Events: input, change (bubbles, composed)
@@ -107,7 +111,7 @@ Tag: `<au-pagination>`
 Attributes: data-total, data-current-page, data-pager-count, data-page-size, data-page-size-options, data-layout, data-text-* (localization)
 Localization attributes: data-text-total-pages-prefix, data-text-page, data-text-total-items-suffix, data-text-per, data-text-first, data-text-prev, data-text-next, data-text-last, data-text-go, data-text-goto, data-text-pagination-label, data-text-page-size, data-text-page-announcement (`{page}`)
 Properties: pageSizeOptions (getter/setter), layout (getter/setter), totalPages (getter), pagers (getter)
-Events: page-change (detail: page number), page-size-change (detail: size)
+Events: au-page-change (detail: page number), au-page-size-change (detail: size)
 Form-associated: No
 CSS variables: inherits --au-btn-* from button styles
 
@@ -142,7 +146,7 @@ Tag: `<au-tabs>`
 Children: elements with role="tabpanel" (auto-detected via slot)
 Localization attributes: data-text-tab (`{index}` fallback tab label), data-text-badge-label-prefix
 Properties: selectedIndex (getter/setter)
-Events: tab-change (detail: { index, label })
+Events: au-tab-change (detail: { index, label })
 Form-associated: No
 CSS variables: 26 (--au-tabs-*, --au-tabpanels-*, --au-tab-panel-*, --au-tab-badge-*)
 
@@ -180,7 +184,7 @@ CSS variables: 30+ (--au-tree-*, --au-tree-node-*, --au-tree-node-checkbox-*, --
 - Shadow DOM mode is always `open` (accessible to testing and DevTools)
 - CSS variables control all visual properties; no inline styles
 - Accordion panel visibility is immediate; reduced motion disables header/icon transitions
-- `formAssociated = true` + ElementInternals for native form participation (no hidden inputs)
+- Form controls extend `AuFormElement`: `formAssociated` + ElementInternals for native form participation (no hidden inputs)
 - Events always use `{ bubbles: true, composed: true }` to cross Shadow DOM boundaries
-- `generateId()` uses `crypto.getRandomValues()` with `Math.random()` fallback for SSR safety
+- Shadow-root ids come from `uid()` in `src/core/id.js` (`crypto.getRandomValues()`)
 - `customElements.define()` is guarded with `typeof customElements !== 'undefined'` for SSR safety

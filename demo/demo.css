@@ -527,7 +527,6 @@ code {
 
 .custom-carousel {
   --au-carousel-gap: 1.5rem;
-  /* --au-carousel-visible:; */
   /* --au-carousel-dot-target:; */
   /* --au-carousel-dot-size:; */
   --au-carousel-dot-color: var(--color-primary-400);

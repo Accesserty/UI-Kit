@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="demo.css" />
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-  <script src="../src/components/input.js" defer></script>
+  <script src="../dist/accesserty-ui-kit.js" defer></script>
 </head>
 
 <body>
@@ -306,6 +306,7 @@
             <td>Font size for large size input</td>
             <td>1.25rem</td>
           </tr>
+          <tr><td>--au-input-disabled-opacity</td><td>Opacity of the disabled state (text stays at least 4.5:1 on white)</td><td>0.6</td></tr>
         </tbody>
       </table>
       </div>
@@ -343,6 +344,31 @@
             <td>boolean (getter + setter)</td>
             <td>Get or set the read-only state.</td>
           </tr>
+          <tr>
+            <td>valueAsNumber / valueAsDate</td>
+            <td>number / Date | null (getter + setter)</td>
+            <td>As on a native input: the value as a number for number, range and date-like types (<code>NaN</code> otherwise), or as a Date.</td>
+          </tr>
+          <tr>
+            <td>validity / validationMessage / willValidate</td>
+            <td>read-only</td>
+            <td>The field's validation state, as on a native field.</td>
+          </tr>
+          <tr>
+            <td>checkValidity() / reportValidity()</td>
+            <td>method</td>
+            <td>Check the field; <code>reportValidity()</code> also shows the message and moves focus to the field.</td>
+          </tr>
+          <tr>
+            <td>setCustomValidity(message)</td>
+            <td>method</td>
+            <td>Mark the field invalid with your own message (for example &quot;This address is already registered.&quot;); it blocks submission. Pass <code>''</code> to remove it. The field's own checks, such as <code>required</code>, keep working.</td>
+          </tr>
+          <tr>
+            <td>form</td>
+            <td>HTMLFormElement | null (read-only)</td>
+            <td>The form the field belongs to, including through the <code>form</code> attribute.</td>
+          </tr>
         </tbody>
       </table>
       </div>
@@ -358,9 +384,9 @@ input.required = false; // removes required attribute</code></pre>
         validation silently without replacing the initial reset value. Actual history
         restoration and autofill depend on the browser; callback tests are not proof
         of password-manager or BFCache support.</p>
-      <p>Vue client-only templates can use direct <code>v-model</code> for this text-value contract.
-        Nuxt SSR rejects that directive on custom elements; use explicit
-        <code>:value="text" @input="text = $event.target.value"</code> binding instead.</p>
+      <p>Vue and Nuxt: bind with <code>v-model</code>, also in server rendering; with <code>type="number"</code> it
+        gives a number, as on a native input. React: use <code>AuInput</code> with <code>value</code> and
+        <code>onChange</code>. See the README's framework integration.</p>
     </section>
     <section>
       <h2>Events</h2>

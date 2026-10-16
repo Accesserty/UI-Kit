@@ -15,8 +15,8 @@
   <p>This page is exactly what a Nuxt server would send: the <code>&lt;au-carousel&gt;</code>
      tag with its i18n <code>data-*</code> attributes and slide content already rendered as
      <strong>HTML text</strong> (the server never runs the web component). The component script
-     is loaded <strong>client-only</strong> at the end — as you would from a Nuxt
-     <code>*.client.ts</code> plugin — because the bundle extends <code>HTMLElement</code> and
+     is loaded <strong>client-only</strong> at the end — as the kit's Nuxt module does — because
+     the bundle extends <code>HTMLElement</code> and
      cannot be imported on the Node server. On upgrade it reads the localized attributes.</p>
 
   <!-- ===== SERVER-RENDERED MARKUP (what Nuxt streams to the browser) ===== -->
@@ -35,7 +35,7 @@
   </au-carousel>
   <!-- ==================================================================== -->
 
-  <!-- Client-only registration (Nuxt: plugins/accesserty.client.ts). Never import
+  <!-- Client-only registration (in Nuxt the kit's module does this). Never import
        the bundle in server code — it extends HTMLElement, which Node lacks. -->
   <script type="module">
     import '../../dist/accesserty-ui-kit.min.js';

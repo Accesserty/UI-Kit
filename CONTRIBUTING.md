@@ -33,6 +33,10 @@ npm test
 npm run build
 ```
 
+The demo pages load `dist/accesserty-ui-kit.js`, so they open directly from disk
+and show what consumers get. While editing `src/`, run `npm run dev` to rebuild
+the bundle on every change, then reload the demo.
+
 
 ## Development Workflow
 
@@ -97,13 +101,14 @@ This produces `dist/accesserty-ui-kit.js` and `dist/accesserty-ui-kit.min.js`.
 `src/components/my-component.js` — use this template:
 
 ```js
-class AuMyComponent extends HTMLElement {
-  // static formAssociated = true;  // add this for form-participating components
+import { uid } from '../core/id.js';
+import { upgradeProperties } from '../core/upgrade.js';
 
+class AuMyComponent extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    // this.internals = this.attachInternals(); // for form-associated components
+    this._hintId = uid('au-my-component-');
 
     const style = document.createElement('style');
     style.textContent = `
@@ -126,22 +131,12 @@ class AuMyComponent extends HTMLElement {
   }
 
   connectedCallback() {
-    // setup after insertion into DOM
+    // Properties set before the script loaded must reach the setters.
+    upgradeProperties(this, [/* public properties */]);
   }
 
   disconnectedCallback() {
     // cleanup event listeners
-  }
-
-  // formResetCallback() { }  // required for form-associated components
-
-  generateId() {
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const byteArray = new Uint32Array(1);
-      crypto.getRandomValues(byteArray);
-      return `au-my-component-${byteArray[0].toString(36)}`;
-    }
-    return `au-my-component-${Math.random().toString(36).slice(2)}`;
   }
 }
 
@@ -150,12 +145,53 @@ if (typeof customElements !== 'undefined' && !customElements.get('au-my-componen
 }
 ```
 
+### Shared code in `src/core/`
+
+Use these instead of writing your own copy:
+
+| Module | Use it for |
+|---|---|
+| `id.js` — `uid(prefix)` | ids inside the shadow root (label targets, ARIA references) |
+| `upgrade.js` — `upgradeProperties(element, names)` | properties assigned before the element was defined |
+| `form-element.js` — `AuFormElement` | form controls: extend it instead of `HTMLElement`. It adds form association, `this.internals`, `form` and the validity API (`validity`, `checkValidity()`, `setCustomValidity()`…). Report your component's own validity through `this.internals.setValidity()`; a custom error from `setCustomValidity()` is kept on top of it. Implement `formResetCallback()`, `formStateRestoreCallback()` and `formDisabledCallback()` for your kind of value. |
+| `aria.js` — `forwardAria(host, control, options)` | giving the inner control the host's `aria-label`, `aria-labelledby`, `aria-describedby` and `<label for>` |
+| `declarative.js` — `setupShadow()` | components rendered on the server (see below) |
+
+Each file in `dist/components/` bundles the shared code it imports, so single
+component files keep working on their own.
+
+### Server rendering (display components only)
+
+Most components build their Shadow DOM in the browser, as above. A component
+whose content looks wrong before its script runs (accordion, tabs, breadcrumbs)
+can also render on the server as a declarative shadow root:
+
+1. Move its markup and styles to `src/views/my-component.js`: pure functions
+   with no DOM access, escaping text with `escapeHTML`, and fixed ids (each
+   shadow root is its own id scope).
+2. In the component, call `setupShadow(this, () => renderMyComponent(), (root, adopted) => { … })`
+   from `src/core/declarative.js`. The callback finds the nodes and adds
+   listeners for both a built and an adopted root, then sets `this._bound`;
+   lifecycle callbacks do nothing until then.
+3. Add a renderer to `src/ssr/inject.js` that maps the element's attributes
+   (and, if needed, its child elements) to the view's state.
+4. Add a fixture to `test/browser/declarative.mjs` (adopted and built roots
+   must match) and cases to `test/ssr-inject.test.js`.
+
+Form components stay browser-only: without JavaScript they could not submit.
+
 ### 2. Add to the bundle entry
 
 ```js
 // src/accesserty-ui-kit.js
 import './components/my-component.js';  // add this line
 ```
+
+`npm run build` also writes a self-contained `dist/components/my-component.js`
+(and `my-component.min.js`)
+for pages that load single components; every file in `src/components/` gets one
+automatically. `test/browser/standalone.mjs` checks that each of these files
+works on its own.
 
 ### 3. Write tests
 
@@ -207,7 +243,8 @@ describe('AuMyComponent', () => {
 3. Properties table (Property | Type | Description)
 4. Events table (Event | Detail | Description)
 
-Add a link in `demo/index.html`.
+Load the bundle with `<script src="../dist/accesserty-ui-kit.js" defer></script>`
+and add a link in `demo/index.html`.
 
 ### 5. Add to playground
 

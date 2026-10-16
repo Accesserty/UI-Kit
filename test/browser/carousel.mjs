@@ -17,10 +17,11 @@ const server=createServer(async(req,res)=>{try{
   res.end(await readFile(file));
 }catch{res.writeHead(404).end();}});
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
+// ES module sources do not load from file:// URLs; the bundles are checked both ways.
 const urls=['source','bundle','min'].flatMap(v=>{
   const path='test/browser/fixtures/carousel-'+v+'.html';
   return [`http://127.0.0.1:${server.address().port}/`+path,pathToFileURL(join(root,path)).href];
-});
+}).filter(url=>!(url.startsWith('file:')&&url.includes('-source.html')));
 const ready=()=>window.gallery?._dots?.length===3&&gallery.current===1&&Math.abs(gallery._startDistance(gallery._slides[1]))<2;
 async function scenario(api){
   // A timed-out wait says which step it was and what the track actually looked

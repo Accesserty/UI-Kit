@@ -10,7 +10,9 @@ const names=new Set(['--au-btn-border-radius','--au-breadcrumbs-text-deco',
   '--au-switch-container-gap','--au-switch-inner-distance','--au-switch-inner-border-radius']);
 const audited=name=>names.has(name)||name.includes('border-color')||name.includes('focus-outline-');
 const definitions=new Map();
-const sources=['src/css/components.css',...(await readdir(new URL('src/components/',root))).filter(n=>n.endsWith('.js')).map(n=>'src/components/'+n)];
+// Shadow styles live in the components or, for declarative components, in src/views/.
+const scripts=async dir=>(await readdir(new URL(dir,root))).filter(n=>n.endsWith('.js')).map(n=>dir+n);
+const sources=['src/css/components.css',...await scripts('src/components/'),...await scripts('src/views/')];
 for(const file of sources){
   const source=await read(file);
   for(const match of source.matchAll(/var\((--au-[\w-]+),\s*/g)){

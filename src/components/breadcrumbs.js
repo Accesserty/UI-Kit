@@ -1,19 +1,23 @@
+import { setupShadow } from '../core/declarative.js'
+import { DEFAULT_LABEL, DEFAULT_LINK_TITLE_PREFIX, DEFAULT_SEPARATOR, linkTitle, parseItems, renderBreadcrumbs } from '../views/breadcrumbs.js'
+import { upgradeProperties } from '../core/upgrade.js';
+
 class AuBreadcrumbs extends HTMLElement {
   constructor() {
     super()
-    this.attachShadow({ mode: 'open' })
     // An existing, unregistered element may already carry consumer properties.
     // Restore the accessors before upgrade-time attribute callbacks render it.
-    for (const name of ['items', 'separator']) {
-      if (Object.hasOwn(this, name)) {
-        const value = this[name]
-        delete this[name]
-        this[name] = value
-      }
-    }
+    upgradeProperties(this, ['items', 'separator']);
+    // Adopts a server-rendered declarative root when present (core/declarative.js).
+    setupShadow(this, () => renderBreadcrumbs(), root => {
+      this._nav = root.querySelector('nav')
+      this._bound = true
+      if (this.isConnected) this.connectedCallback()
+    })
   }
 
   connectedCallback() {
+    if (!this._bound) return
     this.render()
     this.observeLabelRoot()
   }
@@ -44,17 +48,7 @@ class AuBreadcrumbs extends HTMLElement {
   }
 
   get items() {
-    const attr = this.getAttribute('items')
-    if (!attr) return []
-
-    try {
-      const parsed = JSON.parse(attr)
-      return Array.isArray(parsed)
-        ? parsed.filter(item => item && typeof item === 'object' && !Array.isArray(item) && 'text' in item)
-        : []
-    } catch {
-      return []
-    }
+    return parseItems(this.getAttribute('items'))
   }
 
   set items(val) {
@@ -71,7 +65,7 @@ class AuBreadcrumbs extends HTMLElement {
   }
 
   get separator() {
-    return this.getAttribute('separator') || '/'
+    return this.getAttribute('separator') || DEFAULT_SEPARATOR
   }
 
   set separator(val) {
@@ -120,7 +114,7 @@ class AuBreadcrumbs extends HTMLElement {
     const root = this.getRootNode()
     const ids = (this.getAttribute('aria-labelledby') || '').trim().split(/\s+/).filter(Boolean)
     const labels = ids.map(id => root.getElementById?.(id)).filter(el => el && el !== this)
-    const fallback = this.getAttribute('aria-label')?.trim() || this.getAttribute('label')?.trim() || 'Breadcrumbs'
+    const fallback = this.getAttribute('aria-label')?.trim() || this.getAttribute('label')?.trim() || DEFAULT_LABEL
     if ('ariaLabelledByElements' in this._nav) {
       // Element references can point to ancestors' trees, unlike ID strings
       // copied into a shadow root. Native naming preserves rich label semantics.
@@ -138,8 +132,7 @@ class AuBreadcrumbs extends HTMLElement {
     const items = this.items
     const list = this._nav.querySelector('ol')
     const active = this.shadowRoot.activeElement
-    const prefix = this.getAttribute('data-link-title-prefix') || 'go to'
-    const template = this.getAttribute('data-link-title-template')
+    const titles = {template: this.getAttribute('data-link-title-template'), prefix: this.getAttribute('data-link-title-prefix') || DEFAULT_LINK_TITLE_PREFIX}
     items.forEach((item, index) => {
       const current = index === items.length - 1
       const url = current ? null : this.navigationURL(item.url)
@@ -160,7 +153,7 @@ class AuBreadcrumbs extends HTMLElement {
       current ? content.setAttribute('aria-current', 'page') : content.removeAttribute('aria-current')
       if (url) {
         content.href = url
-        content.title = template ? this.formatText(template, {text: item.text ?? '', index: index + 1}) : `${prefix} ${item.text ?? ''}`
+        content.title = linkTitle(item.text, index, titles)
       }
       let separator = li.querySelector('[aria-hidden="true"]')
       if (current) separator?.remove()
@@ -179,97 +172,7 @@ class AuBreadcrumbs extends HTMLElement {
   }
 
   render() {
-    if (!this.shadowRoot) return;
-    if (!this._nav) {
-      this.shadowRoot.innerHTML = `
-      <style>
-      :host([hidden]:not([hidden="until-found" i])) { display: none; }
-        nav {
-          background-color: var(--au-breadcrumbs-bg, transparent);
-          overflow-x: auto;
-          overflow-y: hidden;
-          white-space: normal;
-          &:focus-visible {
-            outline: 2px solid var(--au-breadcrumbs-focus-shadow-color, oklch(0.45 0.15 260));
-            outline-offset: -2px;
-          }
-          ol {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            width: 100%;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            li {
-              font-size: 0;
-              max-width: 100%;
-              overflow-wrap: anywhere;
-              >span.item {
-                display: inline-block;
-                box-sizing: border-box;
-                max-width: 100%;
-                padding: var(--au-breadcrumbs-link-padding-vertical, 0.375rem) var(--au-breadcrumbs-link-padding-horizontal, 0.625rem);
-                font-size: var(--au-breadcrumbs-text-size, 1rem);
-                color: var(--au-breadcrumbs-link-currentpage-color, oklch(0.1398 0 0));
-              }
-              >span[aria-hidden="true"] { font-size: var(--au-breadcrumbs-text-size, 1rem); }
-              &:last-child {
-                a {
-                  text-decoration: none;
-                }
-                >span {
-                  padding-left: var(--au-breadcrumbs-link-padding-horizontal, 0.625rem);
-                  font-size: var(--au-breadcrumbs-text-size, 1rem);
-                  color: var(--au-breadcrumbs-link-currentpage-color, oklch(0.1398 0 0));
-                }
-              }
-              a {
-                display: inline-block;
-                box-sizing: border-box;
-                max-width: 100%;
-                padding: var(--au-breadcrumbs-link-padding-vertical, 0.375rem) var(--au-breadcrumbs-link-padding-horizontal, 0.625rem);
-                font-size: var(--au-breadcrumbs-text-size, 1rem);
-                text-decoration: var(--au-breadcrumbs-text-deco, underline);
-                color: var(--au-breadcrumbs-link-color, oklch(0.429 0.2972777928415759 264.05202063805507));
-                -webkit-tap-highlight-color: oklch(0 0 0 / 0);
-                &:hover {
-                  text-decoration: underline;
-                }
-                &:active {
-                  opacity: 1;
-                }
-                &:visited {
-                  color: var(--au-breadcrumbs-link-visited-color, oklch(0.3748 0.167 303.51));
-                }
-                &:focus-visible {
-                  outline: none;
-                  box-shadow: inset 0 0 0 var(--au-breadcrumbs-focus-shadow-width, 3px) var(--au-breadcrumbs-focus-shadow-color, oklch(0.45 0.15 260));
-                  /* Forced colours drop box-shadow. Nested here so it outranks the
-                     outline: none above; a top-level a:focus-visible would not. */
-                  @media (forced-colors: active) {
-                    outline: 2px solid Highlight;
-                    outline-offset: -2px;
-                  }
-                }
-                &+span {
-                  font-size: var(--au-breadcrumbs-text-size, 1rem);
-                }
-              }
-            }
-          }
-        }
-        @media (forced-colors: active) {
-          nav:focus-visible {
-            outline: 2px solid Highlight;
-            outline-offset: -2px;
-          }
-        }
-      </style>
-      <nav tabindex="-1"><ol></ol></nav>
-    `
-      this._nav = this.shadowRoot.querySelector('nav')
-    }
+    if (!this._bound) return
     for (const name of ['id', 'class']) {
       this.hasAttribute(name) ? this._nav.setAttribute(name, this.getAttribute(name)) : this._nav.removeAttribute(name)
     }

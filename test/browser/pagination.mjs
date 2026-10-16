@@ -21,8 +21,9 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const fixture='test/browser/fixtures/pagination.html';
 const fileBase=pathToFileURL(join(root,fixture)).href;
 const httpBase=`http://127.0.0.1:${server.address().port}/${fixture}`;
-const urls=[fileBase,httpBase].flatMap(base=>['source','bundle','min'].map(mode=>base+'?mode='+mode));
-const setup=()=>{const el=document.getElementById('pager');window.pageEvents=[];el.addEventListener('page-change',e=>pageEvents.push(e.detail));window.nextNode=el.shadowRoot.querySelector('[data-control=next]');nextNode.focus();};
+// ES module sources do not load from file:// URLs; the bundles are checked both ways.
+const urls=[fileBase,httpBase].flatMap(base=>['source','bundle','min'].map(mode=>base+'?mode='+mode)).filter(url=>!(url.startsWith('file:')&&url.endsWith('mode=source')));
+const setup=()=>{const el=document.getElementById('pager');window.pageEvents=[];el.addEventListener('au-page-change',e=>pageEvents.push(e.detail));window.nextNode=el.shadowRoot.querySelector('[data-control=next]');nextNode.focus();};
 const stable=()=>{const el=document.getElementById('pager');return el.currentPage===2&&el.shadowRoot.activeElement===window.nextNode&&JSON.stringify(window.pageEvents)==='[2]';};
 const translate=()=>document.getElementById('pager').setAttribute('data-text-next','下一頁');
 const translated=()=>window.nextNode.textContent==='下一頁'&&document.getElementById('pager').shadowRoot.activeElement===window.nextNode;

@@ -1,9 +1,12 @@
+import { uid } from '../core/id.js';
+import { upgradeProperties } from '../core/upgrade.js';
+import { AuFormElement } from '../core/form-element.js';
 // AuRating - Interactive rating component with optional score display and partial star support
-class AuRating extends HTMLElement {
+class AuRating extends AuFormElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
-    this._groupName = 'rating-' + this.generateId();
+    this._groupName = 'rating-' + uid();
 
     const template = document.createElement('template');
     template.innerHTML = `
@@ -18,7 +21,7 @@ class AuRating extends HTMLElement {
         }
 
         :host([disabled]) {
-          opacity: 0.6;
+          opacity: var(--au-rating-disabled-opacity, 0.6);
           pointer-events: none;
           cursor: not-allowed;
         }
@@ -109,13 +112,13 @@ class AuRating extends HTMLElement {
           top: 0;
           left: 0;
           fill: var(--au-rating-star-filled-color, oklch(0.75 0.15 85));
-          clip-path: inset(0 var(--au-rating-clip, 100%) 0 0);
+          clip-path: inset(0 var(--_rating-clip, 100%) 0 0);
           transition: clip-path 150ms ease;
         }
         
         /* Animation for filled stars */
         :host(:dir(rtl)) .star-fill {
-          clip-path: inset(0 0 0 var(--au-rating-clip, 100%));
+          clip-path: inset(0 0 0 var(--_rating-clip, 100%));
         }
 
         @keyframes pulse {
@@ -179,16 +182,11 @@ class AuRating extends HTMLElement {
     this._fieldset = this.shadowRoot.querySelector('.au-rating');
     this._legend = this.shadowRoot.querySelector('legend');
     this._scoreEl = this.shadowRoot.querySelector('.score');
-    this._internals = this.attachInternals();
     // The native input event leaves the shadow root before change; update the value
     // first so host listeners reading value on input (e.g. Vue v-model) see the new one.
     this._fieldset.addEventListener('input', (e) => this.handleInput(e));
     this._fieldset.addEventListener('change', (e) => this.handleChange(e));
     this._fieldset.addEventListener('keydown', (e) => this.handleKeyDown(e));
-  }
-
-  static get formAssociated() {
-    return true;
   }
 
   static get observedAttributes() {
@@ -212,11 +210,7 @@ class AuRating extends HTMLElement {
 
   connectedCallback() {
     // Properties assigned before registration must not shadow public setters.
-    for (const name of ['name', 'value', 'max', 'disabled', 'readonly']) {
-      if (Object.hasOwn(this, name)) {
-        const value = this[name]; delete this[name]; this[name] = value;
-      }
-    }
+    upgradeProperties(this, ['name', 'value', 'max', 'disabled', 'readonly']);
     if (this._defaultValue === undefined) this._defaultValue = this.value;
     this.render();
     this._observeDescriptions();
@@ -343,15 +337,6 @@ class AuRating extends HTMLElement {
     else this.removeAttribute('readonly');
   }
 
-  generateId() {
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const byteArray = new Uint32Array(1);
-      crypto.getRandomValues(byteArray);
-      return byteArray[0].toString(36);
-    }
-    return Math.random().toString(36).slice(2);
-  }
-
   getStarSVG(className = '') {
     return `<svg class="star ${className}" viewBox="0 0 24 24" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -411,7 +396,7 @@ class AuRating extends HTMLElement {
     }
     this.updateStars(currentValue);
     this.updateScoreDisplay(currentValue);
-    this._internals.setFormValue(currentValue.toString());
+    this.internals.setFormValue(currentValue.toString());
   }
 
   updateScoreDisplay(val) {
@@ -464,7 +449,7 @@ class AuRating extends HTMLElement {
         wrapper.classList.add('animate');
       }
 
-      wrapper.style.setProperty('--au-rating-clip', `${clipRight}%`);
+      wrapper.style.setProperty('--_rating-clip', `${clipRight}%`);
     });
   }
 

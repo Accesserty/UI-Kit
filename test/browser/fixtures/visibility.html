@@ -19,6 +19,8 @@
     for (const src of files) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
+        // Component sources are ES modules; the bundles are classic scripts.
+        if (mode === 'source') script.type = 'module';
         script.src = src; script.onload = resolve; script.onerror = reject;
         document.head.append(script);
       });

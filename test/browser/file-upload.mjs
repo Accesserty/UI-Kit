@@ -16,7 +16,8 @@ const server=createServer(async(req,res)=>{try{
   res.setHeader('Content-Type',(extname(file)==='.js'?'text/javascript':'text/html')+'; charset=utf-8');res.end(await readFile(file));
 }catch{res.writeHead(404).end();}});
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
-const urls=['source','bundle','min'].flatMap(v=>{const path='test/browser/fixtures/file-upload-'+v+'.html';return ['http://127.0.0.1:'+server.address().port+'/'+path,pathToFileURL(join(root,path)).href];});
+// ES module sources do not load from file:// URLs; the bundles are checked both ways.
+const urls=['source','bundle','min'].flatMap(v=>{const path='test/browser/fixtures/file-upload-'+v+'.html';return ['http://127.0.0.1:'+server.address().port+'/'+path,pathToFileURL(join(root,path)).href];}).filter(url=>!(url.startsWith('file:')&&url.includes('-source.html')));
 async function scenario(api){
   assert.equal(await api.evaluate(()=>window.consumerSentinel()),'consumer-owned');
   assert.equal(await api.evaluate(()=>!Object.hasOwn(u,'value')),true);

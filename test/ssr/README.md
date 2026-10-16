@@ -10,7 +10,21 @@ npm test
 
 Dependencies are isolated from the component library. The runner builds Next and
 Nuxt production servers, tests through Chrome, then stops its servers. Ports
-41791–41792 must be free; it never terminates unrelated servers.
+41791–41794 must be free; it never terminates unrelated servers.
+
+Two more fixtures use the built Vue integration the way a project does, by
+copying `dist/` into their `vendor/` folder: `nuxt-vmodel` (the Nuxt module,
+checked by `vmodel-check.mjs`: server-rendered values, hydration, `v-model` in
+both directions for the seven form components, `.trim`/`.number`/`.lazy`,
+bindings shaped like native controls (checkbox arrays, `true-value`, a number
+input, typed radio values), consumer listeners, file-upload errors surviving the model update, FormData and
+template refs), `vue-spa` (a Vite build configured exactly as the README
+shows, checked by `vue-spa-check.mjs`) and `next-react` (the React integration
+in a Next.js App Router page, checked by `react-check.mjs`: server-rendered
+values, hydration, controlled and uncontrolled use, a rejected controlled value
+reverting, checked boxes collected into an array through `e.target.value`,
+`valueAsNumber`, FormData and element refs). Run `npm run build` at the repository
+root first.
 
 The check covers rating, input, textarea, checkbox, switch, radio-group, tabs, pagination, dropdown, tree, accordion, carousel, card, breadcrumbs and file-upload. It verifies server-produced
 attributes, preservation of the SSR
@@ -27,18 +41,23 @@ Tabs checks preserve the actual server-produced panel nodes, update labels/langu
 without losing button focus, verify native Tab navigation, selected-index bindings,
 single user change events and the accessible tab-to-panel relation.
 
-Registration is client-only: Next uses an effect, Nuxt a `.client` plugin. The server emits the custom-element host, not its shadow
-controls. JavaScript is required to render and operate them. Do not import
-the component class on the server or call this declarative-shadow-DOM SSR.
+In the `next` and `nuxt` fixtures registration is client-only: Next uses an
+effect, Nuxt a `.client` plugin, and the server emits the custom-element hosts,
+not their shadow controls. The `nuxt-vmodel` and `next-react` fixtures also
+insert declarative shadow roots for accordion, tabs and breadcrumbs (the Nuxt
+module's Nitro plugin, and `withDeclarativeShadow` in a custom Next server);
+`declarative-check.mjs` verifies the server HTML, the layout without
+JavaScript, adoption without hydration warnings and later interaction. Never
+import the component classes on the server.
 
-Nuxt uses explicit `:value` / `@input` binding. Direct `v-model` on `au-input`
-works in the client-only Vue fixture but is rejected by the tested SSR compiler.
-Textarea also uses explicit value/input binding in the Nuxt fixture.
-Checkbox/switch use checked/change-detail binding, not direct text-style v-model.
+The `nuxt` fixture uses the elements without the Vue integration, so it binds
+explicitly: `:value` / `@input` for input and textarea, checked/change-detail for
+checkbox and switch. Vue's server compiler rejects `v-model` on a plain custom
+element; with the integration (the `nuxt-vmodel` fixture) `v-model` works.
 Radio-group uses value/change-detail.value binding, not child checked markers for controlled state.
-Tabs uses selected-index/tab-change.detail.index; programmatic selection is silent.
+Tabs uses selected-index/au-tab-change.detail.index; programmatic selection is silent.
 Pagination binds data-current-page/data-page-size and numeric custom-event details.
-Its page-size-change handler updates both size and page 1; there is no extra page-change event.
+Its au-page-size-change handler updates both size and page 1; there is no extra au-page-change event.
 Checks cover server host identity, silent reactive updates, keyboard navigation,
 focus retention during translations and size changes, event counts and accessible names.
 Dropdown checks preserve both server-produced menu-item hosts, update translated
@@ -57,7 +76,7 @@ and reconnection. React uses Boolean open/onau-toggle; Nuxt uses :open.attr with
 empty string/null for presence/absence. Handlers copy
 detail.open into the Boolean model; same-value writes do not repeat events.
 Carousel preserves the host and server-produced slide nodes, binds current as a
-DOM property and synchronizes slide-change.detail.index. Next uses a ref after
+DOM property and synchronizes au-slide-change.detail.index. Next uses a ref after
 registration; Nuxt :current.prop. Tests cover navigation,
 translated dot identity/focus, native Tab into content, names, reconnection and
 boundary-button focus/no-op event counts. Internal controls are client-rendered;

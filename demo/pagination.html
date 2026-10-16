@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="demo.css" />
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-  <script src="../src/components/pagination.js" defer></script>
+  <script src="../dist/accesserty-ui-kit.js" defer></script>
 </head>
 
 <body>
@@ -173,14 +173,14 @@
         </thead>
         <tbody>
           <tr>
-            <td>page-change</td>
+            <td>au-page-change</td>
             <td><code>number</code> (the new page number)</td>
             <td>Fired when the user navigates to a different page. Bubbles and is composed.</td>
           </tr>
           <tr>
-            <td>page-size-change</td>
+            <td>au-page-size-change</td>
             <td><code>number</code> (the new page size)</td>
-            <td>Fired once after the new size and page 1 are set. No additional page-change event is emitted.
+            <td>Fired once after the new size and page 1 are set. No additional au-page-change event is emitted.
               Controlled frameworks must update both size and page in this handler. Bubbles and is composed.</td>
           </tr>
         </tbody>
@@ -188,18 +188,19 @@
       </div>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>const pagination = document.querySelector('au-pagination');
 
-pagination.addEventListener('page-change', (e) => {
+pagination.addEventListener('au-page-change', (e) => {
   console.log('Current page:', e.detail);
 });
 
-pagination.addEventListener('page-size-change', (e) => {
+pagination.addEventListener('au-page-size-change', (e) => {
   console.log('Page size:', e.detail, 'Current page:', pagination.currentPage);
 });</code></pre>
       <p>Navigation and language updates retain existing controls and focus. When a focused control
         becomes disabled or is removed, focus moves to the current page or available navigation fallback.
         Jump accepts whole pages within its range; invalid entries use native browser validation.
         Page announcements do not certify that asynchronously loaded results have finished loading.</p>
-      <p>For Next and Nuxt SSR, register the component only on the client, bind
+      <p>In Next and Nuxt the element is defined in the browser (the Nuxt module and React's
+        <code>defineElements()</code> do this). Bind
         <code>data-current-page</code>/<code>data-page-size</code>, and consume the numeric custom-event details.
         Servers render the host, not the interactive shadow controls. See <code>test/ssr/</code> for executable examples.
         These checks are not a WCAG conformance or screen-reader certification.</p>
@@ -242,21 +243,21 @@ pagination.addEventListener('page-size-change', (e) => {
         });
       }
 
-      pagination.addEventListener('page-change', () => {
+      pagination.addEventListener('au-page-change', () => {
         renderList();
       });
-      pagination.addEventListener('page-size-change', () => {
+      pagination.addEventListener('au-page-size-change', () => {
         renderList();
       });
       customElements.whenDefined('au-pagination').then(renderList);
 
       const output = document.getElementById('output');
 
-      pagination.addEventListener('page-change', e => {
+      pagination.addEventListener('au-page-change', e => {
         output.textContent = `Current Page: ${e.detail}`;
       });
 
-      pagination.addEventListener('page-size-change', e => {
+      pagination.addEventListener('au-page-size-change', e => {
         output.textContent += ` | ${e.detail} / Page`;
       });
     </script>
@@ -270,6 +271,7 @@ pagination.addEventListener('page-size-change', (e) => {
         <tr><td>--au-btn-current-text-color</td><td>Current page button text colour</td><td>oklch(0.1398 0 0)</td></tr>
         <tr><td>--au-btn-current-border-color</td><td>Current page button border colour</td><td>oklch(0.55 0 0)</td></tr>
         <tr><td>--au-pagination-focus-color</td><td>Focus outline colour of the buttons, page size select and page input</td><td>#222</td></tr>
+        <tr><td>--au-btn-disabled-opacity</td><td>Opacity of disabled buttons (shared with native buttons)</td><td>0.6</td></tr>
       </table>
       </div>
     </section>

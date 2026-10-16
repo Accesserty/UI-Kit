@@ -48,7 +48,7 @@ describe('AuTabs with <div class="au-tab-panel">', () => {
   it('emits one event per actual user change after reconnect, not repeated activation', async () => {
     const wrapper=await fixture(html`<div><button id="outside">Outside</button><au-tabs><div class="au-tab-panel" slot="panel" label="One">One</div><div class="au-tab-panel" slot="panel">Two</div></au-tabs></div>`);
     const el=wrapper.lastElementChild;el.remove();wrapper.append(el);await nextFrame();
-    const events=[];el.addEventListener('tab-change',e=>events.push(e.detail));
+    const events=[];el.addEventListener('au-tab-change',e=>events.push(e.detail));
     const tab=el.shadowRoot.querySelectorAll('[role=tab]')[1];tab.click();tab.click();
     expect(events).to.deep.equal([{index:1,label:'Tab 2'}]);
     wrapper.firstElementChild.focus();el.selectedIndex=0;expect(events).to.have.length(1);

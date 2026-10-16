@@ -20,6 +20,7 @@
 const mode=new URL(location.href).searchParams.get('mode')||'source';
 const scripts=mode==='source'?['input','textarea','checkbox','switch','radio','rating','tabs'].map(x=>'../../../src/components/'+x+'.js'):mode==='bundle'?['../../../dist/accesserty-ui-kit.js']:mode==='min'?['../../../dist/accesserty-ui-kit.min.js']:[];
 if(!scripts.length) throw Error('Unknown fixture mode');
-for(const src of scripts) document.write('<script src="'+src+'"><\/script>');
+// Component sources are ES modules; the bundles are classic scripts.
+for(const src of scripts) document.write('<script'+(mode==='source'?' type="module"':'')+' src="'+src+'"><\/script>');
 </script>
 </html>

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>Standalone component files</title>
+<h1>Standalone component files</h1>
+<script>
+// ?files=tabs,accordion.min loads dist/components/tabs.js and accordion.min.js;
+// "bundle" stands for the full dist/accesserty-ui-kit.js.
+window.errors = [];
+addEventListener('error', event => errors.push(String(event.message)));
+window.globalsBefore = Object.keys(window);
+const files = (new URL(location.href).searchParams.get('files') || '').split(',').filter(Boolean);
+for (const file of files) {
+  const src = file === 'bundle' ? '../../../dist/accesserty-ui-kit.js' : '../../../dist/components/' + file + '.js';
+  document.write('<script src="' + src + '"><\/script>');
+}
+</script>
+</html>

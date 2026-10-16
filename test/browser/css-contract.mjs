@@ -22,11 +22,14 @@ const snapshot=()=>{
   const panel=document.getElementById('panel');panel.showPopover();
   const style=getComputedStyle(panel);
   const defaults={bg:rgb(style.backgroundColor),fg:rgb(style.color)};
+  // file:// pages cannot read stylesheet rules; the computed override below still applies there.
+  let layer;try{layer=[...document.styleSheets].flatMap(sheet=>[...sheet.cssRules]).find(rule=>rule.constructor.name==='CSSLayerStatementRule')?.nameList?.join();}catch{layer='unreadable';}
+  const consumerRadius=style.borderTopLeftRadius;
   panel.style.setProperty('--au-popover-bg','0 0 0');
   panel.style.setProperty('--au-popover-text-color','1 0 0');
   panel.style.setProperty('--au-popover-border-color','1 0 0');
   const custom={bg:rgb(style.backgroundColor),fg:rgb(style.color),border:rgb(style.borderTopColor)};
-  return {black:rgb(getComputedStyle(document.getElementById('black')).color),white:rgb(getComputedStyle(document.getElementById('white')).color),focus:rgb(getComputedStyle(document.getElementById('focus-color')).color),placeholder:rgb(getComputedStyle(document.getElementById('placeholder-color')).color),defaults,custom,
+  return {layer,consumerRadius,black:rgb(getComputedStyle(document.getElementById('black')).color),white:rgb(getComputedStyle(document.getElementById('white')).color),focus:rgb(getComputedStyle(document.getElementById('focus-color')).color),placeholder:rgb(getComputedStyle(document.getElementById('placeholder-color')).color),defaults,custom,
     fallback:!CSS.supports('selector(::picker-icon)'),
     selects:['ltr','rtl','auto'].map(id=>{const c=getComputedStyle(document.getElementById(id));return {id,direction:c.direction,x:c.backgroundPositionX,image:c.backgroundImage,start:parseFloat(c.paddingInlineStart),end:parseFloat(c.paddingInlineEnd)};})};
 };
@@ -38,6 +41,8 @@ try{
       if(name==='chrome'){browser=await chromium.launch({channel:'chrome',headless:true});page=await browser.newPage();goto=url=>page.goto(url);evaluate=fn=>page.evaluate(fn);}
       else{assert.ok(process.env.UI_KIT_WEBDRIVER_MODULE,'Set UI_KIT_WEBDRIVER_MODULE');const url=pathToFileURL(process.env.UI_KIT_WEBDRIVER_MODULE);const {default:w}=await import(url.href),{default:f}=await import(new URL('./firefox.js',url).href);let builder=new w.Builder().forBrowser(name);if(name==='firefox')builder=builder.setFirefoxOptions(new f.Options().addArguments('-headless'));driver=await builder.build();goto=url=>driver.get(url);evaluate=fn=>driver.executeScript(fn);}
       for(const url of urls){await goto(url);const s=await evaluate(snapshot);
+        if(s.layer!=='unreadable')assert.equal(s.layer,'accesserty','native control rules live in the accesserty layer');
+        assert.equal(s.consumerRadius,'7px','an unlayered consumer rule beats the layered kit rule');
         assert.deepEqual(s.black,[0,0,0,255],'pure-black must render black');
         assert.deepEqual(s.white,[255,255,255,255],'pure-white must render white');
         assert.ok(1.05/(luminance(s.focus)+0.05)>=3,'focus token against white');

@@ -176,6 +176,33 @@ describe('AuInput', () => {
     expect(el.shadowRoot.querySelector('input').disabled).to.be.false;
   });
 
+  it('valueAsNumber and valueAsDate work as on a native input', async () => {
+    const form = await fixture(html`<form><au-input type="number" name="qty" label="Qty" value="2"></au-input></form>`);
+    const el = form.querySelector('au-input');
+    expect(el.valueAsNumber).to.equal(2);
+    el.valueAsNumber = 7;
+    expect(el.value).to.equal('7');
+    expect(new FormData(form).get('qty')).to.equal('7');
+    el.setAttribute('type', 'text');
+    await nextFrame();
+    expect(Number.isNaN(el.valueAsNumber)).to.be.true;
+    el.setAttribute('type', 'date');
+    await nextFrame();
+    el.valueAsDate = new Date(Date.UTC(2026, 9, 16));
+    expect(el.value).to.equal('2026-10-16');
+    expect(el.valueAsDate.toISOString().slice(0, 10)).to.equal('2026-10-16');
+  });
+
+  it('looks disabled: the field dims to the shared disabled opacity', async () => {
+    const el = await fixture(html`<au-input label="Name"></au-input>`);
+    const field = el.shadowRoot.querySelector('.input-container');
+    expect(getComputedStyle(field).opacity).to.equal('1');
+    el.disabled = true;
+    expect(getComputedStyle(field).opacity).to.equal('0.6');
+    el.style.setProperty('--au-input-disabled-opacity', '0.8');
+    expect(getComputedStyle(field).opacity).to.equal('0.8');
+  });
+
   it('required property getter/setter works correctly', async () => {
     const el = await fixture(html`<au-input></au-input>`);
     expect(el.required).to.be.false;

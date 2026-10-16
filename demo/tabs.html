@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="demo.css" />
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-  <script src="../src/components/tabs.js" defer></script>
+  <script src="../dist/accesserty-ui-kit.js" defer></script>
 </head>
 
 <body>
@@ -137,7 +137,7 @@ tabs.selectedIndex = 2;</code></pre>
         </thead>
         <tbody>
           <tr>
-            <td>tab-change</td>
+            <td>au-tab-change</td>
             <td><code>{ index: number, label: string }</code></td>
             <td>One notification when user activation changes selection. Repeated activation, property/attribute writes and structural updates are silent. The label includes the effective fallback text when needed. Bubbles and is composed.</td>
           </tr>
@@ -145,16 +145,16 @@ tabs.selectedIndex = 2;</code></pre>
       </table>
       </div>
       <pre style="background:#f4f4f4;padding:1rem;overflow:auto;"><code>// Vanilla JS
-document.querySelector('au-tabs').addEventListener('tab-change', (e) => {
+document.querySelector('au-tabs').addEventListener('au-tab-change', (e) => {
   console.log('Tab index:', e.detail.index);
   console.log('Tab label:', e.detail.label);
 });
 
 // Vue
-// &lt;au-tabs @tab-change="onTabChange"&gt;
+// &lt;au-tabs @au-tab-change="onTabChange"&gt;
 
 // React (ref)
-// tabsRef.current.addEventListener('tab-change', handler);</code></pre>
+// tabsRef.current.addEventListener('au-tab-change', handler);</code></pre>
     </section>
     <section>
       <h2>Keyboard and framework integration</h2>
@@ -165,9 +165,10 @@ document.querySelector('au-tabs').addEventListener('tab-change', (e) => {
       <p>Only use this automatic-activation pattern when panel content is already available without a noticeable delay.
         This component does not implement vertical tabs, delayed/manual activation, or closable-tab commands.</p>
       <p>Bind <code>selected-index</code> (or the selectedIndex property after registration) and update your model from
-        <code>tab-change.detail.index</code>. Register only on the client. The Next/Nuxt fixtures verify
-        server-produced hosts and light-DOM panels, hydration identity, reactive labels and keyboard interaction;
-        they do not server-render the shadow tab buttons or guarantee no-JavaScript tab behavior.</p>
+        <code>au-tab-change.detail.index</code>. With server rendering (see the README), the tab buttons are rendered on
+        the server as a declarative shadow root and only the selected panel shows before the script runs; switching
+        tabs needs JavaScript. The Next/Nuxt fixtures verify server-produced hosts and light-DOM panels, hydration
+        identity, reactive labels and keyboard interaction.</p>
       <p>Tab-to-panel relations use native element references. Older engines without that API retain named panels,
         but lack that relation. Panel names use plain aria-label text because a light-DOM panel cannot reference
         a button inside a descendant shadow root. This boundary needs assistive-technology verification.</p>

@@ -25,7 +25,8 @@ try {
   page.on('pageerror', error => errors.push(String(error)));
   const fixture = 'test/browser/fixtures/visibility.html';
   const bases = [pathToFileURL(resolve(root, fixture)).href, `http://127.0.0.1:${server.address().port}/${fixture}`];
-  for (const base of bases) for (const mode of ['source','bundle','min']) {
+  // ES module sources do not load from file:// URLs.
+  for (const base of bases) for (const mode of (base.startsWith('file:') ? ['bundle','min'] : ['source','bundle','min'])) {
     await page.goto(`${base}?mode=${mode}`);
     await page.evaluate(() => window.ready);
     assert.equal(await page.evaluate(() => [...document.querySelector('#components').children].every(el => getComputedStyle(el).display === 'none' && el.getClientRects().length === 0)), true);

@@ -13,7 +13,7 @@
   <au-accordion-item id="second" open heading-level="2"><span slot="heading">Second answer</span><div slot="content"><button>Second action</button></div></au-accordion-item>
 </au-accordion>
 <button id="after">After</button>
-<script src="../../../src/components/accordion.js" defer></script>
+<script type="module" src="../../../src/components/accordion.js"></script>
 <script>
 window.accordionFixture={root:document.getElementById('faq'),first:document.getElementById('first'),second:document.getElementById('second'),inner:document.getElementById('inner'),inside:document.getElementById('inside')};
 accordionFixture.root.exclusive=true;

@@ -42,7 +42,7 @@
         const loc = ref('en');
         const t = computed(() => dict[loc.value]);
         const toggle = () => { loc.value = loc.value === 'en' ? 'zh' : 'en'; };
-        const onChange = (e) => console.log('slide-change', e.detail);
+        const onChange = (e) => console.log('au-slide-change', e.detail);
         return { loc, t, toggle, onChange };
       },
       template: `
@@ -53,7 +53,7 @@
           :data-text-pagination="t.pagination"
           :data-text-instructions="t.instructions"
           :data-dot-template="t.dot"
-          @slide-change="onChange"
+          @au-slide-change="onChange"
         >
           <div v-for="(s, i) in t.slides" :key="i" class="demo-slide" :data-title="s">
             <h3>{{ s }}</h3>
@@ -61,7 +61,8 @@
           </div>
         </au-carousel>`,
     });
-    // Tell Vue that <au-*> are native custom elements, not Vue components.
+    // Tell Vue that <au-*> are native custom elements. This page uses only au-carousel; in an app
+    // with form components use the kit's isCustomElement and AccessertyVue plugin (README, Vue 3).
     app.config.compilerOptions.isCustomElement = (tag) => tag.startsWith('au-');
     app.mount('#root');
 

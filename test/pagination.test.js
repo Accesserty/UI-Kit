@@ -3,7 +3,7 @@ import '../src/components/pagination.js';
 import { html, fixture, expect, nextFrame } from '@open-wc/testing';
 
 describe('AuPagination Web Component', () => {
-  it('provides a confirm button for jump and emits page-change on click', async () => {
+  it('provides a confirm button for jump and emits au-page-change on click', async () => {
     const el = await fixture(html`
       <au-pagination
         data-total="40"
@@ -13,7 +13,7 @@ describe('AuPagination Web Component', () => {
     `);
       
     let detail;
-    el.addEventListener('page-change', e => (detail = e.detail));
+    el.addEventListener('au-page-change', e => (detail = e.detail));
 
     const input = el.shadowRoot.querySelector('input[type="number"]');
     const btn = el.shadowRoot.querySelector('.au-pagination-group:nth-child(3) button');
@@ -97,7 +97,7 @@ describe('AuPagination Web Component', () => {
     expect(buttons.length).to.equal(9);
   });
 
-  it('emits page-change and updates attribute when clicking page buttons', async () => {
+  it('emits au-page-change and updates attribute when clicking page buttons', async () => {
     const el = await fixture(html`
       <au-pagination
         data-total="30"
@@ -108,7 +108,7 @@ describe('AuPagination Web Component', () => {
     `);
 
     let detail;
-    el.addEventListener('page-change', (e) => (detail = e.detail));
+    el.addEventListener('au-page-change', (e) => (detail = e.detail));
 
     const btn = el.shadowRoot.querySelectorAll(
       '.pagination-buttons li button'
@@ -120,7 +120,7 @@ describe('AuPagination Web Component', () => {
     expect(el.getAttribute('data-current-page')).to.equal('2');
   });
 
-  it('emits page-size-change and resets current page on select change', async () => {
+  it('emits au-page-size-change and resets current page on select change', async () => {
     const el = await fixture(html`
       <au-pagination
         data-total="200"
@@ -130,7 +130,7 @@ describe('AuPagination Web Component', () => {
     `);
 
     let detail;
-    el.addEventListener('page-size-change', (e) => (detail = e.detail));
+    el.addEventListener('au-page-size-change', (e) => (detail = e.detail));
 
     const select = el.shadowRoot.querySelector('select');
     select.value = '50';
@@ -186,7 +186,7 @@ describe('AuPagination Web Component', () => {
   it('does not steal external focus for controlled updates and supports writable numeric properties', async () => {
     const wrapper = await fixture(html`<div><button>Outside</button><au-pagination data-total="100"></au-pagination></div>`);
     const el = wrapper.querySelector('au-pagination'), outside = wrapper.querySelector('button'); outside.focus();
-    let events = 0; el.addEventListener('page-change', () => events++);
+    let events = 0; el.addEventListener('au-page-change', () => events++);
     el.total = 220; el.pageSize = 20; el.currentPage = 8; el.pagerCount = 3; await nextFrame();
     expect(el.totalPages).to.equal(11); expect(el.pagers).to.deep.equal([7,8,9]);
     expect(el.shadowRoot.querySelector('select').value).to.equal('20');
@@ -209,7 +209,7 @@ describe('AuPagination Web Component', () => {
   it('rejects blank, fractional and out-of-range jump entries without changing page', async () => {
     const el = await fixture(html`<au-pagination data-total="100"></au-pagination>`);
     const input = el.shadowRoot.querySelector('input');
-    let events = 0; el.addEventListener('page-change', () => events++);
+    let events = 0; el.addEventListener('au-page-change', () => events++);
     input.reportValidity = () => input.checkValidity();
     for (const value of ['', '1.5', '999']) {
       input.value = value;
@@ -220,12 +220,12 @@ describe('AuPagination Web Component', () => {
     expect(events).to.equal(1); expect(el.currentPage).to.equal(3);
   });
 
-  it('emits page-size-change only after both size and reset page are coherent, without duplicate page events', async () => {
+  it('emits au-page-size-change only after both size and reset page are coherent, without duplicate page events', async () => {
     const el = await fixture(html`<au-pagination data-total="200" data-current-page="3"></au-pagination>`);
     const select = el.shadowRoot.querySelector('select'); select.focus();
     const states = []; let pages = 0;
-    el.addEventListener('page-change', () => pages++);
-    el.addEventListener('page-size-change', e => states.push([e.detail,el.pageSize,el.currentPage,e.bubbles,e.composed]));
+    el.addEventListener('au-page-change', () => pages++);
+    el.addEventListener('au-page-size-change', e => states.push([e.detail,el.pageSize,el.currentPage,e.bubbles,e.composed]));
     select.value = '50'; select.dispatchEvent(new Event('change')); await nextFrame();
     expect(states).to.deep.equal([[50,50,1,true,true]]); expect(pages).to.equal(0);
     expect(el.shadowRoot.activeElement).to.equal(select);
@@ -244,7 +244,7 @@ describe('AuPagination Web Component', () => {
   it('reconnects without duplicating events and labels the size control with visible and purpose text', async () => {
     const wrapper = await fixture(html`<div><au-pagination data-total="100" data-text-per="每頁" data-text-page-size="顯示筆數"></au-pagination></div>`);
     const el = wrapper.firstElementChild; let count = 0;
-    el.addEventListener('page-change', () => count++); el.remove(); wrapper.append(el); await nextFrame();
+    el.addEventListener('au-page-change', () => count++); el.remove(); wrapper.append(el); await nextFrame();
     el.shadowRoot.querySelector('[data-control="next"]').click(); await nextFrame();
     expect(count).to.equal(1);
     const select = el.shadowRoot.querySelector('select');

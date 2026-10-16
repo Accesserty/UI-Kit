@@ -21,7 +21,7 @@ describe('AuDropdown', () => {
     dropdown.items[1].item.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape',bubbles:true,composed:true}));
     expect(dropdown.isOpen).to.be.false;
     expect(dropdown.shadowRoot.activeElement).to.equal(dropdown.trigger);
-    let selections=0; dropdown.addEventListener('selected',()=>selections++);
+    let selections=0; dropdown.addEventListener('au-select',()=>selections++);
     dropdown.open(); dropdown.items[0].click();
     expect(selections).to.equal(1);
     dropdown.open(); wrapper.querySelector('button').focus();
@@ -203,9 +203,9 @@ describe('AuDropdown', () => {
   });
 
   // --- Item Selection ---
-  it('dispatches selected event on item mouse click', async () => {
+  it('dispatches au-select event on item mouse click', async () => {
     let eventDetail = null;
-    el.addEventListener('selected', (e) => { eventDetail = e.detail; });
+    el.addEventListener('au-select', (e) => { eventDetail = e.detail; });
 
     el.items[0].click();
     await new Promise(r => setTimeout(r, 50));
@@ -215,9 +215,9 @@ describe('AuDropdown', () => {
     expect(el.isOpen).to.be.false;
   });
 
-  it('dispatches selected event on item keyboard activation (Enter)', async () => {
+  it('dispatches au-select event on item keyboard activation (Enter)', async () => {
     let eventDetail = null;
-    el.addEventListener('selected', (e) => { eventDetail = e.detail; });
+    el.addEventListener('au-select', (e) => { eventDetail = e.detail; });
 
     el.open(0);
     await new Promise(r => setTimeout(r, 100));
@@ -230,9 +230,9 @@ describe('AuDropdown', () => {
     expect(el.isOpen).to.be.false;
   });
 
-  it('dispatches selected event on item keyboard activation (Space)', async () => {
+  it('dispatches au-select event on item keyboard activation (Space)', async () => {
     let eventDetail = null;
-    el.addEventListener('selected', (e) => { eventDetail = e.detail; });
+    el.addEventListener('au-select', (e) => { eventDetail = e.detail; });
 
     el.open(1);
     await new Promise(r => setTimeout(r, 100));
@@ -308,7 +308,7 @@ describe('AuDropdown', () => {
 
   it('keeps one selection notification after moving existing items and the dropdown', async () => {
     let count = 0;
-    el.addEventListener('selected', () => count++);
+    el.addEventListener('au-select', () => count++);
     const first = el.items[0];
     for (let i = 0; i < 3; i++) {
       first.remove();
@@ -331,7 +331,7 @@ describe('AuDropdown', () => {
     el.open(1);
     expect(el.trigger.getAttribute('aria-expanded')).to.equal('true');
     expect(el.items[1].shadowRoot.activeElement).to.equal(el.items[1].item);
-    el.addEventListener('selected', () => dialogAction.focus());
+    el.addEventListener('au-select', () => dialogAction.focus());
     el.items[1].click();
     expect(el.trigger.getAttribute('aria-expanded')).to.equal('false');
     await new Promise(r => setTimeout(r, 50));

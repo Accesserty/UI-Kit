@@ -1,14 +1,16 @@
-class AuCheckbox extends HTMLElement {
-  static formAssociated = true;
+import { uid } from '../core/id.js';
+import { upgradeProperties } from '../core/upgrade.js';
+import { forwardAria } from '../core/aria.js';
+import { AuFormElement } from '../core/form-element.js';
+class AuCheckbox extends AuFormElement {
 
   constructor() {
     super();
     this.attachShadow({ mode: "open", delegatesFocus: true });
-    this.internals = this.attachInternals();
     this.addEventListener('click', event => this._activateFromHost(event));
 
     // Generate a unique ID for the input element
-    const inputID = this.generateId();
+    const inputID = uid('au-checkbox-');
 
     const style = document.createElement('style');
     style.textContent = `
@@ -78,7 +80,7 @@ class AuCheckbox extends HTMLElement {
         &:has(input[type="checkbox"]:disabled) {
           cursor: not-allowed;
           input[type="checkbox"] {
-            opacity: 0.5;
+            opacity: var(--au-checkbox-disabled-opacity, 0.6);
           }
           .text {
             pointer-events: none;
@@ -164,15 +166,6 @@ class AuCheckbox extends HTMLElement {
     val ? this.setAttribute('disabled', '') : this.removeAttribute('disabled');
   }
 
-  generateId() {
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const byteArray = new Uint32Array(1);
-      crypto.getRandomValues(byteArray);
-      return `au-checkbox-${byteArray[0].toString(36)}`;
-    }
-    return `au-checkbox-${Math.random().toString(36).slice(2)}`;
-  }
-
   static get observedAttributes() {
     return ['name', 'value', 'checked', 'disabled', 'required', 'label', 'aria-label', 'aria-labelledby', 'aria-describedby', 'aria-invalid'];
   }
@@ -216,39 +209,8 @@ class AuCheckbox extends HTMLElement {
   }
 
   syncAccessibleLabel() {
-    const input = this.inputElement;
-    const root = this.getRootNode();
-    const resolve = attribute => (this.getAttribute(attribute) || '').trim()
-      .split(/\s+/).filter(Boolean).map(id => root.getElementById?.(id))
-      .filter(element => element && element !== this);
-    const explicit = this.getAttribute('aria-label');
-    let labels = resolve('aria-labelledby');
-    const hasSlotText = this._labelSlot.assignedNodes({flatten: true})
-      .some(node => node.textContent?.trim());
-    if (!labels.length && !explicit && !hasSlotText && this.isConnected) {
-      labels = [...this.internals.labels];
-    }
-    const descriptions = resolve('aria-describedby');
-    input.removeAttribute('aria-labelledby');
-    input.removeAttribute('aria-describedby');
-    if (explicit) input.setAttribute('aria-label', explicit);
-    else input.removeAttribute('aria-label');
-    if ('ariaLabelledByElements' in input) input.ariaLabelledByElements = labels;
-    else if (!explicit && labels.length) {
-      input.setAttribute('aria-label', labels.map(element =>
-        element.getAttribute('aria-label') || element.textContent).join(' ').trim());
-    }
-    if ('ariaDescribedByElements' in input) input.ariaDescribedByElements = descriptions;
-    else if (descriptions.length) {
-      if (!this._descriptionMirror) {
-        this._descriptionMirror = document.createElement('span');
-        this._descriptionMirror.id = this.generateId();
-        this._descriptionMirror.hidden = true;
-        this.shadowRoot.append(this._descriptionMirror);
-      }
-      this._descriptionMirror.textContent = descriptions.map(element => element.textContent).join(' ').trim();
-      input.setAttribute('aria-describedby', this._descriptionMirror.id);
-    }
+    const hasSlotText = this._labelSlot.assignedNodes({flatten: true}).some(node => node.textContent?.trim());
+    forwardAria(this, this.inputElement, { explicit: this.getAttribute('aria-label'), hasOwnLabel: hasSlotText, mirrorPrefix: 'au-checkbox-' });
   }
 
   _observeLabels() {
@@ -264,11 +226,7 @@ class AuCheckbox extends HTMLElement {
   disconnectedCallback() { this._labelObserver?.disconnect(); }
 
   _upgradeProperties() {
-    for (const name of ['checked', 'disabled', 'required', 'name', 'value']) {
-      if (Object.hasOwn(this, name)) {
-        const value = this[name]; delete this[name]; this[name] = value;
-      }
-    }
+    upgradeProperties(this, ['checked', 'disabled', 'required', 'name', 'value']);
   }
 
   get name() { return this.getAttribute('name') || ''; }
@@ -277,11 +235,6 @@ class AuCheckbox extends HTMLElement {
   set value(value) { this.setAttribute('value', value); }
   get required() { return this.hasAttribute('required'); }
   set required(value) { this.toggleAttribute('required', Boolean(value)); }
-  get validity() { return this.internals.validity; }
-  get validationMessage() { return this.internals.validationMessage; }
-  get willValidate() { return this.internals.willValidate; }
-  checkValidity() { return this.internals.checkValidity(); }
-  reportValidity() { return this.internals.reportValidity(); }
   focus(options) { this.inputElement.focus(options); }
 
   formStateRestoreCallback(state) {

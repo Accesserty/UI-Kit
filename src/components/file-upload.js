@@ -1,5 +1,7 @@
-class AuFileUpload extends HTMLElement {
-  static formAssociated = true;
+import { uid } from '../core/id.js';
+import { upgradeProperties } from '../core/upgrade.js';
+import { AuFormElement } from '../core/form-element.js';
+class AuFileUpload extends AuFormElement {
   static get observedAttributes() {
     return [
       'accept',
@@ -29,7 +31,6 @@ class AuFileUpload extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    this.internals = this.attachInternals();
     this.files = [];
     this.previewUrls = new Map();
 
@@ -171,7 +172,7 @@ class AuFileUpload extends HTMLElement {
         outline-offset: 2px;
       }
       .default-trigger { font: inherit; min-block-size: 24px; min-inline-size: 24px; padding: 0.625rem; max-inline-size: 100%; overflow-wrap: anywhere; }
-      .file-upload-container[aria-disabled="true"] { opacity: 0.65; }
+      .file-upload-container[aria-disabled="true"] { opacity: var(--au-file-upload-disabled-opacity, 0.6); }
       @media (max-width: 360px) { .file-list [role=listitem] { flex-wrap: wrap; } }
       @media (prefers-reduced-motion: reduce) { .upload-area, .file-list [role=listitem] .delete { transition: none; } }
       @media (forced-colors: active) {
@@ -189,7 +190,7 @@ class AuFileUpload extends HTMLElement {
     this.container.setAttribute('aria-labelledby', 'upload-label');
     this.container.setAttribute('aria-describedby', 'upload-errors upload-drop');
 
-    this._id = this.getAttribute('id') || this.generateId();
+    this._id = this.getAttribute('id') || uid('au-file-upload-');
 
     this.labelEl = document.createElement('label');
     this.labelEl.id = 'upload-label';
@@ -327,7 +328,7 @@ class AuFileUpload extends HTMLElement {
         this.updateValidity();
         break;
       case 'id':
-        this._id = newValue || this.generateId();
+        this._id = newValue || uid('au-file-upload-');
         if (this.labelEl) this.labelEl.setAttribute('for', this._id);
         if (this.fileInput) this.fileInput.id = this._id;
         break;
@@ -367,9 +368,7 @@ class AuFileUpload extends HTMLElement {
   }
 
   connectedCallback() {
-    if (Object.hasOwn(this, 'value')) {
-      const value = this.value; delete this.value; this.value = value;
-    }
+    upgradeProperties(this, ['value']);
     this.updateLabelText();
     this.updateDropText();
     this.updateFileList();
@@ -678,7 +677,7 @@ class AuFileUpload extends HTMLElement {
     this.announce(this.formatMessage('msg-removed', '{fileName} removed.', { fileName: removed.name }));
     this.syncFormValue();
     this.updateValidity();
-    this.dispatchEvent(new CustomEvent('remove-file', { bubbles: true, composed: true, detail: removed }));
+    this.dispatchEvent(new CustomEvent('au-remove-file', { bubbles: true, composed: true, detail: removed }));
     this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
   };
 
@@ -733,8 +732,11 @@ class AuFileUpload extends HTMLElement {
     return true;
   }
 
-  checkValidity() { this.updateValidity(); return this.internals.checkValidity(); }
-  reportValidity() { this.updateValidity(); return this.internals.reportValidity(); }
+  // A custom error points at the visible trigger, not the hidden file input.
+  _validityAnchor() { return this.triggerArea; }
+
+  checkValidity() { this.updateValidity(); return super.checkValidity(); }
+  reportValidity() { this.updateValidity(); return super.reportValidity(); }
 
   formResetCallback() {
     this.revokeAllPreviewUrls();
@@ -763,14 +765,6 @@ class AuFileUpload extends HTMLElement {
     }
   }
 
-  generateId() {
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const byteArray = new Uint32Array(1);
-      crypto.getRandomValues(byteArray);
-      return `au-file-upload-${byteArray[0].toString(36)}`;
-    }
-    return `au-file-upload-${Math.random().toString(36).slice(2)}`;
-  }
 }
 
 if (typeof customElements !== 'undefined' && !customElements.get('au-file-upload')) {

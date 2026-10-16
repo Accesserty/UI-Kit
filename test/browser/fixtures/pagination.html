@@ -9,6 +9,8 @@ const scripts={source:'../../../src/components/pagination.js',bundle:'../../../d
 const src=scripts[mode];
 if(!src) throw new Error('Unknown pagination fixture mode: '+mode);
 const script=document.createElement('script');
+// Component sources are ES modules; the bundles are classic scripts.
+if(mode==='source') script.type='module';
 script.src=src;
 script.onerror=()=>{ throw new Error('Failed to load pagination script: '+src); };
 document.head.append(script);

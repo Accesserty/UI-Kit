@@ -1,10 +1,12 @@
-class AuRadioGroup extends HTMLElement {
-  static formAssociated = true;
+import { uid } from '../core/id.js';
+import { upgradeProperties } from '../core/upgrade.js';
+import { forwardAria } from '../core/aria.js';
+import { AuFormElement } from '../core/form-element.js';
+class AuRadioGroup extends AuFormElement {
 
   constructor() {
     super();
     this.attachShadow({ mode: "open", delegatesFocus: true });
-    this.internals = this.attachInternals();
 
     const style = document.createElement('style');
     style.textContent = `
@@ -87,7 +89,7 @@ class AuRadioGroup extends HTMLElement {
         &:has(input[type="radio"]:disabled) {
           cursor: not-allowed;
           input[type="radio"] {
-            opacity: 0.5;
+            opacity: var(--au-radio-disabled-opacity, 0.6);
           }
           .text {
             pointer-events: none;
@@ -111,7 +113,7 @@ class AuRadioGroup extends HTMLElement {
     container.setAttribute('role', 'radiogroup');
 
     // Generate a unique name for the radio group
-    this.groupName = 'radio-group-name-' + this.generateId();
+    this.groupName = 'radio-group-name-' + uid();
 
     const slot = document.createElement('slot');
     slot.style.display = 'none';
@@ -127,11 +129,7 @@ class AuRadioGroup extends HTMLElement {
   }
 
   connectedCallback() {
-    for (const name of ['value', 'name', 'disabled', 'required']) {
-      if (Object.hasOwn(this, name)) {
-        const value = this[name]; delete this[name]; this[name] = value;
-      }
-    }
+    upgradeProperties(this, ['value', 'name', 'disabled', 'required']);
     this._mutationObserver ??= new MutationObserver(records => {
       // An explicit checked mutation is an instruction; label/locale updates are not.
       for (const record of records) {
@@ -175,7 +173,7 @@ class AuRadioGroup extends HTMLElement {
         const label = document.createElement('label');
         const input = document.createElement('input');
         input.type = 'radio';
-        input.id = 'radio-' + this.generateId();
+        input.id = 'radio-' + uid();
         input.name = this.groupName;
         label.htmlFor = input.id;
         const text = document.createElement('div');
@@ -295,32 +293,7 @@ class AuRadioGroup extends HTMLElement {
 
   updateGroupAttributes() {
     const container = this._container;
-    const root = this.getRootNode();
-    const resolve = attribute => (this.getAttribute(attribute) || '').trim().split(/\s+/)
-      .filter(Boolean).map(id => root.getElementById?.(id)).filter(element => element && element !== this);
-    const explicit = this.getAttribute('aria-label') || this.getAttribute('label');
-    let labels = resolve('aria-labelledby');
-    if (!labels.length && !explicit && this.isConnected) labels = [...(this.internals.labels || [])];
-    const descriptions = resolve('aria-describedby');
-    container.removeAttribute('aria-labelledby');
-    container.removeAttribute('aria-describedby');
-    if (explicit) container.setAttribute('aria-label', explicit);
-    else container.removeAttribute('aria-label');
-    if ('ariaLabelledByElements' in container) container.ariaLabelledByElements = labels;
-    else if (!explicit && labels.length) {
-      container.setAttribute('aria-label', labels.map(element => element.getAttribute('aria-label') || element.textContent).join(' ').trim());
-    }
-    if ('ariaDescribedByElements' in container) container.ariaDescribedByElements = descriptions;
-    else if (descriptions.length) {
-      if (!this._descriptionMirror) {
-        this._descriptionMirror = document.createElement('span');
-        this._descriptionMirror.id = 'radio-description-' + this.generateId();
-        this._descriptionMirror.hidden = true;
-        this.shadowRoot.append(this._descriptionMirror);
-      }
-      this._descriptionMirror.textContent = descriptions.map(element => element.textContent).join(' ').trim();
-      container.setAttribute('aria-describedby', this._descriptionMirror.id);
-    }
+    forwardAria(this, container, { explicit: this.getAttribute('aria-label') || this.getAttribute('label'), hasOwnLabel: false, mirrorPrefix: 'radio-description-' });
     container.classList.toggle('au-radio-group--vertical', this.getAttribute('direction') === 'vertical');
     if (this.required) container.setAttribute('aria-required', 'true');
     else container.removeAttribute('aria-required');
@@ -343,11 +316,6 @@ class AuRadioGroup extends HTMLElement {
   set required(value) { this.toggleAttribute('required', Boolean(value)); }
   get disabled() { return this.hasAttribute('disabled'); }
   set disabled(value) { this.toggleAttribute('disabled', Boolean(value)); }
-  get validity() { return this.internals.validity; }
-  get validationMessage() { return this.internals.validationMessage; }
-  get willValidate() { return this.internals.willValidate; }
-  checkValidity() { return this.internals.checkValidity(); }
-  reportValidity() { return this.internals.reportValidity(); }
 
   focus(options) {
     const inputs = [...this._entries.values()].map(entry => entry.input);
@@ -370,14 +338,6 @@ class AuRadioGroup extends HTMLElement {
     } catch { /* Ignore unrecognized state rather than treating it as an option. */ }
   }
 
-  generateId() {
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const byteArray = new Uint32Array(1);
-      crypto.getRandomValues(byteArray);
-      return `${byteArray[0].toString(36)}`;
-    }
-    return Math.random().toString(36).slice(2);
-  }
 }
 
 if (typeof customElements !== 'undefined' && !customElements.get('au-radio-group')) {

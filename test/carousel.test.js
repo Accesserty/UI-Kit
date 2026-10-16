@@ -169,7 +169,7 @@ describe('AuCarousel', () => {
     });
   });
 
-  it('emits a composed, bubbling slide-change event with detail', async () => {
+  it('emits a composed, bubbling au-slide-change event with detail', async () => {
     const wrapper = document.createElement('div');
     const carousel = document.createElement('au-carousel');
     carousel.innerHTML = slidesHtml(3);
@@ -178,7 +178,7 @@ describe('AuCarousel', () => {
     const c = el.querySelector('au-carousel');
     await tick();
     let detail = null;
-    el.addEventListener('slide-change', (e) => (detail = e.detail));
+    el.addEventListener('au-slide-change', (e) => (detail = e.detail));
     c.shadowRoot.querySelector('[data-carousel-next]').click();
     await tick();
     expect(detail).to.deep.equal({ index: 1, total: 3, title: 'Slide 2' });
@@ -435,7 +435,7 @@ describe('AuCarousel', () => {
   it('retains current slide and dot identity on reorder and translation', async () => {
     const el=await mount(slidesHtml(3));await tick();
     el.current=1;const slide=el.children[1],dot=el._dots[1];dot.focus();
-    const changes=[];el.addEventListener('slide-change',e=>changes.push(e.detail));
+    const changes=[];el.addEventListener('au-slide-change',e=>changes.push(e.detail));
     el.prepend(slide);el.refresh();
     expect(el.current).to.equal(0);expect(el._dots[0]).to.equal(dot);
     expect(el.shadowRoot.activeElement).to.equal(dot);
@@ -477,7 +477,7 @@ describe('AuCarousel', () => {
 
   it('keeps boundary button focus and emits no extra event on repeated activation', async () => {
     const el=await mount(slidesHtml(2));await tick();
-    const events=[];el.addEventListener('slide-change',e=>events.push(e.detail.index));
+    const events=[];el.addEventListener('au-slide-change',e=>events.push(e.detail.index));
     el._nextBtn.focus();el._nextBtn.click();el._nextBtn.click();
     expect(el.shadowRoot.activeElement).to.equal(el._nextBtn);
     expect(el._nextBtn.disabled).to.be.false;
@@ -497,7 +497,7 @@ describe('AuCarousel', () => {
     const el = await mount(slidesHtml(3), {style: 'width:300px;display:block'});
     await tick();
     const events = [];
-    el.addEventListener('slide-change', e => events.push(e.detail.index));
+    el.addEventListener('au-slide-change', e => events.push(e.detail.index));
     el._scrollToIndex(2, 'smooth'); el.setCurrent(2);
     // Model a settle timer that fires mid-animation (a busy machine pausing
     // the scroll longer than the settle delay).
@@ -512,7 +512,7 @@ describe('AuCarousel', () => {
 
   it('retains dots and one notification through reconnection', async () => {
     const wrapper=await fixture(document.createElement('div')),el=document.createElement('au-carousel');el.innerHTML=slidesHtml(3);wrapper.append(el);await tick();
-    const dot=el._dots[1],events=[];el.addEventListener('slide-change',e=>events.push(e.detail.index));
+    const dot=el._dots[1],events=[];el.addEventListener('au-slide-change',e=>events.push(e.detail.index));
     for(let i=0;i<3;i++){el.remove();wrapper.append(el);}
     expect(el._dots[1]).to.equal(dot);dot.click();expect(events).to.deep.equal([1]);
   });

@@ -19,11 +19,14 @@ are available in [`demo/`](demo/index.html); framework setup is covered below.
 - **Zero runtime dependencies** — one self-contained JS file
 - **Framework-agnostic** — works in plain HTML, Vue, React, Nuxt, Next or any other stack that renders custom elements
 - **Form-integrated** — form-associated components participate in native `<form>` submission and validation via the ElementInternals API
-- **SSR-friendly** — register client-side in SSR frameworks (see [Nuxt 3](#nuxt-3)); the `customElements.define()` guard keeps re-importing on the client safe
+- **Server rendering** — Nuxt and Next.js render the tags and initial values; accordion, tabs and breadcrumbs also render their Shadow DOM on the server, so they look right before the script runs (see [Server rendering](#server-rendering))
+- **Framework-native forms** — `v-model` in Vue and Nuxt, `value`/`checked` with `onChange` in React and Next.js
 - **Fully themeable** — every visual detail is a CSS Custom Property
 
 > **On accessibility claims:** automated tests and targeted browser checks do not establish complete WCAG conformance or screen-reader compatibility. Verify your content, structure, headings, themes and interactions in the assembled application, including with assistive technologies.
 
+
+Upgrading from 2.x? See [UPGRADING.md](UPGRADING.md).
 
 ## Components
 
@@ -88,18 +91,29 @@ after registration. Rendering and navigation still require JavaScript.
 
 For SSR, serialize breadcrumb items into the HTML attribute: React
 `items={JSON.stringify(items)}`, Nuxt `:items.attr="JSON.stringify(items)"`.
-Register the component only on the client. The server supplies the host/data and icon slots, not the internal
-navigation links. The [SSR fixtures](test/ssr/README.md) test these bindings,
+With [server rendering](#server-rendering), the server also renders the
+navigation links, so they work before the script runs; otherwise the server
+supplies the host, data and icon slots and the links appear when the script
+registers the element. The [SSR fixtures](test/ssr/README.md) test these bindings,
 translation focus and native fragment navigation; framework router interception
 is not provided or verified.
 
-Or copy individual component source files if you only need a subset (also usable
-with local HTML without a module loader):
+The bundle registers every component. To ship only some of them, copy single
+files from [`dist/components/`](dist/components/). Each file works on its own,
+also in local HTML opened from disk:
 
 ```html
 <script src="components/input.js" defer></script>
 <script src="components/checkbox.js" defer></script>
 ```
+
+Each component also comes minified, used the same way:
+`components/input.min.js`. Pick either; they behave identically.
+
+`accordion.js` registers both `au-accordion` and `au-accordion-item`;
+`dropdown.js` and `tree.js` likewise register their item elements. Loading a
+file twice, or next to the full bundle, is harmless: each element is defined
+once.
 
 ### File selection and native forms
 
@@ -129,50 +143,153 @@ client-only: send host attributes and optional trigger/hint content from the ser
 not File values in HTML. See [the live demo](demo/file-upload.html) and
 [framework fixtures](test/ssr/README.md).
 
+All form components (`au-input`, `au-textarea`, `au-checkbox`, `au-switch`,
+`au-radio-group`, `au-rating`, `au-file-upload`) take part in forms like native
+fields: they submit under `name`, follow `reset` and disabled fieldsets, block
+submission while invalid, and offer `checkValidity()`, `reportValidity()`,
+`validity`, `validationMessage`, `setCustomValidity()` and `form`. A custom
+message works on top of the component's own checks, such as `required`:
+
+```js
+const email = document.querySelector('au-input[name="email"]');
+email.setCustomValidity('This address is already registered.'); // blocks submission
+email.setCustomValidity('');                                      // back to the field's own checks
+```
+
+Pressing Enter in an `au-input` does not submit the form.
+
 ## Framework Integration
 
 ### Vue 3
 
-Tell the Vue compiler to treat `au-*` elements as custom elements:
+Copy the whole [`dist/`](dist/) folder into your project, for example as
+`src/vendor/accesserty/`. Define the elements and install the Vue plugin:
 
 ```js
-// vite.config.js or vue.config.js
+// main.js
+import './vendor/accesserty/accesserty-ui-kit.js' // defines the au-* elements
+import { createApp } from 'vue'
+import { AccessertyVue } from './vendor/accesserty/accesserty-ui-kit-vue.js'
+import App from './App.vue'
+
+createApp(App).use(AccessertyVue).mount('#app')
+```
+
+Tell the Vue compiler which tags are custom elements. Use the kit's
+`isCustomElement`, not `tag => tag.startsWith('au-')`: the form components below
+are Vue components so that `v-model` works.
+
+```js
+// vite.config.js
+import vue from '@vitejs/plugin-vue'
+import { isCustomElement } from './src/vendor/accesserty/accesserty-ui-kit-vue.js'
+
 export default {
-  vue: {
-    compilerOptions: {
-      isCustomElement: tag => tag.startsWith('au-')
-    }
-  }
+  plugins: [vue({ template: { compilerOptions: { isCustomElement } } })]
 }
 ```
 
-Then use components directly in templates:
+Then bind form components with `v-model`, as with native fields:
 
 ```vue
-<template>
-  <au-input label="Email" name="email" @input="onInput"></au-input>
-</template>
+<au-input label="Email" name="email" v-model.trim="email"></au-input>
+<au-checkbox label="I agree" name="agree" v-model="agree"></au-checkbox>
+<au-radio-group label="Size" name="size" v-model="size">
+  <au-radio value="s">Small</au-radio>
+  <au-radio value="m">Medium</au-radio>
+</au-radio-group>
 ```
 
-### React
+| Component | `v-model` value |
+|---|---|
+| `au-input`, `au-textarea` | string; a number for `type="number"` when the text parses as one (`.trim`, `.number` and `.lazy` work) |
+| `au-checkbox`, `au-switch` | boolean; an array or `Set` of the checked boxes' `value`s; or `true-value` / `false-value` |
+| `au-radio-group` | the selected `<au-radio>`'s `value` as you bound it (`:value="2"` gives `2`), or `null` |
+| `au-rating` | number |
+| `au-file-upload` | array of `File`; set it to `[]` to clear the selection |
 
-React 19+ supports custom elements natively. For React 18, use refs to attach event listeners:
+These follow the rules of Vue's `v-model` on native inputs, so a group of
+checkboxes can share one array:
+
+```vue
+<au-checkbox label="Search" value="search" v-model="sources"></au-checkbox>
+<au-checkbox label="A friend" value="friend" v-model="sources"></au-checkbox>
+<au-checkbox label="Newsletter" true-value="yes" false-value="no" v-model="newsletter"></au-checkbox>
+```
+
+Typed radio values come from `<au-radio>` elements written directly inside the
+group (a `v-for` there is fine); options rendered by a child component of your
+own report their string value.
+
+Other attributes, classes and listeners pass through to the element, and your
+own `@input` or `@change` still runs. A template ref gives access to the
+element's properties and methods (`nameField.value.focus()`); use
+`nameField.value.$el` where an API needs the DOM node itself. The other `au-*`
+elements are used as before, with ordinary attribute and event bindings, and
+explicit `:value` / `@input` bindings keep working. TypeScript declarations
+(`accesserty-ui-kit-vue.d.ts`) sit next to the file and type `v-model` in
+templates through Vue's `GlobalComponents`.
+
+### React and Next.js
+
+Copy the whole [`dist/`](dist/) folder into your project, for example as
+`vendor/accesserty/`. The form components have React counterparts with the
+usual form props, and `defineElements()` defines the `au-*` elements in the
+browser (they cannot be defined during server rendering):
 
 ```jsx
-import { useRef, useEffect } from 'react'
+'use client'
+import { useEffect, useState } from 'react'
+import { AuInput, AuCheckbox, defineElements } from './vendor/accesserty/accesserty-ui-kit-react.js'
 
-function EmailField({ onChange }) {
-  const ref = useRef(null)
+export default function Signup() {
+  const [email, setEmail] = useState('')
+  const [agree, setAgree] = useState(false)
+  useEffect(() => { defineElements() }, [])
 
-  useEffect(() => {
-    const el = ref.current
-    el.addEventListener('input', onChange)
-    return () => el.removeEventListener('input', onChange)
-  }, [onChange])
-
-  return <au-input ref={ref} label="Email" name="email" />
+  return (
+    <form>
+      <AuInput label="Email" name="email" value={email} onChange={e => setEmail(e.target.value)} />
+      <AuCheckbox label="I agree" name="agree" checked={agree} onChange={e => setAgree(e.target.checked)} />
+    </form>
+  )
 }
 ```
+
+| Component | Controlled | Uncontrolled | Read in `onChange` |
+|---|---|---|---|
+| `AuInput`, `AuTextarea` | `value` | `defaultValue` | `e.target.value` |
+| `AuCheckbox`, `AuSwitch` | `checked` | `defaultChecked` | `e.target.checked` |
+| `AuRadioGroup` | `value` | `defaultValue` | `e.target.value` |
+| `AuRating` | `value` | `defaultValue` | `Number(e.target.value)` |
+| `AuFileUpload` | — | — | `e.target.value` (array of `File`) |
+
+`e.target` behaves like the native field: `AuCheckbox` and `AuSwitch` expose
+their `value` (`'on'` unless set), so checked boxes can be collected into an
+array, and `AuInput` has `valueAsNumber` and `valueAsDate`:
+
+```jsx
+<AuCheckbox label="Search" value="search" checked={sources.includes('search')}
+  onChange={e => { const { checked, value } = e.target; setSources(list => checked ? [...list, value] : list.filter(x => x !== value)) }} />
+<AuInput label="Quantity" type="number" value={String(qty)} onChange={e => setQty(e.target.valueAsNumber)} />
+```
+
+As with native inputs, a controlled value wins: if `onChange` does not update
+the state, the field returns to it. One difference: when the field returns to the
+state value, the caret moves to the end of `AuInput` / `AuTextarea`, where a
+native React input keeps it in place. `ref` points at the element itself. Other
+props, `className` and children pass through. Call `defineElements()` once, for
+example in a client component of the root layout. The integration file starts
+with `'use client'`, so Next.js server components can render these components.
+
+Other `au-*` elements are used directly as JSX tags: React 19 sets matching
+properties and attaches `on` + event-name props as listeners, for example
+`<au-accordion-item open={isOpen} onau-toggle={e => setOpen(e.detail.open)}>`.
+The integration needs React 19. TypeScript declarations
+(`accesserty-ui-kit-react.d.ts`) sit next to the file and type every `au-*`
+tag, including event details such as `e.detail.open`.
+`accesserty-ui-kit.d.ts` types the elements themselves, so
+`document.querySelector('au-tabs')` knows `selectedIndex`.
 
 ### Other frameworks
 
@@ -180,40 +297,73 @@ The components are standard custom elements, so any framework that renders them
 can use the kit. Only Vue/Nuxt and React/Next integrations are tested; the
 Angular fixtures were removed in 2.0.6.
 
-### Nuxt 3
+### Nuxt
 
-Copy `accesserty-ui-kit.min.js` to `public/vendors/`, then create a client-only plugin:
-
-```ts
-// plugins/accesserty.client.ts
-export default defineNuxtPlugin(() => {
-  const script = document.createElement('script')
-  script.src = '/vendors/accesserty-ui-kit.min.js'
-  script.defer = true
-  document.head.appendChild(script)
-})
-```
-
-Configure the Vue compiler in `nuxt.config.ts`:
+Copy the whole [`dist/`](dist/) folder into your project, for example as
+`vendor/accesserty/` (not `public/`), and add one module:
 
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
-  vue: {
-    compilerOptions: {
-      isCustomElement: tag => tag.startsWith('au-')
-    }
-  }
+  modules: ['./vendor/accesserty/accesserty-ui-kit-nuxt.js']
 })
 ```
 
-Wrap usage in `<ClientOnly>` to prevent SSR hydration mismatches:
+The module configures the Vue compiler, registers the `v-model` components for
+server and client rendering, and defines the elements in the browser. Use the
+components directly, including `v-model` on the form components listed under
+[Vue 3](#vue-3); no `<ClientOnly>` wrapper is needed. The server renders the
+element tags and their initial values; each component builds its internals when
+the script runs in the browser.
 
-```vue
-<ClientOnly>
-  <au-input label="Email" name="email"></au-input>
-</ClientOnly>
+### Server rendering
+
+Frameworks render the `<au-*>` tags and their attributes on the server. Three
+components can also render their Shadow DOM there, as declarative shadow roots:
+`au-accordion`, `au-tabs` and `au-breadcrumbs`. The page then shows the final
+layout before the script runs (collapsed panels, the selected tab, working
+breadcrumb links) instead of the raw light-DOM content, and the components take
+over that markup instead of rebuilding it.
+
+| Without JavaScript | `au-accordion` | `au-tabs` | `au-breadcrumbs` |
+|---|---|---|---|
+| Looks like the final component | yes | yes | yes |
+| Works | find-in-page and links open collapsed items | only the selected panel is shown | links navigate |
+
+The roots are inserted into the finished HTML, after the framework has rendered:
+never write `<template shadowrootmode>` in a Vue or React template, which breaks
+hydration. The other components keep building their Shadow DOM in the browser.
+
+**Nuxt** — the module above does it for you. Turn it off with
+`modules: [['./vendor/accesserty/accesserty-ui-kit-nuxt.js', { declarativeShadowDom: false }]]`.
+
+**Next.js** — run Next.js with a [custom server](https://nextjs.org/docs/app/building-your-application/configuring/custom-server)
+and wrap its request handler:
+
+```js
+// server.mjs
+import { createServer } from 'node:http'
+import next from 'next'
+import { withDeclarativeShadow } from './vendor/accesserty/accesserty-ui-kit-ssr.js'
+
+const app = next({ dev: false })
+await app.prepare()
+createServer(withDeclarativeShadow(app.getRequestHandler())).listen(3000)
 ```
+
+`withDeclarativeShadow` streams the HTML through the transform and leaves the
+response uncompressed, so compress after it (in a reverse proxy, for example).
+Next.js documents that a custom server cannot be deployed on Vercel or combined
+with `output: 'standalone'`; there, the components still work and render in the
+browser as before.
+
+**Other Node.js servers** — pass the finished HTML through
+`injectDeclarativeShadow(html)` from `accesserty-ui-kit-ssr.js`, or use
+`createInjector()` (`push(chunk)` / `flush()`) for streamed responses.
+
+HTML added with `innerHTML`, `v-html` or `dangerouslySetInnerHTML` does not turn
+declarative templates into shadow roots; the components then build their own and
+remove the unused template.
 
 ### Tree data in plain HTML and frameworks
 
@@ -402,6 +552,19 @@ does not work. Then link it alongside the script:
 ```
 
 The stylesheet is optional and does not replace the script.
+
+The native control rules sit in a cascade layer named `accesserty`, so your own
+unlayered CSS always overrides them, whatever its specificity. If your project
+uses layers too (Tailwind CSS v4 declares `theme, base, components, utilities`),
+declare where the kit goes before loading any stylesheet:
+
+```css
+@layer theme, base, accesserty, components, utilities;
+```
+
+The layer only affects these native-control styles. `<au-*>` components keep
+their styles in Shadow DOM and are customised with `--au-*` variables and
+`::part()` (Step 1), which layers do not change.
 
 ### Step 3: Apply brand colours with tokens
 
@@ -602,7 +765,7 @@ the result clamps to range (-1 when empty). Keep stable keyed slide elements to
 retain selection and dot focus across translations/reordering. A new slide node
 is a new identity. `refresh()` updates immediately; title edits also auto-refresh.
 
-Navigation/current changes and settled scrolling emit `slide-change.detail`
+Navigation/current changes and settled scrolling emit `au-slide-change.detail`
 with `{index,total,title}`. Structural refresh and translation are silent.
 Boundary arrows remain focusable with `aria-disabled` and ignore repeated
 activation. Tab from a dot enters the current slide's first eligible native
@@ -610,7 +773,7 @@ control; nested shadow widgets need their own focus entry. RTL movement uses
 the track's right edge. Forced colors and reduced motion have explicit styles.
 
 Next assigns `ref.current.current` after client registration; Nuxt uses
-`:current.prop="index"` / `@slide-change`. Copy `event.detail.index` into the model. The real SSR fixtures
+`:current.prop="index"` / `@au-slide-change`. Copy `event.detail.index` into the model. The real SSR fixtures
 retain server-produced host/slide nodes but create controls only in the browser;
 they do not establish full framework navigation or screen-reader behavior.
 
@@ -657,11 +820,11 @@ collapsed panels `hidden` and `inert`, so their find-in-page skips them.
 
 The real Next/Nuxt fixtures verify host and slotted-content hydration,
 reactive open state, events, keyboard interaction and a fragment link that opens a
-collapsed item, with client-only registration.
-React binds Boolean `open` and `onau-toggle`; Nuxt uses
-`:open.attr="isOpen ? '' : null"` / `@au-toggle`. Synchronize the Boolean model
-from `event.detail.open`. This is not server-rendered Shadow DOM or a full
-screen-reader/conformance result.
+collapsed item. React binds Boolean `open` and `onau-toggle`; Vue and Nuxt bind
+`:open="isOpen"` / `@au-toggle`. Synchronize the Boolean model from
+`event.detail.open`; an item's initial `open` state emits no event. With
+[server rendering](#server-rendering) the accordion is already collapsed or open
+before the script runs. These are not a full screen-reader/conformance result.
 
 ## Browser Support
 
@@ -701,6 +864,12 @@ npm run build
 ```
 
 Tests run in a real Chromium browser via `@web/test-runner`. No mocking — components are tested as they behave in production.
+
+`npm test --prefix test/ssr` builds Next.js, Nuxt and Vue fixtures and checks
+server rendering, hydration, the Vue and React integrations, declarative shadow
+roots and the TypeScript declarations (run `npm run build` first).
+`node test/browser/declarative.mjs chrome` compares adopted and browser-built
+shadow roots; `npm run test:ssr-stream` checks the streaming server wrapper.
 
 `npm run test:css` checks the shared stylesheet's token, Popover and select-direction
 contracts in installed Chrome, Firefox and Safari. `npm run test:firefox` and

@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "strict": true, "noEmit": true, "target": "ES2022", "module": "ESNext",
+    "moduleResolution": "Bundler", "jsx": "react-jsx", "skipLibCheck": false,
+    "types": ["node"], "lib": ["ES2022", "DOM", "DOM.Iterable"]
+  },
+  "files": ["react.tsx", "vue.ts", "ssr.ts", "nuxt.ts", "dom.ts"]
+}

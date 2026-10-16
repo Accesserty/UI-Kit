@@ -20,7 +20,8 @@ const server=createServer(async(req,res)=>{
 });
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const fixture='test/browser/fixtures/controls.html';
-const urls=[pathToFileURL(resolve(root,fixture)).href,`http://127.0.0.1:${server.address().port}/${fixture}`].flatMap(url=>['source','bundle','min'].map(mode=>url+'?mode='+mode));
+// ES module sources do not load from file:// URLs; the bundles are checked both ways.
+const urls=[pathToFileURL(resolve(root,fixture)).href,`http://127.0.0.1:${server.address().port}/${fixture}`].flatMap(url=>(url.startsWith('file:')?['bundle','min']:['source','bundle','min']).map(mode=>url+'?mode='+mode));
 async function verify(api,url,name){
   const {evaluate:e,key,wait}=api;
   await api.goto(url);
@@ -30,7 +31,7 @@ async function verify(api,url,name){
     window.events={};
     for(const [id,el] of Object.entries(controls)){
       events[id]=[];
-      el.addEventListener(id==='tabs'?'tab-change':'change',event=>events[id].push(event.detail));
+      el.addEventListener(id==='tabs'?'au-tab-change':'change',event=>events[id].push(event.detail));
     }
   });
   let optionTab=false;

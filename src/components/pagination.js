@@ -1,3 +1,5 @@
+import { uid } from '../core/id.js';
+import { upgradeProperties } from '../core/upgrade.js';
 class AuPagination extends HTMLElement {
   static get observedAttributes() {
     return [
@@ -10,22 +12,12 @@ class AuPagination extends HTMLElement {
     ];
   }
 
-  // generate unique IDs for input and select
-  static generateId() {
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const byteArray = new Uint32Array(1);
-      crypto.getRandomValues(byteArray);
-      return `au-pagination-${byteArray[0].toString(36)}`;
-    }
-    return `au-pagination-${Math.random().toString(36).slice(2)}`;
-  }
-
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
     // unique IDs for accessibility
-    this._selectId = AuPagination.generateId();
-    this._jumpId = AuPagination.generateId();
+    this._selectId = uid('au-pagination-');
+    this._jumpId = uid('au-pagination-');
     this.liveRegion = document.createElement('div');
     this.liveRegion.setAttribute('aria-live', 'polite');
     this.liveRegion.setAttribute('role', 'status');
@@ -37,9 +29,7 @@ class AuPagination extends HTMLElement {
   }
 
   connectedCallback() {
-    for (const key of ['total', 'currentPage', 'pageSize', 'pagerCount', 'layout', 'pageSizeOptions']) {
-      if (Object.hasOwn(this, key)) { const value = this[key]; delete this[key]; this[key] = value; }
-    }
+    upgradeProperties(this, ['total', 'currentPage', 'pageSize', 'pagerCount', 'layout', 'pageSizeOptions']);
     this._requestRender();
   }
 
@@ -197,7 +187,7 @@ class AuPagination extends HTMLElement {
         &:disabled {
           cursor: not-allowed;
           pointer-events: none;
-          opacity: 0.4;
+          opacity: var(--au-btn-disabled-opacity, 0.6);
         }
 
         &:hover {
@@ -330,7 +320,7 @@ class AuPagination extends HTMLElement {
         this.pageSize = size;
         this.currentPage = 1;
         // Observers see the complete new state; programmatic writes stay silent.
-        this.dispatchEvent(new CustomEvent('page-size-change', { detail: size, bubbles: true, composed: true }));
+        this.dispatchEvent(new CustomEvent('au-page-size-change', { detail: size, bubbles: true, composed: true }));
         this.announce(this.formatText(this.texts.pageAnnouncement, { page: this.currentPage }));
       };
       info.push(label, select, node('size-suffix', 'span', t.totalItemsSuffix));
@@ -387,7 +377,7 @@ class AuPagination extends HTMLElement {
     if (page > this.totalPages) page = this.totalPages;
     if (page === this.currentPage) return;
     this.currentPage = page;
-    this.dispatchEvent(new CustomEvent('page-change', { detail: page, bubbles: true, composed: true }));
+    this.dispatchEvent(new CustomEvent('au-page-change', { detail: page, bubbles: true, composed: true }));
     this.announce(this.formatText(this.texts.pageAnnouncement, { page: this.currentPage }));
   }
 

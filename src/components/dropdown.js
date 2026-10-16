@@ -1,3 +1,4 @@
+import { uid } from '../core/id.js';
 class AuDropdown extends HTMLElement {
   static get observedAttributes() {
     return ['data-text-trigger'];
@@ -6,8 +7,8 @@ class AuDropdown extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
-    this.triggerId = this.generateId('trigger');
-    this.menuId = this.generateId('menu');
+    this.triggerId = uid('au-dropdown-');
+    this.menuId = uid('au-dropdown-');
     this._returnFocusOnClose = true;
 
     const template = document.createElement('template');
@@ -60,7 +61,7 @@ class AuDropdown extends HTMLElement {
           &:disabled {
             cursor: not-allowed;
             pointer-events: none;
-            opacity: 0.4;
+            opacity: var(--au-dropdown-disabled-opacity, 0.6);
           }
 
           &:hover {
@@ -219,15 +220,6 @@ class AuDropdown extends HTMLElement {
     this.trigger.removeEventListener('click', this._handleFallbackClick);
     this.ownerDocument.removeEventListener('pointerdown', this._dismissFallback);
     this.ownerDocument.removeEventListener('focusin', this._dismissFallback);
-  }
-
-  generateId() {
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const byteArray = new Uint32Array(1);
-      crypto.getRandomValues(byteArray);
-      return `au-dropdown-${byteArray[0].toString(36)}`;
-    }
-    return `au-dropdown-${Math.random().toString(36).slice(2)}`;
   }
 
   updateTriggerFallback() {
@@ -507,7 +499,7 @@ class AuDropdownItem extends HTMLElement {
   }
 
   handleClick() {
-    this.dispatchEvent(new CustomEvent('selected', {
+    this.dispatchEvent(new CustomEvent('au-select', {
       bubbles: true,
       composed: true,
       detail: { value: this.getAttribute('value') }

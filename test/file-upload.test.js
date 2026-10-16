@@ -338,7 +338,7 @@ describe('<au-file-upload>', () => {
     expect(received).to.be.true;
   });
 
-  it('remove-file event is composed and bubbles with the removed File as detail', async () => {
+  it('au-remove-file event is composed and bubbles with the removed File as detail', async () => {
     const wrapper = await fixture(html`
       <div>
         <au-file-upload></au-file-upload>
@@ -351,7 +351,7 @@ describe('<au-file-upload>', () => {
     await el.updateComplete;
 
     let removedFile = null;
-    wrapper.addEventListener('remove-file', e => { removedFile = e.detail; });
+    wrapper.addEventListener('au-remove-file', e => { removedFile = e.detail; });
 
     const removeBtn = el.shadowRoot.querySelector('button[aria-label^="Remove"]');
     removeBtn.click();
@@ -386,7 +386,7 @@ describe('<au-file-upload>', () => {
     const one = new File(['1'], 'one.txt'), two = new File(['2'], 'two.txt');
     el.value = [one, two];
     const received = [], changes = [];
-    wrapper.addEventListener('remove-file', event => received.push(event));
+    wrapper.addEventListener('au-remove-file', event => received.push(event));
     wrapper.addEventListener('change', event => changes.push(event));
     el.removeFile(one);
     el.shadowRoot.querySelector('button.delete').click();

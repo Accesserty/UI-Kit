@@ -22,7 +22,8 @@ const server=createServer(async(req,res)=>{try{
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const http=`http://127.0.0.1:${server.address().port}/`;
 const cases=[];
-for(const base of [pathToFileURL(root).href,http])for(const variant of ['source','bundle','min'])cases.push(new URL('test/browser/fixtures/breadcrumbs-'+variant+'.html',base).href);
+// ES module sources do not load from file:// URLs; the bundles are checked both ways.
+for(const base of [pathToFileURL(root).href,http])for(const variant of (base===http?['source','bundle','min']:['bundle','min']))cases.push(new URL('test/browser/fixtures/breadcrumbs-'+variant+'.html',base).href);
 const ready=()=>document.querySelector('au-breadcrumbs')?.shadowRoot?.querySelectorAll('a').length===2;
 const check=()=>{
   const el=document.querySelector('au-breadcrumbs'),links=[...el.shadowRoot.querySelectorAll('a')];
@@ -75,7 +76,7 @@ try {
       await first.click();await page.waitForURL(new URL('demo/index.html',base).href);
       assert.equal(await page.locator('#components').textContent(),'Components');
     }
-    assert.deepEqual(errors,[]);console.log('Chrome: source/bundle/min classic scripts on file + HTTP, real keyboard navigation, tab order, forced-colors focus, underline, actual demo links PASS');
+    assert.deepEqual(errors,[]);console.log('Chrome: module source on HTTP, classic bundles on file + HTTP, real keyboard navigation, tab order, forced-colors focus, underline, actual demo links PASS');
   }finally{await browser.close();}
   }
   const webdriverBrowsers=browsers.filter(n=>n!=='chrome');
@@ -90,7 +91,8 @@ try {
       if(name==='firefox')builder=builder.setFirefoxOptions(new firefox.Options().addArguments('-headless'));
       driver=await builder.build();
       for(const url of cases){
-        await driver.get(url);await driver.wait(()=>driver.executeScript(ready),5000);verify(await driver.executeScript(check),url);
+        // Safari can return from get() while the previous file:// page is still current.
+        await driver.get(url);await driver.wait(async()=>await driver.executeScript('return location.href')===url&&await driver.executeScript(ready),5000);verify(await driver.executeScript(check),url);
         assert.equal(await driver.executeScript(updateTrail),true);
         let optionTab=false;
         if(name==='safari'){
@@ -111,7 +113,7 @@ try {
         await driver.wait(async()=>await driver.getCurrentUrl()===new URL('./breadcrumbs-target.html#components',url).href,5000);
         console.log(name+' '+url.split('/').at(-1)+' '+new URL(url).protocol+' PASS: deferred properties, dynamic focus, Enter, '+(optionTab?'Option+Tab':'Tab'));
       }
-      console.log(name+': source/bundle/min classic scripts on file + HTTP, native keyboard link activation PASS');
+      console.log(name+': module source on HTTP, classic bundles on file + HTTP, native keyboard link activation PASS');
     }finally{if(driver)await driver.quit();}
   }
   }

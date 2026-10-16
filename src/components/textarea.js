@@ -1,12 +1,14 @@
-class AuTextarea extends HTMLElement {
-  static formAssociated = true;
+import { uid } from '../core/id.js';
+import { upgradeProperties } from '../core/upgrade.js';
+import { forwardAria } from '../core/aria.js';
+import { AuFormElement } from '../core/form-element.js';
+class AuTextarea extends AuFormElement {
 
   constructor() {
     super();
     this.attachShadow({ mode: 'open', delegatesFocus: true });
-    this.internals = this.attachInternals();
 
-    this._id = this.getAttribute('id') || this.generateId();
+    this._id = this.getAttribute('id') || uid('au-textarea-');
     this._initialValue = '';
     this._initialValueSet = false;
 
@@ -80,7 +82,7 @@ class AuTextarea extends HTMLElement {
 
         &:disabled {
           cursor: not-allowed;
-          opacity: 0.5;
+          opacity: var(--au-textarea-disabled-opacity, 0.6);
         }        
       }
       @media (forced-colors: active) {
@@ -136,32 +138,12 @@ class AuTextarea extends HTMLElement {
     return ['value', 'placeholder', 'name', 'rows', 'cols', 'disabled', 'readonly', 'required', 'maxlength', 'minlength', 'autocomplete', 'aria-label', 'aria-labelledby', 'aria-describedby', 'aria-invalid', 'label', 'id'];
   }
 
-  get validity() {
-    return this.internals.validity;
-  }
-
-  get validationMessage() {
-    return this.internals.validationMessage;
-  }
-
-  get willValidate() {
-    return this.internals.willValidate;
-  }
-
-  checkValidity() {
-    return this.internals.checkValidity();
-  }
-
-  reportValidity() {
-    return this.internals.reportValidity();
-  }
-
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
     if (name === 'label' && this.labelEl) {
       this.labelEl.textContent = newValue;
     } else if (name === 'id') {
-      this._id = newValue || this.generateId();
+      this._id = newValue || uid('au-textarea-');
       this.textarea.id = this._id;
       this.labelEl.htmlFor = this._id;
     } else if (name === 'value') {
@@ -178,13 +160,7 @@ class AuTextarea extends HTMLElement {
   }
 
   connectedCallback() {
-    for (const name of ['value', 'name', 'disabled', 'readonly', 'required']) {
-      if (Object.hasOwn(this, name)) {
-        const value = this[name];
-        delete this[name];
-        this[name] = value;
-      }
-    }
+    upgradeProperties(this, ['value', 'name', 'disabled', 'readonly', 'required']);
     if (!this._initialValueSet) {
       this._initialValue = this.textarea.value;
       this._initialValueSet = true;
@@ -256,15 +232,6 @@ class AuTextarea extends HTMLElement {
     val ? this.setAttribute('readonly', '') : this.removeAttribute('readonly');
   }
 
-  generateId() {
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const byteArray = new Uint32Array(1);
-      crypto.getRandomValues(byteArray);
-      return `au-textarea-${byteArray[0].toString(36)}`;
-    }
-    return `au-textarea-${Math.random().toString(36).slice(2)}`;
-  }
-
   _syncControlState() {
     this.textarea.disabled = Boolean(this.disabled || this._formDisabled);
     this.textarea.readOnly = this.readonly;
@@ -282,39 +249,8 @@ class AuTextarea extends HTMLElement {
   }
 
   _syncAccessibleReferences() {
-    const root = this.getRootNode();
-    const resolve = attribute => (this.getAttribute(attribute) || '').trim()
-      .split(/\s+/).filter(Boolean).map(id => root.getElementById?.(id))
-      .filter(element => element && element !== this);
-    const explicit = this.getAttribute('aria-label');
-    let labels = resolve('aria-labelledby');
-    if (!labels.length && !explicit && !this.getAttribute('label') && this.isConnected) {
-      labels = [...this.internals.labels];
-    }
-    const descriptions = resolve('aria-describedby');
-    this.textarea.removeAttribute('aria-labelledby');
-    this.textarea.removeAttribute('aria-describedby');
-    if (explicit) this.textarea.setAttribute('aria-label', explicit);
-    else this.textarea.removeAttribute('aria-label');
+    forwardAria(this, this.textarea, { explicit: this.getAttribute('aria-label'), hasOwnLabel: !!this.getAttribute('label'), mirrorPrefix: 'au-textarea-' });
     this.labelEl.hidden = !this.labelEl.textContent;
-    if ('ariaLabelledByElements' in this.textarea) {
-      this.textarea.ariaLabelledByElements = labels;
-    } else if (!explicit && labels.length) {
-      this.textarea.setAttribute('aria-label', labels.map(element =>
-        element.getAttribute('aria-label') || element.textContent).join(' ').trim());
-    }
-    if ('ariaDescribedByElements' in this.textarea) {
-      this.textarea.ariaDescribedByElements = descriptions;
-    } else if (descriptions.length) {
-      if (!this._descriptionMirror) {
-        this._descriptionMirror = document.createElement('span');
-        this._descriptionMirror.id = this.generateId();
-        this._descriptionMirror.hidden = true;
-        this.shadowRoot.append(this._descriptionMirror);
-      }
-      this._descriptionMirror.textContent = descriptions.map(element => element.textContent).join(' ').trim();
-      this.textarea.setAttribute('aria-describedby', this._descriptionMirror.id);
-    }
   }
 
   disconnectedCallback() {

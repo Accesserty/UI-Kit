@@ -1,11 +1,13 @@
-class AuInput extends HTMLElement {
-  static formAssociated = true;
+import { uid } from '../core/id.js';
+import { upgradeProperties } from '../core/upgrade.js';
+import { forwardAria } from '../core/aria.js';
+import { AuFormElement } from '../core/form-element.js';
+class AuInput extends AuFormElement {
 
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    this.internals = this.attachInternals();
-    this._id = this.getAttribute('id') || this.generateId();
+    this._id = this.getAttribute('id') || uid('au-input-');
 
     const style = document.createElement('style');
     style.textContent = `
@@ -78,6 +80,11 @@ class AuInput extends HTMLElement {
         border-radius: var(--au-input-border-radius, 0.25rem);
         padding: var(--au-input-container-padding-vertical, 0.25rem) var(--au-input-container-padding-horizontal, 0.25rem);
         gap: var(--au-input-container-gap, 0.625rem);
+        &:has(input:disabled) {
+          cursor: not-allowed;
+          opacity: var(--au-input-disabled-opacity, 0.6);
+          input { cursor: not-allowed; }
+        }
         /* prefix/affix 不可被壓縮;窄容器時優先維持同一行,由 input 彈性縮小。
            只有在放不下「可用寬度的輸入框」時才換行,避免 input 被擠到幾乎為零、
            內容溢出元件(WCAG 1.4.10)。 */
@@ -276,7 +283,7 @@ class AuInput extends HTMLElement {
     } else if (name === 'list') {
       this._handleListAttribute(newValue);
     } else if (name === 'id') {
-      this._id = newValue || this.generateId();
+      this._id = newValue || uid('au-input-');
       this.input.id = this._id;
       this.labelEl.htmlFor = this._id;
     } else if (['aria-label','aria-labelledby','aria-describedby'].includes(name)) {
@@ -302,30 +309,8 @@ class AuInput extends HTMLElement {
     this._syncAccessibleReferences();
   }
 
-  get validity() {
-    return this.internals.validity;
-  }
-
-  get validationMessage() {
-    return this.internals.validationMessage;
-  }
-
-  get willValidate() {
-    return this.internals.willValidate;
-  }
-
-  checkValidity() {
-    return this.internals.checkValidity();
-  }
-
-  reportValidity() {
-    return this.internals.reportValidity();
-  }
-
   connectedCallback() {
-    for (const name of ['value','disabled','required','readonly']) {
-      if (Object.hasOwn(this,name)) {const value=this[name];delete this[name];this[name]=value;}
-    }
+    upgradeProperties(this, ['value', 'disabled', 'required', 'readonly']);
     if (!this._initialValueSet) {
       this._initialValue = this.input.value;
       this._initialValueSet = true;
@@ -389,6 +374,22 @@ class AuInput extends HTMLElement {
     }
   }
 
+  // As on a native input: a number (or Date) for number, range and date-like
+  // types, NaN (or null) otherwise. Setting goes through value, so the form
+  // value and validity follow.
+  get valueAsNumber() { return this.input ? this.input.valueAsNumber : NaN; }
+  set valueAsNumber(number) {
+    if (!this.input) return;
+    this.input.valueAsNumber = number;
+    this.value = this.input.value;
+  }
+  get valueAsDate() { return this.input ? this.input.valueAsDate : null; }
+  set valueAsDate(date) {
+    if (!this.input) return;
+    this.input.valueAsDate = date;
+    this.value = this.input.value;
+  }
+
   /** ✅ 開發者用：清空 input 值 */
   clear() {
     if (this.input.disabled || this.input.readOnly || !this.input.value) return;
@@ -440,15 +441,6 @@ class AuInput extends HTMLElement {
   /** ✅ 開發者用：聚焦 input 欄位 */
   focus(options) {
     this.input?.focus(options);
-  }
-
-  generateId() {
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const byteArray = new Uint32Array(1);
-      crypto.getRandomValues(byteArray);
-      return `au-input-${byteArray[0].toString(36)}`;
-    }
-    return `au-input-${Math.random().toString(36).slice(2)}`;
   }
 
   // Forward only the documented input attributes. Copying every host attribute
@@ -514,29 +506,8 @@ class AuInput extends HTMLElement {
 
   _syncAccessibleReferences() {
     if (!this.input) return;
-    const root=this.getRootNode();
-    const resolve=attribute=>(this.getAttribute(attribute)||'').trim().split(/\s+/).filter(Boolean)
-      .map(id=>root.getElementById?.(id)).filter(el=>el && el!==this);
-    const explicit=this.getAttribute('aria-label');
-    let labels=resolve('aria-labelledby');
-    if (!labels.length && !explicit && !this.getAttribute('label') && this.isConnected) labels=[...this.internals.labels];
-    const descriptions=resolve('aria-describedby');
-    this.input.removeAttribute('aria-labelledby');
-    this.input.removeAttribute('aria-describedby');
-    explicit ? this.input.setAttribute('aria-label',explicit) : this.input.removeAttribute('aria-label');
-    this.labelEl.hidden=!this.labelEl.textContent;
-    if ('ariaLabelledByElements' in this.input) this.input.ariaLabelledByElements=labels;
-    else if (!explicit && labels.length) this.input.setAttribute('aria-label',labels.map(el=>el.getAttribute('aria-label')||el.textContent).join(' ').trim());
-    if ('ariaDescribedByElements' in this.input) this.input.ariaDescribedByElements=descriptions;
-    else if (descriptions.length) {
-      if (!this._descriptionMirror) {
-        this._descriptionMirror=document.createElement('span');
-        this._descriptionMirror.id=this.generateId();this._descriptionMirror.hidden=true;
-        this.shadowRoot.append(this._descriptionMirror);
-      }
-      this._descriptionMirror.textContent=descriptions.map(el=>el.textContent).join(' ').trim();
-      this.input.setAttribute('aria-describedby',this._descriptionMirror.id);
-    }
+    forwardAria(this, this.input, { explicit: this.getAttribute('aria-label'), hasOwnLabel: !!this.getAttribute('label'), mirrorPrefix: 'au-input-' });
+    this.labelEl.hidden = !this.labelEl.textContent;
   }
 
   _updateColorCode() {

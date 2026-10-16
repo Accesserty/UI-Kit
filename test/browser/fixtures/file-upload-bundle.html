@@ -15,6 +15,6 @@
 <script>
 let e='consumer-owned';window.consumerSentinel=()=>e;
 window.u=document.getElementById('upload');window.uploadForm=document.getElementById('upload-form');window.fields=document.getElementById('fields');
-u.value=[];window.events=[];u.addEventListener('change',()=>events.push('change'));u.addEventListener('remove-file',e=>events.push(e.detail.name));
+u.value=[];window.events=[];u.addEventListener('change',()=>events.push('change'));u.addEventListener('au-remove-file',e=>events.push(e.detail.name));
 uploadForm.addEventListener('submit',e=>e.preventDefault());
 </script></html>
