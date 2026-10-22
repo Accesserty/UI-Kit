@@ -13,14 +13,31 @@ const sourceDate = process.env.SOURCE_DATE_EPOCH
   : '';
 const banner = `/*! Accesserty UI Kit v${pkg.version}${sourceDate} */`;
 
+// Rolldown may print renderChunk results again. Run the existing Terser
+// plugin after code generation so string contents and compact output survive.
+function minifyFinalOutput() {
+  const { renderChunk, ...plugin } = terser();
+  return {
+    ...plugin,
+    name: 'terser-final-output',
+    async generateBundle(output, bundle) {
+      for (const chunk of Object.values(bundle)) {
+        if (chunk.type !== 'chunk') continue;
+        const result = await renderChunk.call(this, chunk.code, chunk, output);
+        chunk.code = typeof result === 'string' ? result : result.code;
+      }
+    },
+  };
+}
+
 export default defineConfig({
   build: {
     // 元件原本就用到 ES2022（static 欄位、Object.hasOwn），不需降轉。
-    // 降轉 static 欄位時，esbuild 會把 __defProp 等輔助函式放在 IIFE 外，變成全域變數。
+    // 保留原生 class 欄位，避免降轉輔助函式改變單檔載入的邊界。
     target: 'es2022',
-    // esbuild minify 會剝掉所有註解(包含 /*! banner),改由第二個 output 的 terser 負責壓縮
+    // 停用 Vite 的預設壓縮；只有第二組輸出交給 Terser，保留版本註記。
     minify: false,
-    rollupOptions: {
+    rolldownOptions: {
       input: './src/accesserty-ui-kit.js',
       output: [
         {
@@ -36,7 +53,8 @@ export default defineConfig({
           entryFileNames: '[name].min.js',
           format: 'iife',
           banner,
-          plugins: [terser()]
+          minify: false,
+          plugins: [minifyFinalOutput()]
         }
       ]
     }

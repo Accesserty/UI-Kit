@@ -1,4 +1,4 @@
-/*! Accesserty UI Kit v3.0.0 */
+/*! Accesserty UI Kit v3.0.1 */
 // Text and attribute escaping for markup rendered on the server and in the browser.
 const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 

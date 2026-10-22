@@ -1,6 +1,6 @@
 {
   "name": "accesserty-ui-kit",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Accesserty UI Kit is a library of web components built with Web Components technology, designed with built-in accessibility semantics, structure, and interaction support by default.",
   "author": "Accesserty",
   "keywords": [
@@ -19,6 +19,10 @@
   },
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "26.12.1",
+    "npm": ">=11.20.0 <12"
+  },
   "license": "MIT",
   "files": [
     "dist",
@@ -72,11 +76,11 @@
     "test:ssr-stream": "node test/ssr-stream.mjs"
   },
   "devDependencies": {
-    "@open-wc/testing": "^4.0.0",
+    "@open-wc/testing": "^5.0.0",
     "@rollup/plugin-terser": "^1.0.0",
     "@web/test-runner": "^1.0.0",
-    "rollup": "4.62.2",
-    "vite": "^6.3.4"
+    "rollup": "4.64.12",
+    "vite": "^8.3.5"
   },
   "peerDependencies": {
     "vue": "^3.4.0",

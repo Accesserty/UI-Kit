@@ -1,4 +1,4 @@
-/*! Accesserty UI Kit v3.0.0 */
+/*! Accesserty UI Kit v3.0.1 */
 (function () {
   'use strict';
 

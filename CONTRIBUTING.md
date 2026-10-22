@@ -7,12 +7,15 @@ This document explains how to set up your development environment, create new co
 
 ## Prerequisites
 
-- **Node.js 22 or higher** — components are tested in a real Chromium instance via `@web/test-runner`
+- **Node.js from [`.nvmrc`](.nvmrc) and npm 11** — components are tested in a real Chromium instance via `@web/test-runner`
 - **Git**
 
 ```bash
-# Verify your Node version
-node --version  # must be v20.x or higher
+# Select and verify the repository's Node version (with nvm)
+nvm install
+nvm use
+node --version
+npm --version
 ```
 
 

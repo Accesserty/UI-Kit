@@ -1,4 +1,4 @@
-/*! Accesserty UI Kit v3.0.0 */
+/*! Accesserty UI Kit v3.0.1 */
 import { fileURLToPath } from 'node:url';
 import { isCustomElement } from './accesserty-ui-kit-vue.js';
 import 'vue';

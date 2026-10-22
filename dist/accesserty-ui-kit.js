@@ -1,31 +1,45 @@
-/*! Accesserty UI Kit v3.0.0 */
+/*! Accesserty UI Kit v3.0.1 */
 (function() {
-  "use strict";
-  function setupShadow(host, render, bind) {
-    const internals = host.attachInternals();
-    const ready = () => {
-      const adopted = !!internals.shadowRoot;
-      const root = internals.shadowRoot ?? host.attachShadow({ mode: "open" });
-      if (!adopted) {
-        host.querySelector(":scope > template[shadowrootmode]")?.remove();
-        root.innerHTML = render();
-      }
-      bind(root, adopted);
-    };
-    if (internals.shadowRoot || host.ownerDocument.readyState !== "loading") ready();
-    else host.ownerDocument.addEventListener("DOMContentLoaded", ready, { once: true });
-  }
-  const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
-  function escapeHTML(value) {
-    return String(value ?? "").replace(/[&<>"']/g, (character) => entities[character]);
-  }
-  const DEFAULT_EXCLUSIVE_HINT = "Only one section may be expanded at a time.";
-  const VISUALLY_HIDDEN = "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;padding:0;";
-  const accordionStyles = `:host([hidden]:not([hidden="until-found" i])) { display: none; }`;
-  function renderAccordion({ exclusive = false, hint = DEFAULT_EXCLUSIVE_HINT } = {}) {
-    return `<style>${accordionStyles}</style><span id="hint" style="${VISUALLY_HIDDEN}"${exclusive ? "" : " hidden"}>${exclusive ? escapeHTML(hint) : ""}</span><div class="au-accordion"${exclusive ? ' aria-describedby="hint"' : ""}><slot></slot></div>`;
-  }
-  const accordionItemStyles = `
+	// src/core/declarative.js
+	/**
+	* @param {HTMLElement} host
+	* @param {() => string} render   markup for a shadow root the component builds itself
+	* @param {(root: ShadowRoot, adopted: boolean) => void} bind  look up nodes, add listeners, sync state
+	*/
+	function setupShadow(host, render, bind) {
+		const internals = host.attachInternals();
+		const ready = () => {
+			const adopted = !!internals.shadowRoot;
+			const root = internals.shadowRoot ?? host.attachShadow({ mode: "open" });
+			if (!adopted) {
+				host.querySelector(":scope > template[shadowrootmode]")?.remove();
+				root.innerHTML = render();
+			}
+			bind(root, adopted);
+		};
+		if (internals.shadowRoot || host.ownerDocument.readyState !== "loading") ready();
+		else host.ownerDocument.addEventListener("DOMContentLoaded", ready, { once: true });
+	}
+	// src/views/escape.js
+	var entities = {
+		"&": "&amp;",
+		"<": "&lt;",
+		">": "&gt;",
+		"\"": "&quot;",
+		"'": "&#39;"
+	};
+	function escapeHTML(value) {
+		return String(value ?? "").replace(/[&<>"']/g, (character) => entities[character]);
+	}
+	// src/views/accordion.js
+	var DEFAULT_EXCLUSIVE_HINT = "Only one section may be expanded at a time.";
+	var VISUALLY_HIDDEN = "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;padding:0;";
+	var accordionStyles = `:host([hidden]:not([hidden="until-found" i])) { display: none; }`;
+	/** @param { exclusive?: boolean, hint?: string } [state] */
+	function renderAccordion({ exclusive = false, hint = DEFAULT_EXCLUSIVE_HINT } = {}) {
+		return `<style>${accordionStyles}</style><span id="hint" style="${VISUALLY_HIDDEN}"${exclusive ? "" : " hidden"}>${exclusive ? escapeHTML(hint) : ""}</span><div class="au-accordion"${exclusive ? " aria-describedby=\"hint\"" : ""}><slot></slot></div>`;
+	}
+	var accordionItemStyles = `
   :host([hidden]:not([hidden="until-found" i])) { display: none; }
       .au-accordion-item {
         box-sizing: border-box;
@@ -165,211 +179,194 @@
       @media (forced-colors: active) { button:focus-visible { outline: 2px solid Highlight; outline-offset:-2px; } }
       @media (prefers-reduced-motion: reduce) { button, button .icon { transition: none; } }
 `;
-  function renderAccordionItem({ open = false, headingLevel = 3, region = true, hint = "" } = {}) {
-    const level = Number.isInteger(headingLevel) && headingLevel >= 1 && headingLevel <= 6 ? headingLevel : 3;
-    return `<div class="au-accordion-item"><style>${accordionItemStyles}</style><div role="heading" aria-level="${level}"><button type="button" id="title" aria-expanded="${open}" aria-controls="region" part="button"${hint ? ' aria-describedby="hint"' : ""}><div class="heading"><slot name="heading"></slot></div><div class="info"><div><slot name="sub"></slot></div><div class="icon" aria-hidden="true"><slot name="icon"></slot></div></div></button></div><span class="exclusive-hint" id="hint">${escapeHTML(hint)}</span><div class="region"${region ? ' role="region" aria-labelledby="title"' : ""} id="region"${open ? "" : ' hidden="until-found"'} part="region"><slot name="content"></slot></div></div>`;
-  }
-  function upgradeProperties(element, names) {
-    for (const name of names) {
-      if (Object.hasOwn(element, name)) {
-        const value = element[name];
-        delete element[name];
-        element[name] = value;
-      }
-    }
-  }
-  class AuAccordion extends HTMLElement {
-    constructor() {
-      super();
-      this._onToggle = this._handleToggle.bind(this);
-      this._childrenObserver = new MutationObserver(() => this._syncItems());
-      setupShadow(this, () => renderAccordion(), (root) => {
-        this._exclusiveHint = root.getElementById("hint");
-        this._container = root.querySelector(".au-accordion");
-        this._bound = true;
-        if (this.isConnected) this.connectedCallback();
-      });
-    }
-    connectedCallback() {
-      if (!this._bound) return;
-      upgradeProperties(this, ["exclusive"]);
-      this.addEventListener("au-toggle", this._onToggle);
-      this._childrenObserver.observe(this, { childList: true });
-      this._updateExclusiveAria();
-    }
-    disconnectedCallback() {
-      this.removeEventListener("au-toggle", this._onToggle);
-      this._childrenObserver.disconnect();
-    }
-    static get observedAttributes() {
-      return ["exclusive", "data-text-exclusive-hint"];
-    }
-    get exclusive() {
-      return this.hasAttribute("exclusive");
-    }
-    set exclusive(val) {
-      if (val) {
-        this.setAttribute("exclusive", "");
-      } else {
-        this.removeAttribute("exclusive");
-      }
-    }
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (!this._bound) return;
-      if (name === "exclusive" && oldValue !== newValue) {
-        this._updateExclusiveAria();
-      }
-      if (name === "data-text-exclusive-hint" && oldValue !== newValue) {
-        this._updateExclusiveHint();
-      }
-    }
-    _updateExclusiveHint() {
-      if (!this._exclusiveHint) return;
-      this._exclusiveHint.hidden = !this.exclusive;
-      this._exclusiveHint.textContent = this.exclusive ? this.getAttribute("data-text-exclusive-hint") || DEFAULT_EXCLUSIVE_HINT : "";
-      this._syncItems();
-    }
-    _updateExclusiveAria() {
-      if (this.exclusive) {
-        this._container.setAttribute("aria-describedby", this._exclusiveHint.id);
-      } else {
-        this._container.removeAttribute("aria-describedby");
-      }
-      this._updateExclusiveHint();
-    }
-    _handleToggle(e) {
-      const item = e.composedPath()[0];
-      if (item?.parentElement !== this || item.localName !== "au-accordion-item") return;
-      if (this.exclusive && e.detail?.open) this._syncItems(item);
-    }
-    _syncItems(preferred) {
-      const items = [...this.children].filter((el) => el.localName === "au-accordion-item");
-      const keep = preferred || items.find((item) => item.hasAttribute("open"));
-      for (const item of items) {
-        item.updateExclusiveHint?.();
-        if (this.exclusive && item !== keep && item.hasAttribute("open")) item.removeAttribute("open");
-      }
-    }
-  }
-  class AuAccordionItem extends HTMLElement {
-    constructor() {
-      super();
-      this._initialOpen = this.isConnected && this.hasAttribute("open");
-      setupShadow(this, () => renderAccordionItem(), (root) => {
-        this.button = root.getElementById("title");
-        this.region = root.getElementById("region");
-        this.heading = root.querySelector('[role="heading"]');
-        this._hint = root.getElementById("hint");
-        this.button.addEventListener("click", () => this.toggleAccordion());
-        this.region.addEventListener("beforematch", () => {
-          this._revealing = true;
-          try {
-            this.open = true;
-          } finally {
-            this._revealing = false;
-          }
-          setTimeout(() => this.updateExpanded());
-        });
-        this._bound = true;
-        if (this.isConnected) this.connectedCallback();
-      });
-    }
-    connectedCallback() {
-      if (!this._bound) return;
-      upgradeProperties(this, ["open"]);
-      this.updateExpanded();
-      this.updateSemantics();
-      this.updateExclusiveHint();
-    }
-    static supportsUntilFound = typeof HTMLElement !== "undefined" && "onbeforematch" in HTMLElement.prototype;
-    static get observedAttributes() {
-      return ["open", "heading-level", "no-region"];
-    }
-    get open() {
-      return this.hasAttribute("open");
-    }
-    set open(val) {
-      if (val) {
-        this.setAttribute("open", "");
-      } else {
-        this.removeAttribute("open");
-      }
-    }
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (oldValue === newValue || !this._bound) return;
-      if (name !== "open") {
-        this.updateSemantics();
-        return;
-      }
-      this.updateExpanded();
-      const initial = this._initialOpen && oldValue === null;
-      this._initialOpen = false;
-      if (this.isConnected && !initial) {
-        this.dispatchEvent(new CustomEvent("au-toggle", {
-          bubbles: true,
-          composed: true,
-          detail: { open: this.open }
-        }));
-      }
-    }
-    updateExpanded() {
-      if (!this._bound) return;
-      const isOpen = this.hasAttribute("open");
-      let active = this.ownerDocument.activeElement;
-      while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
-      for (let node = active; !isOpen && node; node = node.assignedSlot || node.parentNode || node.host) {
-        if (node === this.region) {
-          this.button.focus({ preventScroll: true });
-          break;
-        }
-      }
-      this.button.setAttribute("aria-expanded", isOpen);
-      if (isOpen && this._revealing) return;
-      if (isOpen) {
-        this.region.removeAttribute("hidden");
-        this.region.inert = false;
-      } else if (AuAccordionItem.supportsUntilFound) {
-        this.region.setAttribute("hidden", "until-found");
-        this.region.inert = false;
-      } else {
-        this.region.hidden = true;
-        this.region.inert = true;
-      }
-    }
-    updateSemantics() {
-      if (!this._bound) return;
-      const level = Number(this.getAttribute("heading-level"));
-      this.heading.setAttribute("aria-level", String(Number.isInteger(level) && level >= 1 && level <= 6 ? level : 3));
-      if (this.hasAttribute("no-region")) {
-        this.region.removeAttribute("role");
-        this.region.removeAttribute("aria-labelledby");
-      } else {
-        this.region.setAttribute("role", "region");
-        this.region.setAttribute("aria-labelledby", this.button.id);
-      }
-    }
-    updateExclusiveHint() {
-      if (!this._bound) return;
-      const owner = this.parentElement;
-      const exclusive = owner?.localName === "au-accordion" && owner.hasAttribute("exclusive");
-      this._hint.textContent = exclusive ? owner.getAttribute("data-text-exclusive-hint") || DEFAULT_EXCLUSIVE_HINT : "";
-      if (exclusive) this.button.setAttribute("aria-describedby", this._hint.id);
-      else this.button.removeAttribute("aria-describedby");
-    }
-    toggleAccordion() {
-      this.open = !this.open;
-    }
-  }
-  if (typeof customElements !== "undefined" && !customElements.get("au-accordion-item")) {
-    customElements.define("au-accordion-item", AuAccordionItem);
-  }
-  if (typeof customElements !== "undefined" && !customElements.get("au-accordion")) {
-    customElements.define("au-accordion", AuAccordion);
-  }
-  const DEFAULT_LABEL = "Breadcrumbs";
-  const DEFAULT_SEPARATOR = "/";
-  const DEFAULT_LINK_TITLE_PREFIX = "go to";
-  const breadcrumbsStyles = `
+	/**
+	* @param {{ open?: boolean, headingLevel?: number, region?: boolean, hint?: string }} [state]
+	* `hint` is the group's exclusive instruction, or empty when the group is not exclusive.
+	*/
+	function renderAccordionItem({ open = false, headingLevel = 3, region = true, hint = "" } = {}) {
+		return `<div class="au-accordion-item"><style>${accordionItemStyles}</style><div role="heading" aria-level="${Number.isInteger(headingLevel) && headingLevel >= 1 && headingLevel <= 6 ? headingLevel : 3}"><button type="button" id="title" aria-expanded="${open}" aria-controls="region" part="button"${hint ? " aria-describedby=\"hint\"" : ""}><div class="heading"><slot name="heading"></slot></div><div class="info"><div><slot name="sub"></slot></div><div class="icon" aria-hidden="true"><slot name="icon"></slot></div></div></button></div><span class="exclusive-hint" id="hint">${escapeHTML(hint)}</span><div class="region"${region ? " role=\"region\" aria-labelledby=\"title\"" : ""} id="region"${open ? "" : " hidden=\"until-found\""} part="region"><slot name="content"></slot></div></div>`;
+	}
+	// src/core/upgrade.js
+	function upgradeProperties(element, names) {
+		for (const name of names) if (Object.hasOwn(element, name)) {
+			const value = element[name];
+			delete element[name];
+			element[name] = value;
+		}
+	}
+	// src/components/accordion.js
+	var AuAccordion = class extends HTMLElement {
+		constructor() {
+			super();
+			this._onToggle = this._handleToggle.bind(this);
+			this._childrenObserver = new MutationObserver(() => this._syncItems());
+			setupShadow(this, () => renderAccordion(), (root) => {
+				this._exclusiveHint = root.getElementById("hint");
+				this._container = root.querySelector(".au-accordion");
+				this._bound = true;
+				if (this.isConnected) this.connectedCallback();
+			});
+		}
+		connectedCallback() {
+			if (!this._bound) return;
+			upgradeProperties(this, ["exclusive"]);
+			this.addEventListener("au-toggle", this._onToggle);
+			this._childrenObserver.observe(this, { childList: true });
+			this._updateExclusiveAria();
+		}
+		disconnectedCallback() {
+			this.removeEventListener("au-toggle", this._onToggle);
+			this._childrenObserver.disconnect();
+		}
+		static get observedAttributes() {
+			return ["exclusive", "data-text-exclusive-hint"];
+		}
+		get exclusive() {
+			return this.hasAttribute("exclusive");
+		}
+		set exclusive(val) {
+			if (val) this.setAttribute("exclusive", "");
+			else this.removeAttribute("exclusive");
+		}
+		attributeChangedCallback(name, oldValue, newValue) {
+			if (!this._bound) return;
+			if (name === "exclusive" && oldValue !== newValue) this._updateExclusiveAria();
+			if (name === "data-text-exclusive-hint" && oldValue !== newValue) this._updateExclusiveHint();
+		}
+		_updateExclusiveHint() {
+			if (!this._exclusiveHint) return;
+			this._exclusiveHint.hidden = !this.exclusive;
+			this._exclusiveHint.textContent = this.exclusive ? this.getAttribute("data-text-exclusive-hint") || "Only one section may be expanded at a time." : "";
+			this._syncItems();
+		}
+		_updateExclusiveAria() {
+			if (this.exclusive) this._container.setAttribute("aria-describedby", this._exclusiveHint.id);
+			else this._container.removeAttribute("aria-describedby");
+			this._updateExclusiveHint();
+		}
+		_handleToggle(e) {
+			const item = e.composedPath()[0];
+			if (item?.parentElement !== this || item.localName !== "au-accordion-item") return;
+			if (this.exclusive && e.detail?.open) this._syncItems(item);
+		}
+		_syncItems(preferred) {
+			const items = [...this.children].filter((el) => el.localName === "au-accordion-item");
+			const keep = preferred || items.find((item) => item.hasAttribute("open"));
+			for (const item of items) {
+				item.updateExclusiveHint?.();
+				if (this.exclusive && item !== keep && item.hasAttribute("open")) item.removeAttribute("open");
+			}
+		}
+	};
+	var AuAccordionItem = class AuAccordionItem extends HTMLElement {
+		constructor() {
+			super();
+			this._initialOpen = this.isConnected && this.hasAttribute("open");
+			setupShadow(this, () => renderAccordionItem(), (root) => {
+				this.button = root.getElementById("title");
+				this.region = root.getElementById("region");
+				this.heading = root.querySelector("[role=\"heading\"]");
+				this._hint = root.getElementById("hint");
+				this.button.addEventListener("click", () => this.toggleAccordion());
+				this.region.addEventListener("beforematch", () => {
+					this._revealing = true;
+					try {
+						this.open = true;
+					} finally {
+						this._revealing = false;
+					}
+					setTimeout(() => this.updateExpanded());
+				});
+				this._bound = true;
+				if (this.isConnected) this.connectedCallback();
+			});
+		}
+		connectedCallback() {
+			if (!this._bound) return;
+			upgradeProperties(this, ["open"]);
+			this.updateExpanded();
+			this.updateSemantics();
+			this.updateExclusiveHint();
+		}
+		static supportsUntilFound = typeof HTMLElement !== "undefined" && "onbeforematch" in HTMLElement.prototype;
+		static get observedAttributes() {
+			return [
+				"open",
+				"heading-level",
+				"no-region"
+			];
+		}
+		get open() {
+			return this.hasAttribute("open");
+		}
+		set open(val) {
+			if (val) this.setAttribute("open", "");
+			else this.removeAttribute("open");
+		}
+		attributeChangedCallback(name, oldValue, newValue) {
+			if (oldValue === newValue || !this._bound) return;
+			if (name !== "open") {
+				this.updateSemantics();
+				return;
+			}
+			this.updateExpanded();
+			const initial = this._initialOpen && oldValue === null;
+			this._initialOpen = false;
+			if (this.isConnected && !initial) this.dispatchEvent(new CustomEvent("au-toggle", {
+				bubbles: true,
+				composed: true,
+				detail: { open: this.open }
+			}));
+		}
+		updateExpanded() {
+			if (!this._bound) return;
+			const isOpen = this.hasAttribute("open");
+			let active = this.ownerDocument.activeElement;
+			while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+			for (let node = active; !isOpen && node; node = node.assignedSlot || node.parentNode || node.host) if (node === this.region) {
+				this.button.focus({ preventScroll: true });
+				break;
+			}
+			this.button.setAttribute("aria-expanded", isOpen);
+			if (isOpen && this._revealing) return;
+			if (isOpen) {
+				this.region.removeAttribute("hidden");
+				this.region.inert = false;
+			} else if (AuAccordionItem.supportsUntilFound) {
+				this.region.setAttribute("hidden", "until-found");
+				this.region.inert = false;
+			} else {
+				this.region.hidden = true;
+				this.region.inert = true;
+			}
+		}
+		updateSemantics() {
+			if (!this._bound) return;
+			const level = Number(this.getAttribute("heading-level"));
+			this.heading.setAttribute("aria-level", String(Number.isInteger(level) && level >= 1 && level <= 6 ? level : 3));
+			if (this.hasAttribute("no-region")) {
+				this.region.removeAttribute("role");
+				this.region.removeAttribute("aria-labelledby");
+			} else {
+				this.region.setAttribute("role", "region");
+				this.region.setAttribute("aria-labelledby", this.button.id);
+			}
+		}
+		updateExclusiveHint() {
+			if (!this._bound) return;
+			const owner = this.parentElement;
+			const exclusive = owner?.localName === "au-accordion" && owner.hasAttribute("exclusive");
+			this._hint.textContent = exclusive ? owner.getAttribute("data-text-exclusive-hint") || "Only one section may be expanded at a time." : "";
+			if (exclusive) this.button.setAttribute("aria-describedby", this._hint.id);
+			else this.button.removeAttribute("aria-describedby");
+		}
+		toggleAccordion() {
+			this.open = !this.open;
+		}
+	};
+	if (typeof customElements !== "undefined" && !customElements.get("au-accordion-item")) customElements.define("au-accordion-item", AuAccordionItem);
+	if (typeof customElements !== "undefined" && !customElements.get("au-accordion")) customElements.define("au-accordion", AuAccordion);
+	var breadcrumbsStyles = `
   :host([hidden]:not([hidden="until-found" i])) { display: none; }
     nav {
       background-color: var(--au-breadcrumbs-bg, transparent);
@@ -453,191 +450,195 @@
       }
     }
 `;
-  function parseItems(value) {
-    if (!value) return [];
-    try {
-      const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed.filter((item) => item && typeof item === "object" && !Array.isArray(item) && "text" in item) : [];
-    } catch {
-      return [];
-    }
-  }
-  function linkTitle(text, index, { template, prefix } = {}) {
-    return template ? template.replaceAll("{text}", String(text ?? "")).replaceAll("{index}", String(index + 1)) : `${prefix || DEFAULT_LINK_TITLE_PREFIX} ${text ?? ""}`;
-  }
-  function renderBreadcrumbs({ id, className, label, separator = DEFAULT_SEPARATOR, items = [] } = {}) {
-    const list = items.map((item, index) => {
-      const current = index === items.length - 1;
-      const content = `<slot name="icon-${index + 1}"></slot><span>${escapeHTML(item.text ?? "")}</span>`;
-      const link = !current && item.href ? `<a class="item" href="${escapeHTML(item.href)}" title="${escapeHTML(item.title ?? "")}">${content}</a>` : `<span class="item"${current ? ' aria-current="page"' : ""}>${content}</span>`;
-      return `<li>${link}${current ? "" : `<span aria-hidden="true">${escapeHTML(separator)}</span>`}</li>`;
-    }).join("");
-    const attrs = (id ? ` id="${escapeHTML(id)}"` : "") + (className ? ` class="${escapeHTML(className)}"` : "") + (label ? ` aria-label="${escapeHTML(label)}"` : "");
-    return `<style>${breadcrumbsStyles}</style><nav tabindex="-1"${attrs}><ol>${list}</ol></nav>`;
-  }
-  class AuBreadcrumbs extends HTMLElement {
-    constructor() {
-      super();
-      upgradeProperties(this, ["items", "separator"]);
-      setupShadow(this, () => renderBreadcrumbs(), (root) => {
-        this._nav = root.querySelector("nav");
-        this._bound = true;
-        if (this.isConnected) this.connectedCallback();
-      });
-    }
-    connectedCallback() {
-      if (!this._bound) return;
-      this.render();
-      this.observeLabelRoot();
-    }
-    disconnectedCallback() {
-      this._labelObserver?.disconnect();
-    }
-    static get observedAttributes() {
-      return [
-        "id",
-        "class",
-        "aria-label",
-        "aria-labelledby",
-        "label",
-        "items",
-        "separator",
-        "data-link-title-prefix",
-        "data-link-title-template"
-      ];
-    }
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (oldValue !== newValue) {
-        this.render();
-        if (name === "aria-labelledby" && this.isConnected) this.observeLabelRoot();
-      }
-    }
-    get items() {
-      return parseItems(this.getAttribute("items"));
-    }
-    set items(val) {
-      if (typeof val === "string") {
-        this.setAttribute("items", val);
-      } else if (Array.isArray(val) || val && typeof val === "object") {
-        const newVal = Array.isArray(val) ? val : [val];
-        this.setAttribute("items", JSON.stringify(newVal));
-      } else {
-        console.error("Invalid value provided for 'items'. Expected string (JSON) or Array:", val);
-        return;
-      }
-    }
-    get separator() {
-      return this.getAttribute("separator") || DEFAULT_SEPARATOR;
-    }
-    set separator(val) {
-      this.setAttribute("separator", val);
-    }
-    formatText(template, values = {}) {
-      return Object.entries(values).reduce((message, [key, value]) => {
-        return message.replaceAll(`{${key}}`, String(value));
-      }, template);
-    }
-    navigationURL(value) {
-      if (typeof value !== "string" || !value.trim()) return null;
-      try {
-        const url = new URL(value, this.ownerDocument.baseURI);
-        if (["http:", "https:"].includes(url.protocol)) return url.href;
-        const documentURL = new URL(this.ownerDocument.URL);
-        return url.protocol === "file:" && documentURL.protocol === "file:" && url.host === "" && documentURL.host === "" ? url.href : null;
-      } catch {
-        return null;
-      }
-    }
-    observeLabelRoot() {
-      this._labelObserver?.disconnect();
-      if (!this.getAttribute("aria-labelledby")?.trim()) return;
-      this._labelObserver ??= new MutationObserver(() => this.syncAccessibleLabel());
-      this._labelObserver.observe(this.getRootNode(), {
-        childList: true,
-        subtree: true,
-        characterData: true,
-        attributes: true,
-        attributeFilter: ["id", "aria-label"]
-      });
-      this.syncAccessibleLabel();
-    }
-    syncAccessibleLabel() {
-      if (!this._nav) return;
-      const root = this.getRootNode();
-      const ids = (this.getAttribute("aria-labelledby") || "").trim().split(/\s+/).filter(Boolean);
-      const labels = ids.map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
-      const fallback = this.getAttribute("aria-label")?.trim() || this.getAttribute("label")?.trim() || DEFAULT_LABEL;
-      if ("ariaLabelledByElements" in this._nav) {
-        this._nav.ariaLabelledByElements = labels;
-        this._nav.setAttribute("aria-label", fallback);
-      } else {
-        const text = labels.map((el) => el.getAttribute("aria-label") || el.textContent).join(" ").trim();
-        this._nav.setAttribute("aria-label", this.getAttribute("aria-label")?.trim() || text || fallback);
-      }
-    }
-    renderItems() {
-      const items = this.items;
-      const list = this._nav.querySelector("ol");
-      const active = this.shadowRoot.activeElement;
-      const titles = { template: this.getAttribute("data-link-title-template"), prefix: this.getAttribute("data-link-title-prefix") || DEFAULT_LINK_TITLE_PREFIX };
-      items.forEach((item, index) => {
-        const current = index === items.length - 1;
-        const url = current ? null : this.navigationURL(item.url);
-        const li = list.children[index] || list.appendChild(document.createElement("li"));
-        let content = li.firstElementChild;
-        const tag = url ? "A" : "SPAN";
-        if (!content || content.tagName !== tag) {
-          const replacement = document.createElement(tag.toLowerCase());
-          const icon = document.createElement("slot");
-          const text = document.createElement("span");
-          replacement.append(icon, text);
-          content ? content.replaceWith(replacement) : li.append(replacement);
-          content = replacement;
-        }
-        content.className = "item";
-        content.firstElementChild.name = `icon-${index + 1}`;
-        content.lastElementChild.textContent = String(item.text ?? "");
-        current ? content.setAttribute("aria-current", "page") : content.removeAttribute("aria-current");
-        if (url) {
-          content.href = url;
-          content.title = linkTitle(item.text, index, titles);
-        }
-        let separator = li.querySelector('[aria-hidden="true"]');
-        if (current) separator?.remove();
-        else {
-          if (!separator) {
-            separator = document.createElement("span");
-            separator.setAttribute("aria-hidden", "true");
-            li.append(separator);
-          }
-          separator.textContent = this.separator;
-        }
-      });
-      while (list.children.length > items.length) list.lastElementChild.remove();
-      if (active && !this.shadowRoot.contains(active)) this._nav.focus();
-    }
-    render() {
-      if (!this._bound) return;
-      for (const name of ["id", "class"]) {
-        this.hasAttribute(name) ? this._nav.setAttribute(name, this.getAttribute(name)) : this._nav.removeAttribute(name);
-      }
-      this.syncAccessibleLabel();
-      this.renderItems();
-    }
-  }
-  if (typeof customElements !== "undefined" && !customElements.get("au-breadcrumbs")) {
-    customElements.define("au-breadcrumbs", AuBreadcrumbs);
-  }
-  class AuCard extends HTMLElement {
-    constructor() {
-      super();
-      this.shadow = this.attachShadow({ mode: "open" });
-      this.render();
-    }
-    render() {
-      if (this._rendered) return;
-      this._rendered = true;
-      this.shadowRoot.innerHTML = `
+	/** The `items` attribute: a JSON array of objects with `text` (and `url`). */
+	function parseItems(value) {
+		if (!value) return [];
+		try {
+			const parsed = JSON.parse(value);
+			return Array.isArray(parsed) ? parsed.filter((item) => item && typeof item === "object" && !Array.isArray(item) && "text" in item) : [];
+		} catch {
+			return [];
+		}
+	}
+	/** Link title from `data-link-title-template` or `data-link-title-prefix`. */
+	function linkTitle(text, index, { template, prefix } = {}) {
+		return template ? template.replaceAll("{text}", String(text ?? "")).replaceAll("{index}", String(index + 1)) : `${prefix || "go to"} ${text ?? ""}`;
+	}
+	/**
+	* @param {{ id?: string, className?: string, label?: string, separator?: string,
+	*   items?: {{ text: string, href?: string|null, title?: string }}[] }} [state]
+	* The last item is the current page; items without an href render as text.
+	*/
+	function renderBreadcrumbs({ id, className, label, separator = "/", items = [] } = {}) {
+		const list = items.map((item, index) => {
+			const current = index === items.length - 1;
+			const content = `<slot name="icon-${index + 1}"></slot><span>${escapeHTML(item.text ?? "")}</span>`;
+			return `<li>${!current && item.href ? `<a class="item" href="${escapeHTML(item.href)}" title="${escapeHTML(item.title ?? "")}">${content}</a>` : `<span class="item"${current ? " aria-current=\"page\"" : ""}>${content}</span>`}${current ? "" : `<span aria-hidden="true">${escapeHTML(separator)}</span>`}</li>`;
+		}).join("");
+		return `<style>${breadcrumbsStyles}</style><nav tabindex="-1"${(id ? ` id="${escapeHTML(id)}"` : "") + (className ? ` class="${escapeHTML(className)}"` : "") + (label ? ` aria-label="${escapeHTML(label)}"` : "")}><ol>${list}</ol></nav>`;
+	}
+	// src/components/breadcrumbs.js
+	var AuBreadcrumbs = class extends HTMLElement {
+		constructor() {
+			super();
+			upgradeProperties(this, ["items", "separator"]);
+			setupShadow(this, () => renderBreadcrumbs(), (root) => {
+				this._nav = root.querySelector("nav");
+				this._bound = true;
+				if (this.isConnected) this.connectedCallback();
+			});
+		}
+		connectedCallback() {
+			if (!this._bound) return;
+			this.render();
+			this.observeLabelRoot();
+		}
+		disconnectedCallback() {
+			this._labelObserver?.disconnect();
+		}
+		static get observedAttributes() {
+			return [
+				"id",
+				"class",
+				"aria-label",
+				"aria-labelledby",
+				"label",
+				"items",
+				"separator",
+				"data-link-title-prefix",
+				"data-link-title-template"
+			];
+		}
+		attributeChangedCallback(name, oldValue, newValue) {
+			if (oldValue !== newValue) {
+				this.render();
+				if (name === "aria-labelledby" && this.isConnected) this.observeLabelRoot();
+			}
+		}
+		get items() {
+			return parseItems(this.getAttribute("items"));
+		}
+		set items(val) {
+			if (typeof val === "string") this.setAttribute("items", val);
+			else if (Array.isArray(val) || val && typeof val === "object") {
+				const newVal = Array.isArray(val) ? val : [val];
+				this.setAttribute("items", JSON.stringify(newVal));
+			} else {
+				console.error("Invalid value provided for 'items'. Expected string (JSON) or Array:", val);
+				return;
+			}
+		}
+		get separator() {
+			return this.getAttribute("separator") || "/";
+		}
+		set separator(val) {
+			this.setAttribute("separator", val);
+		}
+		formatText(template, values = {}) {
+			return Object.entries(values).reduce((message, [key, value]) => {
+				return message.replaceAll(`{${key}}`, String(value));
+			}, template);
+		}
+		navigationURL(value) {
+			if (typeof value !== "string" || !value.trim()) return null;
+			try {
+				const url = new URL(value, this.ownerDocument.baseURI);
+				if (["http:", "https:"].includes(url.protocol)) return url.href;
+				const documentURL = new URL(this.ownerDocument.URL);
+				return url.protocol === "file:" && documentURL.protocol === "file:" && url.host === "" && documentURL.host === "" ? url.href : null;
+			} catch {
+				return null;
+			}
+		}
+		observeLabelRoot() {
+			this._labelObserver?.disconnect();
+			if (!this.getAttribute("aria-labelledby")?.trim()) return;
+			this._labelObserver ??= new MutationObserver(() => this.syncAccessibleLabel());
+			this._labelObserver.observe(this.getRootNode(), {
+				childList: true,
+				subtree: true,
+				characterData: true,
+				attributes: true,
+				attributeFilter: ["id", "aria-label"]
+			});
+			this.syncAccessibleLabel();
+		}
+		syncAccessibleLabel() {
+			if (!this._nav) return;
+			const root = this.getRootNode();
+			const labels = (this.getAttribute("aria-labelledby") || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
+			const fallback = this.getAttribute("aria-label")?.trim() || this.getAttribute("label")?.trim() || "Breadcrumbs";
+			if ("ariaLabelledByElements" in this._nav) {
+				this._nav.ariaLabelledByElements = labels;
+				this._nav.setAttribute("aria-label", fallback);
+			} else {
+				const text = labels.map((el) => el.getAttribute("aria-label") || el.textContent).join(" ").trim();
+				this._nav.setAttribute("aria-label", this.getAttribute("aria-label")?.trim() || text || fallback);
+			}
+		}
+		renderItems() {
+			const items = this.items;
+			const list = this._nav.querySelector("ol");
+			const active = this.shadowRoot.activeElement;
+			const titles = {
+				template: this.getAttribute("data-link-title-template"),
+				prefix: this.getAttribute("data-link-title-prefix") || "go to"
+			};
+			items.forEach((item, index) => {
+				const current = index === items.length - 1;
+				const url = current ? null : this.navigationURL(item.url);
+				const li = list.children[index] || list.appendChild(document.createElement("li"));
+				let content = li.firstElementChild;
+				const tag = url ? "A" : "SPAN";
+				if (!content || content.tagName !== tag) {
+					const replacement = document.createElement(tag.toLowerCase());
+					const icon = document.createElement("slot");
+					const text = document.createElement("span");
+					replacement.append(icon, text);
+					content ? content.replaceWith(replacement) : li.append(replacement);
+					content = replacement;
+				}
+				content.className = "item";
+				content.firstElementChild.name = `icon-${index + 1}`;
+				content.lastElementChild.textContent = String(item.text ?? "");
+				current ? content.setAttribute("aria-current", "page") : content.removeAttribute("aria-current");
+				if (url) {
+					content.href = url;
+					content.title = linkTitle(item.text, index, titles);
+				}
+				let separator = li.querySelector("[aria-hidden=\"true\"]");
+				if (current) separator?.remove();
+				else {
+					if (!separator) {
+						separator = document.createElement("span");
+						separator.setAttribute("aria-hidden", "true");
+						li.append(separator);
+					}
+					separator.textContent = this.separator;
+				}
+			});
+			while (list.children.length > items.length) list.lastElementChild.remove();
+			if (active && !this.shadowRoot.contains(active)) this._nav.focus();
+		}
+		render() {
+			if (!this._bound) return;
+			for (const name of ["id", "class"]) this.hasAttribute(name) ? this._nav.setAttribute(name, this.getAttribute(name)) : this._nav.removeAttribute(name);
+			this.syncAccessibleLabel();
+			this.renderItems();
+		}
+	};
+	if (typeof customElements !== "undefined" && !customElements.get("au-breadcrumbs")) customElements.define("au-breadcrumbs", AuBreadcrumbs);
+	// src/components/card.js
+	var AuCard = class extends HTMLElement {
+		constructor() {
+			super();
+			this.shadow = this.attachShadow({ mode: "open" });
+			this.render();
+		}
+		render() {
+			if (this._rendered) return;
+			this._rendered = true;
+			this.shadowRoot.innerHTML = `
       <style>
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
         :host { display:block; min-inline-size:0; box-sizing:border-box; }
@@ -651,42 +652,42 @@
         <slot name="footer" part="footer"></slot>
       </div>
     `;
-    }
-  }
-  if (typeof customElements !== "undefined" && !customElements.get("au-card")) {
-    customElements.define("au-card", AuCard);
-  }
-  function uid(prefix = "") {
-    return prefix + crypto.getRandomValues(new Uint32Array(1))[0].toString(36);
-  }
-  class AuCarousel extends HTMLElement {
-    static get observedAttributes() {
-      return [
-        "data-live-template",
-        "data-item-fallback",
-        "data-dot-template",
-        "data-text-prev",
-        "data-text-next",
-        "data-text-pagination",
-        "data-text-instructions",
-        "data-icon-prev",
-        "data-icon-next",
-        "aria-label",
-        "aria-labelledby",
-        "data-text-roledescription"
-      ];
-    }
-    constructor() {
-      super();
-      this.attachShadow({ mode: "open" });
-      this._current = -1;
-      this._slides = [];
-      this._names = [];
-      this._dots = [];
-      this._settle = null;
-      this._FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-      const style = document.createElement("style");
-      style.textContent = `
+		}
+	};
+	if (typeof customElements !== "undefined" && !customElements.get("au-card")) customElements.define("au-card", AuCard);
+	// src/core/id.js
+	function uid(prefix = "") {
+		return prefix + crypto.getRandomValues(/* @__PURE__ */ new Uint32Array(1))[0].toString(36);
+	}
+	// src/components/carousel.js
+	var AuCarousel = class extends HTMLElement {
+		static get observedAttributes() {
+			return [
+				"data-live-template",
+				"data-item-fallback",
+				"data-dot-template",
+				"data-text-prev",
+				"data-text-next",
+				"data-text-pagination",
+				"data-text-instructions",
+				"data-icon-prev",
+				"data-icon-next",
+				"aria-label",
+				"aria-labelledby",
+				"data-text-roledescription"
+			];
+		}
+		constructor() {
+			super();
+			this.attachShadow({ mode: "open" });
+			this._current = -1;
+			this._slides = [];
+			this._names = [];
+			this._dots = [];
+			this._settle = null;
+			this._FOCUSABLE = "a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex=\"-1\"])";
+			const style = document.createElement("style");
+			style.textContent = `
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
       :host {
         display: block;
@@ -870,492 +871,503 @@
         white-space: nowrap;
       }
     `;
-      this._wrapper = document.createElement("div");
-      this._wrapper.className = "au-carousel";
-      this._wrapper.tabIndex = -1;
-      this._wrapper.setAttribute("role", "group");
-      this._pagination = document.createElement("div");
-      this._pagination.className = "au-carousel-pagination";
-      this._pagination.setAttribute("role", "group");
-      this._hintId = uid("au-carousel-");
-      this._hint = document.createElement("div");
-      this._hint.className = "au-carousel-sr-hint";
-      this._hint.id = this._hintId;
-      this._pagination.setAttribute("aria-describedby", this._hintId);
-      this._track = document.createElement("div");
-      this._track.className = "au-carousel-track";
-      this._slot = document.createElement("slot");
-      this._track.appendChild(this._slot);
-      this._controls = document.createElement("div");
-      this._controls.className = "au-carousel-controls";
-      this._prevBtn = document.createElement("button");
-      this._prevBtn.type = "button";
-      this._prevBtn.className = "au-carousel-button";
-      this._prevBtn.dataset.carouselPrev = "";
-      this._prevBtn.textContent = "‹";
-      this._nextBtn = document.createElement("button");
-      this._nextBtn.type = "button";
-      this._nextBtn.className = "au-carousel-button";
-      this._nextBtn.dataset.carouselNext = "";
-      this._nextBtn.textContent = "›";
-      this._controls.append(this._prevBtn, this._nextBtn);
-      this._live = document.createElement("div");
-      this._live.className = "au-carousel-live";
-      this._live.setAttribute("aria-live", "polite");
-      this._live.setAttribute("aria-atomic", "true");
-      this._wrapper.append(this._pagination, this._track, this._controls, this._live, this._hint);
-      this.shadowRoot.append(style, this._wrapper);
-      this._onSlotChange = this._onSlotChange.bind(this);
-      this._onPaginationKeydown = this._onPaginationKeydown.bind(this);
-      this._onPrevKeydown = this._onPrevKeydown.bind(this);
-      this._onPrevClick = () => {
-        if (this._current > 0) this.slideTo(this._current - 1);
-      };
-      this._onNextClick = () => {
-        if (this._current < this._maxIndex()) this.slideTo(this._current + 1);
-      };
-      this._onFocusIn = this._onFocusIn.bind(this);
-      this._onScroll = this._onScroll.bind(this);
-      this._onSettled = this._onSettled.bind(this);
-      this._onUserScroll = () => {
-        this._scrollTarget = null;
-      };
-      this._resizeObserver = new ResizeObserver(() => {
-        if (this._current > this._maxIndex()) this.setCurrent(this._maxIndex());
-        else this._apply();
-      });
-      this._contentObserver = new MutationObserver(() => {
-        clearTimeout(this._contentTimer);
-        this._contentTimer = setTimeout(() => {
-          if (this.isConnected) this._rebuild();
-        }, 100);
-      });
-    }
-    connectedCallback() {
-      let initial;
-      if (Object.hasOwn(this, "current")) {
-        initial = this.current;
-        delete this.current;
-      }
-      this._applyText();
-      this._slot.addEventListener("slotchange", this._onSlotChange);
-      this._pagination.addEventListener("keydown", this._onPaginationKeydown);
-      this._prevBtn.addEventListener("click", this._onPrevClick);
-      this._nextBtn.addEventListener("click", this._onNextClick);
-      this._prevBtn.addEventListener("keydown", this._onPrevKeydown);
-      this.addEventListener("focusin", this._onFocusIn);
-      this._track.addEventListener("scroll", this._onScroll, { passive: true });
-      for (const type of ["pointerdown", "wheel", "touchstart"]) this._track.addEventListener(type, this._onUserScroll, { passive: true });
-      this._resizeObserver.observe(this);
-      this._contentObserver.observe(this, {
-        childList: true,
-        subtree: true,
-        characterData: true,
-        attributes: true,
-        attributeFilter: ["data-title"]
-      });
-      this._rebuild();
-      if (initial !== void 0) {
-        this._scrollToIndex(this._normalizeIndex(initial), "instant");
-        this.setCurrent(initial);
-      }
-      this._observeLabelRoot();
-    }
-    disconnectedCallback() {
-      this._slot.removeEventListener("slotchange", this._onSlotChange);
-      this._pagination.removeEventListener("keydown", this._onPaginationKeydown);
-      this._prevBtn.removeEventListener("click", this._onPrevClick);
-      this._nextBtn.removeEventListener("click", this._onNextClick);
-      this._prevBtn.removeEventListener("keydown", this._onPrevKeydown);
-      this.removeEventListener("focusin", this._onFocusIn);
-      this._track.removeEventListener("scroll", this._onScroll);
-      for (const type of ["pointerdown", "wheel", "touchstart"]) this._track.removeEventListener(type, this._onUserScroll);
-      this._resizeObserver.disconnect();
-      this._contentObserver.disconnect();
-      this._labelObserver?.disconnect();
-      clearTimeout(this._settle);
-      clearTimeout(this._contentTimer);
-    }
-    attributeChangedCallback(name) {
-      if (!this.isConnected) return;
-      this._applyText();
-      this._rebuild();
-      if (name === "aria-labelledby") this._observeLabelRoot();
-    }
-    _observeLabelRoot() {
-      this._labelObserver?.disconnect();
-      if (!this.getAttribute("aria-labelledby")?.trim()) return;
-      this._labelObserver ??= new MutationObserver(() => this._applyName());
-      this._labelObserver.observe(this.getRootNode(), { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["id", "aria-label"] });
-      this._applyName();
-    }
-    _applyName() {
-      const root = this.getRootNode();
-      const labels = (this.getAttribute("aria-labelledby") || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
-      const fallback = this.getAttribute("aria-label") || "Carousel";
-      if ("ariaLabelledByElements" in this._wrapper) {
-        this._wrapper.ariaLabelledByElements = labels;
-        this._wrapper.setAttribute("aria-label", fallback);
-      } else this._wrapper.setAttribute("aria-label", labels.map((el) => el.getAttribute("aria-label") || el.textContent).join(" ").trim() || fallback);
-      this._wrapper.setAttribute("aria-roledescription", this.getAttribute("data-text-roledescription") || "carousel");
-    }
-    // ---- i18n text (aria-labels + templates) ----
-    _applyText() {
-      this._applyName();
-      this._prevBtn.setAttribute("aria-label", this.getAttribute("data-text-prev") || "Previous slide");
-      this._nextBtn.setAttribute("aria-label", this.getAttribute("data-text-next") || "Next slide");
-      this._prevBtn.textContent = this.getAttribute("data-icon-prev") || "‹";
-      this._nextBtn.textContent = this.getAttribute("data-icon-next") || "›";
-      this._pagination.setAttribute("aria-label", this.getAttribute("data-text-pagination") || "Choose a slide");
-      this._hint.textContent = this.getAttribute("data-text-instructions") || "Use the arrow keys to move between slides.";
-    }
-    _fill(tpl, name, i) {
-      return tpl.replaceAll("{title}", name).replaceAll("{current}", String(i + 1)).replaceAll("{total}", String(this._slides.length));
-    }
-    // Resolve a slide's human title: explicit data-title -> its heading ->
-    // positional fallback. `real` marks whether a genuine title/heading was found
-    // (vs the positional fallback), so the dot label can add "{current} of
-    // {total}" to real titles without doubling it onto an already-positional
-    // fallback. The plain title is what the live region and au-slide-change event
-    // use for {title}.
-    _resolveName(el, i) {
-      if (el.dataset && el.dataset.title) return { name: el.dataset.title, real: true };
-      const h = el.querySelector && el.querySelector("h1, h2, h3, h4, h5, h6");
-      if (h && h.textContent.trim()) return { name: h.textContent.trim(), real: true };
-      const fallback = this.getAttribute("data-item-fallback") || "Item {current} of {total}";
-      console.warn(
-        `[au-carousel] slide ${i + 1} has no data-title or heading; using a positional label. Add one for a clearer screen-reader name.`
-      );
-      return { name: this._fill(fallback, "", i), real: false };
-    }
-    // ---- (re)build the dots from the slotted slides ----
-    _rebuild() {
-      const oldSlides = this._slides;
-      const selected = oldSlides[this._current];
-      const focusedDot = this._dots.indexOf(this.shadowRoot.activeElement);
-      const focusedSlide = oldSlides[focusedDot];
-      const oldDots = new Map(oldSlides.map((slide, i) => [slide, this._dots[i]]));
-      this._slides = this._slot.assignedElements();
-      const total = this._slides.length;
-      const resolved = this._slides.map((el, i) => this._resolveName(el, i));
-      this._names = resolved.map((r) => r.name);
-      this._realNames = resolved.map((r) => r.real);
-      const dotTemplate = this.getAttribute("data-dot-template") || "{title}, {current} of {total}";
-      this._dotLabels = resolved.map((r, i) => r.real ? this._fill(dotTemplate, r.name, i) : r.name);
-      this._dots = this._dotLabels.map((label, i) => {
-        const slide = this._slides[i];
-        let b = oldDots.get(slide);
-        if (!b) {
-          b = document.createElement("button");
-          b.type = "button";
-          b.className = "au-carousel-dot";
-          b.tabIndex = -1;
-          b.addEventListener("click", () => {
-            const index = this._slides.indexOf(slide);
-            if (index < 0) return;
-            this._setRoving(index);
-            this.slideTo(index);
-          });
-        }
-        b.setAttribute("aria-label", label);
-        if (this._pagination.children[i] !== b) this._pagination.insertBefore(b, this._pagination.children[i] || null);
-        return b;
-      });
-      for (const dot of oldDots.values()) if (!this._dots.includes(dot)) dot.remove();
-      if (!total) {
-        this._current = -1;
-        this._live.textContent = "";
-        this._apply();
-        if (focusedDot >= 0) this._wrapper.focus({ preventScroll: true });
-        return;
-      }
-      const retained = this._slides.indexOf(selected);
-      this._current = retained >= 0 ? retained : this._normalizeIndex(this._current);
-      this._apply();
-      if (focusedDot >= 0) {
-        const retainedFocus = this._slides.indexOf(focusedSlide);
-        const index = retainedFocus >= 0 ? retainedFocus : this._current;
-        this._setRoving(index);
-        this._dots[index].focus({ preventScroll: true });
-      }
-      if (oldSlides.length !== total || oldSlides.some((slide, i) => slide !== this._slides[i])) this._scrollToIndex(this._current, "instant");
-    }
-    /**
-     * Re-read the slotted slides and rebuild the dots. Call this after changing a
-     * slide's data-title or heading text when an immediate refresh is needed.
-     * The content observer also refreshes those edits after its debounce.
-     */
-    refresh() {
-      this._rebuild();
-    }
-    // How many slides show at once (from the @container rules).
-    visibleCount() {
-      const raw = parseInt(getComputedStyle(this._track).getPropertyValue("--au-carousel-visible"), 10);
-      return Math.max(1, raw || 1);
-    }
-    // The trailing spacer lets ANY slide scroll to the left edge, so prev/next and
-    // the current dot can reach the very last slide.
-    _maxIndex() {
-      return Math.max(0, this._slides.length - 1);
-    }
-    // Roving tabindex: exactly ONE dot is ever a tab stop.
-    _setRoving(i) {
-      const idx = Math.max(0, Math.min(this._slides.length - 1, i));
-      this._dots.forEach((d, j) => {
-        d.tabIndex = j === idx ? 0 : -1;
-      });
-    }
-    _firstFocusable(i) {
-      const el = this._slides[i];
-      if (!el) return null;
-      return [el, ...el.querySelectorAll(this._FOCUSABLE)].find((node) => {
-        if (node.tabIndex < 0 || node.matches(":disabled") || !node.getClientRects().length) return false;
-        for (let parent = node; parent; parent = parent.assignedSlot || parent.parentNode || parent.host) {
-          if (parent instanceof Element && (parent.hasAttribute("inert") || getComputedStyle(parent).visibility === "hidden")) return false;
-        }
-        return true;
-      }) || null;
-    }
-    _apply() {
-      this._dots.forEach((d, j) => {
-        d.setAttribute("aria-current", j === this._current ? "true" : "false");
-      });
-      this._prevBtn.disabled = this._slides.length === 0;
-      this._nextBtn.disabled = this._slides.length === 0;
-      this._prevBtn.setAttribute("aria-disabled", String(this._current <= 0));
-      this._nextBtn.setAttribute("aria-disabled", String(!this._slides.length || this._current >= this._maxIndex()));
-      if (!this._pagination.contains(this.shadowRoot.activeElement)) {
-        this._setRoving(this._current);
-      }
-    }
-    setCurrent(i) {
-      if (!this._slides.length) {
-        this._current = -1;
-        this._apply();
-        return;
-      }
-      const idx = this._normalizeIndex(i);
-      const changed = idx !== this._current;
-      this._current = idx;
-      this._apply();
-      if (changed && this._slides.length) {
-        if (!this._pagination.contains(this.shadowRoot.activeElement)) {
-          const tpl = this.getAttribute("data-live-template") || "{title}, item {current} of {total}";
-          this._live.textContent = this._realNames[idx] ? this._fill(tpl, this._names[idx], idx) : this._names[idx];
-        }
-        this.dispatchEvent(
-          new CustomEvent("au-slide-change", {
-            bubbles: true,
-            composed: true,
-            detail: { index: idx, total: this._slides.length, title: this._names[idx] }
-          })
-        );
-      }
-    }
-    slideTo(i) {
-      if (!this._slides.length) return;
-      const idx = this._normalizeIndex(i);
-      const behavior = matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth";
-      this._scrollToIndex(idx, behavior);
-      this.setCurrent(idx);
-    }
-    _normalizeIndex(value) {
-      const number = typeof value === "number" || typeof value === "string" ? Number(value) : NaN;
-      return Math.max(0, Math.min(this._maxIndex(), Number.isFinite(number) ? Math.trunc(number) : 0));
-    }
-    _startDistance(slide) {
-      const rect = this._track.getBoundingClientRect(), item = slide.getBoundingClientRect();
-      return getComputedStyle(this._track).direction === "rtl" ? item.right - (rect.left + this._track.clientLeft + this._track.clientWidth) : item.left - (rect.left + this._track.clientLeft);
-    }
-    _scrollToIndex(index, behavior) {
-      if (!this._slides[index]) return;
-      this._scrollTarget = behavior === "smooth" ? this._slides[index] : null;
-      this._scrollTargetSince = performance.now();
-      this._track.scrollTo({ left: this._track.scrollLeft + this._startDistance(this._slides[index]), behavior });
-    }
-    // ---- event handlers ----
-    _onSlotChange() {
-      this._rebuild();
-    }
-    _onPaginationKeydown(e) {
-      if (e.ctrlKey || e.altKey && e.key !== "Tab" || e.metaKey || e.isComposing) return;
-      const idx = this._dots.indexOf(this.shadowRoot.activeElement);
-      if (idx < 0) return;
-      if (e.key === "Tab" && !e.shiftKey) {
-        const target = this._firstFocusable(this._current);
-        if (target) {
-          e.preventDefault();
-          target.focus();
-        }
-        return;
-      }
-      const last = this._slides.length - 1;
-      let to = null;
-      const rtl = getComputedStyle(this._track).direction === "rtl";
-      if (e.key === (rtl ? "ArrowLeft" : "ArrowRight") || e.key === "ArrowDown") to = Math.min(last, idx + 1);
-      else if (e.key === (rtl ? "ArrowRight" : "ArrowLeft") || e.key === "ArrowUp") to = Math.max(0, idx - 1);
-      else if (e.key === "Home") to = 0;
-      else if (e.key === "End") to = last;
-      if (to === null) return;
-      e.preventDefault();
-      this._setRoving(to);
-      this._dots[to].focus();
-      this.slideTo(to);
-    }
-    _onPrevKeydown(e) {
-      if (e.ctrlKey || e.altKey && e.key !== "Tab" || e.metaKey || e.isComposing) return;
-      if (e.key !== "Tab" || !e.shiftKey) return;
-      const target = this._firstFocusable(this._current);
-      if (target) {
-        e.preventDefault();
-        target.focus();
-      }
-    }
-    _onFocusIn(e) {
-      const li = this._slides.find((s) => e.composedPath().includes(s));
-      if (!li) return;
-      const i = this._slides.indexOf(li);
-      if (i < this._current || i >= this._current + this.visibleCount()) this.slideTo(i);
-    }
-    _onScroll() {
-      clearTimeout(this._settle);
-      this._settle = setTimeout(this._onSettled, 120);
-    }
-    // Current = the left-most slide in view, read from the scroll position when
-    // scrolling settles (deterministic for N-per-view; no mid-scroll chatter).
-    _onSettled() {
-      if (this._slides.length < 1) return;
-      const target = this._scrollTarget;
-      if (target) {
-        const arrived = !this._slides.includes(target) || Math.abs(this._startDistance(target)) < 2;
-        if (!arrived && performance.now() - this._scrollTargetSince < 1e3) {
-          clearTimeout(this._settle);
-          this._settle = setTimeout(this._onSettled, 120);
-          return;
-        }
-        this._scrollTarget = null;
-      }
-      let nearest = 0, distance = Infinity;
-      this._slides.forEach((slide, i) => {
-        const delta = Math.abs(this._startDistance(slide));
-        if (delta < distance) {
-          distance = delta;
-          nearest = i;
-        }
-      });
-      this.setCurrent(nearest);
-    }
-    // ---- public properties ----
-    get current() {
-      return this._current;
-    }
-    set current(val) {
-      this.slideTo(val);
-    }
-  }
-  if (typeof customElements !== "undefined" && !customElements.get("au-carousel")) {
-    customElements.define("au-carousel", AuCarousel);
-  }
-  function idRefs(host, attribute) {
-    const root = host.getRootNode();
-    return (host.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((element) => element && element !== host);
-  }
-  function forwardAria(host, target, { explicit, hasOwnLabel, mirrorPrefix }) {
-    let labels = idRefs(host, "aria-labelledby");
-    if (!labels.length && !explicit && !hasOwnLabel && host.isConnected) labels = [...host.internals.labels || []];
-    const descriptions = idRefs(host, "aria-describedby");
-    target.removeAttribute("aria-labelledby");
-    target.removeAttribute("aria-describedby");
-    if (explicit) target.setAttribute("aria-label", explicit);
-    else target.removeAttribute("aria-label");
-    if ("ariaLabelledByElements" in target) target.ariaLabelledByElements = labels;
-    else if (!explicit && labels.length) {
-      target.setAttribute("aria-label", labels.map((element) => element.getAttribute("aria-label") || element.textContent).join(" ").trim());
-    }
-    if ("ariaDescribedByElements" in target) target.ariaDescribedByElements = descriptions;
-    else if (descriptions.length) {
-      if (!host._descriptionMirror) {
-        host._descriptionMirror = document.createElement("span");
-        host._descriptionMirror.id = uid(mirrorPrefix);
-        host._descriptionMirror.hidden = true;
-        host.shadowRoot.append(host._descriptionMirror);
-      }
-      host._descriptionMirror.textContent = descriptions.map((element) => element.textContent).join(" ").trim();
-      target.setAttribute("aria-describedby", host._descriptionMirror.id);
-    }
-  }
-  const VALIDITY_FLAGS = [
-    "valueMissing",
-    "typeMismatch",
-    "patternMismatch",
-    "tooLong",
-    "tooShort",
-    "rangeUnderflow",
-    "rangeOverflow",
-    "stepMismatch",
-    "badInput"
-  ];
-  class AuFormElement extends HTMLElement {
-    static formAssociated = true;
-    constructor() {
-      super();
-      const internals = this.attachInternals();
-      this.internals = internals;
-      const setValidity = internals.setValidity.bind(internals);
-      let own = { flags: {}, message: "", anchor: void 0 };
-      this._customValidity = "";
-      this._applyValidity = () => {
-        if (!this._customValidity) {
-          setValidity(own.flags, own.message, own.anchor);
-          return;
-        }
-        const flags = { customError: true };
-        for (const flag of VALIDITY_FLAGS) if (own.flags[flag]) flags[flag] = true;
-        setValidity(flags, this._customValidity, own.anchor || this._validityAnchor());
-      };
-      internals.setValidity = (flags = {}, message = "", anchor) => {
-        own = { flags, message, anchor };
-        this._applyValidity();
-      };
-    }
-    get form() {
-      return this.internals.form;
-    }
-    get validity() {
-      return this.internals.validity;
-    }
-    get validationMessage() {
-      return this.internals.validationMessage;
-    }
-    get willValidate() {
-      return this.internals.willValidate;
-    }
-    checkValidity() {
-      return this.internals.checkValidity();
-    }
-    reportValidity() {
-      return this.internals.reportValidity();
-    }
-    // As on a native control: a non-empty message makes the field invalid with
-    // that message (validity.customError); an empty one removes it. The
-    // component's own checks, such as required, keep working underneath.
-    setCustomValidity(message) {
-      this._customValidity = message == null ? "" : String(message);
-      this._applyValidity();
-    }
-    // Where the browser points (and focuses) when it reports a custom error.
-    _validityAnchor() {
-      return this.shadowRoot?.querySelector("input:not([type=hidden]), textarea, button, [tabindex]") || void 0;
-    }
-  }
-  class AuCheckbox extends AuFormElement {
-    constructor() {
-      super();
-      this.attachShadow({ mode: "open", delegatesFocus: true });
-      this.addEventListener("click", (event) => this._activateFromHost(event));
-      const inputID = uid("au-checkbox-");
-      const style = document.createElement("style");
-      style.textContent = `
+			this._wrapper = document.createElement("div");
+			this._wrapper.className = "au-carousel";
+			this._wrapper.tabIndex = -1;
+			this._wrapper.setAttribute("role", "group");
+			this._pagination = document.createElement("div");
+			this._pagination.className = "au-carousel-pagination";
+			this._pagination.setAttribute("role", "group");
+			this._hintId = uid("au-carousel-");
+			this._hint = document.createElement("div");
+			this._hint.className = "au-carousel-sr-hint";
+			this._hint.id = this._hintId;
+			this._pagination.setAttribute("aria-describedby", this._hintId);
+			this._track = document.createElement("div");
+			this._track.className = "au-carousel-track";
+			this._slot = document.createElement("slot");
+			this._track.appendChild(this._slot);
+			this._controls = document.createElement("div");
+			this._controls.className = "au-carousel-controls";
+			this._prevBtn = document.createElement("button");
+			this._prevBtn.type = "button";
+			this._prevBtn.className = "au-carousel-button";
+			this._prevBtn.dataset.carouselPrev = "";
+			this._prevBtn.textContent = "‹";
+			this._nextBtn = document.createElement("button");
+			this._nextBtn.type = "button";
+			this._nextBtn.className = "au-carousel-button";
+			this._nextBtn.dataset.carouselNext = "";
+			this._nextBtn.textContent = "›";
+			this._controls.append(this._prevBtn, this._nextBtn);
+			this._live = document.createElement("div");
+			this._live.className = "au-carousel-live";
+			this._live.setAttribute("aria-live", "polite");
+			this._live.setAttribute("aria-atomic", "true");
+			this._wrapper.append(this._pagination, this._track, this._controls, this._live, this._hint);
+			this.shadowRoot.append(style, this._wrapper);
+			this._onSlotChange = this._onSlotChange.bind(this);
+			this._onPaginationKeydown = this._onPaginationKeydown.bind(this);
+			this._onPrevKeydown = this._onPrevKeydown.bind(this);
+			this._onPrevClick = () => {
+				if (this._current > 0) this.slideTo(this._current - 1);
+			};
+			this._onNextClick = () => {
+				if (this._current < this._maxIndex()) this.slideTo(this._current + 1);
+			};
+			this._onFocusIn = this._onFocusIn.bind(this);
+			this._onScroll = this._onScroll.bind(this);
+			this._onSettled = this._onSettled.bind(this);
+			this._onUserScroll = () => {
+				this._scrollTarget = null;
+			};
+			this._resizeObserver = new ResizeObserver(() => {
+				if (this._current > this._maxIndex()) this.setCurrent(this._maxIndex());
+				else this._apply();
+			});
+			this._contentObserver = new MutationObserver(() => {
+				clearTimeout(this._contentTimer);
+				this._contentTimer = setTimeout(() => {
+					if (this.isConnected) this._rebuild();
+				}, 100);
+			});
+		}
+		connectedCallback() {
+			let initial;
+			if (Object.hasOwn(this, "current")) {
+				initial = this.current;
+				delete this.current;
+			}
+			this._applyText();
+			this._slot.addEventListener("slotchange", this._onSlotChange);
+			this._pagination.addEventListener("keydown", this._onPaginationKeydown);
+			this._prevBtn.addEventListener("click", this._onPrevClick);
+			this._nextBtn.addEventListener("click", this._onNextClick);
+			this._prevBtn.addEventListener("keydown", this._onPrevKeydown);
+			this.addEventListener("focusin", this._onFocusIn);
+			this._track.addEventListener("scroll", this._onScroll, { passive: true });
+			for (const type of [
+				"pointerdown",
+				"wheel",
+				"touchstart"
+			]) this._track.addEventListener(type, this._onUserScroll, { passive: true });
+			this._resizeObserver.observe(this);
+			this._contentObserver.observe(this, {
+				childList: true,
+				subtree: true,
+				characterData: true,
+				attributes: true,
+				attributeFilter: ["data-title"]
+			});
+			this._rebuild();
+			if (initial !== void 0) {
+				this._scrollToIndex(this._normalizeIndex(initial), "instant");
+				this.setCurrent(initial);
+			}
+			this._observeLabelRoot();
+		}
+		disconnectedCallback() {
+			this._slot.removeEventListener("slotchange", this._onSlotChange);
+			this._pagination.removeEventListener("keydown", this._onPaginationKeydown);
+			this._prevBtn.removeEventListener("click", this._onPrevClick);
+			this._nextBtn.removeEventListener("click", this._onNextClick);
+			this._prevBtn.removeEventListener("keydown", this._onPrevKeydown);
+			this.removeEventListener("focusin", this._onFocusIn);
+			this._track.removeEventListener("scroll", this._onScroll);
+			for (const type of [
+				"pointerdown",
+				"wheel",
+				"touchstart"
+			]) this._track.removeEventListener(type, this._onUserScroll);
+			this._resizeObserver.disconnect();
+			this._contentObserver.disconnect();
+			this._labelObserver?.disconnect();
+			clearTimeout(this._settle);
+			clearTimeout(this._contentTimer);
+		}
+		attributeChangedCallback(name) {
+			if (!this.isConnected) return;
+			this._applyText();
+			this._rebuild();
+			if (name === "aria-labelledby") this._observeLabelRoot();
+		}
+		_observeLabelRoot() {
+			this._labelObserver?.disconnect();
+			if (!this.getAttribute("aria-labelledby")?.trim()) return;
+			this._labelObserver ??= new MutationObserver(() => this._applyName());
+			this._labelObserver.observe(this.getRootNode(), {
+				childList: true,
+				subtree: true,
+				characterData: true,
+				attributes: true,
+				attributeFilter: ["id", "aria-label"]
+			});
+			this._applyName();
+		}
+		_applyName() {
+			const root = this.getRootNode();
+			const labels = (this.getAttribute("aria-labelledby") || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
+			const fallback = this.getAttribute("aria-label") || "Carousel";
+			if ("ariaLabelledByElements" in this._wrapper) {
+				this._wrapper.ariaLabelledByElements = labels;
+				this._wrapper.setAttribute("aria-label", fallback);
+			} else this._wrapper.setAttribute("aria-label", labels.map((el) => el.getAttribute("aria-label") || el.textContent).join(" ").trim() || fallback);
+			this._wrapper.setAttribute("aria-roledescription", this.getAttribute("data-text-roledescription") || "carousel");
+		}
+		_applyText() {
+			this._applyName();
+			this._prevBtn.setAttribute("aria-label", this.getAttribute("data-text-prev") || "Previous slide");
+			this._nextBtn.setAttribute("aria-label", this.getAttribute("data-text-next") || "Next slide");
+			this._prevBtn.textContent = this.getAttribute("data-icon-prev") || "‹";
+			this._nextBtn.textContent = this.getAttribute("data-icon-next") || "›";
+			this._pagination.setAttribute("aria-label", this.getAttribute("data-text-pagination") || "Choose a slide");
+			this._hint.textContent = this.getAttribute("data-text-instructions") || "Use the arrow keys to move between slides.";
+		}
+		_fill(tpl, name, i) {
+			return tpl.replaceAll("{title}", name).replaceAll("{current}", String(i + 1)).replaceAll("{total}", String(this._slides.length));
+		}
+		_resolveName(el, i) {
+			if (el.dataset && el.dataset.title) return {
+				name: el.dataset.title,
+				real: true
+			};
+			const h = el.querySelector && el.querySelector("h1, h2, h3, h4, h5, h6");
+			if (h && h.textContent.trim()) return {
+				name: h.textContent.trim(),
+				real: true
+			};
+			const fallback = this.getAttribute("data-item-fallback") || "Item {current} of {total}";
+			console.warn(`[au-carousel] slide ${i + 1} has no data-title or heading; using a positional label. Add one for a clearer screen-reader name.`);
+			return {
+				name: this._fill(fallback, "", i),
+				real: false
+			};
+		}
+		_rebuild() {
+			const oldSlides = this._slides;
+			const selected = oldSlides[this._current];
+			const focusedDot = this._dots.indexOf(this.shadowRoot.activeElement);
+			const focusedSlide = oldSlides[focusedDot];
+			const oldDots = new Map(oldSlides.map((slide, i) => [slide, this._dots[i]]));
+			this._slides = this._slot.assignedElements();
+			const total = this._slides.length;
+			const resolved = this._slides.map((el, i) => this._resolveName(el, i));
+			this._names = resolved.map((r) => r.name);
+			this._realNames = resolved.map((r) => r.real);
+			const dotTemplate = this.getAttribute("data-dot-template") || "{title}, {current} of {total}";
+			this._dotLabels = resolved.map((r, i) => r.real ? this._fill(dotTemplate, r.name, i) : r.name);
+			this._dots = this._dotLabels.map((label, i) => {
+				const slide = this._slides[i];
+				let b = oldDots.get(slide);
+				if (!b) {
+					b = document.createElement("button");
+					b.type = "button";
+					b.className = "au-carousel-dot";
+					b.tabIndex = -1;
+					b.addEventListener("click", () => {
+						const index = this._slides.indexOf(slide);
+						if (index < 0) return;
+						this._setRoving(index);
+						this.slideTo(index);
+					});
+				}
+				b.setAttribute("aria-label", label);
+				if (this._pagination.children[i] !== b) this._pagination.insertBefore(b, this._pagination.children[i] || null);
+				return b;
+			});
+			for (const dot of oldDots.values()) if (!this._dots.includes(dot)) dot.remove();
+			if (!total) {
+				this._current = -1;
+				this._live.textContent = "";
+				this._apply();
+				if (focusedDot >= 0) this._wrapper.focus({ preventScroll: true });
+				return;
+			}
+			const retained = this._slides.indexOf(selected);
+			this._current = retained >= 0 ? retained : this._normalizeIndex(this._current);
+			this._apply();
+			if (focusedDot >= 0) {
+				const retainedFocus = this._slides.indexOf(focusedSlide);
+				const index = retainedFocus >= 0 ? retainedFocus : this._current;
+				this._setRoving(index);
+				this._dots[index].focus({ preventScroll: true });
+			}
+			if (oldSlides.length !== total || oldSlides.some((slide, i) => slide !== this._slides[i])) this._scrollToIndex(this._current, "instant");
+		}
+		/**
+		* Re-read the slotted slides and rebuild the dots. Call this after changing a
+		* slide's data-title or heading text when an immediate refresh is needed.
+		* The content observer also refreshes those edits after its debounce.
+		*/
+		refresh() {
+			this._rebuild();
+		}
+		visibleCount() {
+			const raw = parseInt(getComputedStyle(this._track).getPropertyValue("--au-carousel-visible"), 10);
+			return Math.max(1, raw || 1);
+		}
+		_maxIndex() {
+			return Math.max(0, this._slides.length - 1);
+		}
+		_setRoving(i) {
+			const idx = Math.max(0, Math.min(this._slides.length - 1, i));
+			this._dots.forEach((d, j) => {
+				d.tabIndex = j === idx ? 0 : -1;
+			});
+		}
+		_firstFocusable(i) {
+			const el = this._slides[i];
+			if (!el) return null;
+			return [el, ...el.querySelectorAll(this._FOCUSABLE)].find((node) => {
+				if (node.tabIndex < 0 || node.matches(":disabled") || !node.getClientRects().length) return false;
+				for (let parent = node; parent; parent = parent.assignedSlot || parent.parentNode || parent.host) if (parent instanceof Element && (parent.hasAttribute("inert") || getComputedStyle(parent).visibility === "hidden")) return false;
+				return true;
+			}) || null;
+		}
+		_apply() {
+			this._dots.forEach((d, j) => {
+				d.setAttribute("aria-current", j === this._current ? "true" : "false");
+			});
+			this._prevBtn.disabled = this._slides.length === 0;
+			this._nextBtn.disabled = this._slides.length === 0;
+			this._prevBtn.setAttribute("aria-disabled", String(this._current <= 0));
+			this._nextBtn.setAttribute("aria-disabled", String(!this._slides.length || this._current >= this._maxIndex()));
+			if (!this._pagination.contains(this.shadowRoot.activeElement)) this._setRoving(this._current);
+		}
+		setCurrent(i) {
+			if (!this._slides.length) {
+				this._current = -1;
+				this._apply();
+				return;
+			}
+			const idx = this._normalizeIndex(i);
+			const changed = idx !== this._current;
+			this._current = idx;
+			this._apply();
+			if (changed && this._slides.length) {
+				if (!this._pagination.contains(this.shadowRoot.activeElement)) {
+					const tpl = this.getAttribute("data-live-template") || "{title}, item {current} of {total}";
+					this._live.textContent = this._realNames[idx] ? this._fill(tpl, this._names[idx], idx) : this._names[idx];
+				}
+				this.dispatchEvent(new CustomEvent("au-slide-change", {
+					bubbles: true,
+					composed: true,
+					detail: {
+						index: idx,
+						total: this._slides.length,
+						title: this._names[idx]
+					}
+				}));
+			}
+		}
+		slideTo(i) {
+			if (!this._slides.length) return;
+			const idx = this._normalizeIndex(i);
+			const behavior = matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth";
+			this._scrollToIndex(idx, behavior);
+			this.setCurrent(idx);
+		}
+		_normalizeIndex(value) {
+			const number = typeof value === "number" || typeof value === "string" ? Number(value) : NaN;
+			return Math.max(0, Math.min(this._maxIndex(), Number.isFinite(number) ? Math.trunc(number) : 0));
+		}
+		_startDistance(slide) {
+			const rect = this._track.getBoundingClientRect(), item = slide.getBoundingClientRect();
+			return getComputedStyle(this._track).direction === "rtl" ? item.right - (rect.left + this._track.clientLeft + this._track.clientWidth) : item.left - (rect.left + this._track.clientLeft);
+		}
+		_scrollToIndex(index, behavior) {
+			if (!this._slides[index]) return;
+			this._scrollTarget = behavior === "smooth" ? this._slides[index] : null;
+			this._scrollTargetSince = performance.now();
+			this._track.scrollTo({
+				left: this._track.scrollLeft + this._startDistance(this._slides[index]),
+				behavior
+			});
+		}
+		_onSlotChange() {
+			this._rebuild();
+		}
+		_onPaginationKeydown(e) {
+			if (e.ctrlKey || e.altKey && e.key !== "Tab" || e.metaKey || e.isComposing) return;
+			const idx = this._dots.indexOf(this.shadowRoot.activeElement);
+			if (idx < 0) return;
+			if (e.key === "Tab" && !e.shiftKey) {
+				const target = this._firstFocusable(this._current);
+				if (target) {
+					e.preventDefault();
+					target.focus();
+				}
+				return;
+			}
+			const last = this._slides.length - 1;
+			let to = null;
+			const rtl = getComputedStyle(this._track).direction === "rtl";
+			if (e.key === (rtl ? "ArrowLeft" : "ArrowRight") || e.key === "ArrowDown") to = Math.min(last, idx + 1);
+			else if (e.key === (rtl ? "ArrowRight" : "ArrowLeft") || e.key === "ArrowUp") to = Math.max(0, idx - 1);
+			else if (e.key === "Home") to = 0;
+			else if (e.key === "End") to = last;
+			if (to === null) return;
+			e.preventDefault();
+			this._setRoving(to);
+			this._dots[to].focus();
+			this.slideTo(to);
+		}
+		_onPrevKeydown(e) {
+			if (e.ctrlKey || e.altKey && e.key !== "Tab" || e.metaKey || e.isComposing) return;
+			if (e.key !== "Tab" || !e.shiftKey) return;
+			const target = this._firstFocusable(this._current);
+			if (target) {
+				e.preventDefault();
+				target.focus();
+			}
+		}
+		_onFocusIn(e) {
+			const li = this._slides.find((s) => e.composedPath().includes(s));
+			if (!li) return;
+			const i = this._slides.indexOf(li);
+			if (i < this._current || i >= this._current + this.visibleCount()) this.slideTo(i);
+		}
+		_onScroll() {
+			clearTimeout(this._settle);
+			this._settle = setTimeout(this._onSettled, 120);
+		}
+		_onSettled() {
+			if (this._slides.length < 1) return;
+			const target = this._scrollTarget;
+			if (target) {
+				if (!(!this._slides.includes(target) || Math.abs(this._startDistance(target)) < 2) && performance.now() - this._scrollTargetSince < 1e3) {
+					clearTimeout(this._settle);
+					this._settle = setTimeout(this._onSettled, 120);
+					return;
+				}
+				this._scrollTarget = null;
+			}
+			let nearest = 0, distance = Infinity;
+			this._slides.forEach((slide, i) => {
+				const delta = Math.abs(this._startDistance(slide));
+				if (delta < distance) {
+					distance = delta;
+					nearest = i;
+				}
+			});
+			this.setCurrent(nearest);
+		}
+		get current() {
+			return this._current;
+		}
+		set current(val) {
+			this.slideTo(val);
+		}
+	};
+	if (typeof customElements !== "undefined" && !customElements.get("au-carousel")) customElements.define("au-carousel", AuCarousel);
+	// src/core/aria.js
+	function idRefs(host, attribute) {
+		const root = host.getRootNode();
+		return (host.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((element) => element && element !== host);
+	}
+	function forwardAria(host, target, { explicit, hasOwnLabel, mirrorPrefix }) {
+		let labels = idRefs(host, "aria-labelledby");
+		if (!labels.length && !explicit && !hasOwnLabel && host.isConnected) labels = [...host.internals.labels || []];
+		const descriptions = idRefs(host, "aria-describedby");
+		target.removeAttribute("aria-labelledby");
+		target.removeAttribute("aria-describedby");
+		if (explicit) target.setAttribute("aria-label", explicit);
+		else target.removeAttribute("aria-label");
+		if ("ariaLabelledByElements" in target) target.ariaLabelledByElements = labels;
+		else if (!explicit && labels.length) target.setAttribute("aria-label", labels.map((element) => element.getAttribute("aria-label") || element.textContent).join(" ").trim());
+		if ("ariaDescribedByElements" in target) target.ariaDescribedByElements = descriptions;
+		else if (descriptions.length) {
+			if (!host._descriptionMirror) {
+				host._descriptionMirror = document.createElement("span");
+				host._descriptionMirror.id = uid(mirrorPrefix);
+				host._descriptionMirror.hidden = true;
+				host.shadowRoot.append(host._descriptionMirror);
+			}
+			host._descriptionMirror.textContent = descriptions.map((element) => element.textContent).join(" ").trim();
+			target.setAttribute("aria-describedby", host._descriptionMirror.id);
+		}
+	}
+	// src/core/form-element.js
+	var VALIDITY_FLAGS = [
+		"valueMissing",
+		"typeMismatch",
+		"patternMismatch",
+		"tooLong",
+		"tooShort",
+		"rangeUnderflow",
+		"rangeOverflow",
+		"stepMismatch",
+		"badInput"
+	];
+	var AuFormElement = class extends HTMLElement {
+		static formAssociated = true;
+		constructor() {
+			super();
+			const internals = this.attachInternals();
+			this.internals = internals;
+			const setValidity = internals.setValidity.bind(internals);
+			let own = {
+				flags: {},
+				message: "",
+				anchor: void 0
+			};
+			this._customValidity = "";
+			this._applyValidity = () => {
+				if (!this._customValidity) {
+					setValidity(own.flags, own.message, own.anchor);
+					return;
+				}
+				const flags = { customError: true };
+				for (const flag of VALIDITY_FLAGS) if (own.flags[flag]) flags[flag] = true;
+				setValidity(flags, this._customValidity, own.anchor || this._validityAnchor());
+			};
+			internals.setValidity = (flags = {}, message = "", anchor) => {
+				own = {
+					flags,
+					message,
+					anchor
+				};
+				this._applyValidity();
+			};
+		}
+		get form() {
+			return this.internals.form;
+		}
+		get validity() {
+			return this.internals.validity;
+		}
+		get validationMessage() {
+			return this.internals.validationMessage;
+		}
+		get willValidate() {
+			return this.internals.willValidate;
+		}
+		checkValidity() {
+			return this.internals.checkValidity();
+		}
+		reportValidity() {
+			return this.internals.reportValidity();
+		}
+		setCustomValidity(message) {
+			this._customValidity = message == null ? "" : String(message);
+			this._applyValidity();
+		}
+		_validityAnchor() {
+			return this.shadowRoot?.querySelector("input:not([type=hidden]), textarea, button, [tabindex]") || void 0;
+		}
+	};
+	// src/components/checkbox.js
+	var AuCheckbox = class extends AuFormElement {
+		constructor() {
+			super();
+			this.attachShadow({
+				mode: "open",
+				delegatesFocus: true
+			});
+			this.addEventListener("click", (event) => this._activateFromHost(event));
+			const inputID = uid("au-checkbox-");
+			const style = document.createElement("style");
+			style.textContent = `
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
       :host { max-width: 100%; }
       .au-checkbox {
@@ -1437,196 +1449,219 @@
         label:has(input:focus-visible) { outline: 2px solid Highlight; outline-offset: 2px; }
       }
     `;
-      const container = document.createElement("div");
-      container.setAttribute("class", "au-checkbox");
-      const label = document.createElement("label");
-      label.setAttribute("for", inputID);
-      const input = document.createElement("input");
-      this.inputElement = input;
-      input.type = "checkbox";
-      input.id = inputID;
-      input.name = this.getAttribute("name") || "";
-      input.value = this.getAttribute("value") ?? "on";
-      const textSlot = document.createElement("div");
-      textSlot.setAttribute("class", "text");
-      const slot = document.createElement("slot");
-      this._labelSlot = slot;
-      slot.addEventListener("slotchange", () => this.syncAccessibleLabel());
-      this.labelFallback = document.createElement("span");
-      this.labelFallback.textContent = this.getAttribute("label") || "";
-      slot.appendChild(this.labelFallback);
-      textSlot.appendChild(slot);
-      label.append(input, textSlot);
-      container.appendChild(label);
-      this.shadowRoot.append(style, container);
-      input.addEventListener("input", () => {
-        this.checked = input.checked;
-      });
-      input.addEventListener("change", (event) => {
-        event.stopPropagation();
-        this.checked = input.checked;
-        this.dispatchEvent(new CustomEvent("change", { bubbles: true, composed: true, detail: this.checked }));
-      });
-    }
-    _activateFromHost(event) {
-      if (event.composedPath()[0] !== this) return;
-      queueMicrotask(() => {
-        if (!event.defaultPrevented && this.isConnected && !this.inputElement.disabled) {
-          this.inputElement.focus();
-          this.inputElement.click();
-        }
-      });
-    }
-    get checked() {
-      return this.shadowRoot.querySelector("input")?.checked ?? false;
-    }
-    set checked(val) {
-      this.toggleAttribute("checked", Boolean(val));
-      this.inputElement.checked = Boolean(val);
-      this.updateFormValue();
-    }
-    get disabled() {
-      return this.hasAttribute("disabled");
-    }
-    set disabled(val) {
-      val ? this.setAttribute("disabled", "") : this.removeAttribute("disabled");
-    }
-    static get observedAttributes() {
-      return ["name", "value", "checked", "disabled", "required", "label", "aria-label", "aria-labelledby", "aria-describedby", "aria-invalid"];
-    }
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (oldValue === newValue) return;
-      const input = this.shadowRoot.querySelector("input");
-      if (input) {
-        switch (name) {
-          case "checked":
-            input.checked = newValue !== null;
-            break;
-          case "disabled":
-            input.disabled = this.disabled || Boolean(this._formDisabled);
-            break;
-          case "name":
-            input.name = newValue ?? "";
-            break;
-          case "value":
-            input.value = newValue ?? "on";
-            break;
-          case "required":
-            input.required = newValue !== null;
-            break;
-          case "label":
-            if (this.labelFallback) this.labelFallback.textContent = newValue || "";
-            this.syncAccessibleLabel();
-            break;
-          case "aria-label":
-          case "aria-labelledby":
-          case "aria-describedby":
-            this.syncAccessibleLabel();
-            break;
-          case "aria-invalid":
-            if (newValue === null) input.removeAttribute(name);
-            else input.setAttribute(name, newValue);
-            break;
-        }
-        this.updateFormValue();
-      }
-    }
-    syncAccessibleLabel() {
-      const hasSlotText = this._labelSlot.assignedNodes({ flatten: true }).some((node) => node.textContent?.trim());
-      forwardAria(this, this.inputElement, { explicit: this.getAttribute("aria-label"), hasOwnLabel: hasSlotText, mirrorPrefix: "au-checkbox-" });
-    }
-    _observeLabels() {
-      this._labelObserver?.disconnect();
-      this._labelObserver ??= new MutationObserver(() => this.syncAccessibleLabel());
-      this._labelObserver.observe(this.getRootNode(), {
-        subtree: true,
-        childList: true,
-        characterData: true,
-        attributes: true,
-        attributeFilter: ["id", "for", "aria-label"]
-      });
-      this.syncAccessibleLabel();
-    }
-    disconnectedCallback() {
-      this._labelObserver?.disconnect();
-    }
-    _upgradeProperties() {
-      upgradeProperties(this, ["checked", "disabled", "required", "name", "value"]);
-    }
-    get name() {
-      return this.getAttribute("name") || "";
-    }
-    set name(value) {
-      this.setAttribute("name", value);
-    }
-    get value() {
-      return this.getAttribute("value") ?? "on";
-    }
-    set value(value) {
-      this.setAttribute("value", value);
-    }
-    get required() {
-      return this.hasAttribute("required");
-    }
-    set required(value) {
-      this.toggleAttribute("required", Boolean(value));
-    }
-    focus(options) {
-      this.inputElement.focus(options);
-    }
-    formStateRestoreCallback(state) {
-      if (state === "checked" || state === "unchecked") this.checked = state === "checked";
-    }
-    connectedCallback() {
-      this._upgradeProperties();
-      if (!this._initialCheckedSet) {
-        this._initialChecked = this.checked;
-        this._initialCheckedSet = true;
-      }
-      this.inputElement.disabled = this.disabled || Boolean(this._formDisabled);
-      this.updateFormValue();
-      this._observeLabels();
-    }
-    updateCheckedState() {
-      this.checked = this.hasAttribute("checked");
-    }
-    updateFormValue() {
-      const input = this.shadowRoot.querySelector("input");
-      const value = input.checked ? this.value : null;
-      this.internals.setFormValue(value, input.checked ? "checked" : "unchecked");
-      if (!input.willValidate || input.validity.valid) {
-        this.internals.setValidity({});
-      } else {
-        this.internals.setValidity(input.validity, input.validationMessage, input);
-      }
-    }
-    formDisabledCallback(disabled) {
-      this._formDisabled = disabled;
-      const input = this.shadowRoot.querySelector("input");
-      if (input) {
-        input.disabled = this.disabled || disabled;
-        this.updateFormValue();
-      }
-    }
-    formResetCallback() {
-      this.checked = this._initialChecked;
-    }
-  }
-  if (typeof customElements !== "undefined" && !customElements.get("au-checkbox")) {
-    customElements.define("au-checkbox", AuCheckbox);
-  }
-  class AuDropdown extends HTMLElement {
-    static get observedAttributes() {
-      return ["data-text-trigger"];
-    }
-    constructor() {
-      super();
-      this.attachShadow({ mode: "open" });
-      this.triggerId = uid("au-dropdown-");
-      this.menuId = uid("au-dropdown-");
-      this._returnFocusOnClose = true;
-      const template = document.createElement("template");
-      template.innerHTML = `
+			const container = document.createElement("div");
+			container.setAttribute("class", "au-checkbox");
+			const label = document.createElement("label");
+			label.setAttribute("for", inputID);
+			const input = document.createElement("input");
+			this.inputElement = input;
+			input.type = "checkbox";
+			input.id = inputID;
+			input.name = this.getAttribute("name") || "";
+			input.value = this.getAttribute("value") ?? "on";
+			const textSlot = document.createElement("div");
+			textSlot.setAttribute("class", "text");
+			const slot = document.createElement("slot");
+			this._labelSlot = slot;
+			slot.addEventListener("slotchange", () => this.syncAccessibleLabel());
+			this.labelFallback = document.createElement("span");
+			this.labelFallback.textContent = this.getAttribute("label") || "";
+			slot.appendChild(this.labelFallback);
+			textSlot.appendChild(slot);
+			label.append(input, textSlot);
+			container.appendChild(label);
+			this.shadowRoot.append(style, container);
+			input.addEventListener("input", () => {
+				this.checked = input.checked;
+			});
+			input.addEventListener("change", (event) => {
+				event.stopPropagation();
+				this.checked = input.checked;
+				this.dispatchEvent(new CustomEvent("change", {
+					bubbles: true,
+					composed: true,
+					detail: this.checked
+				}));
+			});
+		}
+		_activateFromHost(event) {
+			if (event.composedPath()[0] !== this) return;
+			queueMicrotask(() => {
+				if (!event.defaultPrevented && this.isConnected && !this.inputElement.disabled) {
+					this.inputElement.focus();
+					this.inputElement.click();
+				}
+			});
+		}
+		get checked() {
+			return this.shadowRoot.querySelector("input")?.checked ?? false;
+		}
+		set checked(val) {
+			this.toggleAttribute("checked", Boolean(val));
+			this.inputElement.checked = Boolean(val);
+			this.updateFormValue();
+		}
+		get disabled() {
+			return this.hasAttribute("disabled");
+		}
+		set disabled(val) {
+			val ? this.setAttribute("disabled", "") : this.removeAttribute("disabled");
+		}
+		static get observedAttributes() {
+			return [
+				"name",
+				"value",
+				"checked",
+				"disabled",
+				"required",
+				"label",
+				"aria-label",
+				"aria-labelledby",
+				"aria-describedby",
+				"aria-invalid"
+			];
+		}
+		attributeChangedCallback(name, oldValue, newValue) {
+			if (oldValue === newValue) return;
+			const input = this.shadowRoot.querySelector("input");
+			if (input) {
+				switch (name) {
+					case "checked":
+						input.checked = newValue !== null;
+						break;
+					case "disabled":
+						input.disabled = this.disabled || Boolean(this._formDisabled);
+						break;
+					case "name":
+						input.name = newValue ?? "";
+						break;
+					case "value":
+						input.value = newValue ?? "on";
+						break;
+					case "required":
+						input.required = newValue !== null;
+						break;
+					case "label":
+						if (this.labelFallback) this.labelFallback.textContent = newValue || "";
+						this.syncAccessibleLabel();
+						break;
+					case "aria-label":
+					case "aria-labelledby":
+					case "aria-describedby":
+						this.syncAccessibleLabel();
+						break;
+					case "aria-invalid": if (newValue === null) input.removeAttribute(name);
+					else input.setAttribute(name, newValue);
+				}
+				this.updateFormValue();
+			}
+		}
+		syncAccessibleLabel() {
+			const hasSlotText = this._labelSlot.assignedNodes({ flatten: true }).some((node) => node.textContent?.trim());
+			forwardAria(this, this.inputElement, {
+				explicit: this.getAttribute("aria-label"),
+				hasOwnLabel: hasSlotText,
+				mirrorPrefix: "au-checkbox-"
+			});
+		}
+		_observeLabels() {
+			this._labelObserver?.disconnect();
+			this._labelObserver ??= new MutationObserver(() => this.syncAccessibleLabel());
+			this._labelObserver.observe(this.getRootNode(), {
+				subtree: true,
+				childList: true,
+				characterData: true,
+				attributes: true,
+				attributeFilter: [
+					"id",
+					"for",
+					"aria-label"
+				]
+			});
+			this.syncAccessibleLabel();
+		}
+		disconnectedCallback() {
+			this._labelObserver?.disconnect();
+		}
+		_upgradeProperties() {
+			upgradeProperties(this, [
+				"checked",
+				"disabled",
+				"required",
+				"name",
+				"value"
+			]);
+		}
+		get name() {
+			return this.getAttribute("name") || "";
+		}
+		set name(value) {
+			this.setAttribute("name", value);
+		}
+		get value() {
+			return this.getAttribute("value") ?? "on";
+		}
+		set value(value) {
+			this.setAttribute("value", value);
+		}
+		get required() {
+			return this.hasAttribute("required");
+		}
+		set required(value) {
+			this.toggleAttribute("required", Boolean(value));
+		}
+		focus(options) {
+			this.inputElement.focus(options);
+		}
+		formStateRestoreCallback(state) {
+			if (state === "checked" || state === "unchecked") this.checked = state === "checked";
+		}
+		connectedCallback() {
+			this._upgradeProperties();
+			if (!this._initialCheckedSet) {
+				this._initialChecked = this.checked;
+				this._initialCheckedSet = true;
+			}
+			this.inputElement.disabled = this.disabled || Boolean(this._formDisabled);
+			this.updateFormValue();
+			this._observeLabels();
+		}
+		updateCheckedState() {
+			this.checked = this.hasAttribute("checked");
+		}
+		updateFormValue() {
+			const input = this.shadowRoot.querySelector("input");
+			const value = input.checked ? this.value : null;
+			this.internals.setFormValue(value, input.checked ? "checked" : "unchecked");
+			if (!input.willValidate || input.validity.valid) this.internals.setValidity({});
+			else this.internals.setValidity(input.validity, input.validationMessage, input);
+		}
+		formDisabledCallback(disabled) {
+			this._formDisabled = disabled;
+			const input = this.shadowRoot.querySelector("input");
+			if (input) {
+				input.disabled = this.disabled || disabled;
+				this.updateFormValue();
+			}
+		}
+		formResetCallback() {
+			this.checked = this._initialChecked;
+		}
+	};
+	if (typeof customElements !== "undefined" && !customElements.get("au-checkbox")) customElements.define("au-checkbox", AuCheckbox);
+	// src/components/dropdown.js
+	var AuDropdown = class extends HTMLElement {
+		static get observedAttributes() {
+			return ["data-text-trigger"];
+		}
+		constructor() {
+			super();
+			this.attachShadow({ mode: "open" });
+			this.triggerId = uid("au-dropdown-");
+			this.menuId = uid("au-dropdown-");
+			this._returnFocusOnClose = true;
+			const template = document.createElement("template");
+			template.innerHTML = `
       <style>
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
         :host {
@@ -1776,247 +1811,239 @@
         <slot></slot>
       </div>
     `;
-      this.shadowRoot.appendChild(template.content.cloneNode(true));
-      this.trigger = this.shadowRoot.getElementById(this.triggerId);
-      this.menu = this.shadowRoot.getElementById(this.menuId);
-      this.triggerFallback = this.shadowRoot.querySelector(".trigger-fallback");
-      this.handleKeyDown = this.handleKeyDown.bind(this);
-      this.handleMenuKeyDown = this.handleMenuKeyDown.bind(this);
-      this.handleToggle = this.handleToggle.bind(this);
-      this._handleFallbackClick = () => {
-        if (!this._nativePopover) this.isOpen ? this.close() : this.open();
-      };
-      this._dismissFallback = (event) => {
-        if (!this._nativePopover && this.isOpen && !event.composedPath().includes(this)) this.closeWithoutReturningFocus();
-      };
-      this._positionMenu = this._positionMenu.bind(this);
-    }
-    connectedCallback() {
-      this._nativePopover = typeof this.menu.showPopover === "function" && typeof this.menu.hidePopover === "function";
-      this.menu.toggleAttribute("data-inline", !this._nativePopover);
-      this.menu.hidden = !this._nativePopover;
-      if (this._nativePopover) {
-        this.menu.setAttribute("popover", "auto");
-        this.trigger.setAttribute("popovertarget", this.menuId);
-      } else {
-        this.menu.removeAttribute("popover");
-        this.trigger.removeAttribute("popovertarget");
-      }
-      this.updateTriggerFallback();
-      this.trigger.setAttribute("aria-expanded", String(this.isOpen));
-      this.trigger.addEventListener("keydown", this.handleKeyDown);
-      this.menu.addEventListener("keydown", this.handleMenuKeyDown);
-      this.menu.addEventListener("toggle", this.handleToggle);
-      this.trigger.addEventListener("click", this._handleFallbackClick);
-      this.ownerDocument.addEventListener("pointerdown", this._dismissFallback);
-      this.ownerDocument.addEventListener("focusin", this._dismissFallback);
-    }
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (name === "data-text-trigger" && oldValue !== newValue) {
-        this.updateTriggerFallback();
-      }
-    }
-    disconnectedCallback() {
-      clearTimeout(this._tabCloseTimer);
-      this._restoreTabStops?.();
-      this._stopPositionTracking();
-      if (!this._nativePopover) this.menu.hidden = true;
-      this._returnFocusOnClose = true;
-      this.trigger.setAttribute("aria-expanded", "false");
-      this.trigger.removeEventListener("keydown", this.handleKeyDown);
-      this.menu.removeEventListener("keydown", this.handleMenuKeyDown);
-      this.menu.removeEventListener("toggle", this.handleToggle);
-      this.trigger.removeEventListener("click", this._handleFallbackClick);
-      this.ownerDocument.removeEventListener("pointerdown", this._dismissFallback);
-      this.ownerDocument.removeEventListener("focusin", this._dismissFallback);
-    }
-    updateTriggerFallback() {
-      if (!this.triggerFallback) return;
-      this.triggerFallback.textContent = this.getAttribute("data-text-trigger") || "Dropdown";
-    }
-    open(index = 0) {
-      if (!this.isConnected) return;
-      this._returnFocusOnClose = true;
-      if (!this.isOpen) {
-        if (this._nativePopover) this.menu.showPopover();
-        else this.menu.hidden = false;
-      }
-      this.trigger.setAttribute("aria-expanded", "true");
-      this._startPositionTracking();
-      this.focusItem(index);
-    }
-    close() {
-      if (!this.isOpen) return;
-      const active = this.getRootNode().activeElement;
-      const restore = this._returnFocusOnClose && (active === this || this.contains(active));
-      if (this._nativePopover) this.menu.hidePopover();
-      else this.menu.hidden = true;
-      this._stopPositionTracking();
-      this.trigger.setAttribute("aria-expanded", "false");
-      if (restore && this.isConnected) this.trigger.focus();
-      if (!this._nativePopover) this._returnFocusOnClose = true;
-    }
-    closeWithoutReturningFocus() {
-      this._returnFocusOnClose = false;
-      this.close();
-    }
-    _leaveInlineMenuWithTab() {
-      this._restoreTabStops?.();
-      const saved = [...this.querySelectorAll("a[href],button,input,select,textarea,[tabindex]")].filter((el) => el.closest("au-dropdown") === this && !el.closest('[slot="trigger"]')).map((el) => [el, el.getAttribute("tabindex")]);
-      for (const [el] of saved) el.setAttribute("tabindex", "-1");
-      this._restoreTabStops = () => {
-        for (const [el, value] of saved) {
-          if (el.getAttribute("tabindex") !== "-1") continue;
-          if (value === null) el.removeAttribute("tabindex");
-          else el.setAttribute("tabindex", value);
-        }
-        this._restoreTabStops = null;
-      };
-      clearTimeout(this._tabCloseTimer);
-      this._tabCloseTimer = setTimeout(() => {
-        this._restoreTabStops?.();
-        this.closeWithoutReturningFocus();
-      }, 0);
-    }
-    handleToggle() {
-      if (!this.isConnected) return;
-      const isOpen = this.isOpen;
-      this.trigger.setAttribute("aria-expanded", isOpen);
-      if (isOpen) this._startPositionTracking();
-      else this._stopPositionTracking();
-      if (!isOpen) {
-        const active = this.getRootNode().activeElement;
-        if (this._returnFocusOnClose && (active === this || this.contains(active))) {
-          this.trigger.focus();
-        }
-        this._returnFocusOnClose = true;
-      }
-    }
-    get isOpen() {
-      return this._nativePopover ? this.menu.matches(":popover-open") : !this.menu.hidden;
-    }
-    set isOpen(val) {
-      if (val) {
-        if (this.isConnected) {
-          if (this._nativePopover) this.menu.showPopover();
-          else this.menu.hidden = false;
-          this.trigger.setAttribute("aria-expanded", "true");
-          this._startPositionTracking();
-        }
-      } else {
-        this.close();
-      }
-    }
-    _startPositionTracking() {
-      if (!this._nativePopover) return;
-      this._positionMenu();
-      if (this._trackingPosition) return;
-      this._trackingPosition = true;
-      const view = this.ownerDocument.defaultView;
-      view.addEventListener("resize", this._positionMenu);
-      view.addEventListener("scroll", this._positionMenu, true);
-      view.visualViewport?.addEventListener("resize", this._positionMenu);
-      view.visualViewport?.addEventListener("scroll", this._positionMenu);
-      if (typeof ResizeObserver !== "undefined") {
-        this._sizeObserver ??= new ResizeObserver(this._positionMenu);
-        this._sizeObserver.observe(this.trigger);
-        this._sizeObserver.observe(this.menu);
-      }
-    }
-    _stopPositionTracking() {
-      this._trackingPosition = false;
-      this._sizeObserver?.disconnect();
-      const view = this.ownerDocument.defaultView;
-      view.removeEventListener("resize", this._positionMenu);
-      view.removeEventListener("scroll", this._positionMenu, true);
-      view.visualViewport?.removeEventListener("resize", this._positionMenu);
-      view.visualViewport?.removeEventListener("scroll", this._positionMenu);
-    }
-    _positionMenu() {
-      if (!this.isConnected || !this._nativePopover || !this.isOpen) return;
-      const view = this.ownerDocument.defaultView, viewport = view.visualViewport;
-      const left = (viewport?.offsetLeft || 0) + 8, top = (viewport?.offsetTop || 0) + 8;
-      const right = left + (viewport?.width || view.innerWidth) - 16;
-      const bottom = top + (viewport?.height || view.innerHeight) - 16;
-      const anchor = this.trigger.getBoundingClientRect();
-      const width = Math.max(0, right - left);
-      this.menu.style.maxWidth = width + "px";
-      this.menu.style.minWidth = Math.min(anchor.width, width) + "px";
-      const below = Math.max(0, bottom - anchor.bottom - 4);
-      const above = Math.max(0, anchor.top - top - 4);
-      const placeAbove = this.menu.scrollHeight > below && above > below;
-      this.menu.style.maxHeight = (placeAbove ? above : below) + "px";
-      const box = this.menu.getBoundingClientRect();
-      const start = getComputedStyle(this).direction === "rtl" ? anchor.right - box.width : anchor.left;
-      this.menu.style.left = Math.max(left, Math.min(start, right - box.width)) + "px";
-      this.menu.style.top = Math.max(top, Math.min(placeAbove ? anchor.top - box.height - 4 : anchor.bottom + 4, bottom - box.height)) + "px";
-    }
-    focusItem(index) {
-      const items = this.items;
-      if (items.length > 0) {
-        let idx = index;
-        if (idx < 0) idx = items.length - 1;
-        if (idx >= items.length) idx = 0;
-        items[idx].focus();
-      }
-    }
-    get items() {
-      return Array.from(this.querySelectorAll("au-dropdown-item")).filter((item) => item.closest("au-dropdown") === this);
-    }
-    handleKeyDown(e) {
-      switch (e.key) {
-        case "Enter":
-        case " ":
-        case "Spacebar":
-        case "ArrowDown":
-          e.preventDefault();
-          this.open(0);
-          break;
-        case "ArrowUp":
-          e.preventDefault();
-          this.open(this.items.length - 1);
-          break;
-      }
-    }
-    handleMenuKeyDown(e) {
-      const items = this.items;
-      const currentItem = e.composedPath().find((node) => node instanceof HTMLElement && node.localName === "au-dropdown-item");
-      if (currentItem && !items.includes(currentItem)) return;
-      const currentIndex = items.indexOf(currentItem);
-      switch (e.key) {
-        case "ArrowDown":
-          e.preventDefault();
-          this.focusItem(currentIndex + 1);
-          break;
-        case "ArrowUp":
-          e.preventDefault();
-          this.focusItem(currentIndex - 1);
-          break;
-        case "Home":
-          e.preventDefault();
-          this.focusItem(0);
-          break;
-        case "End":
-          e.preventDefault();
-          this.focusItem(items.length - 1);
-          break;
-        case "Tab":
-          if (this._nativePopover) this.closeWithoutReturningFocus();
-          else this._leaveInlineMenuWithTab();
-          break;
-        case "Escape":
-          e.preventDefault();
-          this.close();
-          break;
-      }
-    }
-  }
-  class AuDropdownItem extends HTMLElement {
-    constructor() {
-      super();
-      this.attachShadow({ mode: "open" });
-      const template = document.createElement("template");
-      template.innerHTML = `
+			this.shadowRoot.appendChild(template.content.cloneNode(true));
+			this.trigger = this.shadowRoot.getElementById(this.triggerId);
+			this.menu = this.shadowRoot.getElementById(this.menuId);
+			this.triggerFallback = this.shadowRoot.querySelector(".trigger-fallback");
+			this.handleKeyDown = this.handleKeyDown.bind(this);
+			this.handleMenuKeyDown = this.handleMenuKeyDown.bind(this);
+			this.handleToggle = this.handleToggle.bind(this);
+			this._handleFallbackClick = () => {
+				if (!this._nativePopover) this.isOpen ? this.close() : this.open();
+			};
+			this._dismissFallback = (event) => {
+				if (!this._nativePopover && this.isOpen && !event.composedPath().includes(this)) this.closeWithoutReturningFocus();
+			};
+			this._positionMenu = this._positionMenu.bind(this);
+		}
+		connectedCallback() {
+			this._nativePopover = typeof this.menu.showPopover === "function" && typeof this.menu.hidePopover === "function";
+			this.menu.toggleAttribute("data-inline", !this._nativePopover);
+			this.menu.hidden = !this._nativePopover;
+			if (this._nativePopover) {
+				this.menu.setAttribute("popover", "auto");
+				this.trigger.setAttribute("popovertarget", this.menuId);
+			} else {
+				this.menu.removeAttribute("popover");
+				this.trigger.removeAttribute("popovertarget");
+			}
+			this.updateTriggerFallback();
+			this.trigger.setAttribute("aria-expanded", String(this.isOpen));
+			this.trigger.addEventListener("keydown", this.handleKeyDown);
+			this.menu.addEventListener("keydown", this.handleMenuKeyDown);
+			this.menu.addEventListener("toggle", this.handleToggle);
+			this.trigger.addEventListener("click", this._handleFallbackClick);
+			this.ownerDocument.addEventListener("pointerdown", this._dismissFallback);
+			this.ownerDocument.addEventListener("focusin", this._dismissFallback);
+		}
+		attributeChangedCallback(name, oldValue, newValue) {
+			if (name === "data-text-trigger" && oldValue !== newValue) this.updateTriggerFallback();
+		}
+		disconnectedCallback() {
+			clearTimeout(this._tabCloseTimer);
+			this._restoreTabStops?.();
+			this._stopPositionTracking();
+			if (!this._nativePopover) this.menu.hidden = true;
+			this._returnFocusOnClose = true;
+			this.trigger.setAttribute("aria-expanded", "false");
+			this.trigger.removeEventListener("keydown", this.handleKeyDown);
+			this.menu.removeEventListener("keydown", this.handleMenuKeyDown);
+			this.menu.removeEventListener("toggle", this.handleToggle);
+			this.trigger.removeEventListener("click", this._handleFallbackClick);
+			this.ownerDocument.removeEventListener("pointerdown", this._dismissFallback);
+			this.ownerDocument.removeEventListener("focusin", this._dismissFallback);
+		}
+		updateTriggerFallback() {
+			if (!this.triggerFallback) return;
+			this.triggerFallback.textContent = this.getAttribute("data-text-trigger") || "Dropdown";
+		}
+		open(index = 0) {
+			if (!this.isConnected) return;
+			this._returnFocusOnClose = true;
+			if (!this.isOpen) {
+				if (this._nativePopover) this.menu.showPopover();
+				else this.menu.hidden = false;
+			}
+			this.trigger.setAttribute("aria-expanded", "true");
+			this._startPositionTracking();
+			this.focusItem(index);
+		}
+		close() {
+			if (!this.isOpen) return;
+			const active = this.getRootNode().activeElement;
+			const restore = this._returnFocusOnClose && (active === this || this.contains(active));
+			if (this._nativePopover) this.menu.hidePopover();
+			else this.menu.hidden = true;
+			this._stopPositionTracking();
+			this.trigger.setAttribute("aria-expanded", "false");
+			if (restore && this.isConnected) this.trigger.focus();
+			if (!this._nativePopover) this._returnFocusOnClose = true;
+		}
+		closeWithoutReturningFocus() {
+			this._returnFocusOnClose = false;
+			this.close();
+		}
+		_leaveInlineMenuWithTab() {
+			this._restoreTabStops?.();
+			const saved = [...this.querySelectorAll("a[href],button,input,select,textarea,[tabindex]")].filter((el) => el.closest("au-dropdown") === this && !el.closest("[slot=\"trigger\"]")).map((el) => [el, el.getAttribute("tabindex")]);
+			for (const [el] of saved) el.setAttribute("tabindex", "-1");
+			this._restoreTabStops = () => {
+				for (const [el, value] of saved) {
+					if (el.getAttribute("tabindex") !== "-1") continue;
+					if (value === null) el.removeAttribute("tabindex");
+					else el.setAttribute("tabindex", value);
+				}
+				this._restoreTabStops = null;
+			};
+			clearTimeout(this._tabCloseTimer);
+			this._tabCloseTimer = setTimeout(() => {
+				this._restoreTabStops?.();
+				this.closeWithoutReturningFocus();
+			}, 0);
+		}
+		handleToggle() {
+			if (!this.isConnected) return;
+			const isOpen = this.isOpen;
+			this.trigger.setAttribute("aria-expanded", isOpen);
+			if (isOpen) this._startPositionTracking();
+			else this._stopPositionTracking();
+			if (!isOpen) {
+				const active = this.getRootNode().activeElement;
+				if (this._returnFocusOnClose && (active === this || this.contains(active))) this.trigger.focus();
+				this._returnFocusOnClose = true;
+			}
+		}
+		get isOpen() {
+			return this._nativePopover ? this.menu.matches(":popover-open") : !this.menu.hidden;
+		}
+		set isOpen(val) {
+			if (val) {
+				if (this.isConnected) {
+					if (this._nativePopover) this.menu.showPopover();
+					else this.menu.hidden = false;
+					this.trigger.setAttribute("aria-expanded", "true");
+					this._startPositionTracking();
+				}
+			} else this.close();
+		}
+		_startPositionTracking() {
+			if (!this._nativePopover) return;
+			this._positionMenu();
+			if (this._trackingPosition) return;
+			this._trackingPosition = true;
+			const view = this.ownerDocument.defaultView;
+			view.addEventListener("resize", this._positionMenu);
+			view.addEventListener("scroll", this._positionMenu, true);
+			view.visualViewport?.addEventListener("resize", this._positionMenu);
+			view.visualViewport?.addEventListener("scroll", this._positionMenu);
+			if (typeof ResizeObserver !== "undefined") {
+				this._sizeObserver ??= new ResizeObserver(this._positionMenu);
+				this._sizeObserver.observe(this.trigger);
+				this._sizeObserver.observe(this.menu);
+			}
+		}
+		_stopPositionTracking() {
+			this._trackingPosition = false;
+			this._sizeObserver?.disconnect();
+			const view = this.ownerDocument.defaultView;
+			view.removeEventListener("resize", this._positionMenu);
+			view.removeEventListener("scroll", this._positionMenu, true);
+			view.visualViewport?.removeEventListener("resize", this._positionMenu);
+			view.visualViewport?.removeEventListener("scroll", this._positionMenu);
+		}
+		_positionMenu() {
+			if (!this.isConnected || !this._nativePopover || !this.isOpen) return;
+			const view = this.ownerDocument.defaultView, viewport = view.visualViewport;
+			const left = (viewport?.offsetLeft || 0) + 8, top = (viewport?.offsetTop || 0) + 8;
+			const right = left + (viewport?.width || view.innerWidth) - 16;
+			const bottom = top + (viewport?.height || view.innerHeight) - 16;
+			const anchor = this.trigger.getBoundingClientRect();
+			const width = Math.max(0, right - left);
+			this.menu.style.maxWidth = width + "px";
+			this.menu.style.minWidth = Math.min(anchor.width, width) + "px";
+			const below = Math.max(0, bottom - anchor.bottom - 4);
+			const above = Math.max(0, anchor.top - top - 4);
+			const placeAbove = this.menu.scrollHeight > below && above > below;
+			this.menu.style.maxHeight = (placeAbove ? above : below) + "px";
+			const box = this.menu.getBoundingClientRect();
+			const start = getComputedStyle(this).direction === "rtl" ? anchor.right - box.width : anchor.left;
+			this.menu.style.left = Math.max(left, Math.min(start, right - box.width)) + "px";
+			this.menu.style.top = Math.max(top, Math.min(placeAbove ? anchor.top - box.height - 4 : anchor.bottom + 4, bottom - box.height)) + "px";
+		}
+		focusItem(index) {
+			const items = this.items;
+			if (items.length > 0) {
+				let idx = index;
+				if (idx < 0) idx = items.length - 1;
+				if (idx >= items.length) idx = 0;
+				items[idx].focus();
+			}
+		}
+		get items() {
+			return Array.from(this.querySelectorAll("au-dropdown-item")).filter((item) => item.closest("au-dropdown") === this);
+		}
+		handleKeyDown(e) {
+			switch (e.key) {
+				case "Enter":
+				case " ":
+				case "Spacebar":
+				case "ArrowDown":
+					e.preventDefault();
+					this.open(0);
+					break;
+				case "ArrowUp":
+					e.preventDefault();
+					this.open(this.items.length - 1);
+			}
+		}
+		handleMenuKeyDown(e) {
+			const items = this.items;
+			const currentItem = e.composedPath().find((node) => node instanceof HTMLElement && node.localName === "au-dropdown-item");
+			if (currentItem && !items.includes(currentItem)) return;
+			const currentIndex = items.indexOf(currentItem);
+			switch (e.key) {
+				case "ArrowDown":
+					e.preventDefault();
+					this.focusItem(currentIndex + 1);
+					break;
+				case "ArrowUp":
+					e.preventDefault();
+					this.focusItem(currentIndex - 1);
+					break;
+				case "Home":
+					e.preventDefault();
+					this.focusItem(0);
+					break;
+				case "End":
+					e.preventDefault();
+					this.focusItem(items.length - 1);
+					break;
+				case "Tab":
+					if (this._nativePopover) this.closeWithoutReturningFocus();
+					else this._leaveInlineMenuWithTab();
+					break;
+				case "Escape":
+					e.preventDefault();
+					this.close();
+			}
+		}
+	};
+	var AuDropdownItem = class extends HTMLElement {
+		constructor() {
+			super();
+			this.attachShadow({ mode: "open" });
+			const template = document.createElement("template");
+			template.innerHTML = `
       <style>
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
         :host {
@@ -2056,82 +2083,80 @@
         <slot></slot>
       </div>
     `;
-      this.shadowRoot.appendChild(template.content.cloneNode(true));
-      this.item = this.shadowRoot.querySelector(".item");
-      this.handleClick = this.handleClick.bind(this);
-      this.handleItemKeyDown = this.handleItemKeyDown.bind(this);
-    }
-    connectedCallback() {
-      this.setAttribute("tabindex", "-1");
-      this.setAttribute("role", "none");
-      this.addEventListener("click", this.handleClick);
-      this.item.addEventListener("keydown", this.handleItemKeyDown);
-    }
-    disconnectedCallback() {
-      this.removeEventListener("click", this.handleClick);
-      this.item.removeEventListener("keydown", this.handleItemKeyDown);
-    }
-    handleClick() {
-      this.dispatchEvent(new CustomEvent("au-select", {
-        bubbles: true,
-        composed: true,
-        detail: { value: this.getAttribute("value") }
-      }));
-      const dropdown = this.closest("au-dropdown");
-      if (dropdown) dropdown.close();
-    }
-    handleItemKeyDown(e) {
-      if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
-        e.preventDefault();
-        const link = this.querySelector("a");
-        if (link) {
-          link.click();
-        } else {
-          this.click();
-        }
-      }
-    }
-    focus(options) {
-      this.item.focus(options);
-    }
-  }
-  if (typeof customElements !== "undefined") {
-    if (!customElements.get("au-dropdown")) customElements.define("au-dropdown", AuDropdown);
-    if (!customElements.get("au-dropdown-item")) customElements.define("au-dropdown-item", AuDropdownItem);
-  }
-  class AuFileUpload extends AuFormElement {
-    static get observedAttributes() {
-      return [
-        "accept",
-        "aria-describedby",
-        "aria-invalid",
-        "disabled",
-        "form",
-        "id",
-        "label",
-        "multiple",
-        "msg-drop-text",
-        "msg-total-size-error",
-        "msg-type-error",
-        "msg-size-error",
-        "msg-count-error",
-        "msg-added",
-        "msg-removed",
-        "msg-remove-text",
-        "msg-remove-file-label",
-        "msg-required",
-        "name",
-        "required",
-        "max-total-size-mb"
-      ];
-    }
-    constructor() {
-      super();
-      this.attachShadow({ mode: "open" });
-      this.files = [];
-      this.previewUrls = /* @__PURE__ */ new Map();
-      const style = document.createElement("style");
-      style.textContent = `
+			this.shadowRoot.appendChild(template.content.cloneNode(true));
+			this.item = this.shadowRoot.querySelector(".item");
+			this.handleClick = this.handleClick.bind(this);
+			this.handleItemKeyDown = this.handleItemKeyDown.bind(this);
+		}
+		connectedCallback() {
+			this.setAttribute("tabindex", "-1");
+			this.setAttribute("role", "none");
+			this.addEventListener("click", this.handleClick);
+			this.item.addEventListener("keydown", this.handleItemKeyDown);
+		}
+		disconnectedCallback() {
+			this.removeEventListener("click", this.handleClick);
+			this.item.removeEventListener("keydown", this.handleItemKeyDown);
+		}
+		handleClick() {
+			this.dispatchEvent(new CustomEvent("au-select", {
+				bubbles: true,
+				composed: true,
+				detail: { value: this.getAttribute("value") }
+			}));
+			const dropdown = this.closest("au-dropdown");
+			if (dropdown) dropdown.close();
+		}
+		handleItemKeyDown(e) {
+			if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+				e.preventDefault();
+				const link = this.querySelector("a");
+				if (link) link.click();
+				else this.click();
+			}
+		}
+		focus(options) {
+			this.item.focus(options);
+		}
+	};
+	if (typeof customElements !== "undefined") {
+		if (!customElements.get("au-dropdown")) customElements.define("au-dropdown", AuDropdown);
+		if (!customElements.get("au-dropdown-item")) customElements.define("au-dropdown-item", AuDropdownItem);
+	}
+	// src/components/file-upload.js
+	var AuFileUpload = class extends AuFormElement {
+		static get observedAttributes() {
+			return [
+				"accept",
+				"aria-describedby",
+				"aria-invalid",
+				"disabled",
+				"form",
+				"id",
+				"label",
+				"multiple",
+				"msg-drop-text",
+				"msg-total-size-error",
+				"msg-type-error",
+				"msg-size-error",
+				"msg-count-error",
+				"msg-added",
+				"msg-removed",
+				"msg-remove-text",
+				"msg-remove-file-label",
+				"msg-required",
+				"name",
+				"required",
+				"max-total-size-mb"
+			];
+		}
+		constructor() {
+			super();
+			this.attachShadow({ mode: "open" });
+			this.files = [];
+			this.previewUrls = /* @__PURE__ */ new Map();
+			const style = document.createElement("style");
+			style.textContent = `
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
       :host { display: block; min-inline-size: 0; }
 
@@ -2276,548 +2301,529 @@
         .trigger-area:focus-visible, .default-trigger:focus-visible { outline: 2px solid Highlight; }
       }
     `;
-      this.wrapper = document.createElement("div");
-      this.wrapper.className = "file-upload-wrapper";
-      this.container = document.createElement("div");
-      this.container.className = "file-upload-container";
-      this.container.setAttribute("role", "group");
-      this.container.setAttribute("aria-labelledby", "upload-label");
-      this.container.setAttribute("aria-describedby", "upload-errors upload-drop");
-      this._id = this.getAttribute("id") || uid("au-file-upload-");
-      this.labelEl = document.createElement("label");
-      this.labelEl.id = "upload-label";
-      this.labelEl.textContent = this.getAttribute("label") || "Upload files";
-      this.labelEl.setAttribute("for", this._id);
-      this.fileInput = document.createElement("input");
-      this.fileInput.type = "file";
-      this.fileInput.hidden = true;
-      this.fileInput.id = this._id;
-      ["accept", "multiple", "name", "disabled", "required", "form"].forEach((attr) => {
-        if (this.hasAttribute(attr)) {
-          this.fileInput.setAttribute(attr, this.getAttribute(attr));
-        }
-      });
-      const triggerSlot = document.createElement("slot");
-      triggerSlot.name = "trigger";
-      this.defaultTrigger = document.createElement("button");
-      this.defaultTrigger.type = "button";
-      this.defaultTrigger.className = "default-trigger";
-      this.defaultTrigger.textContent = this.labelEl.textContent;
-      triggerSlot.append(this.defaultTrigger);
-      triggerSlot.addEventListener("click", () => {
-        if (this.effectiveDisabled) return;
-        this.fileInput.click();
-      });
-      triggerSlot.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
-          const nativeButton = e.composedPath().some((node) => node instanceof Element && node.matches("button"));
-          if (nativeButton || !e.composedPath().some((node) => node instanceof Element && node.matches("input, a[href]"))) {
-            e.preventDefault();
-          } else {
-            return;
-          }
-          if (this.effectiveDisabled) return;
-          this.fileInput.click();
-        }
-      });
-      this.dropZone = document.createElement("div");
-      this.dropZone.className = "drop-zone";
-      this.dropZone.id = "upload-drop";
-      this.dropZone.textContent = this.getAttribute("msg-drop-text") || "Drop files here";
-      this.usageDisplay = document.createElement("div");
-      this.usageDisplay.className = "usage";
-      this.fileList = document.createElement("ul");
-      this.fileList.className = "file-list";
-      this.fileList.setAttribute("role", "list");
-      const hintSlot = document.createElement("slot");
-      hintSlot.name = "hint";
-      this.errorMessage = document.createElement("div");
-      this.errorMessage.className = "error-area";
-      this.errorMessage.id = "upload-errors";
-      this.errorList = document.createElement("ul");
-      this.errorList.className = "error-list";
-      this.errorMessage.append(hintSlot, this.usageDisplay, this.errorList);
-      this.liveRegion = document.createElement("div");
-      this.liveRegion.setAttribute("aria-live", "polite");
-      this.liveRegion.setAttribute("role", "status");
-      this.liveRegion.setAttribute("aria-atomic", "true");
-      this.fileInput.addEventListener("change", (e) => {
-        e.stopPropagation();
-        try {
-          this.handleFiles(this.fileInput.files);
-        } finally {
-          this.fileInput.value = "";
-        }
-      });
-      this.addEventListener("invalid", () => {
-        this.showErrors([this.internals.validationMessage]);
-      });
-      this.container.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        if (this.effectiveDisabled) return;
-        this.dropZone.classList.add("dragover");
-      });
-      this.container.addEventListener("dragleave", () => {
-        this.dropZone.classList.remove("dragover");
-      });
-      this.container.addEventListener("drop", (e) => {
-        e.preventDefault();
-        if (this.effectiveDisabled) return;
-        this.dropZone.classList.remove("dragover");
-        const dt = e.dataTransfer;
-        if (dt?.files) this.handleFiles(dt.files);
-      });
-      const actionGroup = document.createElement("div");
-      actionGroup.className = "actions";
-      const fileArea = document.createElement("div");
-      fileArea.className = "upload-area";
-      this.triggerArea = document.createElement("div");
-      this.triggerArea.className = "trigger-area";
-      this.triggerArea.tabIndex = -1;
-      this.triggerArea.setAttribute("role", "group");
-      this.triggerArea.setAttribute("aria-labelledby", "upload-label");
-      this.triggerArea.setAttribute("aria-describedby", "upload-errors");
-      this.triggerArea.append(triggerSlot);
-      fileArea.append(this.triggerArea, this.dropZone);
-      actionGroup.append(fileArea);
-      this.container.append(
-        this.labelEl,
-        actionGroup,
-        this.errorMessage,
-        this.fileList,
-        this.liveRegion,
-        this.fileInput
-      );
-      this.wrapper.append(this.container);
-      this.shadowRoot.append(style, this.wrapper);
-    }
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (oldValue === newValue) return;
-      if (!this.shadowRoot) return;
-      switch (name) {
-        case "aria-describedby":
-          if (this.isConnected) this._observeDescriptions();
-          break;
-        case "aria-invalid":
-          this.updateValidity();
-          break;
-        case "id":
-          this._id = newValue || uid("au-file-upload-");
-          if (this.labelEl) this.labelEl.setAttribute("for", this._id);
-          if (this.fileInput) this.fileInput.id = this._id;
-          break;
-        case "label":
-          this.updateLabelText();
-          break;
-        case "msg-drop-text":
-          this.updateDropText();
-          break;
-        case "msg-remove-text":
-        case "msg-remove-file-label":
-          this.updateFileList();
-          break;
-        case "msg-required":
-          this.updateValidity();
-          break;
-        case "disabled":
-          this.syncDisabled();
-          break;
-        case "multiple":
-          this.syncBooleanAttributeToInput("multiple");
-          break;
-        case "required":
-          this.syncBooleanAttributeToInput("required");
-          this.updateValidity();
-          break;
-        case "accept":
-        case "form":
-        case "name":
-          this.syncAttributeToInput(name);
-          if (name === "name") this.syncFormValue();
-          break;
-        case "max-total-size-mb":
-          this.updateUsage();
-          break;
-      }
-    }
-    connectedCallback() {
-      upgradeProperties(this, ["value"]);
-      this.updateLabelText();
-      this.updateDropText();
-      this.updateFileList();
-      this.syncFormValue();
-      this.updateUsage();
-      this.updateValidity();
-      this.syncDisabled();
-      this._observeDescriptions();
-    }
-    disconnectedCallback() {
-      this._descriptionObserver?.disconnect();
-      cancelAnimationFrame(this._announcementFrame);
-      this.liveRegion.textContent = "";
-      this.revokeAllPreviewUrls();
-    }
-    get effectiveDisabled() {
-      return this.hasAttribute("disabled") || !!this._formDisabled;
-    }
-    _observeDescriptions() {
-      this._descriptionObserver?.disconnect();
-      if (this.hasAttribute("aria-describedby")) {
-        this._descriptionObserver ??= new MutationObserver(() => this._syncDescriptions());
-        this._descriptionObserver.observe(this.getRootNode(), {
-          subtree: true,
-          childList: true,
-          characterData: true,
-          attributes: true,
-          attributeFilter: ["id"]
-        });
-      }
-      this._syncDescriptions();
-    }
-    _syncDescriptions() {
-      const root = this.getRootNode();
-      const external = [...new Set((this.getAttribute("aria-describedby") || "").trim().split(/\s+/))].filter(Boolean).map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
-      for (const target of [this.container, this.triggerArea, this.defaultTrigger]) {
-        if (typeof target.ariaDescribedByElements !== "undefined") {
-          target.ariaDescribedByElements = [this.errorMessage, this.dropZone, ...external];
-        } else {
-          if (!this._descriptionMirror) {
-            this._descriptionMirror = document.createElement("span");
-            this._descriptionMirror.id = "external-description";
-            this._descriptionMirror.hidden = true;
-            this.shadowRoot.append(this._descriptionMirror);
-          }
-          const text = external.map((el) => el.textContent).join(" ").trim();
-          if (this._descriptionMirror.textContent !== text) this._descriptionMirror.textContent = text;
-          target.setAttribute("aria-describedby", "upload-errors upload-drop" + (text ? " external-description" : ""));
-        }
-      }
-    }
-    formDisabledCallback(disabled) {
-      this._formDisabled = disabled;
-      this.syncDisabled();
-    }
-    syncDisabled() {
-      if (!this.triggerArea) return;
-      const disabled = this.effectiveDisabled;
-      this.fileInput.disabled = disabled;
-      this.defaultTrigger.disabled = disabled;
-      this.triggerArea.inert = disabled;
-      this.container.setAttribute("aria-disabled", String(disabled));
-      this.fileList.querySelectorAll("button").forEach((button) => {
-        button.disabled = disabled;
-      });
-      if (disabled) this.dropZone.classList.remove("dragover");
-    }
-    updateLabelText() {
-      if (this.labelEl) this.labelEl.textContent = this.getAttribute("label") || "Upload files";
-      if (this.defaultTrigger) this.defaultTrigger.textContent = this.labelEl.textContent;
-    }
-    updateDropText() {
-      if (this.dropZone) this.dropZone.textContent = this.getAttribute("msg-drop-text") || "Drop files here";
-    }
-    getText(name, fallback) {
-      return this.getAttribute(name) || fallback;
-    }
-    formatMessage(name, fallback, values = {}) {
-      const template = this.getText(name, fallback);
-      return Object.entries(values).reduce((message, [key, value]) => {
-        return message.replaceAll(`{${key}}`, String(value));
-      }, template);
-    }
-    formatFileError(name, fallbackTemplate, legacySuffix, fileName, values = {}) {
-      const customMessage = this.getAttribute(name);
-      if (customMessage && customMessage.includes("{")) {
-        return this.formatMessage(name, fallbackTemplate, { fileName, ...values });
-      }
-      return `${fileName} ${customMessage || legacySuffix}`;
-    }
-    syncAttributeToInput(name) {
-      if (!this.fileInput) return;
-      const value = this.getAttribute(name);
-      if (value === null) this.fileInput.removeAttribute(name);
-      else this.fileInput.setAttribute(name, value);
-    }
-    syncBooleanAttributeToInput(name) {
-      if (!this.fileInput) return;
-      if (this.hasAttribute(name)) this.fileInput.setAttribute(name, "");
-      else this.fileInput.removeAttribute(name);
-    }
-    revokePreviewUrl(file) {
-      const url = this.previewUrls.get(file);
-      if (url) {
-        URL.revokeObjectURL(url);
-        this.previewUrls.delete(file);
-      }
-    }
-    revokeAllPreviewUrls() {
-      this.previewUrls.forEach((url) => URL.revokeObjectURL(url));
-      this.previewUrls.clear();
-    }
-    handleFiles(fileList) {
-      if (this.effectiveDisabled) return;
-      const maxTotalSizeMB = this.limit("max-total-size-mb", 20);
-      const maxFiles = Math.min(Math.floor(this.limit("max-files", 5)), this.hasAttribute("multiple") ? Infinity : 1);
-      const maxSizeMB = this.limit("max-size-mb", 5);
-      const acceptAttr = this.getAttribute("accept");
-      const acceptList = acceptAttr ? acceptAttr.toLowerCase().split(",").map((type) => type.trim()).filter(Boolean) : [];
-      const newFiles = Array.from(fileList || []).filter((file) => file instanceof File);
-      const validFiles = [];
-      const errorMessages = [];
-      newFiles.forEach((file) => {
-        const isValidType = acceptList.length === 0 || acceptList.some((type) => {
-          if (type.endsWith("/*")) {
-            return file.type.toLowerCase().startsWith(type.slice(0, -1));
-          }
-          return type.startsWith(".") ? file.name.toLowerCase().endsWith(type) : file.type.toLowerCase() === type;
-        });
-        if (!isValidType) {
-          errorMessages.push(this.formatFileError(
-            "msg-type-error",
-            "{fileName} is not an accepted file type.",
-            "is not an accepted file type.",
-            file.name
-          ));
-          return;
-        }
-        if (file.size > maxSizeMB * 1024 * 1024) {
-          errorMessages.push(this.formatFileError(
-            "msg-size-error",
-            "{fileName} exceeds the maximum size of {maxSize}MB.",
-            `exceeds the maximum size of ${maxSizeMB}MB.`,
-            file.name,
-            { maxSize: maxSizeMB }
-          ));
-          return;
-        }
-        validFiles.push(file);
-      });
-      const uniqueFiles = [];
-      validFiles.forEach((file) => {
-        if (![...this.files, ...uniqueFiles].some((f) => f.name === file.name && f.size === file.size)) uniqueFiles.push(file);
-      });
-      const slotsLeft = Math.max(0, maxFiles - this.files.length);
-      const filesToAdd = uniqueFiles.slice(0, slotsLeft);
-      const dropped = uniqueFiles.slice(slotsLeft);
-      dropped.forEach((file) => {
-        errorMessages.push(this.formatFileError(
-          "msg-count-error",
-          "{fileName} cannot be added. You can only upload up to {maxFiles} files.",
-          `You can only upload up to ${maxFiles} files.`,
-          file.name,
-          { maxFiles }
-        ));
-      });
-      const totalSize = this.files.reduce((sum, f) => sum + f.size, 0) + filesToAdd.reduce((sum, f) => sum + f.size, 0);
-      if (totalSize > maxTotalSizeMB * 1024 * 1024) {
-        const totalSizeMessage = this.getAttribute("msg-total-size-error")?.includes("{") ? this.formatMessage("msg-total-size-error", "Total file size exceeds limit of {maxTotalSize}MB.", { maxTotalSize: maxTotalSizeMB }) : `${this.getText("msg-total-size-error", "Total file size exceeds limit of")} ${maxTotalSizeMB}MB.`;
-        errorMessages.push(totalSizeMessage);
-        filesToAdd.length = 0;
-      }
-      this.showErrors(errorMessages);
-      if (filesToAdd.length === 0) return;
-      this.files.push(...filesToAdd);
-      this.updateFileList();
-      this.updateUsage();
-      this.announce([this.formatMessage("msg-added", "{count} file(s) added.", { count: filesToAdd.length }), ...errorMessages].join(" "));
-      this.syncFormValue();
-      this.updateValidity();
-      this.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
-      this.fileInput.value = "";
-    }
-    showErrors(messages) {
-      this.errorList.innerHTML = "";
-      messages.forEach((msg) => {
-        const li = document.createElement("li");
-        li.textContent = msg;
-        this.errorList.appendChild(li);
-      });
-      this.announce(messages.join(" "));
-    }
-    announce(message) {
-      cancelAnimationFrame(this._announcementFrame);
-      while (this.liveRegion.firstChild) this.liveRegion.removeChild(this.liveRegion.firstChild);
-      if (!this.isConnected || !message) return;
-      this._announcementFrame = requestAnimationFrame(() => {
-        const span = document.createElement("span");
-        span.textContent = message;
-        this.liveRegion.appendChild(span);
-      });
-    }
-    createFileRow(file) {
-      const row = document.createElement("li");
-      row.setAttribute("role", "listitem");
-      const preview = document.createElement("div");
-      const image = file.type.startsWith("image/");
-      const icon = document.createElement(image ? "img" : "span");
-      icon.className = "preview";
-      if (image) {
-        icon.alt = "";
-        icon.width = 40;
-        icon.height = 40;
-      } else {
-        icon.textContent = "📄";
-        icon.setAttribute("aria-hidden", "true");
-      }
-      const name = document.createElement("span");
-      name.className = "file-name";
-      name.textContent = file.name;
-      preview.append(icon, name);
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "delete";
-      button._file = file;
-      button.setAttribute("part", "delete");
-      button.addEventListener("click", () => this.removeFile(file));
-      row.append(preview, button);
-      return row;
-    }
-    updateFileList() {
-      const previousButtons = [...this.fileList.querySelectorAll("button.delete")];
-      const focused = this.shadowRoot.activeElement;
-      const focusedIndex = previousButtons.indexOf(focused);
-      const focusedFile = focused?._file;
-      this._fileRows ??= /* @__PURE__ */ new Map();
-      for (const [file, row] of this._fileRows) {
-        if (!this.files.includes(file)) {
-          row.remove();
-          this._fileRows.delete(file);
-          this.revokePreviewUrl(file);
-        }
-      }
-      this.files.forEach((file, index) => {
-        let li = this._fileRows.get(file);
-        if (!li) {
-          li = this.createFileRow(file);
-          this._fileRows.set(file, li);
-        }
-        const removeBtn = li.querySelector("button.delete");
-        const visibleLabel = this.getAttribute("msg-remove-text")?.trim() || "Remove";
-        const requestedName = this.formatMessage("msg-remove-file-label", "{action} {fileName}", { action: visibleLabel, fileName: file.name });
-        removeBtn.textContent = visibleLabel;
-        removeBtn.setAttribute("aria-label", requestedName.includes(visibleLabel) ? requestedName : `${visibleLabel} ${requestedName}`);
-        removeBtn.disabled = this.effectiveDisabled;
-        const img = li.querySelector("img");
-        if (img) {
-          if (!this.previewUrls.has(file)) this.previewUrls.set(file, URL.createObjectURL(file));
-          if (img.src !== this.previewUrls.get(file)) img.src = this.previewUrls.get(file);
-        }
-        if (this.fileList.children[index] !== li) this.fileList.insertBefore(li, this.fileList.children[index] || null);
-      });
-      if (focusedIndex >= 0) {
-        const buttons = [...this.fileList.querySelectorAll("button.delete")];
-        const next = buttons.find((button) => button._file === focusedFile) || buttons[Math.min(focusedIndex, buttons.length - 1)];
-        if (next) next.focus();
-        else this.focusTrigger();
-      }
-    }
-    removeFile(file) {
-      if (this.effectiveDisabled) return;
-      const index = this.files.findIndex((f) => f === file || f.name === file?.name && f.size === file?.size);
-      if (index < 0) return;
-      const removed = this.files[index];
-      this.revokePreviewUrl(removed);
-      this.files = this.files.filter((_, i) => i !== index);
-      this.updateFileList();
-      this.updateUsage();
-      this.announce(this.formatMessage("msg-removed", "{fileName} removed.", { fileName: removed.name }));
-      this.syncFormValue();
-      this.updateValidity();
-      this.dispatchEvent(new CustomEvent("au-remove-file", { bubbles: true, composed: true, detail: removed }));
-      this.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
-    }
-    updateUsage() {
-      const maxMB = this.limit("max-total-size-mb", 20);
-      const totalMB = this.files.reduce((sum, f) => sum + f.size, 0) / (1024 * 1024);
-      this.usageDisplay.textContent = `${totalMB.toFixed(1)}MB / ${maxMB}MB`;
-    }
-    syncFormValue() {
-      const name = this.getAttribute("name");
-      if (!name || this.files.length === 0) {
-        this.internals.setFormValue(null);
-        return;
-      }
-      const data = new FormData();
-      this.files.forEach((file) => data.append(name, file, file.name));
-      this.internals.setFormValue(data);
-    }
-    limit(name, fallback) {
-      const raw = this.getAttribute(name);
-      const value = raw?.trim() ? Number(raw) : NaN;
-      return Number.isFinite(value) && value >= 0 ? value : fallback;
-    }
-    focus(options) {
-      if (!this.effectiveDisabled) this.focusTrigger(options);
-    }
-    focusTrigger(options) {
-      const slot = this.shadowRoot.querySelector("slot[name=trigger]");
-      const roots = slot.assignedElements({ flatten: true });
-      const candidates = roots.flatMap((root) => [root, ...root.querySelectorAll("button,input,[tabindex]")]);
-      const trigger = candidates.find((el) => el.matches("button,input,[tabindex]") && !el.matches(":disabled") && el.tabIndex >= 0 && !el.closest("[hidden],[inert]") && el.getClientRects().length && getComputedStyle(el).visibility === "visible");
-      (trigger || this.triggerArea).focus(options);
-    }
-    updateValidity() {
-      const missing = this.hasAttribute("required") && this.files.length === 0;
-      const invalid = missing ? "true" : this.getAttribute("aria-invalid") || "false";
-      for (const target of [this.container, this.triggerArea, this.defaultTrigger]) target.setAttribute("aria-invalid", invalid);
-      if (missing) {
-        this.internals.setValidity(
-          { valueMissing: true },
-          this.getText("msg-required", "Please select at least one file."),
-          this.triggerArea
-        );
-        return false;
-      }
-      this.internals.setValidity({});
-      return true;
-    }
-    // A custom error points at the visible trigger, not the hidden file input.
-    _validityAnchor() {
-      return this.triggerArea;
-    }
-    checkValidity() {
-      this.updateValidity();
-      return super.checkValidity();
-    }
-    reportValidity() {
-      this.updateValidity();
-      return super.reportValidity();
-    }
-    formResetCallback() {
-      this.revokeAllPreviewUrls();
-      this.files = [];
-      this.fileInput.value = "";
-      this.showErrors([]);
-      this.updateFileList();
-      this.updateUsage();
-      this.syncFormValue();
-      this.updateValidity();
-    }
-    get value() {
-      return [...this.files];
-    }
-    set value(val) {
-      if (Array.isArray(val)) {
-        this.files = [...new Set(val.filter((file) => file instanceof File))];
-        this.fileInput.value = "";
-        this.showErrors([]);
-        this.updateFileList();
-        this.updateUsage();
-        this.syncFormValue();
-        this.updateValidity();
-      }
-    }
-  }
-  if (typeof customElements !== "undefined" && !customElements.get("au-file-upload")) {
-    customElements.define("au-file-upload", AuFileUpload);
-  }
-  class AuInput extends AuFormElement {
-    constructor() {
-      super();
-      this.attachShadow({ mode: "open" });
-      this._id = this.getAttribute("id") || uid("au-input-");
-      const style = document.createElement("style");
-      style.textContent = `
+			this.wrapper = document.createElement("div");
+			this.wrapper.className = "file-upload-wrapper";
+			this.container = document.createElement("div");
+			this.container.className = "file-upload-container";
+			this.container.setAttribute("role", "group");
+			this.container.setAttribute("aria-labelledby", "upload-label");
+			this.container.setAttribute("aria-describedby", "upload-errors upload-drop");
+			this._id = this.getAttribute("id") || uid("au-file-upload-");
+			this.labelEl = document.createElement("label");
+			this.labelEl.id = "upload-label";
+			this.labelEl.textContent = this.getAttribute("label") || "Upload files";
+			this.labelEl.setAttribute("for", this._id);
+			this.fileInput = document.createElement("input");
+			this.fileInput.type = "file";
+			this.fileInput.hidden = true;
+			this.fileInput.id = this._id;
+			[
+				"accept",
+				"multiple",
+				"name",
+				"disabled",
+				"required",
+				"form"
+			].forEach((attr) => {
+				if (this.hasAttribute(attr)) this.fileInput.setAttribute(attr, this.getAttribute(attr));
+			});
+			const triggerSlot = document.createElement("slot");
+			triggerSlot.name = "trigger";
+			this.defaultTrigger = document.createElement("button");
+			this.defaultTrigger.type = "button";
+			this.defaultTrigger.className = "default-trigger";
+			this.defaultTrigger.textContent = this.labelEl.textContent;
+			triggerSlot.append(this.defaultTrigger);
+			triggerSlot.addEventListener("click", () => {
+				if (this.effectiveDisabled) return;
+				this.fileInput.click();
+			});
+			triggerSlot.addEventListener("keydown", (e) => {
+				if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+					if (e.composedPath().some((node) => node instanceof Element && node.matches("button")) || !e.composedPath().some((node) => node instanceof Element && node.matches("input, a[href]"))) e.preventDefault();
+					else return;
+					if (this.effectiveDisabled) return;
+					this.fileInput.click();
+				}
+			});
+			this.dropZone = document.createElement("div");
+			this.dropZone.className = "drop-zone";
+			this.dropZone.id = "upload-drop";
+			this.dropZone.textContent = this.getAttribute("msg-drop-text") || "Drop files here";
+			this.usageDisplay = document.createElement("div");
+			this.usageDisplay.className = "usage";
+			this.fileList = document.createElement("ul");
+			this.fileList.className = "file-list";
+			this.fileList.setAttribute("role", "list");
+			const hintSlot = document.createElement("slot");
+			hintSlot.name = "hint";
+			this.errorMessage = document.createElement("div");
+			this.errorMessage.className = "error-area";
+			this.errorMessage.id = "upload-errors";
+			this.errorList = document.createElement("ul");
+			this.errorList.className = "error-list";
+			this.errorMessage.append(hintSlot, this.usageDisplay, this.errorList);
+			this.liveRegion = document.createElement("div");
+			this.liveRegion.setAttribute("aria-live", "polite");
+			this.liveRegion.setAttribute("role", "status");
+			this.liveRegion.setAttribute("aria-atomic", "true");
+			this.fileInput.addEventListener("change", (e) => {
+				e.stopPropagation();
+				try {
+					this.handleFiles(this.fileInput.files);
+				} finally {
+					this.fileInput.value = "";
+				}
+			});
+			this.addEventListener("invalid", () => {
+				this.showErrors([this.internals.validationMessage]);
+			});
+			this.container.addEventListener("dragover", (e) => {
+				e.preventDefault();
+				if (this.effectiveDisabled) return;
+				this.dropZone.classList.add("dragover");
+			});
+			this.container.addEventListener("dragleave", () => {
+				this.dropZone.classList.remove("dragover");
+			});
+			this.container.addEventListener("drop", (e) => {
+				e.preventDefault();
+				if (this.effectiveDisabled) return;
+				this.dropZone.classList.remove("dragover");
+				const dt = e.dataTransfer;
+				if (dt?.files) this.handleFiles(dt.files);
+			});
+			const actionGroup = document.createElement("div");
+			actionGroup.className = "actions";
+			const fileArea = document.createElement("div");
+			fileArea.className = "upload-area";
+			this.triggerArea = document.createElement("div");
+			this.triggerArea.className = "trigger-area";
+			this.triggerArea.tabIndex = -1;
+			this.triggerArea.setAttribute("role", "group");
+			this.triggerArea.setAttribute("aria-labelledby", "upload-label");
+			this.triggerArea.setAttribute("aria-describedby", "upload-errors");
+			this.triggerArea.append(triggerSlot);
+			fileArea.append(this.triggerArea, this.dropZone);
+			actionGroup.append(fileArea);
+			this.container.append(this.labelEl, actionGroup, this.errorMessage, this.fileList, this.liveRegion, this.fileInput);
+			this.wrapper.append(this.container);
+			this.shadowRoot.append(style, this.wrapper);
+		}
+		attributeChangedCallback(name, oldValue, newValue) {
+			if (oldValue === newValue) return;
+			if (!this.shadowRoot) return;
+			switch (name) {
+				case "aria-describedby":
+					if (this.isConnected) this._observeDescriptions();
+					break;
+				case "aria-invalid":
+					this.updateValidity();
+					break;
+				case "id":
+					this._id = newValue || uid("au-file-upload-");
+					if (this.labelEl) this.labelEl.setAttribute("for", this._id);
+					if (this.fileInput) this.fileInput.id = this._id;
+					break;
+				case "label":
+					this.updateLabelText();
+					break;
+				case "msg-drop-text":
+					this.updateDropText();
+					break;
+				case "msg-remove-text":
+				case "msg-remove-file-label":
+					this.updateFileList();
+					break;
+				case "msg-required":
+					this.updateValidity();
+					break;
+				case "disabled":
+					this.syncDisabled();
+					break;
+				case "multiple":
+					this.syncBooleanAttributeToInput("multiple");
+					break;
+				case "required":
+					this.syncBooleanAttributeToInput("required");
+					this.updateValidity();
+					break;
+				case "accept":
+				case "form":
+				case "name":
+					this.syncAttributeToInput(name);
+					if (name === "name") this.syncFormValue();
+					break;
+				case "max-total-size-mb": this.updateUsage();
+			}
+		}
+		connectedCallback() {
+			upgradeProperties(this, ["value"]);
+			this.updateLabelText();
+			this.updateDropText();
+			this.updateFileList();
+			this.syncFormValue();
+			this.updateUsage();
+			this.updateValidity();
+			this.syncDisabled();
+			this._observeDescriptions();
+		}
+		disconnectedCallback() {
+			this._descriptionObserver?.disconnect();
+			cancelAnimationFrame(this._announcementFrame);
+			this.liveRegion.textContent = "";
+			this.revokeAllPreviewUrls();
+		}
+		get effectiveDisabled() {
+			return this.hasAttribute("disabled") || !!this._formDisabled;
+		}
+		_observeDescriptions() {
+			this._descriptionObserver?.disconnect();
+			if (this.hasAttribute("aria-describedby")) {
+				this._descriptionObserver ??= new MutationObserver(() => this._syncDescriptions());
+				this._descriptionObserver.observe(this.getRootNode(), {
+					subtree: true,
+					childList: true,
+					characterData: true,
+					attributes: true,
+					attributeFilter: ["id"]
+				});
+			}
+			this._syncDescriptions();
+		}
+		_syncDescriptions() {
+			const root = this.getRootNode();
+			const external = [...new Set((this.getAttribute("aria-describedby") || "").trim().split(/\s+/))].filter(Boolean).map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
+			for (const target of [
+				this.container,
+				this.triggerArea,
+				this.defaultTrigger
+			]) if (typeof target.ariaDescribedByElements !== "undefined") target.ariaDescribedByElements = [
+				this.errorMessage,
+				this.dropZone,
+				...external
+			];
+			else {
+				if (!this._descriptionMirror) {
+					this._descriptionMirror = document.createElement("span");
+					this._descriptionMirror.id = "external-description";
+					this._descriptionMirror.hidden = true;
+					this.shadowRoot.append(this._descriptionMirror);
+				}
+				const text = external.map((el) => el.textContent).join(" ").trim();
+				if (this._descriptionMirror.textContent !== text) this._descriptionMirror.textContent = text;
+				target.setAttribute("aria-describedby", "upload-errors upload-drop" + (text ? " external-description" : ""));
+			}
+		}
+		formDisabledCallback(disabled) {
+			this._formDisabled = disabled;
+			this.syncDisabled();
+		}
+		syncDisabled() {
+			if (!this.triggerArea) return;
+			const disabled = this.effectiveDisabled;
+			this.fileInput.disabled = disabled;
+			this.defaultTrigger.disabled = disabled;
+			this.triggerArea.inert = disabled;
+			this.container.setAttribute("aria-disabled", String(disabled));
+			this.fileList.querySelectorAll("button").forEach((button) => {
+				button.disabled = disabled;
+			});
+			if (disabled) this.dropZone.classList.remove("dragover");
+		}
+		updateLabelText() {
+			if (this.labelEl) this.labelEl.textContent = this.getAttribute("label") || "Upload files";
+			if (this.defaultTrigger) this.defaultTrigger.textContent = this.labelEl.textContent;
+		}
+		updateDropText() {
+			if (this.dropZone) this.dropZone.textContent = this.getAttribute("msg-drop-text") || "Drop files here";
+		}
+		getText(name, fallback) {
+			return this.getAttribute(name) || fallback;
+		}
+		formatMessage(name, fallback, values = {}) {
+			const template = this.getText(name, fallback);
+			return Object.entries(values).reduce((message, [key, value]) => {
+				return message.replaceAll(`{${key}}`, String(value));
+			}, template);
+		}
+		formatFileError(name, fallbackTemplate, legacySuffix, fileName, values = {}) {
+			const customMessage = this.getAttribute(name);
+			if (customMessage && customMessage.includes("{")) return this.formatMessage(name, fallbackTemplate, {
+				fileName,
+				...values
+			});
+			return `${fileName} ${customMessage || legacySuffix}`;
+		}
+		syncAttributeToInput(name) {
+			if (!this.fileInput) return;
+			const value = this.getAttribute(name);
+			if (value === null) this.fileInput.removeAttribute(name);
+			else this.fileInput.setAttribute(name, value);
+		}
+		syncBooleanAttributeToInput(name) {
+			if (!this.fileInput) return;
+			if (this.hasAttribute(name)) this.fileInput.setAttribute(name, "");
+			else this.fileInput.removeAttribute(name);
+		}
+		revokePreviewUrl(file) {
+			const url = this.previewUrls.get(file);
+			if (url) {
+				URL.revokeObjectURL(url);
+				this.previewUrls.delete(file);
+			}
+		}
+		revokeAllPreviewUrls() {
+			this.previewUrls.forEach((url) => URL.revokeObjectURL(url));
+			this.previewUrls.clear();
+		}
+		handleFiles(fileList) {
+			if (this.effectiveDisabled) return;
+			const maxTotalSizeMB = this.limit("max-total-size-mb", 20);
+			const maxFiles = Math.min(Math.floor(this.limit("max-files", 5)), this.hasAttribute("multiple") ? Infinity : 1);
+			const maxSizeMB = this.limit("max-size-mb", 5);
+			const acceptAttr = this.getAttribute("accept");
+			const acceptList = acceptAttr ? acceptAttr.toLowerCase().split(",").map((type) => type.trim()).filter(Boolean) : [];
+			const newFiles = Array.from(fileList || []).filter((file) => file instanceof File);
+			const validFiles = [];
+			const errorMessages = [];
+			newFiles.forEach((file) => {
+				if (!(acceptList.length === 0 || acceptList.some((type) => {
+					if (type.endsWith("/*")) return file.type.toLowerCase().startsWith(type.slice(0, -1));
+					return type.startsWith(".") ? file.name.toLowerCase().endsWith(type) : file.type.toLowerCase() === type;
+				}))) {
+					errorMessages.push(this.formatFileError("msg-type-error", "{fileName} is not an accepted file type.", "is not an accepted file type.", file.name));
+					return;
+				}
+				if (file.size > maxSizeMB * 1024 * 1024) {
+					errorMessages.push(this.formatFileError("msg-size-error", "{fileName} exceeds the maximum size of {maxSize}MB.", `exceeds the maximum size of ${maxSizeMB}MB.`, file.name, { maxSize: maxSizeMB }));
+					return;
+				}
+				validFiles.push(file);
+			});
+			const uniqueFiles = [];
+			validFiles.forEach((file) => {
+				if (![...this.files, ...uniqueFiles].some((f) => f.name === file.name && f.size === file.size)) uniqueFiles.push(file);
+			});
+			const slotsLeft = Math.max(0, maxFiles - this.files.length);
+			const filesToAdd = uniqueFiles.slice(0, slotsLeft);
+			uniqueFiles.slice(slotsLeft).forEach((file) => {
+				errorMessages.push(this.formatFileError("msg-count-error", "{fileName} cannot be added. You can only upload up to {maxFiles} files.", `You can only upload up to ${maxFiles} files.`, file.name, { maxFiles }));
+			});
+			if (this.files.reduce((sum, f) => sum + f.size, 0) + filesToAdd.reduce((sum, f) => sum + f.size, 0) > maxTotalSizeMB * 1024 * 1024) {
+				const totalSizeMessage = this.getAttribute("msg-total-size-error")?.includes("{") ? this.formatMessage("msg-total-size-error", "Total file size exceeds limit of {maxTotalSize}MB.", { maxTotalSize: maxTotalSizeMB }) : `${this.getText("msg-total-size-error", "Total file size exceeds limit of")} ${maxTotalSizeMB}MB.`;
+				errorMessages.push(totalSizeMessage);
+				filesToAdd.length = 0;
+			}
+			this.showErrors(errorMessages);
+			if (filesToAdd.length === 0) return;
+			this.files.push(...filesToAdd);
+			this.updateFileList();
+			this.updateUsage();
+			this.announce([this.formatMessage("msg-added", "{count} file(s) added.", { count: filesToAdd.length }), ...errorMessages].join(" "));
+			this.syncFormValue();
+			this.updateValidity();
+			this.dispatchEvent(new Event("change", {
+				bubbles: true,
+				composed: true
+			}));
+			this.fileInput.value = "";
+		}
+		showErrors(messages) {
+			this.errorList.innerHTML = "";
+			messages.forEach((msg) => {
+				const li = document.createElement("li");
+				li.textContent = msg;
+				this.errorList.appendChild(li);
+			});
+			this.announce(messages.join(" "));
+		}
+		announce(message) {
+			cancelAnimationFrame(this._announcementFrame);
+			while (this.liveRegion.firstChild) this.liveRegion.removeChild(this.liveRegion.firstChild);
+			if (!this.isConnected || !message) return;
+			this._announcementFrame = requestAnimationFrame(() => {
+				const span = document.createElement("span");
+				span.textContent = message;
+				this.liveRegion.appendChild(span);
+			});
+		}
+		createFileRow(file) {
+			const row = document.createElement("li");
+			row.setAttribute("role", "listitem");
+			const preview = document.createElement("div");
+			const image = file.type.startsWith("image/");
+			const icon = document.createElement(image ? "img" : "span");
+			icon.className = "preview";
+			if (image) {
+				icon.alt = "";
+				icon.width = 40;
+				icon.height = 40;
+			} else {
+				icon.textContent = "📄";
+				icon.setAttribute("aria-hidden", "true");
+			}
+			const name = document.createElement("span");
+			name.className = "file-name";
+			name.textContent = file.name;
+			preview.append(icon, name);
+			const button = document.createElement("button");
+			button.type = "button";
+			button.className = "delete";
+			button._file = file;
+			button.setAttribute("part", "delete");
+			button.addEventListener("click", () => this.removeFile(file));
+			row.append(preview, button);
+			return row;
+		}
+		updateFileList() {
+			const previousButtons = [...this.fileList.querySelectorAll("button.delete")];
+			const focused = this.shadowRoot.activeElement;
+			const focusedIndex = previousButtons.indexOf(focused);
+			const focusedFile = focused?._file;
+			this._fileRows ??= /* @__PURE__ */ new Map();
+			for (const [file, row] of this._fileRows) if (!this.files.includes(file)) {
+				row.remove();
+				this._fileRows.delete(file);
+				this.revokePreviewUrl(file);
+			}
+			this.files.forEach((file, index) => {
+				let li = this._fileRows.get(file);
+				if (!li) {
+					li = this.createFileRow(file);
+					this._fileRows.set(file, li);
+				}
+				const removeBtn = li.querySelector("button.delete");
+				const visibleLabel = this.getAttribute("msg-remove-text")?.trim() || "Remove";
+				const requestedName = this.formatMessage("msg-remove-file-label", "{action} {fileName}", {
+					action: visibleLabel,
+					fileName: file.name
+				});
+				removeBtn.textContent = visibleLabel;
+				removeBtn.setAttribute("aria-label", requestedName.includes(visibleLabel) ? requestedName : `${visibleLabel} ${requestedName}`);
+				removeBtn.disabled = this.effectiveDisabled;
+				const img = li.querySelector("img");
+				if (img) {
+					if (!this.previewUrls.has(file)) this.previewUrls.set(file, URL.createObjectURL(file));
+					if (img.src !== this.previewUrls.get(file)) img.src = this.previewUrls.get(file);
+				}
+				if (this.fileList.children[index] !== li) this.fileList.insertBefore(li, this.fileList.children[index] || null);
+			});
+			if (focusedIndex >= 0) {
+				const buttons = [...this.fileList.querySelectorAll("button.delete")];
+				const next = buttons.find((button) => button._file === focusedFile) || buttons[Math.min(focusedIndex, buttons.length - 1)];
+				if (next) next.focus();
+				else this.focusTrigger();
+			}
+		}
+		removeFile(file) {
+			if (this.effectiveDisabled) return;
+			const index = this.files.findIndex((f) => f === file || f.name === file?.name && f.size === file?.size);
+			if (index < 0) return;
+			const removed = this.files[index];
+			this.revokePreviewUrl(removed);
+			this.files = this.files.filter((_, i) => i !== index);
+			this.updateFileList();
+			this.updateUsage();
+			this.announce(this.formatMessage("msg-removed", "{fileName} removed.", { fileName: removed.name }));
+			this.syncFormValue();
+			this.updateValidity();
+			this.dispatchEvent(new CustomEvent("au-remove-file", {
+				bubbles: true,
+				composed: true,
+				detail: removed
+			}));
+			this.dispatchEvent(new Event("change", {
+				bubbles: true,
+				composed: true
+			}));
+		}
+		updateUsage() {
+			const maxMB = this.limit("max-total-size-mb", 20);
+			const totalMB = this.files.reduce((sum, f) => sum + f.size, 0) / 1048576;
+			this.usageDisplay.textContent = `${totalMB.toFixed(1)}MB / ${maxMB}MB`;
+		}
+		syncFormValue() {
+			const name = this.getAttribute("name");
+			if (!name || this.files.length === 0) {
+				this.internals.setFormValue(null);
+				return;
+			}
+			const data = new FormData();
+			this.files.forEach((file) => data.append(name, file, file.name));
+			this.internals.setFormValue(data);
+		}
+		limit(name, fallback) {
+			const raw = this.getAttribute(name);
+			const value = raw?.trim() ? Number(raw) : NaN;
+			return Number.isFinite(value) && value >= 0 ? value : fallback;
+		}
+		focus(options) {
+			if (!this.effectiveDisabled) this.focusTrigger(options);
+		}
+		focusTrigger(options) {
+			(this.shadowRoot.querySelector("slot[name=trigger]").assignedElements({ flatten: true }).flatMap((root) => [root, ...root.querySelectorAll("button,input,[tabindex]")]).find((el) => el.matches("button,input,[tabindex]") && !el.matches(":disabled") && el.tabIndex >= 0 && !el.closest("[hidden],[inert]") && el.getClientRects().length && getComputedStyle(el).visibility === "visible") || this.triggerArea).focus(options);
+		}
+		updateValidity() {
+			const missing = this.hasAttribute("required") && this.files.length === 0;
+			const invalid = missing ? "true" : this.getAttribute("aria-invalid") || "false";
+			for (const target of [
+				this.container,
+				this.triggerArea,
+				this.defaultTrigger
+			]) target.setAttribute("aria-invalid", invalid);
+			if (missing) {
+				this.internals.setValidity({ valueMissing: true }, this.getText("msg-required", "Please select at least one file."), this.triggerArea);
+				return false;
+			}
+			this.internals.setValidity({});
+			return true;
+		}
+		_validityAnchor() {
+			return this.triggerArea;
+		}
+		checkValidity() {
+			this.updateValidity();
+			return super.checkValidity();
+		}
+		reportValidity() {
+			this.updateValidity();
+			return super.reportValidity();
+		}
+		formResetCallback() {
+			this.revokeAllPreviewUrls();
+			this.files = [];
+			this.fileInput.value = "";
+			this.showErrors([]);
+			this.updateFileList();
+			this.updateUsage();
+			this.syncFormValue();
+			this.updateValidity();
+		}
+		get value() {
+			return [...this.files];
+		}
+		set value(val) {
+			if (Array.isArray(val)) {
+				this.files = [...new Set(val.filter((file) => file instanceof File))];
+				this.fileInput.value = "";
+				this.showErrors([]);
+				this.updateFileList();
+				this.updateUsage();
+				this.syncFormValue();
+				this.updateValidity();
+			}
+		}
+	};
+	if (typeof customElements !== "undefined" && !customElements.get("au-file-upload")) customElements.define("au-file-upload", AuFileUpload);
+	// src/components/input.js
+	var AuInput = class extends AuFormElement {
+		constructor() {
+			super();
+			this.attachShadow({ mode: "open" });
+			this._id = this.getAttribute("id") || uid("au-input-");
+			const style = document.createElement("style");
+			style.textContent = `
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
     :host {
       display: block;
@@ -2985,564 +2991,624 @@
       input:focus-visible, .clear-input:focus-visible { outline: 2px solid Highlight; outline-offset: -2px; }
     }
   `;
-      const wrapper = document.createElement("div");
-      wrapper.className = "input-wrapper";
-      this.wrapper = wrapper;
-      this.labelEl = document.createElement("label");
-      this.labelEl.setAttribute("for", this._id);
-      this.labelEl.textContent = this.getAttribute("label") || "";
-      const inputContainer = document.createElement("div");
-      inputContainer.className = "input-container";
-      this.inputContainer = inputContainer;
-      this.prefixSlot = document.createElement("slot");
-      this.prefixSlot.name = "prefix";
-      this.prefixSpan = document.createElement("span");
-      this.prefixSpan.className = "prefix";
-      this.prefixSpan.appendChild(this.prefixSlot);
-      this.prefixSpan.hidden = true;
-      this.input = document.createElement("input");
-      this.input.id = this._id;
-      this.syncAttributes();
-      this.colorCodeSpan = document.createElement("span");
-      this.colorCodeSpan.className = "color-code";
-      this.colorCodeSpan.hidden = true;
-      this.clearButton = document.createElement("button");
-      this.clearButton.type = "button";
-      this.clearButton.className = "clear-input";
-      this.clearButton.textContent = "✖";
-      this.clearButton.hidden = true;
-      this.clearButton.setAttribute("part", "clear");
-      this.clearButton.addEventListener("click", () => {
-        this.clear();
-      });
-      this.affixSlot = document.createElement("slot");
-      this.affixSlot.name = "affix";
-      this.affixSpan = document.createElement("span");
-      this.affixSpan.className = "affix";
-      this.affixSpan.appendChild(this.affixSlot);
-      this.affixSpan.hidden = true;
-      inputContainer.append(this.prefixSpan, this.input, this.colorCodeSpan, this.clearButton, this.affixSpan);
-      wrapper.append(this.labelEl, inputContainer);
-      this.shadowRoot.append(style, wrapper);
-      this._bindInputEvents();
-      this.prefixSlot.addEventListener("slotchange", () => {
-        this.prefixSpan.hidden = this.prefixSlot.assignedNodes().length === 0;
-      });
-      this.affixSlot.addEventListener("slotchange", () => {
-        this.affixSpan.hidden = this.affixSlot.assignedNodes().length === 0;
-      });
-    }
-    /** 綁定 input 事件（抽出方法以便 formResetCallback 重用） */
-    _bindInputEvents() {
-      this.input.addEventListener("input", (event) => {
-        this.value = this.input.value;
-        if (!event.composed) {
-          const forwarded = event instanceof InputEvent ? new InputEvent("input", { bubbles: true, composed: true, data: event.data, inputType: event.inputType, isComposing: event.isComposing }) : new Event("input", { bubbles: true, composed: true });
-          this.dispatchEvent(forwarded);
-        }
-      });
-      this.input.addEventListener("change", (event) => {
-        this.value = this.input.value;
-        if (!event.composed) this.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
-      });
-    }
-    static get observedAttributes() {
-      return [
-        "type",
-        "name",
-        "value",
-        "placeholder",
-        "required",
-        "disabled",
-        "readonly",
-        "label",
-        "min",
-        "max",
-        "step",
-        "pattern",
-        "autocomplete",
-        "autofocus",
-        "inputmode",
-        "maxlength",
-        "minlength",
-        "list",
-        "id",
-        "aria-label",
-        "aria-labelledby",
-        "aria-describedby",
-        "aria-invalid",
-        "data-size",
-        "data-layout",
-        "data-clear",
-        "data-clear-label"
-      ];
-    }
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (oldValue === newValue) return;
-      if (name === "label" && this.labelEl) {
-        this.labelEl.textContent = newValue;
-      } else if ((name === "data-size" || name === "data-layout") && this.wrapper) {
-        if (newValue === null) {
-          this.wrapper.removeAttribute(name);
-        } else {
-          this.wrapper.setAttribute(name, newValue);
-        }
-      } else if (name === "data-clear" || name === "data-clear-label") {
-        this._updateClearButton();
-      } else if (name === "list") {
-        this._handleListAttribute(newValue);
-      } else if (name === "id") {
-        this._id = newValue || uid("au-input-");
-        this.input.id = this._id;
-        this.labelEl.htmlFor = this._id;
-      } else if (["aria-label", "aria-labelledby", "aria-describedby"].includes(name)) {
-        this._syncAccessibleReferences();
-      } else if (this.input) {
-        if (newValue === null) {
-          this.input.removeAttribute(name);
-          const camel = name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
-          if (typeof this.input[camel] === "boolean") this.input[camel] = false;
-          else if (typeof this.input[name] === "boolean") this.input[name] = false;
-        } else {
-          this.input.setAttribute(name, newValue);
-          const camel = name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
-          if (typeof this.input[camel] === "boolean") this.input[camel] = true;
-          else if (typeof this.input[name] === "boolean") this.input[name] = true;
-        }
-        if (name === "value") this.input.value = newValue ?? "";
-        this.internals.setFormValue(this.input.value);
-        this._syncValidity();
-        this._updateColorCode();
-      }
-      this._syncControlState();
-      this._syncAccessibleReferences();
-    }
-    connectedCallback() {
-      upgradeProperties(this, ["value", "disabled", "required", "readonly"]);
-      if (!this._initialValueSet) {
-        this._initialValue = this.input.value;
-        this._initialValueSet = true;
-      }
-      this.internals.setFormValue(this.input.value);
-      this._syncValidity();
-      this._updateClearButton();
-      this._updateColorCode();
-      this._syncControlState();
-      this._observeExternalReferences();
-      if (this.hasAttribute("list")) {
-        requestAnimationFrame(() => {
-          if (this.isConnected) this._handleListAttribute(this.getAttribute("list"));
-        });
-      }
-    }
-    formResetCallback() {
-      const currentValue = this._initialValue || "";
-      const wasFocused = this.shadowRoot.activeElement === this.input;
-      const newInput = this.input.cloneNode(false);
-      newInput.value = currentValue;
-      this.inputContainer.replaceChild(newInput, this.input);
-      this.input = newInput;
-      this._bindInputEvents();
-      this.internals.setFormValue(this.input.value);
-      this._syncValidity();
-      this._updateClearButton();
-      this._updateColorCode();
-      this._syncControlState();
-      this._syncAccessibleReferences();
-      if (wasFocused) this.input.focus();
-    }
-    formStateRestoreCallback(state, mode) {
-      if (typeof state === "string" && this.input?.type !== "file") this.value = state;
-    }
-    get value() {
-      return this.input?.value;
-    }
-    set value(val) {
-      if (this.input) {
-        this.input.value = val;
-        this.setAttribute("value", val);
-        this.internals.setFormValue(this.input.value);
-        this._syncValidity();
-        this._updateClearButton();
-        this._updateColorCode();
-      }
-    }
-    // As on a native input: a number (or Date) for number, range and date-like
-    // types, NaN (or null) otherwise. Setting goes through value, so the form
-    // value and validity follow.
-    get valueAsNumber() {
-      return this.input ? this.input.valueAsNumber : NaN;
-    }
-    set valueAsNumber(number) {
-      if (!this.input) return;
-      this.input.valueAsNumber = number;
-      this.value = this.input.value;
-    }
-    get valueAsDate() {
-      return this.input ? this.input.valueAsDate : null;
-    }
-    set valueAsDate(date) {
-      if (!this.input) return;
-      this.input.valueAsDate = date;
-      this.value = this.input.value;
-    }
-    /** ✅ 開發者用：清空 input 值 */
-    clear() {
-      if (this.input.disabled || this.input.readOnly || !this.input.value) return;
-      const wasFocused = this.shadowRoot.activeElement === this.clearButton;
-      this.input.value = "";
-      this.value = "";
-      this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
-      this.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
-      this._updateClearButton();
-      this._updateColorCode();
-      if (wasFocused) this.input.focus();
-    }
-    /** ✅ 開發者用：注入建議值 */
-    suggest(val = "") {
-      if (this.input.disabled || this.input.readOnly) return;
-      this.input.value = val;
-      this.value = val;
-      this.internals.setFormValue(this.input.value);
-      this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
-      this._updateClearButton();
-      this._updateColorCode();
-    }
-    get disabled() {
-      return this.hasAttribute("disabled");
-    }
-    set disabled(val) {
-      val ? this.setAttribute("disabled", "") : this.removeAttribute("disabled");
-    }
-    get required() {
-      return this.hasAttribute("required");
-    }
-    set required(val) {
-      val ? this.setAttribute("required", "") : this.removeAttribute("required");
-    }
-    get readonly() {
-      return this.hasAttribute("readonly");
-    }
-    set readonly(val) {
-      val ? this.setAttribute("readonly", "") : this.removeAttribute("readonly");
-    }
-    /** ✅ 開發者用：聚焦 input 欄位 */
-    focus(options) {
-      this.input?.focus(options);
-    }
-    // Forward only the documented input attributes. Copying every host attribute
-    // would also copy hidden, inert, style and inline handlers, which then stay on
-    // the inner input after the host changes (and run twice for handlers).
-    syncAttributes() {
-      const handledElsewhere = /* @__PURE__ */ new Set([
-        "id",
-        "label",
-        "list",
-        "aria-label",
-        "aria-labelledby",
-        "aria-describedby",
-        "data-size",
-        "data-layout",
-        "data-clear",
-        "data-clear-label"
-      ]);
-      for (const name of this.constructor.observedAttributes) {
-        if (handledElsewhere.has(name) || !this.hasAttribute(name)) continue;
-        const value = this.getAttribute(name);
-        this.input.setAttribute(name, value);
-        if (name === "value") this.input.defaultValue = value;
-      }
-    }
-    _syncValidity() {
-      if (!this.input) return;
-      if (this.input.validity.valid) {
-        this.internals.setValidity({});
-      } else {
-        this.internals.setValidity(this.input.validity, this.input.validationMessage, this.input);
-      }
-    }
-    _updateClearButton() {
-      if (!this.clearButton) return;
-      const hasClear = this.hasAttribute("data-clear");
-      const hasValue = this.input.value.length > 0;
-      const label = this.getAttribute("data-clear-label") || "Clear input";
-      this.clearButton.setAttribute("aria-label", label);
-      this.clearButton.disabled = this.input.disabled || this.input.readOnly;
-      this.clearButton.hidden = !(hasClear && hasValue) || this.clearButton.disabled;
-    }
-    formDisabledCallback(disabled) {
-      this._formDisabled = disabled;
-      this._syncControlState();
-    }
-    _syncControlState() {
-      if (!this.input) return;
-      this.input.disabled = Boolean(this.disabled || this._formDisabled);
-      this.input.readOnly = this.readonly;
-      this._updateClearButton();
-      this._syncValidity();
-    }
-    _observeExternalReferences() {
-      this._referenceObserver?.disconnect();
-      this._referenceObserver ??= new MutationObserver(() => {
-        this._syncAccessibleReferences();
-        const listId = this.getAttribute("list");
-        const found = this.getRootNode().getElementById?.(listId);
-        const target = found?.tagName === "DATALIST" ? found : null;
-        if (listId && target !== this._externalDatalist) this._handleListAttribute(listId);
-      });
-      this._referenceObserver.observe(this.getRootNode(), {
-        subtree: true,
-        childList: true,
-        characterData: true,
-        attributes: true,
-        attributeFilter: ["id", "for", "aria-label"]
-      });
-      this._syncAccessibleReferences();
-    }
-    _syncAccessibleReferences() {
-      if (!this.input) return;
-      forwardAria(this, this.input, { explicit: this.getAttribute("aria-label"), hasOwnLabel: !!this.getAttribute("label"), mirrorPrefix: "au-input-" });
-      this.labelEl.hidden = !this.labelEl.textContent;
-    }
-    _updateColorCode() {
-      if (this.input.type === "color") {
-        this.colorCodeSpan.textContent = this.input.value;
-        this.colorCodeSpan.hidden = false;
-      } else {
-        this.colorCodeSpan.hidden = true;
-      }
-    }
-    /**
-     * Binds the external datalist to an internal shadow DOM datalist because
-     * `list` attributes do not cross shadow DOM boundaries.
-     *
-     * A MutationObserver keeps the internal copy in sync, so dynamically updated
-     * datalists (e.g. fetch-as-you-type autocomplete) stay current. The observer
-     * is torn down on re-target and in disconnectedCallback to avoid leaks.
-     */
-    _handleListAttribute(listId) {
-      if (!this.shadowRoot || !this.input) return;
-      this._disconnectDatalistObserver();
-      const existingInternal = this.shadowRoot.querySelector("datalist");
-      if (existingInternal) existingInternal.remove();
-      if (!listId) {
-        this.input.removeAttribute("list");
-        return;
-      }
-      const root = this.getRootNode();
-      const externalDatalist = root instanceof Document || root instanceof ShadowRoot ? root.getElementById(listId) : document.getElementById(listId);
-      if (externalDatalist && externalDatalist.tagName === "DATALIST") {
-        this._externalDatalist = externalDatalist;
-        this._syncInternalDatalist(externalDatalist, listId);
-        this._datalistObserver = new MutationObserver(() => {
-          this._syncInternalDatalist(externalDatalist, listId);
-        });
-        this._datalistObserver.observe(externalDatalist, {
-          childList: true,
-          subtree: true,
-          attributes: true,
-          characterData: true
-        });
-      } else {
-        this.input.setAttribute("list", listId);
-      }
-    }
-    /** Rebuilds the shadow-scoped datalist from the current external datalist. */
-    _syncInternalDatalist(externalDatalist, listId) {
-      if (!this.shadowRoot || !this.input) return;
-      const existingInternal = this.shadowRoot.querySelector("datalist");
-      if (existingInternal) existingInternal.remove();
-      const internalDatalist = document.createElement("datalist");
-      internalDatalist.id = listId;
-      Array.from(externalDatalist.options).forEach((opt) => {
-        internalDatalist.appendChild(opt.cloneNode(true));
-      });
-      this.shadowRoot.appendChild(internalDatalist);
-      this.input.setAttribute("list", listId);
-    }
-    _disconnectDatalistObserver() {
-      this._externalDatalist = null;
-      if (this._datalistObserver) {
-        this._datalistObserver.disconnect();
-        this._datalistObserver = null;
-      }
-    }
-    disconnectedCallback() {
-      this._disconnectDatalistObserver();
-      this._referenceObserver?.disconnect();
-    }
-  }
-  if (typeof customElements !== "undefined" && !customElements.get("au-input")) {
-    customElements.define("au-input", AuInput);
-  }
-  class AuPagination extends HTMLElement {
-    static get observedAttributes() {
-      return [
-        "data-total",
-        "data-current-page",
-        "data-pager-count",
-        "data-page-size",
-        "data-page-size-options",
-        "data-layout",
-        "data-text-total-pages-prefix",
-        "data-text-page",
-        "data-text-total-items-suffix",
-        "data-text-per",
-        "data-text-first",
-        "data-text-prev",
-        "data-text-next",
-        "data-text-last",
-        "data-text-go",
-        "data-text-goto",
-        "data-text-pagination-label",
-        "data-text-page-size",
-        "data-text-page-announcement"
-      ];
-    }
-    constructor() {
-      super();
-      this.attachShadow({ mode: "open" });
-      this._selectId = uid("au-pagination-");
-      this._jumpId = uid("au-pagination-");
-      this.liveRegion = document.createElement("div");
-      this.liveRegion.setAttribute("aria-live", "polite");
-      this.liveRegion.setAttribute("role", "status");
-      this.liveRegion.setAttribute("aria-atomic", "true");
-      this.liveRegion.className = "visually-hidden";
-      this._nodes = /* @__PURE__ */ new Map();
-      this._parseAttributes();
-      this._render();
-    }
-    connectedCallback() {
-      upgradeProperties(this, ["total", "currentPage", "pageSize", "pagerCount", "layout", "pageSizeOptions"]);
-      this._requestRender();
-    }
-    disconnectedCallback() {
-      cancelAnimationFrame(this._renderFrame);
-      cancelAnimationFrame(this._announceFrame);
-      this._updatePending = false;
-    }
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (oldValue === newValue) return;
-      this._parseAttributes();
-      this._requestRender();
-    }
-    _requestRender() {
-      if (this._updatePending) return;
-      this._updatePending = true;
-      this._renderFrame = requestAnimationFrame(() => {
-        this._updatePending = false;
-        this._render();
-      });
-    }
-    _parseAttributes() {
-      const integer = (value, fallback, min = 1) => {
-        const number = Number(value);
-        return (typeof value === "number" || typeof value === "string") && String(value).trim() !== "" && Number.isSafeInteger(number) && number >= min ? number : fallback;
-      };
-      this._total = integer(this.getAttribute("data-total"), 0, 0);
-      this._pageSize = integer(this.getAttribute("data-page-size"), 10);
-      this._currentPage = Math.min(integer(this.getAttribute("data-current-page"), 1), this.totalPages);
-      this._pagerCount = Math.min(integer(this.getAttribute("data-pager-count"), 5), 100);
-      const opts = this.getAttribute("data-page-size-options");
-      if (opts) {
-        try {
-          this._pageSizeOptions = JSON.parse(opts);
-        } catch {
-          this._pageSizeOptions = opts.split(",").map((n) => n.trim());
-        }
-      } else {
-        this._pageSizeOptions = [10, 30, 50, 100];
-      }
-      this._pageSizeOptions = Array.isArray(this._pageSizeOptions) ? [...new Set(this._pageSizeOptions.map((value) => integer(value, 0)).filter(Boolean))] : [10, 30, 50, 100];
-      const lay = this.getAttribute("data-layout");
-      if (lay) {
-        try {
-          this._layout = JSON.parse(lay);
-        } catch {
-          this._layout = lay.replace(/[[\]' ]/g, "").split(",");
-        }
-      } else {
-        this._layout = ["total_page", "total_items", "page_size", "first", "prev", "pages", "next", "last", "jump"];
-      }
-      const supported = ["total_page", "total_items", "page_size", "first", "prev", "pages", "next", "last", "jump"];
-      this._layout = Array.isArray(this._layout) ? [...new Set(this._layout.filter((value) => supported.includes(value)))] : supported;
-      this.texts = {
-        totalPagesPrefix: this.getAttribute("data-text-total-pages-prefix") || "Total",
-        pageSuffix: this.getAttribute("data-text-page") || "page(s)",
-        totalItemsSuffix: this.getAttribute("data-text-total-items-suffix") || "item(s)",
-        perText: this.getAttribute("data-text-per") || "each page",
-        firstText: this.getAttribute("data-text-first") || "First",
-        prevText: this.getAttribute("data-text-prev") || "Prev",
-        nextText: this.getAttribute("data-text-next") || "Next",
-        lastText: this.getAttribute("data-text-last") || "Last",
-        goText: this.getAttribute("data-text-go") || "go to",
-        gotoText: this.getAttribute("data-text-goto") || "go to",
-        paginationLabel: this.getAttribute("data-text-pagination-label") || "pagination",
-        pageSizeText: this.getAttribute("data-text-page-size") || "Page size",
-        pageAnnouncement: this.getAttribute("data-text-page-announcement") || "Page {page}"
-      };
-    }
-    formatText(template, values = {}) {
-      return Object.entries(values).reduce((message, [key, value]) => {
-        return message.replaceAll(`{${key}}`, String(value));
-      }, template);
-    }
-    get total() {
-      return this._total;
-    }
-    set total(value) {
-      this.setAttribute("data-total", String(value));
-    }
-    get currentPage() {
-      return this._currentPage;
-    }
-    set currentPage(value) {
-      this.setAttribute("data-current-page", String(value));
-    }
-    get pageSize() {
-      return this._pageSize;
-    }
-    set pageSize(value) {
-      this.setAttribute("data-page-size", String(value));
-    }
-    get pagerCount() {
-      return this._pagerCount;
-    }
-    set pagerCount(value) {
-      this.setAttribute("data-pager-count", String(value));
-    }
-    get pageSizeOptions() {
-      return [...this._pageSizeOptions ?? [10, 30, 50, 100]];
-    }
-    set pageSizeOptions(val) {
-      this.setAttribute("data-page-size-options", JSON.stringify(val));
-    }
-    get layout() {
-      return [...this._layout ?? ["total_page", "total_items", "page_size", "first", "prev", "pages", "next", "last", "jump"]];
-    }
-    set layout(val) {
-      this.setAttribute("data-layout", JSON.stringify(val));
-    }
-    get totalPages() {
-      return Math.ceil(this.total / this.pageSize) || 1;
-    }
-    get pagers() {
-      const groupIndex = Math.floor((this.currentPage - 1) / this.pagerCount);
-      const start = groupIndex * this.pagerCount + 1;
-      const end = Math.min(start + this.pagerCount - 1, this.totalPages);
-      const arr = [];
-      for (let i = start; i <= end; i++) arr.push(i);
-      return arr;
-    }
-    _render() {
-      const t = this.texts;
-      const layout = this.layout;
-      const totalPages = this.totalPages;
-      const totalItems = this.total;
-      if (!this._style) {
-        const style = document.createElement("style");
-        style.textContent = `
+			const wrapper = document.createElement("div");
+			wrapper.className = "input-wrapper";
+			this.wrapper = wrapper;
+			this.labelEl = document.createElement("label");
+			this.labelEl.setAttribute("for", this._id);
+			this.labelEl.textContent = this.getAttribute("label") || "";
+			const inputContainer = document.createElement("div");
+			inputContainer.className = "input-container";
+			this.inputContainer = inputContainer;
+			this.prefixSlot = document.createElement("slot");
+			this.prefixSlot.name = "prefix";
+			this.prefixSpan = document.createElement("span");
+			this.prefixSpan.className = "prefix";
+			this.prefixSpan.appendChild(this.prefixSlot);
+			this.prefixSpan.hidden = true;
+			this.input = document.createElement("input");
+			this.input.id = this._id;
+			this.syncAttributes();
+			this.colorCodeSpan = document.createElement("span");
+			this.colorCodeSpan.className = "color-code";
+			this.colorCodeSpan.hidden = true;
+			this.clearButton = document.createElement("button");
+			this.clearButton.type = "button";
+			this.clearButton.className = "clear-input";
+			this.clearButton.textContent = "✖";
+			this.clearButton.hidden = true;
+			this.clearButton.setAttribute("part", "clear");
+			this.clearButton.addEventListener("click", () => {
+				this.clear();
+			});
+			this.affixSlot = document.createElement("slot");
+			this.affixSlot.name = "affix";
+			this.affixSpan = document.createElement("span");
+			this.affixSpan.className = "affix";
+			this.affixSpan.appendChild(this.affixSlot);
+			this.affixSpan.hidden = true;
+			inputContainer.append(this.prefixSpan, this.input, this.colorCodeSpan, this.clearButton, this.affixSpan);
+			wrapper.append(this.labelEl, inputContainer);
+			this.shadowRoot.append(style, wrapper);
+			this._bindInputEvents();
+			this.prefixSlot.addEventListener("slotchange", () => {
+				this.prefixSpan.hidden = this.prefixSlot.assignedNodes().length === 0;
+			});
+			this.affixSlot.addEventListener("slotchange", () => {
+				this.affixSpan.hidden = this.affixSlot.assignedNodes().length === 0;
+			});
+		}
+		/** 綁定 input 事件（抽出方法以便 formResetCallback 重用） */
+		_bindInputEvents() {
+			this.input.addEventListener("input", (event) => {
+				this.value = this.input.value;
+				if (!event.composed) {
+					const forwarded = event instanceof InputEvent ? new InputEvent("input", {
+						bubbles: true,
+						composed: true,
+						data: event.data,
+						inputType: event.inputType,
+						isComposing: event.isComposing
+					}) : new Event("input", {
+						bubbles: true,
+						composed: true
+					});
+					this.dispatchEvent(forwarded);
+				}
+			});
+			this.input.addEventListener("change", (event) => {
+				this.value = this.input.value;
+				if (!event.composed) this.dispatchEvent(new Event("change", {
+					bubbles: true,
+					composed: true
+				}));
+			});
+		}
+		static get observedAttributes() {
+			return [
+				"type",
+				"name",
+				"value",
+				"placeholder",
+				"required",
+				"disabled",
+				"readonly",
+				"label",
+				"min",
+				"max",
+				"step",
+				"pattern",
+				"autocomplete",
+				"autofocus",
+				"inputmode",
+				"maxlength",
+				"minlength",
+				"list",
+				"id",
+				"aria-label",
+				"aria-labelledby",
+				"aria-describedby",
+				"aria-invalid",
+				"data-size",
+				"data-layout",
+				"data-clear",
+				"data-clear-label"
+			];
+		}
+		attributeChangedCallback(name, oldValue, newValue) {
+			if (oldValue === newValue) return;
+			if (name === "label" && this.labelEl) this.labelEl.textContent = newValue;
+			else if ((name === "data-size" || name === "data-layout") && this.wrapper) {
+				if (newValue === null) this.wrapper.removeAttribute(name);
+				else this.wrapper.setAttribute(name, newValue);
+			} else if (name === "data-clear" || name === "data-clear-label") this._updateClearButton();
+			else if (name === "list") this._handleListAttribute(newValue);
+			else if (name === "id") {
+				this._id = newValue || uid("au-input-");
+				this.input.id = this._id;
+				this.labelEl.htmlFor = this._id;
+			} else if ([
+				"aria-label",
+				"aria-labelledby",
+				"aria-describedby"
+			].includes(name)) this._syncAccessibleReferences();
+			else if (this.input) {
+				if (newValue === null) {
+					this.input.removeAttribute(name);
+					const camel = name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+					if (typeof this.input[camel] === "boolean") this.input[camel] = false;
+					else if (typeof this.input[name] === "boolean") this.input[name] = false;
+				} else {
+					this.input.setAttribute(name, newValue);
+					const camel = name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+					if (typeof this.input[camel] === "boolean") this.input[camel] = true;
+					else if (typeof this.input[name] === "boolean") this.input[name] = true;
+				}
+				if (name === "value") this.input.value = newValue ?? "";
+				this.internals.setFormValue(this.input.value);
+				this._syncValidity();
+				this._updateColorCode();
+			}
+			this._syncControlState();
+			this._syncAccessibleReferences();
+		}
+		connectedCallback() {
+			upgradeProperties(this, [
+				"value",
+				"disabled",
+				"required",
+				"readonly"
+			]);
+			if (!this._initialValueSet) {
+				this._initialValue = this.input.value;
+				this._initialValueSet = true;
+			}
+			this.internals.setFormValue(this.input.value);
+			this._syncValidity();
+			this._updateClearButton();
+			this._updateColorCode();
+			this._syncControlState();
+			this._observeExternalReferences();
+			if (this.hasAttribute("list")) requestAnimationFrame(() => {
+				if (this.isConnected) this._handleListAttribute(this.getAttribute("list"));
+			});
+		}
+		formResetCallback() {
+			const currentValue = this._initialValue || "";
+			const wasFocused = this.shadowRoot.activeElement === this.input;
+			const newInput = this.input.cloneNode(false);
+			newInput.value = currentValue;
+			this.inputContainer.replaceChild(newInput, this.input);
+			this.input = newInput;
+			this._bindInputEvents();
+			this.internals.setFormValue(this.input.value);
+			this._syncValidity();
+			this._updateClearButton();
+			this._updateColorCode();
+			this._syncControlState();
+			this._syncAccessibleReferences();
+			if (wasFocused) this.input.focus();
+		}
+		formStateRestoreCallback(state, mode) {
+			if (typeof state === "string" && this.input?.type !== "file") this.value = state;
+		}
+		get value() {
+			return this.input?.value;
+		}
+		set value(val) {
+			if (this.input) {
+				this.input.value = val;
+				this.setAttribute("value", val);
+				this.internals.setFormValue(this.input.value);
+				this._syncValidity();
+				this._updateClearButton();
+				this._updateColorCode();
+			}
+		}
+		get valueAsNumber() {
+			return this.input ? this.input.valueAsNumber : NaN;
+		}
+		set valueAsNumber(number) {
+			if (!this.input) return;
+			this.input.valueAsNumber = number;
+			this.value = this.input.value;
+		}
+		get valueAsDate() {
+			return this.input ? this.input.valueAsDate : null;
+		}
+		set valueAsDate(date) {
+			if (!this.input) return;
+			this.input.valueAsDate = date;
+			this.value = this.input.value;
+		}
+		/** ✅ 開發者用：清空 input 值 */
+		clear() {
+			if (this.input.disabled || this.input.readOnly || !this.input.value) return;
+			const wasFocused = this.shadowRoot.activeElement === this.clearButton;
+			this.input.value = "";
+			this.value = "";
+			this.dispatchEvent(new Event("input", {
+				bubbles: true,
+				composed: true
+			}));
+			this.dispatchEvent(new Event("change", {
+				bubbles: true,
+				composed: true
+			}));
+			this._updateClearButton();
+			this._updateColorCode();
+			if (wasFocused) this.input.focus();
+		}
+		/** ✅ 開發者用：注入建議值 */
+		suggest(val = "") {
+			if (this.input.disabled || this.input.readOnly) return;
+			this.input.value = val;
+			this.value = val;
+			this.internals.setFormValue(this.input.value);
+			this.dispatchEvent(new Event("input", {
+				bubbles: true,
+				composed: true
+			}));
+			this._updateClearButton();
+			this._updateColorCode();
+		}
+		get disabled() {
+			return this.hasAttribute("disabled");
+		}
+		set disabled(val) {
+			val ? this.setAttribute("disabled", "") : this.removeAttribute("disabled");
+		}
+		get required() {
+			return this.hasAttribute("required");
+		}
+		set required(val) {
+			val ? this.setAttribute("required", "") : this.removeAttribute("required");
+		}
+		get readonly() {
+			return this.hasAttribute("readonly");
+		}
+		set readonly(val) {
+			val ? this.setAttribute("readonly", "") : this.removeAttribute("readonly");
+		}
+		/** ✅ 開發者用：聚焦 input 欄位 */
+		focus(options) {
+			this.input?.focus(options);
+		}
+		syncAttributes() {
+			const handledElsewhere = /* @__PURE__ */ new Set([
+				"id",
+				"label",
+				"list",
+				"aria-label",
+				"aria-labelledby",
+				"aria-describedby",
+				"data-size",
+				"data-layout",
+				"data-clear",
+				"data-clear-label"
+			]);
+			for (const name of this.constructor.observedAttributes) {
+				if (handledElsewhere.has(name) || !this.hasAttribute(name)) continue;
+				const value = this.getAttribute(name);
+				this.input.setAttribute(name, value);
+				if (name === "value") this.input.defaultValue = value;
+			}
+		}
+		_syncValidity() {
+			if (!this.input) return;
+			if (this.input.validity.valid) this.internals.setValidity({});
+			else this.internals.setValidity(this.input.validity, this.input.validationMessage, this.input);
+		}
+		_updateClearButton() {
+			if (!this.clearButton) return;
+			const hasClear = this.hasAttribute("data-clear");
+			const hasValue = this.input.value.length > 0;
+			const label = this.getAttribute("data-clear-label") || "Clear input";
+			this.clearButton.setAttribute("aria-label", label);
+			this.clearButton.disabled = this.input.disabled || this.input.readOnly;
+			this.clearButton.hidden = !(hasClear && hasValue) || this.clearButton.disabled;
+		}
+		formDisabledCallback(disabled) {
+			this._formDisabled = disabled;
+			this._syncControlState();
+		}
+		_syncControlState() {
+			if (!this.input) return;
+			this.input.disabled = Boolean(this.disabled || this._formDisabled);
+			this.input.readOnly = this.readonly;
+			this._updateClearButton();
+			this._syncValidity();
+		}
+		_observeExternalReferences() {
+			this._referenceObserver?.disconnect();
+			this._referenceObserver ??= new MutationObserver(() => {
+				this._syncAccessibleReferences();
+				const listId = this.getAttribute("list");
+				const found = this.getRootNode().getElementById?.(listId);
+				const target = found?.tagName === "DATALIST" ? found : null;
+				if (listId && target !== this._externalDatalist) this._handleListAttribute(listId);
+			});
+			this._referenceObserver.observe(this.getRootNode(), {
+				subtree: true,
+				childList: true,
+				characterData: true,
+				attributes: true,
+				attributeFilter: [
+					"id",
+					"for",
+					"aria-label"
+				]
+			});
+			this._syncAccessibleReferences();
+		}
+		_syncAccessibleReferences() {
+			if (!this.input) return;
+			forwardAria(this, this.input, {
+				explicit: this.getAttribute("aria-label"),
+				hasOwnLabel: !!this.getAttribute("label"),
+				mirrorPrefix: "au-input-"
+			});
+			this.labelEl.hidden = !this.labelEl.textContent;
+		}
+		_updateColorCode() {
+			if (this.input.type === "color") {
+				this.colorCodeSpan.textContent = this.input.value;
+				this.colorCodeSpan.hidden = false;
+			} else this.colorCodeSpan.hidden = true;
+		}
+		/**
+		* Binds the external datalist to an internal shadow DOM datalist because
+		* `list` attributes do not cross shadow DOM boundaries.
+		*
+		* A MutationObserver keeps the internal copy in sync, so dynamically updated
+		* datalists (e.g. fetch-as-you-type autocomplete) stay current. The observer
+		* is torn down on re-target and in disconnectedCallback to avoid leaks.
+		*/
+		_handleListAttribute(listId) {
+			if (!this.shadowRoot || !this.input) return;
+			this._disconnectDatalistObserver();
+			const existingInternal = this.shadowRoot.querySelector("datalist");
+			if (existingInternal) existingInternal.remove();
+			if (!listId) {
+				this.input.removeAttribute("list");
+				return;
+			}
+			const root = this.getRootNode();
+			const externalDatalist = root instanceof Document || root instanceof ShadowRoot ? root.getElementById(listId) : document.getElementById(listId);
+			if (externalDatalist && externalDatalist.tagName === "DATALIST") {
+				this._externalDatalist = externalDatalist;
+				this._syncInternalDatalist(externalDatalist, listId);
+				this._datalistObserver = new MutationObserver(() => {
+					this._syncInternalDatalist(externalDatalist, listId);
+				});
+				this._datalistObserver.observe(externalDatalist, {
+					childList: true,
+					subtree: true,
+					attributes: true,
+					characterData: true
+				});
+			} else this.input.setAttribute("list", listId);
+		}
+		/** Rebuilds the shadow-scoped datalist from the current external datalist. */
+		_syncInternalDatalist(externalDatalist, listId) {
+			if (!this.shadowRoot || !this.input) return;
+			const existingInternal = this.shadowRoot.querySelector("datalist");
+			if (existingInternal) existingInternal.remove();
+			const internalDatalist = document.createElement("datalist");
+			internalDatalist.id = listId;
+			Array.from(externalDatalist.options).forEach((opt) => {
+				internalDatalist.appendChild(opt.cloneNode(true));
+			});
+			this.shadowRoot.appendChild(internalDatalist);
+			this.input.setAttribute("list", listId);
+		}
+		_disconnectDatalistObserver() {
+			this._externalDatalist = null;
+			if (this._datalistObserver) {
+				this._datalistObserver.disconnect();
+				this._datalistObserver = null;
+			}
+		}
+		disconnectedCallback() {
+			this._disconnectDatalistObserver();
+			this._referenceObserver?.disconnect();
+		}
+	};
+	if (typeof customElements !== "undefined" && !customElements.get("au-input")) customElements.define("au-input", AuInput);
+	// src/components/pagination.js
+	var AuPagination = class extends HTMLElement {
+		static get observedAttributes() {
+			return [
+				"data-total",
+				"data-current-page",
+				"data-pager-count",
+				"data-page-size",
+				"data-page-size-options",
+				"data-layout",
+				"data-text-total-pages-prefix",
+				"data-text-page",
+				"data-text-total-items-suffix",
+				"data-text-per",
+				"data-text-first",
+				"data-text-prev",
+				"data-text-next",
+				"data-text-last",
+				"data-text-go",
+				"data-text-goto",
+				"data-text-pagination-label",
+				"data-text-page-size",
+				"data-text-page-announcement"
+			];
+		}
+		constructor() {
+			super();
+			this.attachShadow({ mode: "open" });
+			this._selectId = uid("au-pagination-");
+			this._jumpId = uid("au-pagination-");
+			this.liveRegion = document.createElement("div");
+			this.liveRegion.setAttribute("aria-live", "polite");
+			this.liveRegion.setAttribute("role", "status");
+			this.liveRegion.setAttribute("aria-atomic", "true");
+			this.liveRegion.className = "visually-hidden";
+			this._nodes = /* @__PURE__ */ new Map();
+			this._parseAttributes();
+			this._render();
+		}
+		connectedCallback() {
+			upgradeProperties(this, [
+				"total",
+				"currentPage",
+				"pageSize",
+				"pagerCount",
+				"layout",
+				"pageSizeOptions"
+			]);
+			this._requestRender();
+		}
+		disconnectedCallback() {
+			cancelAnimationFrame(this._renderFrame);
+			cancelAnimationFrame(this._announceFrame);
+			this._updatePending = false;
+		}
+		attributeChangedCallback(name, oldValue, newValue) {
+			if (oldValue === newValue) return;
+			this._parseAttributes();
+			this._requestRender();
+		}
+		_requestRender() {
+			if (this._updatePending) return;
+			this._updatePending = true;
+			this._renderFrame = requestAnimationFrame(() => {
+				this._updatePending = false;
+				this._render();
+			});
+		}
+		_parseAttributes() {
+			const integer = (value, fallback, min = 1) => {
+				const number = Number(value);
+				return (typeof value === "number" || typeof value === "string") && String(value).trim() !== "" && Number.isSafeInteger(number) && number >= min ? number : fallback;
+			};
+			this._total = integer(this.getAttribute("data-total"), 0, 0);
+			this._pageSize = integer(this.getAttribute("data-page-size"), 10);
+			this._currentPage = Math.min(integer(this.getAttribute("data-current-page"), 1), this.totalPages);
+			this._pagerCount = Math.min(integer(this.getAttribute("data-pager-count"), 5), 100);
+			const opts = this.getAttribute("data-page-size-options");
+			if (opts) try {
+				this._pageSizeOptions = JSON.parse(opts);
+			} catch {
+				this._pageSizeOptions = opts.split(",").map((n) => n.trim());
+			}
+			else this._pageSizeOptions = [
+				10,
+				30,
+				50,
+				100
+			];
+			this._pageSizeOptions = Array.isArray(this._pageSizeOptions) ? [...new Set(this._pageSizeOptions.map((value) => integer(value, 0)).filter(Boolean))] : [
+				10,
+				30,
+				50,
+				100
+			];
+			const lay = this.getAttribute("data-layout");
+			if (lay) try {
+				this._layout = JSON.parse(lay);
+			} catch {
+				this._layout = lay.replace(/[[\]' ]/g, "").split(",");
+			}
+			else this._layout = [
+				"total_page",
+				"total_items",
+				"page_size",
+				"first",
+				"prev",
+				"pages",
+				"next",
+				"last",
+				"jump"
+			];
+			const supported = [
+				"total_page",
+				"total_items",
+				"page_size",
+				"first",
+				"prev",
+				"pages",
+				"next",
+				"last",
+				"jump"
+			];
+			this._layout = Array.isArray(this._layout) ? [...new Set(this._layout.filter((value) => supported.includes(value)))] : supported;
+			this.texts = {
+				totalPagesPrefix: this.getAttribute("data-text-total-pages-prefix") || "Total",
+				pageSuffix: this.getAttribute("data-text-page") || "page(s)",
+				totalItemsSuffix: this.getAttribute("data-text-total-items-suffix") || "item(s)",
+				perText: this.getAttribute("data-text-per") || "each page",
+				firstText: this.getAttribute("data-text-first") || "First",
+				prevText: this.getAttribute("data-text-prev") || "Prev",
+				nextText: this.getAttribute("data-text-next") || "Next",
+				lastText: this.getAttribute("data-text-last") || "Last",
+				goText: this.getAttribute("data-text-go") || "go to",
+				gotoText: this.getAttribute("data-text-goto") || "go to",
+				paginationLabel: this.getAttribute("data-text-pagination-label") || "pagination",
+				pageSizeText: this.getAttribute("data-text-page-size") || "Page size",
+				pageAnnouncement: this.getAttribute("data-text-page-announcement") || "Page {page}"
+			};
+		}
+		formatText(template, values = {}) {
+			return Object.entries(values).reduce((message, [key, value]) => {
+				return message.replaceAll(`{${key}}`, String(value));
+			}, template);
+		}
+		get total() {
+			return this._total;
+		}
+		set total(value) {
+			this.setAttribute("data-total", String(value));
+		}
+		get currentPage() {
+			return this._currentPage;
+		}
+		set currentPage(value) {
+			this.setAttribute("data-current-page", String(value));
+		}
+		get pageSize() {
+			return this._pageSize;
+		}
+		set pageSize(value) {
+			this.setAttribute("data-page-size", String(value));
+		}
+		get pagerCount() {
+			return this._pagerCount;
+		}
+		set pagerCount(value) {
+			this.setAttribute("data-pager-count", String(value));
+		}
+		get pageSizeOptions() {
+			return [...this._pageSizeOptions ?? [
+				10,
+				30,
+				50,
+				100
+			]];
+		}
+		set pageSizeOptions(val) {
+			this.setAttribute("data-page-size-options", JSON.stringify(val));
+		}
+		get layout() {
+			return [...this._layout ?? [
+				"total_page",
+				"total_items",
+				"page_size",
+				"first",
+				"prev",
+				"pages",
+				"next",
+				"last",
+				"jump"
+			]];
+		}
+		set layout(val) {
+			this.setAttribute("data-layout", JSON.stringify(val));
+		}
+		get totalPages() {
+			return Math.ceil(this.total / this.pageSize) || 1;
+		}
+		get pagers() {
+			const start = Math.floor((this.currentPage - 1) / this.pagerCount) * this.pagerCount + 1;
+			const end = Math.min(start + this.pagerCount - 1, this.totalPages);
+			const arr = [];
+			for (let i = start; i <= end; i++) arr.push(i);
+			return arr;
+		}
+		_render() {
+			const t = this.texts;
+			const layout = this.layout;
+			const totalPages = this.totalPages;
+			const totalItems = this.total;
+			if (!this._style) {
+				const style = document.createElement("style");
+				style.textContent = `
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
       :host { display: block; min-inline-size: 0; }
       *, *::before, *::after { box-sizing: border-box; }
@@ -3670,165 +3736,176 @@
         button[aria-current="page"] { border: 3px solid Highlight; }
       }
     `;
-        this.shadowRoot.appendChild(style);
-        this._style = style;
-      }
-      const focused = this.shadowRoot.activeElement;
-      this._usedNodes = /* @__PURE__ */ new Set();
-      const node = (key, tag, text) => {
-        this._usedNodes.add(key);
-        let element = this._nodes.get(key);
-        if (!element) {
-          element = document.createElement(tag);
-          this._nodes.set(key, element);
-        }
-        if (text !== void 0 && element.textContent !== String(text)) element.textContent = String(text);
-        return element;
-      };
-      const children = (parent, desired) => {
-        for (const child of [...parent.children]) if (!desired.includes(child)) child.remove();
-        desired.forEach((child, index) => {
-          if (parent.children[index] !== child) parent.insertBefore(child, parent.children[index] || null);
-        });
-      };
-      const root = node("root", "div");
-      root.className = "au-pagination";
-      const container = node("container", "div");
-      container.className = "au-pagination-container";
-      const grp1 = node("info", "div");
-      grp1.className = "au-pagination-group";
-      const info = [];
-      if (layout.includes("total_page")) info.push(node("total-pages", "span", t.totalPagesPrefix + " " + totalPages + " " + t.pageSuffix));
-      if (layout.includes("total_items")) info.push(node("total-items", "span", totalItems + " " + t.totalItemsSuffix));
-      if (layout.includes("page_size")) {
-        const hidden = node("size-name", "span", t.pageSizeText);
-        hidden.className = "visually-hidden";
-        hidden.id = this._selectId + "-name";
-        const label = node("size-label", "label");
-        label.htmlFor = this._selectId;
-        children(label, [node("size-prefix", "span", t.perText + " "), hidden]);
-        const select = node("size", "select");
-        select.id = this._selectId;
-        const options = [.../* @__PURE__ */ new Set([...this.pageSizeOptions, this.pageSize])].sort((a, b) => a - b).map((size) => {
-          const option = node("size-" + size, "option", size);
-          option.value = String(size);
-          return option;
-        });
-        children(select, options);
-        select.value = String(this.pageSize);
-        select.onchange = () => {
-          const size = Number(select.value);
-          if (size === this.pageSize) return;
-          this.pageSize = size;
-          this.currentPage = 1;
-          this.dispatchEvent(new CustomEvent("au-page-size-change", { detail: size, bubbles: true, composed: true }));
-          this.announce(this.formatText(this.texts.pageAnnouncement, { page: this.currentPage }));
-        };
-        info.push(label, select, node("size-suffix", "span", t.totalItemsSuffix));
-      }
-      children(grp1, info);
-      const grp2 = node("navigation", "div");
-      grp2.className = "au-pagination-group";
-      const nav = node("nav", "nav");
-      nav.setAttribute("aria-label", t.paginationLabel);
-      nav.tabIndex = -1;
-      const list = node("buttons", "ul");
-      list.className = "pagination-buttons";
-      const items = [];
-      const button = (key, label, page, disabled = false, current = false) => {
-        const li = node("li-" + key, "li");
-        const btn = node(key, "button", label);
-        btn.type = "button";
-        btn.dataset.control = key;
-        btn.disabled = disabled;
-        btn.className = key.startsWith("page-") ? "pager" : "";
-        if (current) {
-          btn.setAttribute("aria-current", "page");
-          btn.setAttribute("part", "current-page");
-        } else {
-          btn.removeAttribute("aria-current");
-          btn.removeAttribute("part");
-        }
-        btn.onclick = () => this._goto(typeof page === "function" ? page() : page);
-        children(li, [btn]);
-        items.push(li);
-      };
-      if (layout.includes("first")) button("first", t.firstText, 1, this.currentPage === 1);
-      if (layout.includes("prev")) button("prev", t.prevText, () => this.currentPage - 1, this.currentPage === 1);
-      if (layout.includes("pages")) this.pagers.forEach((page) => button("page-" + page, page, page, false, page === this.currentPage));
-      if (layout.includes("next")) button("next", t.nextText, () => this.currentPage + 1, this.currentPage >= totalPages);
-      if (layout.includes("last")) button("last", t.lastText, () => this.totalPages, this.currentPage >= totalPages);
-      children(list, items);
-      children(nav, [list]);
-      children(grp2, [nav]);
-      const groups = [grp1, grp2];
-      if (layout.includes("jump")) {
-        const grp3 = node("jump-group", "div");
-        grp3.className = "au-pagination-group";
-        const label = node("jump-label", "label", t.goText);
-        label.htmlFor = this._jumpId;
-        const input = node("jump", "input");
-        input.type = "number";
-        input.id = this._jumpId;
-        input.min = "1";
-        input.max = String(totalPages);
-        input.step = "1";
-        input.required = true;
-        if (this._renderedPage !== this.currentPage || !input.isConnected) input.value = String(this.currentPage);
-        const jump = () => {
-          if (input.reportValidity()) this._goto(input.valueAsNumber);
-        };
-        input.onkeydown = (event) => {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            jump();
-          }
-        };
-        const btn = node("jump-confirm", "button", t.gotoText);
-        btn.type = "button";
-        btn.onclick = jump;
-        children(grp3, [label, input, node("jump-suffix", "span", t.pageSuffix), btn]);
-        groups.push(grp3);
-      }
-      children(container, groups);
-      children(root, [container]);
-      if (!root.isConnected) this.shadowRoot.append(root);
-      if (this.liveRegion.parentNode !== this.shadowRoot) this.shadowRoot.append(this.liveRegion);
-      this._renderedPage = this.currentPage;
-      for (const key of this._nodes.keys()) if (!this._usedNodes.has(key)) this._nodes.delete(key);
-      if (focused && this.isConnected && (!focused.isConnected || focused.disabled || this.shadowRoot.activeElement !== focused)) {
-        const target = focused.isConnected && !focused.disabled ? focused : list.querySelector('[aria-current="page"]') || list.querySelector("button:not(:disabled)") || nav;
-        target.focus({ preventScroll: true });
-      }
-    }
-    _goto(page) {
-      if (!Number.isSafeInteger(page)) return;
-      if (page < 1) page = 1;
-      if (page > this.totalPages) page = this.totalPages;
-      if (page === this.currentPage) return;
-      this.currentPage = page;
-      this.dispatchEvent(new CustomEvent("au-page-change", { detail: page, bubbles: true, composed: true }));
-      this.announce(this.formatText(this.texts.pageAnnouncement, { page: this.currentPage }));
-    }
-    announce(message) {
-      cancelAnimationFrame(this._announceFrame);
-      while (this.liveRegion.firstChild) this.liveRegion.removeChild(this.liveRegion.firstChild);
-      this._announceFrame = requestAnimationFrame(() => {
-        const span = document.createElement("span");
-        span.textContent = message;
-        this.liveRegion.appendChild(span);
-      });
-    }
-  }
-  if (typeof customElements !== "undefined" && !customElements.get("au-pagination")) {
-    customElements.define("au-pagination", AuPagination);
-  }
-  class AuRadioGroup extends AuFormElement {
-    constructor() {
-      super();
-      this.attachShadow({ mode: "open", delegatesFocus: true });
-      const style = document.createElement("style");
-      style.textContent = `
+				this.shadowRoot.appendChild(style);
+				this._style = style;
+			}
+			const focused = this.shadowRoot.activeElement;
+			this._usedNodes = /* @__PURE__ */ new Set();
+			const node = (key, tag, text) => {
+				this._usedNodes.add(key);
+				let element = this._nodes.get(key);
+				if (!element) {
+					element = document.createElement(tag);
+					this._nodes.set(key, element);
+				}
+				if (text !== void 0 && element.textContent !== String(text)) element.textContent = String(text);
+				return element;
+			};
+			const children = (parent, desired) => {
+				for (const child of [...parent.children]) if (!desired.includes(child)) child.remove();
+				desired.forEach((child, index) => {
+					if (parent.children[index] !== child) parent.insertBefore(child, parent.children[index] || null);
+				});
+			};
+			const root = node("root", "div");
+			root.className = "au-pagination";
+			const container = node("container", "div");
+			container.className = "au-pagination-container";
+			const grp1 = node("info", "div");
+			grp1.className = "au-pagination-group";
+			const info = [];
+			if (layout.includes("total_page")) info.push(node("total-pages", "span", t.totalPagesPrefix + " " + totalPages + " " + t.pageSuffix));
+			if (layout.includes("total_items")) info.push(node("total-items", "span", totalItems + " " + t.totalItemsSuffix));
+			if (layout.includes("page_size")) {
+				const hidden = node("size-name", "span", t.pageSizeText);
+				hidden.className = "visually-hidden";
+				hidden.id = this._selectId + "-name";
+				const label = node("size-label", "label");
+				label.htmlFor = this._selectId;
+				children(label, [node("size-prefix", "span", t.perText + " "), hidden]);
+				const select = node("size", "select");
+				select.id = this._selectId;
+				children(select, [.../* @__PURE__ */ new Set([...this.pageSizeOptions, this.pageSize])].sort((a, b) => a - b).map((size) => {
+					const option = node("size-" + size, "option", size);
+					option.value = String(size);
+					return option;
+				}));
+				select.value = String(this.pageSize);
+				select.onchange = () => {
+					const size = Number(select.value);
+					if (size === this.pageSize) return;
+					this.pageSize = size;
+					this.currentPage = 1;
+					this.dispatchEvent(new CustomEvent("au-page-size-change", {
+						detail: size,
+						bubbles: true,
+						composed: true
+					}));
+					this.announce(this.formatText(this.texts.pageAnnouncement, { page: this.currentPage }));
+				};
+				info.push(label, select, node("size-suffix", "span", t.totalItemsSuffix));
+			}
+			children(grp1, info);
+			const grp2 = node("navigation", "div");
+			grp2.className = "au-pagination-group";
+			const nav = node("nav", "nav");
+			nav.setAttribute("aria-label", t.paginationLabel);
+			nav.tabIndex = -1;
+			const list = node("buttons", "ul");
+			list.className = "pagination-buttons";
+			const items = [];
+			const button = (key, label, page, disabled = false, current = false) => {
+				const li = node("li-" + key, "li");
+				const btn = node(key, "button", label);
+				btn.type = "button";
+				btn.dataset.control = key;
+				btn.disabled = disabled;
+				btn.className = key.startsWith("page-") ? "pager" : "";
+				if (current) {
+					btn.setAttribute("aria-current", "page");
+					btn.setAttribute("part", "current-page");
+				} else {
+					btn.removeAttribute("aria-current");
+					btn.removeAttribute("part");
+				}
+				btn.onclick = () => this._goto(typeof page === "function" ? page() : page);
+				children(li, [btn]);
+				items.push(li);
+			};
+			if (layout.includes("first")) button("first", t.firstText, 1, this.currentPage === 1);
+			if (layout.includes("prev")) button("prev", t.prevText, () => this.currentPage - 1, this.currentPage === 1);
+			if (layout.includes("pages")) this.pagers.forEach((page) => button("page-" + page, page, page, false, page === this.currentPage));
+			if (layout.includes("next")) button("next", t.nextText, () => this.currentPage + 1, this.currentPage >= totalPages);
+			if (layout.includes("last")) button("last", t.lastText, () => this.totalPages, this.currentPage >= totalPages);
+			children(list, items);
+			children(nav, [list]);
+			children(grp2, [nav]);
+			const groups = [grp1, grp2];
+			if (layout.includes("jump")) {
+				const grp3 = node("jump-group", "div");
+				grp3.className = "au-pagination-group";
+				const label = node("jump-label", "label", t.goText);
+				label.htmlFor = this._jumpId;
+				const input = node("jump", "input");
+				input.type = "number";
+				input.id = this._jumpId;
+				input.min = "1";
+				input.max = String(totalPages);
+				input.step = "1";
+				input.required = true;
+				if (this._renderedPage !== this.currentPage || !input.isConnected) input.value = String(this.currentPage);
+				const jump = () => {
+					if (input.reportValidity()) this._goto(input.valueAsNumber);
+				};
+				input.onkeydown = (event) => {
+					if (event.key === "Enter") {
+						event.preventDefault();
+						jump();
+					}
+				};
+				const btn = node("jump-confirm", "button", t.gotoText);
+				btn.type = "button";
+				btn.onclick = jump;
+				children(grp3, [
+					label,
+					input,
+					node("jump-suffix", "span", t.pageSuffix),
+					btn
+				]);
+				groups.push(grp3);
+			}
+			children(container, groups);
+			children(root, [container]);
+			if (!root.isConnected) this.shadowRoot.append(root);
+			if (this.liveRegion.parentNode !== this.shadowRoot) this.shadowRoot.append(this.liveRegion);
+			this._renderedPage = this.currentPage;
+			for (const key of this._nodes.keys()) if (!this._usedNodes.has(key)) this._nodes.delete(key);
+			if (focused && this.isConnected && (!focused.isConnected || focused.disabled || this.shadowRoot.activeElement !== focused)) (focused.isConnected && !focused.disabled ? focused : list.querySelector("[aria-current=\"page\"]") || list.querySelector("button:not(:disabled)") || nav).focus({ preventScroll: true });
+		}
+		_goto(page) {
+			if (!Number.isSafeInteger(page)) return;
+			if (page < 1) page = 1;
+			if (page > this.totalPages) page = this.totalPages;
+			if (page === this.currentPage) return;
+			this.currentPage = page;
+			this.dispatchEvent(new CustomEvent("au-page-change", {
+				detail: page,
+				bubbles: true,
+				composed: true
+			}));
+			this.announce(this.formatText(this.texts.pageAnnouncement, { page: this.currentPage }));
+		}
+		announce(message) {
+			cancelAnimationFrame(this._announceFrame);
+			while (this.liveRegion.firstChild) this.liveRegion.removeChild(this.liveRegion.firstChild);
+			this._announceFrame = requestAnimationFrame(() => {
+				const span = document.createElement("span");
+				span.textContent = message;
+				this.liveRegion.appendChild(span);
+			});
+		}
+	};
+	if (typeof customElements !== "undefined" && !customElements.get("au-pagination")) customElements.define("au-pagination", AuPagination);
+	// src/components/radio.js
+	var AuRadioGroup = class extends AuFormElement {
+		constructor() {
+			super();
+			this.attachShadow({
+				mode: "open",
+				delegatesFocus: true
+			});
+			const style = document.createElement("style");
+			style.textContent = `
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
       :host { display: block; min-width: 0; }
       .au-radio-group {
@@ -3926,251 +4003,278 @@
       }
       .au-radio-group:focus-visible { outline: 2px solid var(--au-radio-input-focus-shadow-color, oklch(0.45 0.15 260)); }
     `;
-      const container = document.createElement("div");
-      container.setAttribute("class", "au-radio-group");
-      container.setAttribute("role", "radiogroup");
-      this.groupName = "radio-group-name-" + uid();
-      const slot = document.createElement("slot");
-      slot.style.display = "none";
-      container.tabIndex = -1;
-      this._container = container;
-      this._slot = slot;
-      this._entries = /* @__PURE__ */ new Map();
-      this._value = null;
-      this._selectionSet = false;
-      slot.addEventListener("slotchange", () => this.renderRadios());
-      this.shadowRoot.append(style, container, slot);
-    }
-    connectedCallback() {
-      upgradeProperties(this, ["value", "name", "disabled", "required"]);
-      this._mutationObserver ??= new MutationObserver((records) => {
-        for (const record of records) {
-          if (record.attributeName !== "checked" || !this._entries.has(record.target)) continue;
-          if (record.target.hasAttribute("checked")) {
-            this._selectedSource = record.target;
-            this._selectionSet = true;
-          } else if (this._selectedSource === record.target) {
-            this._selectedSource = null;
-            this._value = null;
-            this._selectionSet = true;
-          }
-        }
-        this.renderRadios();
-      });
-      this._mutationObserver.observe(this, {
-        childList: true,
-        subtree: true,
-        characterData: true,
-        attributes: true,
-        attributeFilter: ["label", "value", "checked", "disabled", "lang"]
-      });
-      this._referenceObserver ??= new MutationObserver(() => this.updateGroupAttributes());
-      this._referenceObserver.observe(this.getRootNode(), {
-        childList: true,
-        subtree: true,
-        characterData: true,
-        attributes: true,
-        attributeFilter: ["id", "for", "aria-label"]
-      });
-      this.renderRadios();
-    }
-    disconnectedCallback() {
-      this._mutationObserver?.disconnect();
-      this._referenceObserver?.disconnect();
-    }
-    renderRadios() {
-      const focused = this.shadowRoot.activeElement;
-      const hadFocus = focused && this._container.contains(focused);
-      const sources = this._slot.assignedElements();
-      const entries = /* @__PURE__ */ new Map();
-      sources.forEach((source, index2) => {
-        let entry = this._entries.get(source);
-        if (!entry) {
-          const label = document.createElement("label");
-          const input = document.createElement("input");
-          input.type = "radio";
-          input.id = "radio-" + uid();
-          input.name = this.groupName;
-          label.htmlFor = input.id;
-          const text = document.createElement("div");
-          text.className = "text";
-          label.append(input, text);
-          entry = { source, label, input, text };
-          input.addEventListener("input", () => {
-            if (input.checked) {
-              this._selectedSource = source;
-              this._value = input.value;
-              this._selectionSet = true;
-              this._syncSelection();
-            }
-          });
-          input.addEventListener("change", (event) => this.handleChange(event, input));
-          input.addEventListener("keydown", (event) => this.handleKeyDown(event, input));
-        }
-        entry.input.value = source.getAttribute("value") ?? `radio-${index2 + 1}`;
-        entry.input.disabled = this.disabled || Boolean(this._formDisabled) || source.hasAttribute("disabled");
-        entry.input.required = this.required;
-        entry.text.textContent = source.getAttribute("label") || source.textContent.trim();
-        if (source.hasAttribute("lang")) entry.text.setAttribute("lang", source.getAttribute("lang"));
-        else entry.text.removeAttribute("lang");
-        entries.set(source, entry);
-      });
-      for (const [source, entry] of this._entries) {
-        if (!entries.has(source)) entry.label.remove();
-      }
-      this._entries = entries;
-      let index = 0;
-      for (const entry of entries.values()) {
-        if (this._container.children[index] !== entry.label) {
-          this._container.insertBefore(entry.label, this._container.children[index] || null);
-        }
-        index++;
-      }
-      if (!this._selectionSet && entries.size) {
-        this._selectedSource = sources.filter((source) => source.hasAttribute("checked")).at(-1) || null;
-        this._selectionSet = true;
-      }
-      this._syncSelection();
-      if (!this._initialValueSet && entries.size) {
-        this._initialValue = this._value;
-        this._initialValueSet = true;
-      }
-      this.updateGroupAttributes();
-      if (hadFocus) {
-        const stillEnabled = [...entries.values()].some((entry) => entry.input === focused && !entry.input.disabled);
-        if (stillEnabled && this.shadowRoot.activeElement !== focused) focused.focus();
-        else if (!stillEnabled) this.focus();
-      }
-    }
-    _syncSelection() {
-      let selected = this._entries.get(this._selectedSource);
-      if (!selected && this._value !== null) {
-        selected = [...this._entries.values()].find((entry) => entry.input.value === this._value);
-      }
-      this._selectedSource = selected?.source || null;
-      if (selected) this._value = selected.input.value;
-      const enabled = [...this._entries.values()].filter((entry) => !entry.input.disabled);
-      const tabStop = selected && !selected.input.disabled ? selected : enabled[0];
-      for (const entry of this._entries.values()) {
-        entry.input.checked = entry === selected;
-        entry.input.tabIndex = entry === tabStop ? 0 : -1;
-      }
-      this.internals.setFormValue(
-        selected && !selected.input.disabled ? selected.input.value : null,
-        JSON.stringify({ value: this._value })
-      );
-      const anchor = enabled[0]?.input;
-      if (!anchor || !anchor.willValidate || anchor.validity.valid) this.internals.setValidity({});
-      else this.internals.setValidity(anchor.validity, anchor.validationMessage, anchor);
-    }
-    handleChange(event, input) {
-      event.stopPropagation();
-      const entry = [...this._entries.values()].find((entry2) => entry2.input === input);
-      if (!entry || !input.checked || input.disabled) return;
-      this._selectedSource = entry.source;
-      this._value = input.value;
-      this._selectionSet = true;
-      this._syncSelection();
-      this.dispatchEvent(new CustomEvent("change", {
-        bubbles: true,
-        composed: true,
-        detail: { value: input.value }
-      }));
-    }
-    handleKeyDown(event, currentInput) {
-      const rtl = getComputedStyle(currentInput).direction === "rtl";
-      const step = { ArrowRight: rtl ? -1 : 1, ArrowDown: 1, ArrowLeft: rtl ? 1 : -1, ArrowUp: -1 }[event.key];
-      if (!step || event.altKey || event.ctrlKey || event.metaKey) return;
-      event.preventDefault();
-      const enabled = [...this._entries.values()].map((entry) => entry.input).filter((input) => !input.disabled);
-      if (!enabled.length || currentInput.disabled) return;
-      const current = enabled.indexOf(currentInput);
-      if (current < 0) return;
-      const next = enabled[(current + step + enabled.length) % enabled.length];
-      next.focus();
-      if (next !== currentInput || !next.checked) next.click();
-    }
-    static get observedAttributes() {
-      return ["name", "value", "disabled", "required", "direction", "aria-label", "aria-labelledby", "aria-describedby", "aria-invalid", "label"];
-    }
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (oldValue === newValue) return;
-      if (name === "value") this.value = newValue;
-      else if (name === "disabled" || name === "required") this.renderRadios();
-      else {
-        this._syncSelection();
-        this.updateGroupAttributes();
-      }
-    }
-    updateGroupAttributes() {
-      const container = this._container;
-      forwardAria(this, container, { explicit: this.getAttribute("aria-label") || this.getAttribute("label"), hasOwnLabel: false, mirrorPrefix: "radio-description-" });
-      container.classList.toggle("au-radio-group--vertical", this.getAttribute("direction") === "vertical");
-      if (this.required) container.setAttribute("aria-required", "true");
-      else container.removeAttribute("aria-required");
-      if (this.disabled || this._formDisabled) container.setAttribute("aria-disabled", "true");
-      else container.removeAttribute("aria-disabled");
-      if (this.hasAttribute("aria-invalid")) container.setAttribute("aria-invalid", this.getAttribute("aria-invalid"));
-      else container.removeAttribute("aria-invalid");
-    }
-    get value() {
-      return this._entries.get(this._selectedSource)?.input.value ?? null;
-    }
-    set value(value) {
-      this._value = value == null ? null : String(value);
-      this._selectedSource = null;
-      this._selectionSet = true;
-      this._syncSelection();
-    }
-    get name() {
-      return this.getAttribute("name") || "";
-    }
-    set name(value) {
-      this.setAttribute("name", value);
-    }
-    get required() {
-      return this.hasAttribute("required");
-    }
-    set required(value) {
-      this.toggleAttribute("required", Boolean(value));
-    }
-    get disabled() {
-      return this.hasAttribute("disabled");
-    }
-    set disabled(value) {
-      this.toggleAttribute("disabled", Boolean(value));
-    }
-    focus(options) {
-      const inputs = [...this._entries.values()].map((entry) => entry.input);
-      const target = inputs.find((input) => input.tabIndex === 0 && !input.disabled);
-      (target || this._container).focus(options);
-    }
-    formDisabledCallback(disabled) {
-      this._formDisabled = disabled;
-      this.renderRadios();
-    }
-    formResetCallback() {
-      this.value = this._initialValue ?? null;
-    }
-    formStateRestoreCallback(state) {
-      if (typeof state !== "string") return;
-      try {
-        const restored = JSON.parse(state);
-        if (restored && (restored.value === null || typeof restored.value === "string")) this.value = restored.value;
-      } catch {
-      }
-    }
-  }
-  if (typeof customElements !== "undefined" && !customElements.get("au-radio-group")) {
-    customElements.define("au-radio-group", AuRadioGroup);
-  }
-  class AuRating extends AuFormElement {
-    constructor() {
-      super();
-      this.attachShadow({ mode: "open" });
-      this._groupName = "rating-" + uid();
-      const template = document.createElement("template");
-      template.innerHTML = `
+			const container = document.createElement("div");
+			container.setAttribute("class", "au-radio-group");
+			container.setAttribute("role", "radiogroup");
+			this.groupName = "radio-group-name-" + uid();
+			const slot = document.createElement("slot");
+			slot.style.display = "none";
+			container.tabIndex = -1;
+			this._container = container;
+			this._slot = slot;
+			this._entries = /* @__PURE__ */ new Map();
+			this._value = null;
+			this._selectionSet = false;
+			slot.addEventListener("slotchange", () => this.renderRadios());
+			this.shadowRoot.append(style, container, slot);
+		}
+		connectedCallback() {
+			upgradeProperties(this, [
+				"value",
+				"name",
+				"disabled",
+				"required"
+			]);
+			this._mutationObserver ??= new MutationObserver((records) => {
+				for (const record of records) {
+					if (record.attributeName !== "checked" || !this._entries.has(record.target)) continue;
+					if (record.target.hasAttribute("checked")) {
+						this._selectedSource = record.target;
+						this._selectionSet = true;
+					} else if (this._selectedSource === record.target) {
+						this._selectedSource = null;
+						this._value = null;
+						this._selectionSet = true;
+					}
+				}
+				this.renderRadios();
+			});
+			this._mutationObserver.observe(this, {
+				childList: true,
+				subtree: true,
+				characterData: true,
+				attributes: true,
+				attributeFilter: [
+					"label",
+					"value",
+					"checked",
+					"disabled",
+					"lang"
+				]
+			});
+			this._referenceObserver ??= new MutationObserver(() => this.updateGroupAttributes());
+			this._referenceObserver.observe(this.getRootNode(), {
+				childList: true,
+				subtree: true,
+				characterData: true,
+				attributes: true,
+				attributeFilter: [
+					"id",
+					"for",
+					"aria-label"
+				]
+			});
+			this.renderRadios();
+		}
+		disconnectedCallback() {
+			this._mutationObserver?.disconnect();
+			this._referenceObserver?.disconnect();
+		}
+		renderRadios() {
+			const focused = this.shadowRoot.activeElement;
+			const hadFocus = focused && this._container.contains(focused);
+			const sources = this._slot.assignedElements();
+			const entries = /* @__PURE__ */ new Map();
+			sources.forEach((source, index) => {
+				let entry = this._entries.get(source);
+				if (!entry) {
+					const label = document.createElement("label");
+					const input = document.createElement("input");
+					input.type = "radio";
+					input.id = "radio-" + uid();
+					input.name = this.groupName;
+					label.htmlFor = input.id;
+					const text = document.createElement("div");
+					text.className = "text";
+					label.append(input, text);
+					entry = {
+						source,
+						label,
+						input,
+						text
+					};
+					input.addEventListener("input", () => {
+						if (input.checked) {
+							this._selectedSource = source;
+							this._value = input.value;
+							this._selectionSet = true;
+							this._syncSelection();
+						}
+					});
+					input.addEventListener("change", (event) => this.handleChange(event, input));
+					input.addEventListener("keydown", (event) => this.handleKeyDown(event, input));
+				}
+				entry.input.value = source.getAttribute("value") ?? `radio-${index + 1}`;
+				entry.input.disabled = this.disabled || Boolean(this._formDisabled) || source.hasAttribute("disabled");
+				entry.input.required = this.required;
+				entry.text.textContent = source.getAttribute("label") || source.textContent.trim();
+				if (source.hasAttribute("lang")) entry.text.setAttribute("lang", source.getAttribute("lang"));
+				else entry.text.removeAttribute("lang");
+				entries.set(source, entry);
+			});
+			for (const [source, entry] of this._entries) if (!entries.has(source)) entry.label.remove();
+			this._entries = entries;
+			let index = 0;
+			for (const entry of entries.values()) {
+				if (this._container.children[index] !== entry.label) this._container.insertBefore(entry.label, this._container.children[index] || null);
+				index++;
+			}
+			if (!this._selectionSet && entries.size) {
+				this._selectedSource = sources.filter((source) => source.hasAttribute("checked")).at(-1) || null;
+				this._selectionSet = true;
+			}
+			this._syncSelection();
+			if (!this._initialValueSet && entries.size) {
+				this._initialValue = this._value;
+				this._initialValueSet = true;
+			}
+			this.updateGroupAttributes();
+			if (hadFocus) {
+				const stillEnabled = [...entries.values()].some((entry) => entry.input === focused && !entry.input.disabled);
+				if (stillEnabled && this.shadowRoot.activeElement !== focused) focused.focus();
+				else if (!stillEnabled) this.focus();
+			}
+		}
+		_syncSelection() {
+			let selected = this._entries.get(this._selectedSource);
+			if (!selected && this._value !== null) selected = [...this._entries.values()].find((entry) => entry.input.value === this._value);
+			this._selectedSource = selected?.source || null;
+			if (selected) this._value = selected.input.value;
+			const enabled = [...this._entries.values()].filter((entry) => !entry.input.disabled);
+			const tabStop = selected && !selected.input.disabled ? selected : enabled[0];
+			for (const entry of this._entries.values()) {
+				entry.input.checked = entry === selected;
+				entry.input.tabIndex = entry === tabStop ? 0 : -1;
+			}
+			this.internals.setFormValue(selected && !selected.input.disabled ? selected.input.value : null, JSON.stringify({ value: this._value }));
+			const anchor = enabled[0]?.input;
+			if (!anchor || !anchor.willValidate || anchor.validity.valid) this.internals.setValidity({});
+			else this.internals.setValidity(anchor.validity, anchor.validationMessage, anchor);
+		}
+		handleChange(event, input) {
+			event.stopPropagation();
+			const entry = [...this._entries.values()].find((entry) => entry.input === input);
+			if (!entry || !input.checked || input.disabled) return;
+			this._selectedSource = entry.source;
+			this._value = input.value;
+			this._selectionSet = true;
+			this._syncSelection();
+			this.dispatchEvent(new CustomEvent("change", {
+				bubbles: true,
+				composed: true,
+				detail: { value: input.value }
+			}));
+		}
+		handleKeyDown(event, currentInput) {
+			const rtl = getComputedStyle(currentInput).direction === "rtl";
+			const step = {
+				ArrowRight: rtl ? -1 : 1,
+				ArrowDown: 1,
+				ArrowLeft: rtl ? 1 : -1,
+				ArrowUp: -1
+			}[event.key];
+			if (!step || event.altKey || event.ctrlKey || event.metaKey) return;
+			event.preventDefault();
+			const enabled = [...this._entries.values()].map((entry) => entry.input).filter((input) => !input.disabled);
+			if (!enabled.length || currentInput.disabled) return;
+			const current = enabled.indexOf(currentInput);
+			if (current < 0) return;
+			const next = enabled[(current + step + enabled.length) % enabled.length];
+			next.focus();
+			if (next !== currentInput || !next.checked) next.click();
+		}
+		static get observedAttributes() {
+			return [
+				"name",
+				"value",
+				"disabled",
+				"required",
+				"direction",
+				"aria-label",
+				"aria-labelledby",
+				"aria-describedby",
+				"aria-invalid",
+				"label"
+			];
+		}
+		attributeChangedCallback(name, oldValue, newValue) {
+			if (oldValue === newValue) return;
+			if (name === "value") this.value = newValue;
+			else if (name === "disabled" || name === "required") this.renderRadios();
+			else {
+				this._syncSelection();
+				this.updateGroupAttributes();
+			}
+		}
+		updateGroupAttributes() {
+			const container = this._container;
+			forwardAria(this, container, {
+				explicit: this.getAttribute("aria-label") || this.getAttribute("label"),
+				hasOwnLabel: false,
+				mirrorPrefix: "radio-description-"
+			});
+			container.classList.toggle("au-radio-group--vertical", this.getAttribute("direction") === "vertical");
+			if (this.required) container.setAttribute("aria-required", "true");
+			else container.removeAttribute("aria-required");
+			if (this.disabled || this._formDisabled) container.setAttribute("aria-disabled", "true");
+			else container.removeAttribute("aria-disabled");
+			if (this.hasAttribute("aria-invalid")) container.setAttribute("aria-invalid", this.getAttribute("aria-invalid"));
+			else container.removeAttribute("aria-invalid");
+		}
+		get value() {
+			return this._entries.get(this._selectedSource)?.input.value ?? null;
+		}
+		set value(value) {
+			this._value = value == null ? null : String(value);
+			this._selectedSource = null;
+			this._selectionSet = true;
+			this._syncSelection();
+		}
+		get name() {
+			return this.getAttribute("name") || "";
+		}
+		set name(value) {
+			this.setAttribute("name", value);
+		}
+		get required() {
+			return this.hasAttribute("required");
+		}
+		set required(value) {
+			this.toggleAttribute("required", Boolean(value));
+		}
+		get disabled() {
+			return this.hasAttribute("disabled");
+		}
+		set disabled(value) {
+			this.toggleAttribute("disabled", Boolean(value));
+		}
+		focus(options) {
+			([...this._entries.values()].map((entry) => entry.input).find((input) => input.tabIndex === 0 && !input.disabled) || this._container).focus(options);
+		}
+		formDisabledCallback(disabled) {
+			this._formDisabled = disabled;
+			this.renderRadios();
+		}
+		formResetCallback() {
+			this.value = this._initialValue ?? null;
+		}
+		formStateRestoreCallback(state) {
+			if (typeof state !== "string") return;
+			try {
+				const restored = JSON.parse(state);
+				if (restored && (restored.value === null || typeof restored.value === "string")) this.value = restored.value;
+			} catch {}
+		}
+	};
+	if (typeof customElements !== "undefined" && !customElements.get("au-radio-group")) customElements.define("au-radio-group", AuRadioGroup);
+	// src/components/rating.js
+	var AuRating = class extends AuFormElement {
+		constructor() {
+			super();
+			this.attachShadow({ mode: "open" });
+			this._groupName = "rating-" + uid();
+			const template = document.createElement("template");
+			template.innerHTML = `
       <style>
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
         :host {
@@ -4339,294 +4443,295 @@
       </fieldset>
       <span class="score" id="score"></span>
     `;
-      this.shadowRoot.appendChild(template.content.cloneNode(true));
-      this._fieldset = this.shadowRoot.querySelector(".au-rating");
-      this._legend = this.shadowRoot.querySelector("legend");
-      this._scoreEl = this.shadowRoot.querySelector(".score");
-      this._fieldset.addEventListener("input", (e) => this.handleInput(e));
-      this._fieldset.addEventListener("change", (e) => this.handleChange(e));
-      this._fieldset.addEventListener("keydown", (e) => this.handleKeyDown(e));
-    }
-    static get observedAttributes() {
-      return [
-        "value",
-        "max",
-        "labels",
-        "aria-label",
-        "aria-invalid",
-        "aria-describedby",
-        "name",
-        "show-score",
-        "score-info",
-        "disabled",
-        "readonly",
-        "data-text-rating",
-        "data-text-star",
-        "data-text-score"
-      ];
-    }
-    connectedCallback() {
-      upgradeProperties(this, ["name", "value", "max", "disabled", "readonly"]);
-      if (this._defaultValue === void 0) this._defaultValue = this.value;
-      this.render();
-      this._observeDescriptions();
-    }
-    disconnectedCallback() {
-      this._descriptionObserver?.disconnect();
-    }
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (name === "aria-describedby") {
-        if (oldValue !== newValue && this.isConnected) this._observeDescriptions();
-        return;
-      }
-      if (oldValue !== newValue && this.isConnected) this.render();
-    }
-    _observeDescriptions() {
-      this._descriptionObserver?.disconnect();
-      if (this.hasAttribute("aria-describedby")) {
-        this._descriptionObserver ??= new MutationObserver(() => this._syncDescriptions());
-        this._descriptionObserver.observe(this.getRootNode(), {
-          subtree: true,
-          childList: true,
-          characterData: true,
-          attributes: true,
-          attributeFilter: ["id"]
-        });
-      }
-      this._syncDescriptions();
-    }
-    _syncDescriptions() {
-      const root = this.getRootNode();
-      const external = [...new Set((this.getAttribute("aria-describedby") || "").trim().split(/\s+/))].filter(Boolean).map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
-      if (!external.length) {
-        if (this._descriptionMirror) this._descriptionMirror.textContent = "";
-        this._fieldset.setAttribute("aria-describedby", "score");
-        return;
-      }
-      if (typeof this._fieldset.ariaDescribedByElements !== "undefined") {
-        this._fieldset.ariaDescribedByElements = [this._scoreEl, ...external];
-      } else {
-        if (!this._descriptionMirror) {
-          this._descriptionMirror = document.createElement("span");
-          this._descriptionMirror.id = "external-description";
-          this._descriptionMirror.hidden = true;
-          this.shadowRoot.append(this._descriptionMirror);
-        }
-        const text = external.map((el) => el.textContent).join(" ").trim();
-        if (this._descriptionMirror.textContent !== text) this._descriptionMirror.textContent = text;
-        this._fieldset.setAttribute("aria-describedby", text ? "score external-description" : "score");
-      }
-    }
-    get max() {
-      const max = Number(this.getAttribute("max"));
-      return Number.isInteger(max) && max > 0 ? Math.min(max, 100) : 5;
-    }
-    set max(value) {
-      this.setAttribute("max", value);
-    }
-    get value() {
-      const val = Number(this.getAttribute("value"));
-      return Number.isFinite(val) ? Math.min(this.max, Math.max(0, val)) : 0;
-    }
-    set value(val) {
-      this.setAttribute("value", val);
-    }
-    get labels() {
-      const labelsAttr = this.getAttribute("labels");
-      if (labelsAttr) {
-        return labelsAttr.split(",").map((l) => l.trim());
-      }
-      return [];
-    }
-    get name() {
-      return this.getAttribute("name") || "";
-    }
-    set name(value) {
-      this.setAttribute("name", value);
-    }
-    get scoreInfo() {
-      return this.getAttribute("score-info") || "";
-    }
-    get ratingLabel() {
-      return this.getAttribute("aria-label") || this.getAttribute("data-text-rating") || "Rating";
-    }
-    get starLabelTemplate() {
-      return this.getAttribute("data-text-star") || "{value} Star(s)";
-    }
-    get scoreTemplate() {
-      return this.getAttribute("data-text-score") || "{value} / {max} {scoreInfo}";
-    }
-    get showScore() {
-      return this.hasAttribute("show-score");
-    }
-    get disabled() {
-      return this.hasAttribute("disabled");
-    }
-    set disabled(val) {
-      if (val) this.setAttribute("disabled", "");
-      else this.removeAttribute("disabled");
-    }
-    get readonly() {
-      return this.hasAttribute("readonly");
-    }
-    set readonly(val) {
-      if (val) this.setAttribute("readonly", "");
-      else this.removeAttribute("readonly");
-    }
-    getStarSVG(className = "") {
-      return `<svg class="star ${className}" viewBox="0 0 24 24" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+			this.shadowRoot.appendChild(template.content.cloneNode(true));
+			this._fieldset = this.shadowRoot.querySelector(".au-rating");
+			this._legend = this.shadowRoot.querySelector("legend");
+			this._scoreEl = this.shadowRoot.querySelector(".score");
+			this._fieldset.addEventListener("input", (e) => this.handleInput(e));
+			this._fieldset.addEventListener("change", (e) => this.handleChange(e));
+			this._fieldset.addEventListener("keydown", (e) => this.handleKeyDown(e));
+		}
+		static get observedAttributes() {
+			return [
+				"value",
+				"max",
+				"labels",
+				"aria-label",
+				"aria-invalid",
+				"aria-describedby",
+				"name",
+				"show-score",
+				"score-info",
+				"disabled",
+				"readonly",
+				"data-text-rating",
+				"data-text-star",
+				"data-text-score"
+			];
+		}
+		connectedCallback() {
+			upgradeProperties(this, [
+				"name",
+				"value",
+				"max",
+				"disabled",
+				"readonly"
+			]);
+			if (this._defaultValue === void 0) this._defaultValue = this.value;
+			this.render();
+			this._observeDescriptions();
+		}
+		disconnectedCallback() {
+			this._descriptionObserver?.disconnect();
+		}
+		attributeChangedCallback(name, oldValue, newValue) {
+			if (name === "aria-describedby") {
+				if (oldValue !== newValue && this.isConnected) this._observeDescriptions();
+				return;
+			}
+			if (oldValue !== newValue && this.isConnected) this.render();
+		}
+		_observeDescriptions() {
+			this._descriptionObserver?.disconnect();
+			if (this.hasAttribute("aria-describedby")) {
+				this._descriptionObserver ??= new MutationObserver(() => this._syncDescriptions());
+				this._descriptionObserver.observe(this.getRootNode(), {
+					subtree: true,
+					childList: true,
+					characterData: true,
+					attributes: true,
+					attributeFilter: ["id"]
+				});
+			}
+			this._syncDescriptions();
+		}
+		_syncDescriptions() {
+			const root = this.getRootNode();
+			const external = [...new Set((this.getAttribute("aria-describedby") || "").trim().split(/\s+/))].filter(Boolean).map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
+			if (!external.length) {
+				if (this._descriptionMirror) this._descriptionMirror.textContent = "";
+				this._fieldset.setAttribute("aria-describedby", "score");
+				return;
+			}
+			if (typeof this._fieldset.ariaDescribedByElements !== "undefined") this._fieldset.ariaDescribedByElements = [this._scoreEl, ...external];
+			else {
+				if (!this._descriptionMirror) {
+					this._descriptionMirror = document.createElement("span");
+					this._descriptionMirror.id = "external-description";
+					this._descriptionMirror.hidden = true;
+					this.shadowRoot.append(this._descriptionMirror);
+				}
+				const text = external.map((el) => el.textContent).join(" ").trim();
+				if (this._descriptionMirror.textContent !== text) this._descriptionMirror.textContent = text;
+				this._fieldset.setAttribute("aria-describedby", text ? "score external-description" : "score");
+			}
+		}
+		get max() {
+			const max = Number(this.getAttribute("max"));
+			return Number.isInteger(max) && max > 0 ? Math.min(max, 100) : 5;
+		}
+		set max(value) {
+			this.setAttribute("max", value);
+		}
+		get value() {
+			const val = Number(this.getAttribute("value"));
+			return Number.isFinite(val) ? Math.min(this.max, Math.max(0, val)) : 0;
+		}
+		set value(val) {
+			this.setAttribute("value", val);
+		}
+		get labels() {
+			const labelsAttr = this.getAttribute("labels");
+			if (labelsAttr) return labelsAttr.split(",").map((l) => l.trim());
+			return [];
+		}
+		get name() {
+			return this.getAttribute("name") || "";
+		}
+		set name(value) {
+			this.setAttribute("name", value);
+		}
+		get scoreInfo() {
+			return this.getAttribute("score-info") || "";
+		}
+		get ratingLabel() {
+			return this.getAttribute("aria-label") || this.getAttribute("data-text-rating") || "Rating";
+		}
+		get starLabelTemplate() {
+			return this.getAttribute("data-text-star") || "{value} Star(s)";
+		}
+		get scoreTemplate() {
+			return this.getAttribute("data-text-score") || "{value} / {max} {scoreInfo}";
+		}
+		get showScore() {
+			return this.hasAttribute("show-score");
+		}
+		get disabled() {
+			return this.hasAttribute("disabled");
+		}
+		set disabled(val) {
+			if (val) this.setAttribute("disabled", "");
+			else this.removeAttribute("disabled");
+		}
+		get readonly() {
+			return this.hasAttribute("readonly");
+		}
+		set readonly(val) {
+			if (val) this.setAttribute("readonly", "");
+			else this.removeAttribute("readonly");
+		}
+		getStarSVG(className = "") {
+			return `<svg class="star ${className}" viewBox="0 0 24 24" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
     </svg>`;
-    }
-    formatText(template, values = {}) {
-      return Object.entries(values).reduce((message, [key, value]) => {
-        return message.replaceAll(`{${key}}`, String(value));
-      }, template).trim();
-    }
-    render() {
-      const ariaLabel = this.ratingLabel;
-      this._legend.textContent = ariaLabel;
-      this._fieldset.setAttribute("aria-label", ariaLabel);
-      if (this.hasAttribute("aria-invalid")) this._fieldset.setAttribute("aria-invalid", this.getAttribute("aria-invalid"));
-      else this._fieldset.removeAttribute("aria-invalid");
-      const disabled = this.disabled || this._formDisabled;
-      this.readonly ? this._fieldset.setAttribute("aria-readonly", "true") : this._fieldset.removeAttribute("aria-readonly");
-      disabled ? this._fieldset.setAttribute("aria-disabled", "true") : this._fieldset.removeAttribute("aria-disabled");
-      const labels = this.labels;
-      const currentValue = this.value;
-      const previousFocus = this.shadowRoot.activeElement;
-      const options = [...this._fieldset.querySelectorAll(".rating-option")];
-      for (let i = 1; i <= this.max; i++) {
-        let option = options[i - 1];
-        if (!option) {
-          option = document.createElement("div");
-          option.className = "rating-option";
-          option.innerHTML = `<input type="radio"><label><span class="star-wrapper">${this.getStarSVG("star-bg")}${this.getStarSVG("star-fill")}</span><span class="label-text"></span></label>`;
-          this._fieldset.appendChild(option);
-        }
-        const input = option.querySelector("input");
-        const label = option.querySelector("label");
-        input.name = this._groupName;
-        input.value = i;
-        input.id = `${this._groupName}-${i}`;
-        label.htmlFor = input.id;
-        input.checked = i === currentValue;
-        input.tabIndex = i === (Number.isInteger(currentValue) && currentValue > 0 ? currentValue : 1) ? 0 : -1;
-        const labelTextContent = labels[i - 1];
-        if (!labelTextContent) {
-          input.setAttribute("aria-label", this.formatText(this.starLabelTemplate, { value: i, max: this.max }));
-        } else input.removeAttribute("aria-label");
-        input.disabled = Boolean(disabled || this.readonly);
-        option.querySelector(".label-text").textContent = labelTextContent || "";
-      }
-      options.slice(this.max).forEach((option) => option.remove());
-      if (previousFocus && !this.shadowRoot.contains(previousFocus) && !disabled && !this.readonly) {
-        this._fieldset.querySelector('input[tabindex="0"]')?.focus();
-      }
-      this.updateStars(currentValue);
-      this.updateScoreDisplay(currentValue);
-      this.internals.setFormValue(currentValue.toString());
-    }
-    updateScoreDisplay(val) {
-      this._scoreEl.classList.toggle("visually-hidden", !this.showScore);
-      this._scoreEl.textContent = this.formatText(this.scoreTemplate, {
-        value: val,
-        max: this.max,
-        scoreInfo: this.scoreInfo
-      });
-    }
-    handleInput(e) {
-      if (e.target.type !== "radio" || this.disabled || this._formDisabled || this.readonly) return;
-      this.value = parseInt(e.target.value);
-    }
-    handleChange(e) {
-      if (e.target.type === "radio") {
-        e.stopPropagation();
-        if (this.disabled || this._formDisabled || this.readonly) {
-          this.render();
-          return;
-        }
-        const newValue = parseInt(e.target.value);
-        this.value = newValue;
-        this.dispatchEvent(new CustomEvent("change", {
-          bubbles: true,
-          composed: true,
-          detail: { value: newValue }
-        }));
-      }
-    }
-    updateStars(selectedValue) {
-      const starWrappers = this._fieldset.querySelectorAll(".star-wrapper");
-      const fullStars = Math.floor(selectedValue);
-      const partialFill = selectedValue - fullStars;
-      starWrappers.forEach((wrapper, index) => {
-        const starValue = index + 1;
-        wrapper.classList.remove("animate");
-        let clipRight = 100;
-        if (starValue <= fullStars) {
-          clipRight = 0;
-          if (starValue === fullStars && partialFill === 0) {
-            wrapper.classList.add("animate");
-          }
-        } else if (starValue === fullStars + 1 && partialFill > 0) {
-          clipRight = 100 - partialFill * 100;
-          wrapper.classList.add("animate");
-        }
-        wrapper.style.setProperty("--_rating-clip", `${clipRight}%`);
-      });
-    }
-    handleKeyDown(e) {
-      if (this.disabled || this._formDisabled || this.readonly) return;
-      const radios = Array.from(this._fieldset.querySelectorAll('input[type="radio"]'));
-      if (!radios.length) return;
-      let currentIndex = radios.indexOf(this.shadowRoot.activeElement);
-      if (currentIndex < 0) currentIndex = radios.findIndex((r) => r.checked);
-      let nextIndex;
-      const rtl = getComputedStyle(this._fieldset).direction === "rtl";
-      const key = rtl && e.key === "ArrowRight" ? "ArrowLeft" : rtl && e.key === "ArrowLeft" ? "ArrowRight" : e.key;
-      switch (key) {
-        case "ArrowRight":
-        case "ArrowDown":
-          e.preventDefault();
-          nextIndex = (currentIndex + 1) % radios.length;
-          radios[nextIndex].focus();
-          radios[nextIndex].click();
-          break;
-        case "ArrowLeft":
-        case "ArrowUp":
-          e.preventDefault();
-          nextIndex = currentIndex < 0 ? radios.length - 1 : (currentIndex - 1 + radios.length) % radios.length;
-          radios[nextIndex].focus();
-          radios[nextIndex].click();
-          break;
-      }
-    }
-    formResetCallback() {
-      this.value = this._defaultValue ?? 0;
-    }
-    focus(options) {
-      if (this.disabled || this._formDisabled || this.readonly) return;
-      this._fieldset.querySelector('input[tabindex="0"]:not(:disabled)')?.focus(options);
-    }
-    formStateRestoreCallback(state, mode) {
-      if (typeof state === "string") this.value = state;
-    }
-    formDisabledCallback(disabled) {
-      this._formDisabled = disabled;
-      if (this.isConnected) this.render();
-    }
-  }
-  if (typeof customElements !== "undefined" && !customElements.get("au-rating")) {
-    customElements.define("au-rating", AuRating);
-  }
-  class AuSwitch extends AuFormElement {
-    constructor() {
-      super();
-      this.attachShadow({ mode: "open", delegatesFocus: true });
-      this.addEventListener("click", (event) => this._activateFromHost(event));
-      const inputID = uid("au-switch-");
-      const style = document.createElement("style");
-      style.textContent = `
+		}
+		formatText(template, values = {}) {
+			return Object.entries(values).reduce((message, [key, value]) => {
+				return message.replaceAll(`{${key}}`, String(value));
+			}, template).trim();
+		}
+		render() {
+			const ariaLabel = this.ratingLabel;
+			this._legend.textContent = ariaLabel;
+			this._fieldset.setAttribute("aria-label", ariaLabel);
+			if (this.hasAttribute("aria-invalid")) this._fieldset.setAttribute("aria-invalid", this.getAttribute("aria-invalid"));
+			else this._fieldset.removeAttribute("aria-invalid");
+			const disabled = this.disabled || this._formDisabled;
+			this.readonly ? this._fieldset.setAttribute("aria-readonly", "true") : this._fieldset.removeAttribute("aria-readonly");
+			disabled ? this._fieldset.setAttribute("aria-disabled", "true") : this._fieldset.removeAttribute("aria-disabled");
+			const labels = this.labels;
+			const currentValue = this.value;
+			const previousFocus = this.shadowRoot.activeElement;
+			const options = [...this._fieldset.querySelectorAll(".rating-option")];
+			for (let i = 1; i <= this.max; i++) {
+				let option = options[i - 1];
+				if (!option) {
+					option = document.createElement("div");
+					option.className = "rating-option";
+					option.innerHTML = `<input type="radio"><label><span class="star-wrapper">${this.getStarSVG("star-bg")}${this.getStarSVG("star-fill")}</span><span class="label-text"></span></label>`;
+					this._fieldset.appendChild(option);
+				}
+				const input = option.querySelector("input");
+				const label = option.querySelector("label");
+				input.name = this._groupName;
+				input.value = i;
+				input.id = `${this._groupName}-${i}`;
+				label.htmlFor = input.id;
+				input.checked = i === currentValue;
+				input.tabIndex = i === (Number.isInteger(currentValue) && currentValue > 0 ? currentValue : 1) ? 0 : -1;
+				const labelTextContent = labels[i - 1];
+				if (!labelTextContent) input.setAttribute("aria-label", this.formatText(this.starLabelTemplate, {
+					value: i,
+					max: this.max
+				}));
+				else input.removeAttribute("aria-label");
+				input.disabled = Boolean(disabled || this.readonly);
+				option.querySelector(".label-text").textContent = labelTextContent || "";
+			}
+			options.slice(this.max).forEach((option) => option.remove());
+			if (previousFocus && !this.shadowRoot.contains(previousFocus) && !disabled && !this.readonly) this._fieldset.querySelector("input[tabindex=\"0\"]")?.focus();
+			this.updateStars(currentValue);
+			this.updateScoreDisplay(currentValue);
+			this.internals.setFormValue(currentValue.toString());
+		}
+		updateScoreDisplay(val) {
+			this._scoreEl.classList.toggle("visually-hidden", !this.showScore);
+			this._scoreEl.textContent = this.formatText(this.scoreTemplate, {
+				value: val,
+				max: this.max,
+				scoreInfo: this.scoreInfo
+			});
+		}
+		handleInput(e) {
+			if (e.target.type !== "radio" || this.disabled || this._formDisabled || this.readonly) return;
+			this.value = parseInt(e.target.value);
+		}
+		handleChange(e) {
+			if (e.target.type === "radio") {
+				e.stopPropagation();
+				if (this.disabled || this._formDisabled || this.readonly) {
+					this.render();
+					return;
+				}
+				const newValue = parseInt(e.target.value);
+				this.value = newValue;
+				this.dispatchEvent(new CustomEvent("change", {
+					bubbles: true,
+					composed: true,
+					detail: { value: newValue }
+				}));
+			}
+		}
+		updateStars(selectedValue) {
+			const starWrappers = this._fieldset.querySelectorAll(".star-wrapper");
+			const fullStars = Math.floor(selectedValue);
+			const partialFill = selectedValue - fullStars;
+			starWrappers.forEach((wrapper, index) => {
+				const starValue = index + 1;
+				wrapper.classList.remove("animate");
+				let clipRight = 100;
+				if (starValue <= fullStars) {
+					clipRight = 0;
+					if (starValue === fullStars && partialFill === 0) wrapper.classList.add("animate");
+				} else if (starValue === fullStars + 1 && partialFill > 0) {
+					clipRight = 100 - partialFill * 100;
+					wrapper.classList.add("animate");
+				}
+				wrapper.style.setProperty("--_rating-clip", `${clipRight}%`);
+			});
+		}
+		handleKeyDown(e) {
+			if (this.disabled || this._formDisabled || this.readonly) return;
+			const radios = Array.from(this._fieldset.querySelectorAll("input[type=\"radio\"]"));
+			if (!radios.length) return;
+			let currentIndex = radios.indexOf(this.shadowRoot.activeElement);
+			if (currentIndex < 0) currentIndex = radios.findIndex((r) => r.checked);
+			let nextIndex;
+			const rtl = getComputedStyle(this._fieldset).direction === "rtl";
+			switch (rtl && e.key === "ArrowRight" ? "ArrowLeft" : rtl && e.key === "ArrowLeft" ? "ArrowRight" : e.key) {
+				case "ArrowRight":
+				case "ArrowDown":
+					e.preventDefault();
+					nextIndex = (currentIndex + 1) % radios.length;
+					radios[nextIndex].focus();
+					radios[nextIndex].click();
+					break;
+				case "ArrowLeft":
+				case "ArrowUp":
+					e.preventDefault();
+					nextIndex = currentIndex < 0 ? radios.length - 1 : (currentIndex - 1 + radios.length) % radios.length;
+					radios[nextIndex].focus();
+					radios[nextIndex].click();
+			}
+		}
+		formResetCallback() {
+			this.value = this._defaultValue ?? 0;
+		}
+		focus(options) {
+			if (this.disabled || this._formDisabled || this.readonly) return;
+			this._fieldset.querySelector("input[tabindex=\"0\"]:not(:disabled)")?.focus(options);
+		}
+		formStateRestoreCallback(state, mode) {
+			if (typeof state === "string") this.value = state;
+		}
+		formDisabledCallback(disabled) {
+			this._formDisabled = disabled;
+			if (this.isConnected) this.render();
+		}
+	};
+	if (typeof customElements !== "undefined" && !customElements.get("au-rating")) customElements.define("au-rating", AuRating);
+	// src/components/switch.js
+	var AuSwitch = class extends AuFormElement {
+		constructor() {
+			super();
+			this.attachShadow({
+				mode: "open",
+				delegatesFocus: true
+			});
+			this.addEventListener("click", (event) => this._activateFromHost(event));
+			const inputID = uid("au-switch-");
+			const style = document.createElement("style");
+			style.textContent = `
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
       :host { max-width: 100%; }
       .au-switch {
@@ -4718,211 +4823,228 @@
       }
      
     `;
-      const switchElement = document.createElement("label");
-      switchElement.classList.add("au-switch");
-      switchElement.setAttribute("for", inputID);
-      const container = document.createElement("div");
-      container.classList.add("container");
-      const offTextSpan = document.createElement("span");
-      offTextSpan.classList.add("off-text");
-      offTextSpan.setAttribute("aria-hidden", "true");
-      const inputDiv = document.createElement("div");
-      inputDiv.classList.add("input");
-      this.inputElement = document.createElement("input");
-      this.inputElement.id = inputID;
-      this.inputElement.type = "checkbox";
-      this.inputElement.value = this.getAttribute("value") ?? "on";
-      this.inputElement.setAttribute("role", "switch");
-      this.inputElement.setAttribute("aria-checked", "false");
-      inputDiv.appendChild(this.inputElement);
-      const onTextSpan = document.createElement("span");
-      onTextSpan.classList.add("on-text");
-      onTextSpan.setAttribute("aria-hidden", "true");
-      container.append(offTextSpan, inputDiv, onTextSpan);
-      switchElement.append(container);
-      this.shadowRoot.append(style, switchElement);
-      const slot = document.createElement("slot");
-      this._labelSlot = slot;
-      slot.addEventListener("slotchange", () => this.syncAccessibleLabel());
-      this.labelFallback = document.createElement("span");
-      this.labelFallback.textContent = this.getAttribute("label") || "";
-      slot.appendChild(this.labelFallback);
-      switchElement.prepend(slot);
-      this.inputElement.addEventListener("input", () => {
-        this.checked = this.inputElement.checked;
-      });
-      this.inputElement.addEventListener("change", (event) => {
-        event.stopPropagation();
-        this.checked = this.inputElement.checked;
-        this.dispatchEvent(new CustomEvent("change", { bubbles: true, composed: true, detail: this.checked }));
-      });
-    }
-    _activateFromHost(event) {
-      if (event.composedPath()[0] !== this) return;
-      queueMicrotask(() => {
-        if (!event.defaultPrevented && this.isConnected && !this.inputElement.disabled) {
-          this.inputElement.focus();
-          this.inputElement.click();
-        }
-      });
-    }
-    get checked() {
-      return this.inputElement?.checked ?? false;
-    }
-    set checked(val) {
-      this.toggleAttribute("checked", Boolean(val));
-      this.inputElement.checked = Boolean(val);
-      this.updateFormValue();
-    }
-    get disabled() {
-      return this.hasAttribute("disabled");
-    }
-    set disabled(val) {
-      val ? this.setAttribute("disabled", "") : this.removeAttribute("disabled");
-    }
-    formResetCallback() {
-      this.checked = this._initialChecked;
-    }
-    static get observedAttributes() {
-      return ["name", "value", "checked", "disabled", "required", "off", "on", "label", "aria-label", "aria-labelledby", "aria-describedby", "aria-invalid"];
-    }
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (oldValue === newValue) return;
-      const input = this.shadowRoot.querySelector("input");
-      const offText = this.shadowRoot.querySelector(".off-text");
-      const onText = this.shadowRoot.querySelector(".on-text");
-      if (!input || !offText || !onText) return;
-      switch (name) {
-        case "checked":
-          input.checked = newValue !== null;
-          input.setAttribute("aria-checked", input.checked.toString());
-          break;
-        case "disabled":
-          input.disabled = this.disabled || Boolean(this._formDisabled);
-          break;
-        case "name":
-          input.name = newValue ?? "";
-          break;
-        case "value":
-          input.value = newValue ?? "on";
-          break;
-        case "required":
-          input.required = newValue !== null;
-          break;
-        case "off":
-          offText.textContent = newValue || "";
-          break;
-        case "on":
-          onText.textContent = newValue || "";
-          break;
-        case "label":
-          if (this.labelFallback) this.labelFallback.textContent = newValue || "";
-          this.syncAccessibleLabel();
-          break;
-        case "aria-label":
-        case "aria-labelledby":
-        case "aria-describedby":
-          this.syncAccessibleLabel();
-          break;
-        default:
-          if (newValue === null) {
-            input.removeAttribute(name);
-          } else {
-            input.setAttribute(name, newValue);
-          }
-          break;
-      }
-      this.updateFormValue();
-    }
-    syncAccessibleLabel() {
-      const hasSlotText = this._labelSlot.assignedNodes({ flatten: true }).some((node) => node.textContent?.trim());
-      forwardAria(this, this.inputElement, { explicit: this.getAttribute("aria-label"), hasOwnLabel: hasSlotText, mirrorPrefix: "au-switch-" });
-    }
-    _observeLabels() {
-      this._labelObserver?.disconnect();
-      this._labelObserver ??= new MutationObserver(() => this.syncAccessibleLabel());
-      this._labelObserver.observe(this.getRootNode(), {
-        subtree: true,
-        childList: true,
-        characterData: true,
-        attributes: true,
-        attributeFilter: ["id", "for", "aria-label"]
-      });
-      this.syncAccessibleLabel();
-    }
-    disconnectedCallback() {
-      this._labelObserver?.disconnect();
-    }
-    _upgradeProperties() {
-      upgradeProperties(this, ["checked", "disabled", "required", "name", "value"]);
-    }
-    get name() {
-      return this.getAttribute("name") || "";
-    }
-    set name(value) {
-      this.setAttribute("name", value);
-    }
-    get value() {
-      return this.getAttribute("value") ?? "on";
-    }
-    set value(value) {
-      this.setAttribute("value", value);
-    }
-    get required() {
-      return this.hasAttribute("required");
-    }
-    set required(value) {
-      this.toggleAttribute("required", Boolean(value));
-    }
-    focus(options) {
-      this.inputElement.focus(options);
-    }
-    formStateRestoreCallback(state) {
-      if (state === "checked" || state === "unchecked") this.checked = state === "checked";
-    }
-    connectedCallback() {
-      this._upgradeProperties();
-      if (!this._initialCheckedSet) {
-        this._initialChecked = this.checked;
-        this._initialCheckedSet = true;
-      }
-      const input = this.shadowRoot.querySelector("input");
-      const offText = this.shadowRoot.querySelector(".off-text");
-      const onText = this.shadowRoot.querySelector(".on-text");
-      input.setAttribute("aria-checked", input.checked.toString());
-      if (this.hasAttribute("off")) {
-        offText.textContent = this.getAttribute("off");
-      } else {
-        offText.textContent = "";
-      }
-      if (this.hasAttribute("on")) {
-        onText.textContent = this.getAttribute("on");
-      } else {
-        onText.textContent = "";
-      }
-      input.disabled = this.disabled || Boolean(this._formDisabled);
-      this.updateFormValue();
-      this._observeLabels();
-    }
-    updateFormValue() {
-      const input = this.inputElement;
-      input.setAttribute("aria-checked", String(input.checked));
-      this.internals.setFormValue(input.checked ? this.value : null, input.checked ? "checked" : "unchecked");
-      if (!input.willValidate || input.validity.valid) this.internals.setValidity({});
-      else this.internals.setValidity(input.validity, input.validationMessage, input);
-    }
-    formDisabledCallback(disabled) {
-      this._formDisabled = disabled;
-      this.inputElement.disabled = this.disabled || disabled;
-      this.updateFormValue();
-    }
-  }
-  if (typeof customElements !== "undefined" && !customElements.get("au-switch")) {
-    customElements.define("au-switch", AuSwitch);
-  }
-  const DEFAULT_TAB_LABEL = "Tab {index}";
-  const DEFAULT_BADGE_LABEL_PREFIX = "Additional information:";
-  const tabsStyles = `
+			const switchElement = document.createElement("label");
+			switchElement.classList.add("au-switch");
+			switchElement.setAttribute("for", inputID);
+			const container = document.createElement("div");
+			container.classList.add("container");
+			const offTextSpan = document.createElement("span");
+			offTextSpan.classList.add("off-text");
+			offTextSpan.setAttribute("aria-hidden", "true");
+			const inputDiv = document.createElement("div");
+			inputDiv.classList.add("input");
+			this.inputElement = document.createElement("input");
+			this.inputElement.id = inputID;
+			this.inputElement.type = "checkbox";
+			this.inputElement.value = this.getAttribute("value") ?? "on";
+			this.inputElement.setAttribute("role", "switch");
+			this.inputElement.setAttribute("aria-checked", "false");
+			inputDiv.appendChild(this.inputElement);
+			const onTextSpan = document.createElement("span");
+			onTextSpan.classList.add("on-text");
+			onTextSpan.setAttribute("aria-hidden", "true");
+			container.append(offTextSpan, inputDiv, onTextSpan);
+			switchElement.append(container);
+			this.shadowRoot.append(style, switchElement);
+			const slot = document.createElement("slot");
+			this._labelSlot = slot;
+			slot.addEventListener("slotchange", () => this.syncAccessibleLabel());
+			this.labelFallback = document.createElement("span");
+			this.labelFallback.textContent = this.getAttribute("label") || "";
+			slot.appendChild(this.labelFallback);
+			switchElement.prepend(slot);
+			this.inputElement.addEventListener("input", () => {
+				this.checked = this.inputElement.checked;
+			});
+			this.inputElement.addEventListener("change", (event) => {
+				event.stopPropagation();
+				this.checked = this.inputElement.checked;
+				this.dispatchEvent(new CustomEvent("change", {
+					bubbles: true,
+					composed: true,
+					detail: this.checked
+				}));
+			});
+		}
+		_activateFromHost(event) {
+			if (event.composedPath()[0] !== this) return;
+			queueMicrotask(() => {
+				if (!event.defaultPrevented && this.isConnected && !this.inputElement.disabled) {
+					this.inputElement.focus();
+					this.inputElement.click();
+				}
+			});
+		}
+		get checked() {
+			return this.inputElement?.checked ?? false;
+		}
+		set checked(val) {
+			this.toggleAttribute("checked", Boolean(val));
+			this.inputElement.checked = Boolean(val);
+			this.updateFormValue();
+		}
+		get disabled() {
+			return this.hasAttribute("disabled");
+		}
+		set disabled(val) {
+			val ? this.setAttribute("disabled", "") : this.removeAttribute("disabled");
+		}
+		formResetCallback() {
+			this.checked = this._initialChecked;
+		}
+		static get observedAttributes() {
+			return [
+				"name",
+				"value",
+				"checked",
+				"disabled",
+				"required",
+				"off",
+				"on",
+				"label",
+				"aria-label",
+				"aria-labelledby",
+				"aria-describedby",
+				"aria-invalid"
+			];
+		}
+		attributeChangedCallback(name, oldValue, newValue) {
+			if (oldValue === newValue) return;
+			const input = this.shadowRoot.querySelector("input");
+			const offText = this.shadowRoot.querySelector(".off-text");
+			const onText = this.shadowRoot.querySelector(".on-text");
+			if (!input || !offText || !onText) return;
+			switch (name) {
+				case "checked":
+					input.checked = newValue !== null;
+					input.setAttribute("aria-checked", input.checked.toString());
+					break;
+				case "disabled":
+					input.disabled = this.disabled || Boolean(this._formDisabled);
+					break;
+				case "name":
+					input.name = newValue ?? "";
+					break;
+				case "value":
+					input.value = newValue ?? "on";
+					break;
+				case "required":
+					input.required = newValue !== null;
+					break;
+				case "off":
+					offText.textContent = newValue || "";
+					break;
+				case "on":
+					onText.textContent = newValue || "";
+					break;
+				case "label":
+					if (this.labelFallback) this.labelFallback.textContent = newValue || "";
+					this.syncAccessibleLabel();
+					break;
+				case "aria-label":
+				case "aria-labelledby":
+				case "aria-describedby":
+					this.syncAccessibleLabel();
+					break;
+				default: if (newValue === null) input.removeAttribute(name);
+				else input.setAttribute(name, newValue);
+			}
+			this.updateFormValue();
+		}
+		syncAccessibleLabel() {
+			const hasSlotText = this._labelSlot.assignedNodes({ flatten: true }).some((node) => node.textContent?.trim());
+			forwardAria(this, this.inputElement, {
+				explicit: this.getAttribute("aria-label"),
+				hasOwnLabel: hasSlotText,
+				mirrorPrefix: "au-switch-"
+			});
+		}
+		_observeLabels() {
+			this._labelObserver?.disconnect();
+			this._labelObserver ??= new MutationObserver(() => this.syncAccessibleLabel());
+			this._labelObserver.observe(this.getRootNode(), {
+				subtree: true,
+				childList: true,
+				characterData: true,
+				attributes: true,
+				attributeFilter: [
+					"id",
+					"for",
+					"aria-label"
+				]
+			});
+			this.syncAccessibleLabel();
+		}
+		disconnectedCallback() {
+			this._labelObserver?.disconnect();
+		}
+		_upgradeProperties() {
+			upgradeProperties(this, [
+				"checked",
+				"disabled",
+				"required",
+				"name",
+				"value"
+			]);
+		}
+		get name() {
+			return this.getAttribute("name") || "";
+		}
+		set name(value) {
+			this.setAttribute("name", value);
+		}
+		get value() {
+			return this.getAttribute("value") ?? "on";
+		}
+		set value(value) {
+			this.setAttribute("value", value);
+		}
+		get required() {
+			return this.hasAttribute("required");
+		}
+		set required(value) {
+			this.toggleAttribute("required", Boolean(value));
+		}
+		focus(options) {
+			this.inputElement.focus(options);
+		}
+		formStateRestoreCallback(state) {
+			if (state === "checked" || state === "unchecked") this.checked = state === "checked";
+		}
+		connectedCallback() {
+			this._upgradeProperties();
+			if (!this._initialCheckedSet) {
+				this._initialChecked = this.checked;
+				this._initialCheckedSet = true;
+			}
+			const input = this.shadowRoot.querySelector("input");
+			const offText = this.shadowRoot.querySelector(".off-text");
+			const onText = this.shadowRoot.querySelector(".on-text");
+			input.setAttribute("aria-checked", input.checked.toString());
+			if (this.hasAttribute("off")) offText.textContent = this.getAttribute("off");
+			else offText.textContent = "";
+			if (this.hasAttribute("on")) onText.textContent = this.getAttribute("on");
+			else onText.textContent = "";
+			input.disabled = this.disabled || Boolean(this._formDisabled);
+			this.updateFormValue();
+			this._observeLabels();
+		}
+		updateFormValue() {
+			const input = this.inputElement;
+			input.setAttribute("aria-checked", String(input.checked));
+			this.internals.setFormValue(input.checked ? this.value : null, input.checked ? "checked" : "unchecked");
+			if (!input.willValidate || input.validity.valid) this.internals.setValidity({});
+			else this.internals.setValidity(input.validity, input.validationMessage, input);
+		}
+		formDisabledCallback(disabled) {
+			this._formDisabled = disabled;
+			this.inputElement.disabled = this.disabled || disabled;
+			this.updateFormValue();
+		}
+	};
+	if (typeof customElements !== "undefined" && !customElements.get("au-switch")) customElements.define("au-switch", AuSwitch);
+	var DEFAULT_BADGE_LABEL_PREFIX = "Additional information:";
+	var tabsStyles = `
   :host([hidden]:not([hidden="until-found" i])) { display: none; }
   :host { display: block; min-width: 0; }
   .au-tabs { min-width: 0; }
@@ -5055,261 +5177,299 @@
     ::slotted(.au-tab-panel:focus-visible) { outline-color: Highlight; }
   }
 `;
-  function tabLabel(label, template, index) {
-    return label || String(template || DEFAULT_TAB_LABEL).replaceAll("{index}", String(index + 1));
-  }
-  function renderTabContent({ label, lang, prefix, badge, affix }, badgeLabelPrefix = DEFAULT_BADGE_LABEL_PREFIX) {
-    let html = "";
-    if (prefix) html += `<span class="prefix">${escapeHTML(prefix)}</span>`;
-    if (label) html += `<span class="label"${lang ? ` lang="${escapeHTML(lang)}"` : ""}>${escapeHTML(label)}</span>`;
-    if (badge) html += `<span class="badge" aria-label="${escapeHTML(`${badgeLabelPrefix} ${badge}`)}">${escapeHTML(badge)}</span>`;
-    if (affix) html += `<span class="affix">${escapeHTML(affix)}</span>`;
-    return html;
-  }
-  function renderTab(tab, { id, selected = false, badgeLabelPrefix } = {}) {
-    return `<li role="presentation" class="au-tablist-item${selected ? " au-tablist-item--selected" : ""}"><button type="button" role="tab" id="${id}" aria-selected="${selected}" tabindex="${selected ? 0 : -1}">${renderTabContent(tab, badgeLabelPrefix)}</button></li>`;
-  }
-  function renderTabs({ label, tabs = [], selectedIndex = 0, selectedChild, badgeLabelPrefix } = {}) {
-    const items = tabs.map((tab, index) => renderTab(tab, { id: `tab-${index + 1}`, selected: index === selectedIndex, badgeLabelPrefix })).join("");
-    const preselect = selectedChild ? `<style data-preselect>::slotted(.au-tab-panel:nth-child(${selectedChild})) { display: block; }</style>` : "";
-    return `<div class="au-tabs"><style>${tabsStyles}</style>${preselect}<ul role="tablist" class="au-tablist" tabindex="-1" aria-orientation="horizontal"${label ? ` aria-label="${escapeHTML(label)}"` : ""}>${items}</ul><slot name="panel"></slot></div>`;
-  }
-  class AuTabs extends HTMLElement {
-    static get observedAttributes() {
-      return ["data-text-tab", "data-text-tab-lang", "data-text-badge-label-prefix", "selected-index", "aria-label", "aria-labelledby"];
-    }
-    constructor() {
-      super();
-      this._tabs = [];
-      this._panels = [];
-      this._selectedIndex = -1;
-      this._entries = /* @__PURE__ */ new Map();
-      this._nextTabId = 1;
-      setupShadow(this, () => renderTabs(), (root, adopted) => {
-        this.container = root.querySelector(".au-tabs");
-        this.tabsList = root.querySelector("ul.au-tablist");
-        this._slot = root.querySelector('slot[name="panel"]');
-        this._slot.addEventListener("slotchange", () => this._renderTabs());
-        if (adopted) {
-          this._serverItems = [...this.tabsList.children];
-          this._nextTabId = this._serverItems.length + 1;
-        }
-        this._bound = true;
-        if (this.isConnected) this.connectedCallback();
-        root.querySelector("style[data-preselect]")?.remove();
-      });
-    }
-    connectedCallback() {
-      if (!this._bound) return;
-      upgradeProperties(this, ["selectedIndex"]);
-      this._observer ??= new MutationObserver((records) => {
-        if (records.some((record) => record.target === this || record.target.parentNode === this)) this._renderTabs();
-      });
-      this._observer.observe(this, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ["label", "label-lang", "data-prefix", "data-badge", "data-affix", "id", "class", "slot"]
-      });
-      this._referenceObserver ??= new MutationObserver(() => this._updateLabel());
-      this._root = this.getRootNode();
-      this._referenceObserver.observe(this._root, {
-        childList: true,
-        subtree: true,
-        characterData: true,
-        attributes: true,
-        attributeFilter: ["id", "aria-label"]
-      });
-      this._onRootFocusIn ??= (event) => {
-        this._focusInPanel = this._panels.find((panel) => event.composedPath().includes(panel)) || null;
-      };
-      this._root.addEventListener("focusin", this._onRootFocusIn);
-      this._renderTabs();
-    }
-    disconnectedCallback() {
-      this._observer?.disconnect();
-      this._referenceObserver?.disconnect();
-      this._root?.removeEventListener("focusin", this._onRootFocusIn);
-      this._focusInPanel = null;
-    }
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (oldValue === newValue) return;
-      if (name === "selected-index") this.selectedIndex = newValue === null ? 0 : newValue;
-      else if (this._bound && this.isConnected) this._renderTabs();
-    }
-    formatText(template, values = {}) {
-      return Object.entries(values).reduce((message, [key, value]) => {
-        return message.replaceAll(`{${key}}`, String(value));
-      }, template);
-    }
-    _writePanel(entry, name, value) {
-      const current = entry.panel.getAttribute(name);
-      if (!entry.originals.has(name) || current !== entry.written.get(name)) entry.originals.set(name, current);
-      if (current !== value) {
-        if (value === null) entry.panel.removeAttribute(name);
-        else entry.panel.setAttribute(name, value);
-      }
-      entry.written.set(name, value);
-    }
-    _releasePanel(entry) {
-      for (const [name, value] of entry.originals) {
-        if (entry.panel.getAttribute(name) !== entry.written.get(name)) continue;
-        if (value === null) entry.panel.removeAttribute(name);
-        else entry.panel.setAttribute(name, value);
-      }
-    }
-    _renderTabs() {
-      const panels = this._slot.assignedElements().filter((panel) => panel.classList.contains("au-tab-panel"));
-      const focusedTab = this.shadowRoot.activeElement;
-      const lostPanelFocus = this._focusInPanel && !panels.includes(this._focusInPanel);
-      const entries = /* @__PURE__ */ new Map();
-      for (const [index2, panel] of panels.entries()) {
-        let entry = this._entries.get(panel);
-        if (!entry) {
-          let li = this._serverItems?.shift();
-          if (!li) {
-            const template = document.createElement("template");
-            template.innerHTML = renderTab({}, { id: `tab-${this._nextTabId++}` });
-            li = template.content.firstElementChild;
-          }
-          const button = li.querySelector('[role="tab"]');
-          entry = { panel, li, button, originals: /* @__PURE__ */ new Map(), written: /* @__PURE__ */ new Map() };
-          button.addEventListener("click", () => this._selectTab(this._panels.indexOf(panel)));
-          button.addEventListener("keydown", (event) => this._onKeydown(event, this._panels.indexOf(panel)));
-        }
-        if (!panel.id) this._writePanel(entry, "id", "panel-" + uid());
-        const label = tabLabel(panel.getAttribute("label"), this.getAttribute("data-text-tab"), index2);
-        const lang = panel.getAttribute("label-lang") || this.getAttribute("data-text-tab-lang") || "";
-        entry.label = label;
-        this._writePanel(entry, "role", "tabpanel");
-        this._writePanel(entry, "aria-label", label);
-        if ("ariaControlsElements" in entry.button) entry.button.ariaControlsElements = [panel];
-        const content = renderTabContent({
-          label,
-          lang,
-          prefix: panel.getAttribute("data-prefix"),
-          badge: panel.getAttribute("data-badge"),
-          affix: panel.getAttribute("data-affix")
-        }, this.getAttribute("data-text-badge-label-prefix") || DEFAULT_BADGE_LABEL_PREFIX);
-        if (entry.button.innerHTML !== content) entry.button.innerHTML = content;
-        entries.set(panel, entry);
-      }
-      for (const [panel, entry] of this._entries) {
-        if (!entries.has(panel)) {
-          this._releasePanel(entry);
-          entry.li.remove();
-        }
-      }
-      let index = 0;
-      for (const entry of entries.values()) {
-        if (this.tabsList.children[index] !== entry.li) this.tabsList.insertBefore(entry.li, this.tabsList.children[index] || null);
-        index++;
-      }
-      this._entries = entries;
-      this._panels = panels;
-      this._tabs = [...entries.values()].map((entry) => entry.button);
-      let selected = panels.indexOf(this._selectedPanel);
-      if (this._pendingIndex !== void 0) selected = Math.min(this._pendingIndex, panels.length - 1);
-      else if (selected < 0) selected = Math.min(Math.max(this._selectedIndex, 0), panels.length - 1);
-      if (panels.length) this._pendingIndex = void 0;
-      this._selectedIndex = selected;
-      this._selectedPanel = panels[selected] || null;
-      this._syncSelection();
-      this._updateLabel();
-      if (focusedTab && this._tabs.includes(focusedTab)) {
-        if (this.shadowRoot.activeElement !== focusedTab) focusedTab.focus();
-      } else if (focusedTab || lostPanelFocus) {
-        (this._tabs[selected] || this.tabsList).focus();
-      }
-    }
-    _syncSelection() {
-      for (const [index, panel] of this._panels.entries()) {
-        const entry = this._entries.get(panel), selected = index === this._selectedIndex;
-        entry.button.setAttribute("aria-selected", String(selected));
-        entry.button.tabIndex = selected ? 0 : -1;
-        entry.li.classList.toggle("au-tablist-item--selected", selected);
-        this._writePanel(entry, "aria-hidden", String(!selected));
-        this._writePanel(entry, "hidden", selected ? null : "");
-        this._writePanel(entry, "inert", selected ? null : "");
-        const currentTabindex = panel.getAttribute("tabindex");
-        const originalTabindex = entry.written.has("tabindex") && currentTabindex === entry.written.get("tabindex") ? entry.originals.get("tabindex") : currentTabindex;
-        this._writePanel(entry, "tabindex", selected ? originalTabindex ?? "0" : "-1");
-      }
-    }
-    _updateLabel() {
-      const root = this.getRootNode();
-      const labels = (this.getAttribute("aria-labelledby") || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((element) => element && element !== this);
-      const explicit = this.getAttribute("aria-label");
-      this.tabsList.removeAttribute("aria-labelledby");
-      if (explicit) this.tabsList.setAttribute("aria-label", explicit);
-      else this.tabsList.removeAttribute("aria-label");
-      if ("ariaLabelledByElements" in this.tabsList) this.tabsList.ariaLabelledByElements = labels;
-      else if (!explicit && labels.length) this.tabsList.setAttribute("aria-label", labels.map((element) => element.getAttribute("aria-label") || element.textContent).join(" ").trim());
-    }
-    _selectTab(index, { focus = true, emit = true } = {}) {
-      if (!Number.isInteger(index) || index < 0 || index >= this._tabs.length) return;
-      const changed = this._selectedIndex !== index;
-      const focusWasInPanel = this._focusInPanel && this._focusInPanel !== this._panels[index];
-      this._selectedIndex = index;
-      this._selectedPanel = this._panels[index];
-      this._syncSelection();
-      if (focus || focusWasInPanel || this._tabs.includes(this.shadowRoot.activeElement)) this._tabs[index].focus();
-      if (changed && emit) this.dispatchEvent(new CustomEvent("au-tab-change", {
-        bubbles: true,
-        composed: true,
-        detail: { index, label: this._entries.get(this._selectedPanel).label }
-      }));
-    }
-    _onKeydown(event, index) {
-      if (event.altKey || event.ctrlKey || event.metaKey || index < 0) return;
-      const last = this._tabs.length - 1;
-      const rtl = getComputedStyle(this._tabs[index]).direction === "rtl";
-      const key = rtl && event.key === "ArrowRight" ? "ArrowLeft" : rtl && event.key === "ArrowLeft" ? "ArrowRight" : event.key;
-      let next;
-      switch (key) {
-        case "ArrowRight":
-          next = index === last ? 0 : index + 1;
-          break;
-        case "ArrowLeft":
-          next = index === 0 ? last : index - 1;
-          break;
-        case "Home":
-          next = 0;
-          break;
-        case "End":
-          next = last;
-          break;
-        default:
-          return;
-      }
-      event.preventDefault();
-      this._selectTab(next);
-    }
-    get selectedIndex() {
-      return this._selectedIndex;
-    }
-    set selectedIndex(value) {
-      const index = Number(value);
-      if (!Number.isInteger(index) || index < 0) return;
-      if (!this._tabs.length) {
-        this._pendingIndex = index;
-        return;
-      }
-      this._selectTab(Math.min(index, this._tabs.length - 1), { focus: false, emit: false });
-    }
-  }
-  if (typeof customElements !== "undefined" && !customElements.get("au-tabs")) {
-    customElements.define("au-tabs", AuTabs);
-  }
-  class AuTextarea extends AuFormElement {
-    constructor() {
-      super();
-      this.attachShadow({ mode: "open", delegatesFocus: true });
-      this._id = this.getAttribute("id") || uid("au-textarea-");
-      this._initialValue = "";
-      this._initialValueSet = false;
-      const style = document.createElement("style");
-      style.textContent = `
+	/** Label for the tab at `index` (0-based): the panel's label or the template. */
+	function tabLabel(label, template, index) {
+		return label || String(template || "Tab {index}").replaceAll("{index}", String(index + 1));
+	}
+	/** Inner markup of a tab button. */
+	function renderTabContent({ label, lang, prefix, badge, affix }, badgeLabelPrefix = DEFAULT_BADGE_LABEL_PREFIX) {
+		let html = "";
+		if (prefix) html += `<span class="prefix">${escapeHTML(prefix)}</span>`;
+		if (label) html += `<span class="label"${lang ? ` lang="${escapeHTML(lang)}"` : ""}>${escapeHTML(label)}</span>`;
+		if (badge) html += `<span class="badge" aria-label="${escapeHTML(`${badgeLabelPrefix} ${badge}`)}">${escapeHTML(badge)}</span>`;
+		if (affix) html += `<span class="affix">${escapeHTML(affix)}</span>`;
+		return html;
+	}
+	/** One tab: list item and button. */
+	function renderTab(tab, { id, selected = false, badgeLabelPrefix } = {}) {
+		return `<li role="presentation" class="au-tablist-item${selected ? " au-tablist-item--selected" : ""}"><button type="button" role="tab" id="${id}" aria-selected="${selected}" tabindex="${selected ? 0 : -1}">${renderTabContent(tab, badgeLabelPrefix)}</button></li>`;
+	}
+	/**
+	* @param {{ label?: string, tabs?: object[], selectedIndex?: number, selectedChild?: number, badgeLabelPrefix?: string }} [state]
+	* `selectedChild` (1-based position among the host's element children) adds a
+	* rule that shows the selected panel before the component script runs; the
+	* component removes it when it takes over.
+	*/
+	function renderTabs({ label, tabs = [], selectedIndex = 0, selectedChild, badgeLabelPrefix } = {}) {
+		const items = tabs.map((tab, index) => renderTab(tab, {
+			id: `tab-${index + 1}`,
+			selected: index === selectedIndex,
+			badgeLabelPrefix
+		})).join("");
+		return `<div class="au-tabs"><style>${tabsStyles}</style>${selectedChild ? `<style data-preselect>::slotted(.au-tab-panel:nth-child(${selectedChild})) { display: block; }</style>` : ""}<ul role="tablist" class="au-tablist" tabindex="-1" aria-orientation="horizontal"${label ? ` aria-label="${escapeHTML(label)}"` : ""}>${items}</ul><slot name="panel"></slot></div>`;
+	}
+	// src/components/tabs.js
+	var AuTabs = class extends HTMLElement {
+		static get observedAttributes() {
+			return [
+				"data-text-tab",
+				"data-text-tab-lang",
+				"data-text-badge-label-prefix",
+				"selected-index",
+				"aria-label",
+				"aria-labelledby"
+			];
+		}
+		constructor() {
+			super();
+			this._tabs = [];
+			this._panels = [];
+			this._selectedIndex = -1;
+			this._entries = /* @__PURE__ */ new Map();
+			this._nextTabId = 1;
+			setupShadow(this, () => renderTabs(), (root, adopted) => {
+				this.container = root.querySelector(".au-tabs");
+				this.tabsList = root.querySelector("ul.au-tablist");
+				this._slot = root.querySelector("slot[name=\"panel\"]");
+				this._slot.addEventListener("slotchange", () => this._renderTabs());
+				if (adopted) {
+					this._serverItems = [...this.tabsList.children];
+					this._nextTabId = this._serverItems.length + 1;
+				}
+				this._bound = true;
+				if (this.isConnected) this.connectedCallback();
+				root.querySelector("style[data-preselect]")?.remove();
+			});
+		}
+		connectedCallback() {
+			if (!this._bound) return;
+			upgradeProperties(this, ["selectedIndex"]);
+			this._observer ??= new MutationObserver((records) => {
+				if (records.some((record) => record.target === this || record.target.parentNode === this)) this._renderTabs();
+			});
+			this._observer.observe(this, {
+				childList: true,
+				subtree: true,
+				attributes: true,
+				attributeFilter: [
+					"label",
+					"label-lang",
+					"data-prefix",
+					"data-badge",
+					"data-affix",
+					"id",
+					"class",
+					"slot"
+				]
+			});
+			this._referenceObserver ??= new MutationObserver(() => this._updateLabel());
+			this._root = this.getRootNode();
+			this._referenceObserver.observe(this._root, {
+				childList: true,
+				subtree: true,
+				characterData: true,
+				attributes: true,
+				attributeFilter: ["id", "aria-label"]
+			});
+			this._onRootFocusIn ??= (event) => {
+				this._focusInPanel = this._panels.find((panel) => event.composedPath().includes(panel)) || null;
+			};
+			this._root.addEventListener("focusin", this._onRootFocusIn);
+			this._renderTabs();
+		}
+		disconnectedCallback() {
+			this._observer?.disconnect();
+			this._referenceObserver?.disconnect();
+			this._root?.removeEventListener("focusin", this._onRootFocusIn);
+			this._focusInPanel = null;
+		}
+		attributeChangedCallback(name, oldValue, newValue) {
+			if (oldValue === newValue) return;
+			if (name === "selected-index") this.selectedIndex = newValue === null ? 0 : newValue;
+			else if (this._bound && this.isConnected) this._renderTabs();
+		}
+		formatText(template, values = {}) {
+			return Object.entries(values).reduce((message, [key, value]) => {
+				return message.replaceAll(`{${key}}`, String(value));
+			}, template);
+		}
+		_writePanel(entry, name, value) {
+			const current = entry.panel.getAttribute(name);
+			if (!entry.originals.has(name) || current !== entry.written.get(name)) entry.originals.set(name, current);
+			if (current !== value) {
+				if (value === null) entry.panel.removeAttribute(name);
+				else entry.panel.setAttribute(name, value);
+			}
+			entry.written.set(name, value);
+		}
+		_releasePanel(entry) {
+			for (const [name, value] of entry.originals) {
+				if (entry.panel.getAttribute(name) !== entry.written.get(name)) continue;
+				if (value === null) entry.panel.removeAttribute(name);
+				else entry.panel.setAttribute(name, value);
+			}
+		}
+		_renderTabs() {
+			const panels = this._slot.assignedElements().filter((panel) => panel.classList.contains("au-tab-panel"));
+			const focusedTab = this.shadowRoot.activeElement;
+			const lostPanelFocus = this._focusInPanel && !panels.includes(this._focusInPanel);
+			const entries = /* @__PURE__ */ new Map();
+			for (const [index, panel] of panels.entries()) {
+				let entry = this._entries.get(panel);
+				if (!entry) {
+					let li = this._serverItems?.shift();
+					if (!li) {
+						const template = document.createElement("template");
+						template.innerHTML = renderTab({}, { id: `tab-${this._nextTabId++}` });
+						li = template.content.firstElementChild;
+					}
+					const button = li.querySelector("[role=\"tab\"]");
+					entry = {
+						panel,
+						li,
+						button,
+						originals: /* @__PURE__ */ new Map(),
+						written: /* @__PURE__ */ new Map()
+					};
+					button.addEventListener("click", () => this._selectTab(this._panels.indexOf(panel)));
+					button.addEventListener("keydown", (event) => this._onKeydown(event, this._panels.indexOf(panel)));
+				}
+				if (!panel.id) this._writePanel(entry, "id", "panel-" + uid());
+				const label = tabLabel(panel.getAttribute("label"), this.getAttribute("data-text-tab"), index);
+				const lang = panel.getAttribute("label-lang") || this.getAttribute("data-text-tab-lang") || "";
+				entry.label = label;
+				this._writePanel(entry, "role", "tabpanel");
+				this._writePanel(entry, "aria-label", label);
+				if ("ariaControlsElements" in entry.button) entry.button.ariaControlsElements = [panel];
+				const content = renderTabContent({
+					label,
+					lang,
+					prefix: panel.getAttribute("data-prefix"),
+					badge: panel.getAttribute("data-badge"),
+					affix: panel.getAttribute("data-affix")
+				}, this.getAttribute("data-text-badge-label-prefix") || "Additional information:");
+				if (entry.button.innerHTML !== content) entry.button.innerHTML = content;
+				entries.set(panel, entry);
+			}
+			for (const [panel, entry] of this._entries) if (!entries.has(panel)) {
+				this._releasePanel(entry);
+				entry.li.remove();
+			}
+			let index = 0;
+			for (const entry of entries.values()) {
+				if (this.tabsList.children[index] !== entry.li) this.tabsList.insertBefore(entry.li, this.tabsList.children[index] || null);
+				index++;
+			}
+			this._entries = entries;
+			this._panels = panels;
+			this._tabs = [...entries.values()].map((entry) => entry.button);
+			let selected = panels.indexOf(this._selectedPanel);
+			if (this._pendingIndex !== void 0) selected = Math.min(this._pendingIndex, panels.length - 1);
+			else if (selected < 0) selected = Math.min(Math.max(this._selectedIndex, 0), panels.length - 1);
+			if (panels.length) this._pendingIndex = void 0;
+			this._selectedIndex = selected;
+			this._selectedPanel = panels[selected] || null;
+			this._syncSelection();
+			this._updateLabel();
+			if (focusedTab && this._tabs.includes(focusedTab)) {
+				if (this.shadowRoot.activeElement !== focusedTab) focusedTab.focus();
+			} else if (focusedTab || lostPanelFocus) (this._tabs[selected] || this.tabsList).focus();
+		}
+		_syncSelection() {
+			for (const [index, panel] of this._panels.entries()) {
+				const entry = this._entries.get(panel), selected = index === this._selectedIndex;
+				entry.button.setAttribute("aria-selected", String(selected));
+				entry.button.tabIndex = selected ? 0 : -1;
+				entry.li.classList.toggle("au-tablist-item--selected", selected);
+				this._writePanel(entry, "aria-hidden", String(!selected));
+				this._writePanel(entry, "hidden", selected ? null : "");
+				this._writePanel(entry, "inert", selected ? null : "");
+				const currentTabindex = panel.getAttribute("tabindex");
+				const originalTabindex = entry.written.has("tabindex") && currentTabindex === entry.written.get("tabindex") ? entry.originals.get("tabindex") : currentTabindex;
+				this._writePanel(entry, "tabindex", selected ? originalTabindex ?? "0" : "-1");
+			}
+		}
+		_updateLabel() {
+			const root = this.getRootNode();
+			const labels = (this.getAttribute("aria-labelledby") || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((element) => element && element !== this);
+			const explicit = this.getAttribute("aria-label");
+			this.tabsList.removeAttribute("aria-labelledby");
+			if (explicit) this.tabsList.setAttribute("aria-label", explicit);
+			else this.tabsList.removeAttribute("aria-label");
+			if ("ariaLabelledByElements" in this.tabsList) this.tabsList.ariaLabelledByElements = labels;
+			else if (!explicit && labels.length) this.tabsList.setAttribute("aria-label", labels.map((element) => element.getAttribute("aria-label") || element.textContent).join(" ").trim());
+		}
+		_selectTab(index, { focus = true, emit = true } = {}) {
+			if (!Number.isInteger(index) || index < 0 || index >= this._tabs.length) return;
+			const changed = this._selectedIndex !== index;
+			const focusWasInPanel = this._focusInPanel && this._focusInPanel !== this._panels[index];
+			this._selectedIndex = index;
+			this._selectedPanel = this._panels[index];
+			this._syncSelection();
+			if (focus || focusWasInPanel || this._tabs.includes(this.shadowRoot.activeElement)) this._tabs[index].focus();
+			if (changed && emit) this.dispatchEvent(new CustomEvent("au-tab-change", {
+				bubbles: true,
+				composed: true,
+				detail: {
+					index,
+					label: this._entries.get(this._selectedPanel).label
+				}
+			}));
+		}
+		_onKeydown(event, index) {
+			if (event.altKey || event.ctrlKey || event.metaKey || index < 0) return;
+			const last = this._tabs.length - 1;
+			const rtl = getComputedStyle(this._tabs[index]).direction === "rtl";
+			const key = rtl && event.key === "ArrowRight" ? "ArrowLeft" : rtl && event.key === "ArrowLeft" ? "ArrowRight" : event.key;
+			let next;
+			switch (key) {
+				case "ArrowRight":
+					next = index === last ? 0 : index + 1;
+					break;
+				case "ArrowLeft":
+					next = index === 0 ? last : index - 1;
+					break;
+				case "Home":
+					next = 0;
+					break;
+				case "End":
+					next = last;
+					break;
+				default: return;
+			}
+			event.preventDefault();
+			this._selectTab(next);
+		}
+		get selectedIndex() {
+			return this._selectedIndex;
+		}
+		set selectedIndex(value) {
+			const index = Number(value);
+			if (!Number.isInteger(index) || index < 0) return;
+			if (!this._tabs.length) {
+				this._pendingIndex = index;
+				return;
+			}
+			this._selectTab(Math.min(index, this._tabs.length - 1), {
+				focus: false,
+				emit: false
+			});
+		}
+	};
+	if (typeof customElements !== "undefined" && !customElements.get("au-tabs")) customElements.define("au-tabs", AuTabs);
+	// src/components/textarea.js
+	var AuTextarea = class extends AuFormElement {
+		constructor() {
+			super();
+			this.attachShadow({
+				mode: "open",
+				delegatesFocus: true
+			});
+			this._id = this.getAttribute("id") || uid("au-textarea-");
+			this._initialValue = "";
+			this._initialValueSet = false;
+			const style = document.createElement("style");
+			style.textContent = `
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
       :host { display: block; min-width: 0; }
       .textarea-wrapper {
@@ -5386,181 +5546,214 @@
       }
         
     `;
-      const wrapper = document.createElement("div");
-      wrapper.className = "textarea-wrapper";
-      this.labelEl = document.createElement("label");
-      this.labelEl.setAttribute("for", this._id);
-      this.labelEl.textContent = this.getAttribute("label") || "";
-      const textareaContainer = document.createElement("div");
-      textareaContainer.className = "textarea-container";
-      this.textareaContainer = textareaContainer;
-      this.textarea = document.createElement("textarea");
-      this.textarea.id = this._id;
-      this._bindTextareaEvents();
-      textareaContainer.append(this.textarea);
-      wrapper.append(this.labelEl, textareaContainer);
-      this.shadowRoot.append(style, wrapper);
-    }
-    _bindTextareaEvents() {
-      this.textarea.addEventListener("input", (event) => {
-        this._syncFormValue();
-        if (!event.composed) {
-          const forwarded = event instanceof InputEvent ? new InputEvent("input", {
-            bubbles: true,
-            composed: true,
-            data: event.data,
-            inputType: event.inputType,
-            isComposing: event.isComposing
-          }) : new Event("input", { bubbles: true, composed: true });
-          this.dispatchEvent(forwarded);
-        }
-      });
-      this.textarea.addEventListener("change", (event) => {
-        this._syncFormValue();
-        if (!event.composed) this.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
-      });
-    }
-    static get observedAttributes() {
-      return ["value", "placeholder", "name", "rows", "cols", "disabled", "readonly", "required", "maxlength", "minlength", "autocomplete", "aria-label", "aria-labelledby", "aria-describedby", "aria-invalid", "label", "id"];
-    }
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (oldValue === newValue) return;
-      if (name === "label" && this.labelEl) {
-        this.labelEl.textContent = newValue;
-      } else if (name === "id") {
-        this._id = newValue || uid("au-textarea-");
-        this.textarea.id = this._id;
-        this.labelEl.htmlFor = this._id;
-      } else if (name === "value") {
-        this.value = newValue ?? "";
-      } else if (!["aria-label", "aria-labelledby", "aria-describedby"].includes(name)) {
-        if (newValue === null) {
-          this.textarea.removeAttribute(name);
-        } else {
-          this.textarea.setAttribute(name, newValue);
-        }
-      }
-      this._syncControlState();
-      this._syncAccessibleReferences();
-    }
-    connectedCallback() {
-      upgradeProperties(this, ["value", "name", "disabled", "readonly", "required"]);
-      if (!this._initialValueSet) {
-        this._initialValue = this.textarea.value;
-        this._initialValueSet = true;
-      }
-      this.internals.setFormValue(this.textarea.value);
-      this._syncControlState();
-      this._observeExternalReferences();
-    }
-    get value() {
-      return this.textarea.value;
-    }
-    set value(val) {
-      this.textarea.value = val;
-      this._syncFormValue();
-    }
-    formResetCallback() {
-      const currentValue = this._initialValue || "";
-      const wasFocused = this.shadowRoot.activeElement === this.textarea;
-      const newTextarea = this.textarea.cloneNode(false);
-      newTextarea.value = currentValue;
-      this.textareaContainer.replaceChild(newTextarea, this.textarea);
-      this.textarea = newTextarea;
-      this._bindTextareaEvents();
-      this.internals.setFormValue(this.textarea.value);
-      this._syncControlState();
-      this._syncAccessibleReferences();
-      if (wasFocused) this.textarea.focus();
-    }
-    formStateRestoreCallback(state, mode) {
-      if (typeof state === "string") this.value = state;
-    }
-    formDisabledCallback(disabled) {
-      this._formDisabled = disabled;
-      this._syncControlState();
-    }
-    get name() {
-      return this.getAttribute("name") || "";
-    }
-    set name(value) {
-      this.setAttribute("name", value);
-    }
-    get required() {
-      return this.hasAttribute("required");
-    }
-    set required(value) {
-      this.toggleAttribute("required", Boolean(value));
-    }
-    focus(options) {
-      this.textarea.focus(options);
-    }
-    get disabled() {
-      return this.hasAttribute("disabled");
-    }
-    set disabled(val) {
-      val ? this.setAttribute("disabled", "") : this.removeAttribute("disabled");
-    }
-    get readonly() {
-      return this.hasAttribute("readonly");
-    }
-    set readonly(val) {
-      val ? this.setAttribute("readonly", "") : this.removeAttribute("readonly");
-    }
-    _syncControlState() {
-      this.textarea.disabled = Boolean(this.disabled || this._formDisabled);
-      this.textarea.readOnly = this.readonly;
-      this._syncValidity();
-    }
-    _observeExternalReferences() {
-      this._referenceObserver?.disconnect();
-      this._referenceObserver ??= new MutationObserver(() => this._syncAccessibleReferences());
-      this._referenceObserver.observe(this.getRootNode(), {
-        subtree: true,
-        childList: true,
-        characterData: true,
-        attributes: true,
-        attributeFilter: ["id", "for", "aria-label"]
-      });
-      this._syncAccessibleReferences();
-    }
-    _syncAccessibleReferences() {
-      forwardAria(this, this.textarea, { explicit: this.getAttribute("aria-label"), hasOwnLabel: !!this.getAttribute("label"), mirrorPrefix: "au-textarea-" });
-      this.labelEl.hidden = !this.labelEl.textContent;
-    }
-    disconnectedCallback() {
-      this._referenceObserver?.disconnect();
-    }
-    _syncFormValue() {
-      this.internals.setFormValue(this.textarea.value);
-      this._syncValidity();
-    }
-    _syncValidity() {
-      if (!this.textarea) return;
-      if (this.textarea.validity.valid) {
-        this.internals.setValidity({});
-      } else {
-        this.internals.setValidity(this.textarea.validity, this.textarea.validationMessage, this.textarea);
-      }
-    }
-  }
-  if (typeof customElements !== "undefined" && !customElements.get("au-textarea")) {
-    customElements.define("au-textarea", AuTextarea);
-  }
-  function auTreeRecords(value, ancestors = /* @__PURE__ */ new Set()) {
-    return Array.isArray(value) ? value.filter((item) => item && typeof item === "object" && !Array.isArray(item) && !ancestors.has(item)) : [];
-  }
-  class AuTree extends HTMLElement {
-    constructor() {
-      super();
-      this.attachShadow({ mode: "open" });
-      this._data = [];
-      this._nodeRegistry = [];
-      this._activeNode = null;
-      this._toggleLabel = null;
-      this._typeBuffer = "";
-      this._typeTime = 0;
-      this.shadowRoot.innerHTML = `
+			const wrapper = document.createElement("div");
+			wrapper.className = "textarea-wrapper";
+			this.labelEl = document.createElement("label");
+			this.labelEl.setAttribute("for", this._id);
+			this.labelEl.textContent = this.getAttribute("label") || "";
+			const textareaContainer = document.createElement("div");
+			textareaContainer.className = "textarea-container";
+			this.textareaContainer = textareaContainer;
+			this.textarea = document.createElement("textarea");
+			this.textarea.id = this._id;
+			this._bindTextareaEvents();
+			textareaContainer.append(this.textarea);
+			wrapper.append(this.labelEl, textareaContainer);
+			this.shadowRoot.append(style, wrapper);
+		}
+		_bindTextareaEvents() {
+			this.textarea.addEventListener("input", (event) => {
+				this._syncFormValue();
+				if (!event.composed) {
+					const forwarded = event instanceof InputEvent ? new InputEvent("input", {
+						bubbles: true,
+						composed: true,
+						data: event.data,
+						inputType: event.inputType,
+						isComposing: event.isComposing
+					}) : new Event("input", {
+						bubbles: true,
+						composed: true
+					});
+					this.dispatchEvent(forwarded);
+				}
+			});
+			this.textarea.addEventListener("change", (event) => {
+				this._syncFormValue();
+				if (!event.composed) this.dispatchEvent(new Event("change", {
+					bubbles: true,
+					composed: true
+				}));
+			});
+		}
+		static get observedAttributes() {
+			return [
+				"value",
+				"placeholder",
+				"name",
+				"rows",
+				"cols",
+				"disabled",
+				"readonly",
+				"required",
+				"maxlength",
+				"minlength",
+				"autocomplete",
+				"aria-label",
+				"aria-labelledby",
+				"aria-describedby",
+				"aria-invalid",
+				"label",
+				"id"
+			];
+		}
+		attributeChangedCallback(name, oldValue, newValue) {
+			if (oldValue === newValue) return;
+			if (name === "label" && this.labelEl) this.labelEl.textContent = newValue;
+			else if (name === "id") {
+				this._id = newValue || uid("au-textarea-");
+				this.textarea.id = this._id;
+				this.labelEl.htmlFor = this._id;
+			} else if (name === "value") this.value = newValue ?? "";
+			else if (![
+				"aria-label",
+				"aria-labelledby",
+				"aria-describedby"
+			].includes(name)) {
+				if (newValue === null) this.textarea.removeAttribute(name);
+				else this.textarea.setAttribute(name, newValue);
+			}
+			this._syncControlState();
+			this._syncAccessibleReferences();
+		}
+		connectedCallback() {
+			upgradeProperties(this, [
+				"value",
+				"name",
+				"disabled",
+				"readonly",
+				"required"
+			]);
+			if (!this._initialValueSet) {
+				this._initialValue = this.textarea.value;
+				this._initialValueSet = true;
+			}
+			this.internals.setFormValue(this.textarea.value);
+			this._syncControlState();
+			this._observeExternalReferences();
+		}
+		get value() {
+			return this.textarea.value;
+		}
+		set value(val) {
+			this.textarea.value = val;
+			this._syncFormValue();
+		}
+		formResetCallback() {
+			const currentValue = this._initialValue || "";
+			const wasFocused = this.shadowRoot.activeElement === this.textarea;
+			const newTextarea = this.textarea.cloneNode(false);
+			newTextarea.value = currentValue;
+			this.textareaContainer.replaceChild(newTextarea, this.textarea);
+			this.textarea = newTextarea;
+			this._bindTextareaEvents();
+			this.internals.setFormValue(this.textarea.value);
+			this._syncControlState();
+			this._syncAccessibleReferences();
+			if (wasFocused) this.textarea.focus();
+		}
+		formStateRestoreCallback(state, mode) {
+			if (typeof state === "string") this.value = state;
+		}
+		formDisabledCallback(disabled) {
+			this._formDisabled = disabled;
+			this._syncControlState();
+		}
+		get name() {
+			return this.getAttribute("name") || "";
+		}
+		set name(value) {
+			this.setAttribute("name", value);
+		}
+		get required() {
+			return this.hasAttribute("required");
+		}
+		set required(value) {
+			this.toggleAttribute("required", Boolean(value));
+		}
+		focus(options) {
+			this.textarea.focus(options);
+		}
+		get disabled() {
+			return this.hasAttribute("disabled");
+		}
+		set disabled(val) {
+			val ? this.setAttribute("disabled", "") : this.removeAttribute("disabled");
+		}
+		get readonly() {
+			return this.hasAttribute("readonly");
+		}
+		set readonly(val) {
+			val ? this.setAttribute("readonly", "") : this.removeAttribute("readonly");
+		}
+		_syncControlState() {
+			this.textarea.disabled = Boolean(this.disabled || this._formDisabled);
+			this.textarea.readOnly = this.readonly;
+			this._syncValidity();
+		}
+		_observeExternalReferences() {
+			this._referenceObserver?.disconnect();
+			this._referenceObserver ??= new MutationObserver(() => this._syncAccessibleReferences());
+			this._referenceObserver.observe(this.getRootNode(), {
+				subtree: true,
+				childList: true,
+				characterData: true,
+				attributes: true,
+				attributeFilter: [
+					"id",
+					"for",
+					"aria-label"
+				]
+			});
+			this._syncAccessibleReferences();
+		}
+		_syncAccessibleReferences() {
+			forwardAria(this, this.textarea, {
+				explicit: this.getAttribute("aria-label"),
+				hasOwnLabel: !!this.getAttribute("label"),
+				mirrorPrefix: "au-textarea-"
+			});
+			this.labelEl.hidden = !this.labelEl.textContent;
+		}
+		disconnectedCallback() {
+			this._referenceObserver?.disconnect();
+		}
+		_syncFormValue() {
+			this.internals.setFormValue(this.textarea.value);
+			this._syncValidity();
+		}
+		_syncValidity() {
+			if (!this.textarea) return;
+			if (this.textarea.validity.valid) this.internals.setValidity({});
+			else this.internals.setValidity(this.textarea.validity, this.textarea.validationMessage, this.textarea);
+		}
+	};
+	if (typeof customElements !== "undefined" && !customElements.get("au-textarea")) customElements.define("au-textarea", AuTextarea);
+	// src/components/tree.js
+	function auTreeRecords(value, ancestors = /* @__PURE__ */ new Set()) {
+		return Array.isArray(value) ? value.filter((item) => item && typeof item === "object" && !Array.isArray(item) && !ancestors.has(item)) : [];
+	}
+	var AuTree = class AuTree extends HTMLElement {
+		constructor() {
+			super();
+			this.attachShadow({ mode: "open" });
+			this._data = [];
+			this._nodeRegistry = [];
+			this._activeNode = null;
+			this._toggleLabel = null;
+			this._typeBuffer = "";
+			this._typeTime = 0;
+			this.shadowRoot.innerHTML = `
       <style>
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
         :host { display:block; min-width:0; font-family:var(--au-tree-text-family, inherit);
@@ -5569,292 +5762,306 @@
         [role=tree]:focus-visible { outline:2px solid var(--au-tree-focus-shadow-color,oklch(0.4 0 0)); }
         @media (forced-colors:active) { [role=tree]:focus-visible {outline-color:Highlight;} }
       </style><div role="tree" tabindex="-1"></div>`;
-      this._container = this.shadowRoot.querySelector("[role=tree]");
-      this.handleKeyDown = this.handleKeyDown.bind(this);
-      this.handleFocusIn = this.handleFocusIn.bind(this);
-      this.handleNodeExpand = this.handleNodeExpand.bind(this);
-      this.handleNodeCheckChange = this.handleNodeCheckChange.bind(this);
-    }
-    static get observedAttributes() {
-      return ["show-checkbox", "data-text-node", "data-text-toggle", "aria-label", "aria-labelledby"];
-    }
-    connectedCallback() {
-      for (const prop of ["data", "toggleLabel", "fallbackNodeLabel", "toggleLabelTemplate"]) this._upgradeProperty(prop);
-      this.addEventListener("keydown", this.handleKeyDown);
-      this.addEventListener("focusin", this.handleFocusIn);
-      this.addEventListener("au-tree-node-expand", this.handleNodeExpand);
-      this.addEventListener("au-tree-node-check-change", this.handleNodeCheckChange);
-      if (!this._rendered) this.render();
-      else {
-        this.syncAccessibleLabel();
-        this.updateNodeRegistry();
-      }
-      this.observeLabelRoot();
-    }
-    disconnectedCallback() {
-      this.removeEventListener("keydown", this.handleKeyDown);
-      this.removeEventListener("focusin", this.handleFocusIn);
-      this.removeEventListener("au-tree-node-expand", this.handleNodeExpand);
-      this.removeEventListener("au-tree-node-check-change", this.handleNodeCheckChange);
-      this._labelObserver?.disconnect();
-      this._typeBuffer = "";
-    }
-    _upgradeProperty(prop) {
-      if (Object.prototype.hasOwnProperty.call(this, prop)) {
-        const value = this[prop];
-        delete this[prop];
-        this[prop] = value;
-      }
-    }
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (oldValue === newValue || !this._container) return;
-      if (name === "aria-label" || name === "aria-labelledby") {
-        this.syncAccessibleLabel();
-        if (this.isConnected && name === "aria-labelledby") this.observeLabelRoot();
-      } else {
-        const { activeNode, activeElement } = this.findActiveNode();
-        this._container.setAttribute("aria-multiselectable", String(this.hasAttribute("show-checkbox")));
-        for (const node of this.getAllNodes()) node.syncPresentation();
-        if (activeNode && activeElement?.hidden) activeNode.focus();
-        this.updateNodeRegistry();
-      }
-    }
-    get data() {
-      return this._data;
-    }
-    set data(value) {
-      this._data = Array.isArray(value) ? value : [];
-      this.render();
-    }
-    get toggleLabel() {
-      return this._toggleLabel;
-    }
-    set toggleLabel(value) {
-      this._toggleLabel = value;
-      for (const node of this.getAllNodes()) node.syncPresentation();
-    }
-    get fallbackNodeLabel() {
-      return this.getAttribute("data-text-node") || "Node";
-    }
-    set fallbackNodeLabel(value) {
-      this.setAttribute("data-text-node", value || "Node");
-    }
-    get toggleLabelTemplate() {
-      return this.getAttribute("data-text-toggle");
-    }
-    set toggleLabelTemplate(value) {
-      if (value == null) this.removeAttribute("data-text-toggle");
-      else this.setAttribute("data-text-toggle", value);
-    }
-    observeLabelRoot() {
-      this._labelObserver?.disconnect();
-      if (!this.getAttribute("aria-labelledby")?.trim()) return;
-      this._labelObserver ??= new MutationObserver(() => this.syncAccessibleLabel());
-      this._labelObserver.observe(this.getRootNode(), {
-        childList: true,
-        subtree: true,
-        characterData: true,
-        attributes: true,
-        attributeFilter: ["id", "aria-label"]
-      });
-      this.syncAccessibleLabel();
-    }
-    syncAccessibleLabel() {
-      const root = this.getRootNode();
-      const ids = (this.getAttribute("aria-labelledby") || "").trim().split(/\s+/).filter(Boolean);
-      const labels = ids.map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
-      const fallback = this.getAttribute("aria-label")?.trim() || "Tree";
-      if ("ariaLabelledByElements" in this._container) {
-        this._container.ariaLabelledByElements = labels;
-        this._container.setAttribute("aria-label", fallback);
-      } else {
-        const text = labels.map((el) => el.getAttribute("aria-label") || el.textContent).join(" ").trim();
-        this._container.setAttribute("aria-label", text || fallback);
-      }
-    }
-    static reconcile(container, data, tree, parent, ancestors = /* @__PURE__ */ new Set()) {
-      const records = auTreeRecords(data, ancestors);
-      const counts = /* @__PURE__ */ new Map();
-      const idOf = (item) => typeof item.id === "string" && item.id !== "" || typeof item.id === "number" && Number.isFinite(item.id) ? item.id : void 0;
-      for (const item of records) {
-        const id = idOf(item);
-        if (id !== void 0) counts.set(id, (counts.get(id) || 0) + 1);
-      }
-      const old = [...container.children];
-      const available = /* @__PURE__ */ new Map();
-      for (const node of old) {
-        const bucket = available.get(node._identity) || [];
-        bucket.push(node);
-        available.set(node._identity, bucket);
-      }
-      const retained = /* @__PURE__ */ new Set();
-      records.forEach((item, index) => {
-        const id = idOf(item);
-        const identity = id !== void 0 && counts.get(id) === 1 ? id : item;
-        const node = available.get(identity)?.shift() || document.createElement("au-tree-node");
-        node._identity = identity;
-        node._tree = tree;
-        node.parentTreeNode = parent;
-        node._level = parent ? parent._level + 1 : 1;
-        node._position = index + 1;
-        node._setSize = records.length;
-        node.updateData(item, /* @__PURE__ */ new Set([...ancestors, item]));
-        if (container.children[index] !== node) container.insertBefore(node, container.children[index] || null);
-        retained.add(node);
-      });
-      for (const node of old) if (!retained.has(node)) {
-        node.clearOwner();
-        node.remove();
-      }
-    }
-    render() {
-      if (!this._container) return;
-      this._rendered = true;
-      const { activeNode, activeElement } = this.findActiveNode();
-      this._rendering = true;
-      try {
-        AuTree.reconcile(this._container, this._data, this, null);
-      } finally {
-        this._rendering = false;
-      }
-      this.syncAccessibleLabel();
-      this._container.setAttribute("aria-multiselectable", String(this.hasAttribute("show-checkbox")));
-      this.updateNodeRegistry(activeNode || this._activeNode);
-      if (activeNode) {
-        const target = this._activeNode;
-        if (target === activeNode && activeElement?.isConnected && !activeElement.hidden && !activeElement.disabled) {
-          activeElement.focus({ preventScroll: true });
-        } else (target || this._container).focus({ preventScroll: true });
-      }
-    }
-    collectNodes(root, visibleOnly = false) {
-      const nodes = [];
-      for (const node of root.querySelectorAll("au-tree-node")) {
-        nodes.push(node);
-        if (!visibleOnly || node.expanded) nodes.push(...this.collectNodes(node.shadowRoot, visibleOnly));
-      }
-      return nodes;
-    }
-    getAllNodes() {
-      return this.collectNodes(this.shadowRoot);
-    }
-    findActiveNode() {
-      let activeElement = this.shadowRoot.activeElement;
-      let activeNode = null;
-      while (activeElement) {
-        if (activeElement instanceof AuTreeNode) activeNode = activeElement;
-        if (!activeElement.shadowRoot?.activeElement) break;
-        activeElement = activeElement.shadowRoot.activeElement;
-      }
-      return { activeNode, activeElement };
-    }
-    updateNodeRegistry(preferred = this.findActiveNode().activeNode || this._activeNode) {
-      this._nodeRegistry = this.collectNodes(this.shadowRoot, true);
-      while (preferred && !this._nodeRegistry.includes(preferred)) preferred = preferred.parentTreeNode;
-      this._activeNode = preferred || this._nodeRegistry[0] || null;
-      for (const node of this.getAllNodes()) node.tabIndex = node === this._activeNode ? 0 : -1;
-    }
-    focusNode(node, options) {
-      if (!this._nodeRegistry.includes(node)) return;
-      this.updateNodeRegistry(node);
-      node.focus(options);
-    }
-    focus(options) {
-      this.updateNodeRegistry();
-      (this._activeNode || this._container).focus(options);
-    }
-    handleFocusIn(event) {
-      const node = event.composedPath().find((item) => item instanceof AuTreeNode);
-      if (node?._tree === this) this.updateNodeRegistry(node);
-    }
-    handleNodeExpand(event) {
-      if (event.target === this) return;
-      const { activeNode } = this.findActiveNode();
-      this.updateNodeRegistry();
-      if (activeNode && !this._nodeRegistry.includes(activeNode)) this.focusNode(this._activeNode);
-    }
-    handleNodeCheckChange(event) {
-      if (event.detail?.node?._tree !== this) return;
-      const checkedNodes = this.getAllNodes().filter((node) => node.checked && !node.indeterminate).map((node) => node.data);
-      this.dispatchEvent(new CustomEvent("change", { bubbles: true, composed: true, detail: { checkedNodes } }));
-    }
-    handleKeyDown(event) {
-      const current = event.composedPath().find((item) => item instanceof AuTreeNode);
-      if (current?._tree !== this || event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
-      this.updateNodeRegistry(current);
-      const index = this._nodeRegistry.indexOf(current);
-      let target;
-      const rtl = getComputedStyle(current).direction === "rtl";
-      const key = rtl && event.key === "ArrowRight" ? "ArrowLeft" : rtl && event.key === "ArrowLeft" ? "ArrowRight" : event.key;
-      switch (key) {
-        case "ArrowDown":
-          target = this._nodeRegistry[index + 1];
-          break;
-        case "ArrowUp":
-          target = this._nodeRegistry[index - 1];
-          break;
-        case "ArrowRight":
-          if (current.hasChildren) {
-            if (!current.expanded) current.setExpanded(true);
-            else target = current.childNodesList[0];
-          }
-          break;
-        case "ArrowLeft":
-          if (current.expanded) current.setExpanded(false);
-          else target = current.parentTreeNode;
-          break;
-        case "Home":
-          target = this._nodeRegistry[0];
-          break;
-        case "End":
-          target = this._nodeRegistry.at(-1);
-          break;
-        case "*":
-          for (const sibling of current.parentTreeNode?.childNodesList || [...this._container.children]) sibling.setExpanded(true);
-          break;
-        default:
-          if (event.key.length === 1 && /\S/.test(event.key)) {
-            event.preventDefault();
-            this.handleTypeAhead(event.key, index);
-          }
-          return;
-      }
-      event.preventDefault();
-      this._typeBuffer = "";
-      if (target) this.focusNode(target);
-    }
-    handleTypeAhead(char, index) {
-      const now = Date.now();
-      this._typeBuffer = now - this._typeTime < 700 ? this._typeBuffer + char.toLowerCase() : char.toLowerCase();
-      this._typeTime = now;
-      const repeated = [...this._typeBuffer].every((letter) => letter === this._typeBuffer[0]);
-      const term = repeated ? char.toLowerCase() : this._typeBuffer;
-      const nodes = this._nodeRegistry;
-      const start = term.length > 1 ? index : index + 1;
-      for (let offset = 0; offset < nodes.length; offset++) {
-        const node = nodes[(start + offset) % nodes.length];
-        if (node.label.toLowerCase().startsWith(term)) {
-          this.focusNode(node);
-          break;
-        }
-      }
-    }
-    expandAllChildren() {
-      for (const node of this._container.children) node.setExpanded(true);
-    }
-  }
-  class AuTreeNode extends HTMLElement {
-    constructor() {
-      super();
-      this.attachShadow({ mode: "open" });
-      this._data = {};
-      this._expanded = false;
-      this._checked = false;
-      this._indeterminate = false;
-      this._toggleLabel = null;
-      this._fallbackNodeLabel = "Node";
-      this._toggleLabelTemplate = null;
-      this.shadowRoot.innerHTML = `
+			this._container = this.shadowRoot.querySelector("[role=tree]");
+			this.handleKeyDown = this.handleKeyDown.bind(this);
+			this.handleFocusIn = this.handleFocusIn.bind(this);
+			this.handleNodeExpand = this.handleNodeExpand.bind(this);
+			this.handleNodeCheckChange = this.handleNodeCheckChange.bind(this);
+		}
+		static get observedAttributes() {
+			return [
+				"show-checkbox",
+				"data-text-node",
+				"data-text-toggle",
+				"aria-label",
+				"aria-labelledby"
+			];
+		}
+		connectedCallback() {
+			for (const prop of [
+				"data",
+				"toggleLabel",
+				"fallbackNodeLabel",
+				"toggleLabelTemplate"
+			]) this._upgradeProperty(prop);
+			this.addEventListener("keydown", this.handleKeyDown);
+			this.addEventListener("focusin", this.handleFocusIn);
+			this.addEventListener("au-tree-node-expand", this.handleNodeExpand);
+			this.addEventListener("au-tree-node-check-change", this.handleNodeCheckChange);
+			if (!this._rendered) this.render();
+			else {
+				this.syncAccessibleLabel();
+				this.updateNodeRegistry();
+			}
+			this.observeLabelRoot();
+		}
+		disconnectedCallback() {
+			this.removeEventListener("keydown", this.handleKeyDown);
+			this.removeEventListener("focusin", this.handleFocusIn);
+			this.removeEventListener("au-tree-node-expand", this.handleNodeExpand);
+			this.removeEventListener("au-tree-node-check-change", this.handleNodeCheckChange);
+			this._labelObserver?.disconnect();
+			this._typeBuffer = "";
+		}
+		_upgradeProperty(prop) {
+			if (Object.prototype.hasOwnProperty.call(this, prop)) {
+				const value = this[prop];
+				delete this[prop];
+				this[prop] = value;
+			}
+		}
+		attributeChangedCallback(name, oldValue, newValue) {
+			if (oldValue === newValue || !this._container) return;
+			if (name === "aria-label" || name === "aria-labelledby") {
+				this.syncAccessibleLabel();
+				if (this.isConnected && name === "aria-labelledby") this.observeLabelRoot();
+			} else {
+				const { activeNode, activeElement } = this.findActiveNode();
+				this._container.setAttribute("aria-multiselectable", String(this.hasAttribute("show-checkbox")));
+				for (const node of this.getAllNodes()) node.syncPresentation();
+				if (activeNode && activeElement?.hidden) activeNode.focus();
+				this.updateNodeRegistry();
+			}
+		}
+		get data() {
+			return this._data;
+		}
+		set data(value) {
+			this._data = Array.isArray(value) ? value : [];
+			this.render();
+		}
+		get toggleLabel() {
+			return this._toggleLabel;
+		}
+		set toggleLabel(value) {
+			this._toggleLabel = value;
+			for (const node of this.getAllNodes()) node.syncPresentation();
+		}
+		get fallbackNodeLabel() {
+			return this.getAttribute("data-text-node") || "Node";
+		}
+		set fallbackNodeLabel(value) {
+			this.setAttribute("data-text-node", value || "Node");
+		}
+		get toggleLabelTemplate() {
+			return this.getAttribute("data-text-toggle");
+		}
+		set toggleLabelTemplate(value) {
+			if (value == null) this.removeAttribute("data-text-toggle");
+			else this.setAttribute("data-text-toggle", value);
+		}
+		observeLabelRoot() {
+			this._labelObserver?.disconnect();
+			if (!this.getAttribute("aria-labelledby")?.trim()) return;
+			this._labelObserver ??= new MutationObserver(() => this.syncAccessibleLabel());
+			this._labelObserver.observe(this.getRootNode(), {
+				childList: true,
+				subtree: true,
+				characterData: true,
+				attributes: true,
+				attributeFilter: ["id", "aria-label"]
+			});
+			this.syncAccessibleLabel();
+		}
+		syncAccessibleLabel() {
+			const root = this.getRootNode();
+			const labels = (this.getAttribute("aria-labelledby") || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((el) => el && el !== this);
+			const fallback = this.getAttribute("aria-label")?.trim() || "Tree";
+			if ("ariaLabelledByElements" in this._container) {
+				this._container.ariaLabelledByElements = labels;
+				this._container.setAttribute("aria-label", fallback);
+			} else {
+				const text = labels.map((el) => el.getAttribute("aria-label") || el.textContent).join(" ").trim();
+				this._container.setAttribute("aria-label", text || fallback);
+			}
+		}
+		static reconcile(container, data, tree, parent, ancestors = /* @__PURE__ */ new Set()) {
+			const records = auTreeRecords(data, ancestors);
+			const counts = /* @__PURE__ */ new Map();
+			const idOf = (item) => typeof item.id === "string" && item.id !== "" || typeof item.id === "number" && Number.isFinite(item.id) ? item.id : void 0;
+			for (const item of records) {
+				const id = idOf(item);
+				if (id !== void 0) counts.set(id, (counts.get(id) || 0) + 1);
+			}
+			const old = [...container.children];
+			const available = /* @__PURE__ */ new Map();
+			for (const node of old) {
+				const bucket = available.get(node._identity) || [];
+				bucket.push(node);
+				available.set(node._identity, bucket);
+			}
+			const retained = /* @__PURE__ */ new Set();
+			records.forEach((item, index) => {
+				const id = idOf(item);
+				const identity = id !== void 0 && counts.get(id) === 1 ? id : item;
+				const node = available.get(identity)?.shift() || document.createElement("au-tree-node");
+				node._identity = identity;
+				node._tree = tree;
+				node.parentTreeNode = parent;
+				node._level = parent ? parent._level + 1 : 1;
+				node._position = index + 1;
+				node._setSize = records.length;
+				node.updateData(item, /* @__PURE__ */ new Set([...ancestors, item]));
+				if (container.children[index] !== node) container.insertBefore(node, container.children[index] || null);
+				retained.add(node);
+			});
+			for (const node of old) if (!retained.has(node)) {
+				node.clearOwner();
+				node.remove();
+			}
+		}
+		render() {
+			if (!this._container) return;
+			this._rendered = true;
+			const { activeNode, activeElement } = this.findActiveNode();
+			this._rendering = true;
+			try {
+				AuTree.reconcile(this._container, this._data, this, null);
+			} finally {
+				this._rendering = false;
+			}
+			this.syncAccessibleLabel();
+			this._container.setAttribute("aria-multiselectable", String(this.hasAttribute("show-checkbox")));
+			this.updateNodeRegistry(activeNode || this._activeNode);
+			if (activeNode) {
+				const target = this._activeNode;
+				if (target === activeNode && activeElement?.isConnected && !activeElement.hidden && !activeElement.disabled) activeElement.focus({ preventScroll: true });
+				else (target || this._container).focus({ preventScroll: true });
+			}
+		}
+		collectNodes(root, visibleOnly = false) {
+			const nodes = [];
+			for (const node of root.querySelectorAll("au-tree-node")) {
+				nodes.push(node);
+				if (!visibleOnly || node.expanded) nodes.push(...this.collectNodes(node.shadowRoot, visibleOnly));
+			}
+			return nodes;
+		}
+		getAllNodes() {
+			return this.collectNodes(this.shadowRoot);
+		}
+		findActiveNode() {
+			let activeElement = this.shadowRoot.activeElement;
+			let activeNode = null;
+			while (activeElement) {
+				if (activeElement instanceof AuTreeNode) activeNode = activeElement;
+				if (!activeElement.shadowRoot?.activeElement) break;
+				activeElement = activeElement.shadowRoot.activeElement;
+			}
+			return {
+				activeNode,
+				activeElement
+			};
+		}
+		updateNodeRegistry(preferred = this.findActiveNode().activeNode || this._activeNode) {
+			this._nodeRegistry = this.collectNodes(this.shadowRoot, true);
+			while (preferred && !this._nodeRegistry.includes(preferred)) preferred = preferred.parentTreeNode;
+			this._activeNode = preferred || this._nodeRegistry[0] || null;
+			for (const node of this.getAllNodes()) node.tabIndex = node === this._activeNode ? 0 : -1;
+		}
+		focusNode(node, options) {
+			if (!this._nodeRegistry.includes(node)) return;
+			this.updateNodeRegistry(node);
+			node.focus(options);
+		}
+		focus(options) {
+			this.updateNodeRegistry();
+			(this._activeNode || this._container).focus(options);
+		}
+		handleFocusIn(event) {
+			const node = event.composedPath().find((item) => item instanceof AuTreeNode);
+			if (node?._tree === this) this.updateNodeRegistry(node);
+		}
+		handleNodeExpand(event) {
+			if (event.target === this) return;
+			const { activeNode } = this.findActiveNode();
+			this.updateNodeRegistry();
+			if (activeNode && !this._nodeRegistry.includes(activeNode)) this.focusNode(this._activeNode);
+		}
+		handleNodeCheckChange(event) {
+			if (event.detail?.node?._tree !== this) return;
+			const checkedNodes = this.getAllNodes().filter((node) => node.checked && !node.indeterminate).map((node) => node.data);
+			this.dispatchEvent(new CustomEvent("change", {
+				bubbles: true,
+				composed: true,
+				detail: { checkedNodes }
+			}));
+		}
+		handleKeyDown(event) {
+			const current = event.composedPath().find((item) => item instanceof AuTreeNode);
+			if (current?._tree !== this || event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
+			this.updateNodeRegistry(current);
+			const index = this._nodeRegistry.indexOf(current);
+			let target;
+			const rtl = getComputedStyle(current).direction === "rtl";
+			switch (rtl && event.key === "ArrowRight" ? "ArrowLeft" : rtl && event.key === "ArrowLeft" ? "ArrowRight" : event.key) {
+				case "ArrowDown":
+					target = this._nodeRegistry[index + 1];
+					break;
+				case "ArrowUp":
+					target = this._nodeRegistry[index - 1];
+					break;
+				case "ArrowRight":
+					if (current.hasChildren) {
+						if (!current.expanded) current.setExpanded(true);
+						else target = current.childNodesList[0];
+					}
+					break;
+				case "ArrowLeft":
+					if (current.expanded) current.setExpanded(false);
+					else target = current.parentTreeNode;
+					break;
+				case "Home":
+					target = this._nodeRegistry[0];
+					break;
+				case "End":
+					target = this._nodeRegistry.at(-1);
+					break;
+				case "*":
+					for (const sibling of current.parentTreeNode?.childNodesList || [...this._container.children]) sibling.setExpanded(true);
+					break;
+				default:
+					if (event.key.length === 1 && /\S/.test(event.key)) {
+						event.preventDefault();
+						this.handleTypeAhead(event.key, index);
+					}
+					return;
+			}
+			event.preventDefault();
+			this._typeBuffer = "";
+			if (target) this.focusNode(target);
+		}
+		handleTypeAhead(char, index) {
+			const now = Date.now();
+			this._typeBuffer = now - this._typeTime < 700 ? this._typeBuffer + char.toLowerCase() : char.toLowerCase();
+			this._typeTime = now;
+			const term = [...this._typeBuffer].every((letter) => letter === this._typeBuffer[0]) ? char.toLowerCase() : this._typeBuffer;
+			const nodes = this._nodeRegistry;
+			const start = term.length > 1 ? index : index + 1;
+			for (let offset = 0; offset < nodes.length; offset++) {
+				const node = nodes[(start + offset) % nodes.length];
+				if (node.label.toLowerCase().startsWith(term)) {
+					this.focusNode(node);
+					break;
+				}
+			}
+		}
+		expandAllChildren() {
+			for (const node of this._container.children) node.setExpanded(true);
+		}
+	};
+	var AuTreeNode = class AuTreeNode extends HTMLElement {
+		constructor() {
+			super();
+			this.attachShadow({ mode: "open" });
+			this._data = {};
+			this._expanded = false;
+			this._checked = false;
+			this._indeterminate = false;
+			this._toggleLabel = null;
+			this._fallbackNodeLabel = "Node";
+			this._toggleLabelTemplate = null;
+			this.shadowRoot.innerHTML = `
       <style>
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
         :host {display:block;min-width:0;outline:none;}
@@ -5917,247 +6124,262 @@
         <button type="button" class="toggle-btn" tabindex="-1"><svg class="toggle-icon" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
         <span class="label"><span class="checkmark" aria-hidden="true"></span><span class="text"></span></span>
       </div><div role="group" hidden></div>`;
-      this._row = this.shadowRoot.querySelector(".node-content");
-      this._group = this.shadowRoot.querySelector("[role=group]");
-      this._checkmark = this.shadowRoot.querySelector(".checkmark");
-      this._button = this.shadowRoot.querySelector("button");
-      this._text = this.shadowRoot.querySelector(".text");
-      this._button.addEventListener("click", () => {
-        this.setExpanded(!this.expanded);
-        this.focus();
-      });
-      this._group.addEventListener("beforematch", (event) => {
-        if (event.target !== this._group) return;
-        this._revealing = true;
-        try {
-          this.setExpanded(true);
-        } finally {
-          this._revealing = false;
-        }
-        setTimeout(() => this.syncPresentation());
-      });
-      this._row.addEventListener("click", (event) => {
-        if (event.target.closest("button")) return;
-        this.focus();
-        if (this.hasCheckbox) this.toggleCheck();
-        else if (this.hasChildren) this.setExpanded(!this.expanded);
-      });
-      this.addEventListener("click", (event) => {
-        if (event.composedPath()[0] !== this) return;
-        this.focus();
-        if (this.hasCheckbox) this.toggleCheck();
-        else if (this.hasChildren) this.setExpanded(!this.expanded);
-      });
-      this.addEventListener("keydown", (event) => {
-        if (event.composedPath()[0] !== this || event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
-        if (event.key === " " || event.key === "Enter") {
-          event.preventDefault();
-          event.stopPropagation();
-          if (event.key === " " && this.hasCheckbox) this.toggleCheck();
-          else if (this.hasChildren) this.setExpanded(!this.expanded);
-        }
-      });
-    }
-    static supportsUntilFound = typeof HTMLElement !== "undefined" && "onbeforematch" in HTMLElement.prototype;
-    static get observedAttributes() {
-      return ["expanded", "checked", "indeterminate", "show-checkbox"];
-    }
-    connectedCallback() {
-      this.syncPresentation();
-    }
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (oldValue === newValue || this._syncing) return;
-      if (name === "expanded") this.setExpanded(newValue !== null);
-      else if (name === "checked") this.setChecked(newValue !== null, this.indeterminate);
-      else if (name === "indeterminate") this.setChecked(this.checked, newValue !== null);
-      else this.syncPresentation();
-    }
-    get data() {
-      return this._data;
-    }
-    set data(value) {
-      if (this._tree && !this._tree._rendering) {
-        const { activeNode, activeElement } = this._tree.findActiveNode();
-        this.updateData(value, /* @__PURE__ */ new Set([value]));
-        this._tree.updateNodeRegistry(activeNode);
-        if (activeNode && activeElement?.isConnected) activeElement.focus({ preventScroll: true });
-      } else this.updateData(value, /* @__PURE__ */ new Set([value]));
-    }
-    get childNodesList() {
-      return [...this._group.children];
-    }
-    get hasChildren() {
-      return this._group.childElementCount > 0;
-    }
-    get hasCheckbox() {
-      return this._tree ? this._tree.hasAttribute("show-checkbox") : this.hasAttribute("show-checkbox");
-    }
-    get disabled() {
-      return !!this._data.disabled || !!this.parentTreeNode?.disabled;
-    }
-    get label() {
-      return this.getLabelText();
-    }
-    get expanded() {
-      return this._expanded;
-    }
-    set expanded(value) {
-      this.setExpanded(value);
-    }
-    get checked() {
-      return this._checked;
-    }
-    set checked(value) {
-      this.setChecked(value, this.indeterminate);
-    }
-    get indeterminate() {
-      return this._indeterminate;
-    }
-    set indeterminate(value) {
-      this.setChecked(this.checked, value);
-    }
-    get toggleLabel() {
-      return this._tree?.toggleLabel ?? this._toggleLabel;
-    }
-    set toggleLabel(value) {
-      this._toggleLabel = value;
-      this.syncPresentation();
-      for (const child of this.childNodesList) child.toggleLabel = value;
-    }
-    get fallbackNodeLabel() {
-      return this._tree?.fallbackNodeLabel || this._fallbackNodeLabel;
-    }
-    set fallbackNodeLabel(value) {
-      this._fallbackNodeLabel = value || "Node";
-      this.syncPresentation();
-      for (const child of this.childNodesList) child.fallbackNodeLabel = value;
-    }
-    get toggleLabelTemplate() {
-      return this._tree?.toggleLabelTemplate ?? this._toggleLabelTemplate;
-    }
-    set toggleLabelTemplate(value) {
-      this._toggleLabelTemplate = value;
-      this.syncPresentation();
-      for (const child of this.childNodesList) child.toggleLabelTemplate = value;
-    }
-    getLabelText() {
-      return this._data.label == null || this._data.label === "" ? this.fallbackNodeLabel : String(this._data.label);
-    }
-    clearOwner() {
-      this._tree = null;
-      for (const child of this.childNodesList) child.clearOwner();
-    }
-    updateData(value, ancestors) {
-      this._data = value && typeof value === "object" && !Array.isArray(value) ? value : {};
-      if ("checked" in this._data) this._checked = !!this._data.checked;
-      if ("expanded" in this._data) this._expanded = !!this._data.expanded;
-      AuTree.reconcile(this._group, this._data.children, this._tree, this, ancestors);
-      if (!this.hasChildren) {
-        this._expanded = false;
-        this._indeterminate = false;
-      } else this.updateStateFromChildren();
-      this.syncPresentation();
-    }
-    syncPresentation() {
-      const text = this.getLabelText();
-      this.setAttribute("role", "treeitem");
-      this.setAttribute("aria-label", text);
-      this.setAttribute("aria-disabled", String(this.disabled));
-      this.setAttribute("aria-level", String(this._level || 1));
-      this.setAttribute("aria-posinset", String(this._position || 1));
-      this.setAttribute("aria-setsize", String(this._setSize || 1));
-      this._syncing = true;
-      this.toggleAttribute("expanded", this.hasChildren && this.expanded);
-      this.toggleAttribute("checked", this.checked);
-      this.toggleAttribute("indeterminate", this.indeterminate);
-      this._syncing = false;
-      if (this.hasChildren) this.setAttribute("aria-expanded", String(this.expanded));
-      else this.removeAttribute("aria-expanded");
-      if (this.hasCheckbox) this.setAttribute("aria-checked", this.indeterminate ? "mixed" : String(this.checked));
-      else this.removeAttribute("aria-checked");
-      this._text.textContent = text;
-      const custom = this.toggleLabel;
-      const toggleText = typeof custom === "function" ? custom(this._data) : (this.toggleLabelTemplate || "Toggle {label}").replaceAll("{label}", text);
-      this._button.setAttribute("aria-label", String(toggleText));
-      this._button.classList.toggle("hidden", !this.hasChildren);
-      this._button.setAttribute("aria-hidden", String(!this.hasChildren));
-      this._checkmark.hidden = !this.hasCheckbox;
-      if (this.hasChildren && this.expanded) {
-        if (!this._revealing) {
-          this._group.removeAttribute("hidden");
-          this._group.inert = false;
-        }
-      } else if (this.hasChildren && AuTreeNode.supportsUntilFound) {
-        this._group.setAttribute("hidden", "until-found");
-        this._group.inert = false;
-      } else {
-        this._group.hidden = true;
-        this._group.inert = true;
-      }
-      if (this._data.lang) this.setAttribute("lang", String(this._data.lang));
-      else this.removeAttribute("lang");
-    }
-    setExpanded(value) {
-      const next = !!value && this.hasChildren;
-      if (next === this.expanded) {
-        this.syncPresentation();
-        return;
-      }
-      const tree = this._tree;
-      const active = tree?.findActiveNode().activeNode;
-      this._expanded = next;
-      this.syncPresentation();
-      if (tree) {
-        tree.updateNodeRegistry(active || tree._activeNode);
-        if (active && !tree._nodeRegistry.includes(active)) tree.focusNode(tree._activeNode);
-      }
-      this.dispatchEvent(new CustomEvent("au-tree-node-expand", { bubbles: true, composed: true }));
-    }
-    expandAllChildren() {
-      this.setExpanded(true);
-      for (const child of this.childNodesList) child.setExpanded(true);
-    }
-    setChecked(value, indeterminate = false) {
-      this._checked = !!value;
-      this._indeterminate = !!indeterminate;
-      this.syncPresentation();
-    }
-    setChildrenChecked(value) {
-      for (const child of this.childNodesList) {
-        if (child.disabled) continue;
-        child.setChecked(value);
-        child.setChildrenChecked(value);
-      }
-    }
-    updateStateFromChildren() {
-      const children = this.childNodesList.filter((child) => !child.disabled);
-      if (!children.length) return;
-      const all = children.every((child) => child.checked && !child.indeterminate);
-      const none = children.every((child) => !child.checked && !child.indeterminate);
-      this.setChecked(all, !all && !none);
-    }
-    toggleCheck(value = null) {
-      if (!this.hasCheckbox || this.disabled) {
-        this.syncPresentation();
-        return;
-      }
-      const tree = this._tree;
-      const before = tree?.getAllNodes().map((node) => [node.checked, node.indeterminate].join(":")).join(",");
-      const next = value == null ? !this.checked : !!value;
-      this.setChecked(next);
-      this.setChildrenChecked(next);
-      let parent = this.parentTreeNode;
-      while (parent) {
-        parent.updateStateFromChildren();
-        parent = parent.parentTreeNode;
-      }
-      const after = tree?.getAllNodes().map((node) => [node.checked, node.indeterminate].join(":")).join(",");
-      if (tree && before === after) return;
-      this.dispatchEvent(new CustomEvent("au-tree-node-check-change", { bubbles: true, composed: true, detail: { checked: this.checked, node: this } }));
-    }
-  }
-  if (typeof customElements !== "undefined") {
-    if (!customElements.get("au-tree-node")) customElements.define("au-tree-node", AuTreeNode);
-    if (!customElements.get("au-tree")) customElements.define("au-tree", AuTree);
-  }
+			this._row = this.shadowRoot.querySelector(".node-content");
+			this._group = this.shadowRoot.querySelector("[role=group]");
+			this._checkmark = this.shadowRoot.querySelector(".checkmark");
+			this._button = this.shadowRoot.querySelector("button");
+			this._text = this.shadowRoot.querySelector(".text");
+			this._button.addEventListener("click", () => {
+				this.setExpanded(!this.expanded);
+				this.focus();
+			});
+			this._group.addEventListener("beforematch", (event) => {
+				if (event.target !== this._group) return;
+				this._revealing = true;
+				try {
+					this.setExpanded(true);
+				} finally {
+					this._revealing = false;
+				}
+				setTimeout(() => this.syncPresentation());
+			});
+			this._row.addEventListener("click", (event) => {
+				if (event.target.closest("button")) return;
+				this.focus();
+				if (this.hasCheckbox) this.toggleCheck();
+				else if (this.hasChildren) this.setExpanded(!this.expanded);
+			});
+			this.addEventListener("click", (event) => {
+				if (event.composedPath()[0] !== this) return;
+				this.focus();
+				if (this.hasCheckbox) this.toggleCheck();
+				else if (this.hasChildren) this.setExpanded(!this.expanded);
+			});
+			this.addEventListener("keydown", (event) => {
+				if (event.composedPath()[0] !== this || event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
+				if (event.key === " " || event.key === "Enter") {
+					event.preventDefault();
+					event.stopPropagation();
+					if (event.key === " " && this.hasCheckbox) this.toggleCheck();
+					else if (this.hasChildren) this.setExpanded(!this.expanded);
+				}
+			});
+		}
+		static supportsUntilFound = typeof HTMLElement !== "undefined" && "onbeforematch" in HTMLElement.prototype;
+		static get observedAttributes() {
+			return [
+				"expanded",
+				"checked",
+				"indeterminate",
+				"show-checkbox"
+			];
+		}
+		connectedCallback() {
+			this.syncPresentation();
+		}
+		attributeChangedCallback(name, oldValue, newValue) {
+			if (oldValue === newValue || this._syncing) return;
+			if (name === "expanded") this.setExpanded(newValue !== null);
+			else if (name === "checked") this.setChecked(newValue !== null, this.indeterminate);
+			else if (name === "indeterminate") this.setChecked(this.checked, newValue !== null);
+			else this.syncPresentation();
+		}
+		get data() {
+			return this._data;
+		}
+		set data(value) {
+			if (this._tree && !this._tree._rendering) {
+				const { activeNode, activeElement } = this._tree.findActiveNode();
+				this.updateData(value, /* @__PURE__ */ new Set([value]));
+				this._tree.updateNodeRegistry(activeNode);
+				if (activeNode && activeElement?.isConnected) activeElement.focus({ preventScroll: true });
+			} else this.updateData(value, /* @__PURE__ */ new Set([value]));
+		}
+		get childNodesList() {
+			return [...this._group.children];
+		}
+		get hasChildren() {
+			return this._group.childElementCount > 0;
+		}
+		get hasCheckbox() {
+			return this._tree ? this._tree.hasAttribute("show-checkbox") : this.hasAttribute("show-checkbox");
+		}
+		get disabled() {
+			return !!this._data.disabled || !!this.parentTreeNode?.disabled;
+		}
+		get label() {
+			return this.getLabelText();
+		}
+		get expanded() {
+			return this._expanded;
+		}
+		set expanded(value) {
+			this.setExpanded(value);
+		}
+		get checked() {
+			return this._checked;
+		}
+		set checked(value) {
+			this.setChecked(value, this.indeterminate);
+		}
+		get indeterminate() {
+			return this._indeterminate;
+		}
+		set indeterminate(value) {
+			this.setChecked(this.checked, value);
+		}
+		get toggleLabel() {
+			return this._tree?.toggleLabel ?? this._toggleLabel;
+		}
+		set toggleLabel(value) {
+			this._toggleLabel = value;
+			this.syncPresentation();
+			for (const child of this.childNodesList) child.toggleLabel = value;
+		}
+		get fallbackNodeLabel() {
+			return this._tree?.fallbackNodeLabel || this._fallbackNodeLabel;
+		}
+		set fallbackNodeLabel(value) {
+			this._fallbackNodeLabel = value || "Node";
+			this.syncPresentation();
+			for (const child of this.childNodesList) child.fallbackNodeLabel = value;
+		}
+		get toggleLabelTemplate() {
+			return this._tree?.toggleLabelTemplate ?? this._toggleLabelTemplate;
+		}
+		set toggleLabelTemplate(value) {
+			this._toggleLabelTemplate = value;
+			this.syncPresentation();
+			for (const child of this.childNodesList) child.toggleLabelTemplate = value;
+		}
+		getLabelText() {
+			return this._data.label == null || this._data.label === "" ? this.fallbackNodeLabel : String(this._data.label);
+		}
+		clearOwner() {
+			this._tree = null;
+			for (const child of this.childNodesList) child.clearOwner();
+		}
+		updateData(value, ancestors) {
+			this._data = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+			if ("checked" in this._data) this._checked = !!this._data.checked;
+			if ("expanded" in this._data) this._expanded = !!this._data.expanded;
+			AuTree.reconcile(this._group, this._data.children, this._tree, this, ancestors);
+			if (!this.hasChildren) {
+				this._expanded = false;
+				this._indeterminate = false;
+			} else this.updateStateFromChildren();
+			this.syncPresentation();
+		}
+		syncPresentation() {
+			const text = this.getLabelText();
+			this.setAttribute("role", "treeitem");
+			this.setAttribute("aria-label", text);
+			this.setAttribute("aria-disabled", String(this.disabled));
+			this.setAttribute("aria-level", String(this._level || 1));
+			this.setAttribute("aria-posinset", String(this._position || 1));
+			this.setAttribute("aria-setsize", String(this._setSize || 1));
+			this._syncing = true;
+			this.toggleAttribute("expanded", this.hasChildren && this.expanded);
+			this.toggleAttribute("checked", this.checked);
+			this.toggleAttribute("indeterminate", this.indeterminate);
+			this._syncing = false;
+			if (this.hasChildren) this.setAttribute("aria-expanded", String(this.expanded));
+			else this.removeAttribute("aria-expanded");
+			if (this.hasCheckbox) this.setAttribute("aria-checked", this.indeterminate ? "mixed" : String(this.checked));
+			else this.removeAttribute("aria-checked");
+			this._text.textContent = text;
+			const custom = this.toggleLabel;
+			const toggleText = typeof custom === "function" ? custom(this._data) : (this.toggleLabelTemplate || "Toggle {label}").replaceAll("{label}", text);
+			this._button.setAttribute("aria-label", String(toggleText));
+			this._button.classList.toggle("hidden", !this.hasChildren);
+			this._button.setAttribute("aria-hidden", String(!this.hasChildren));
+			this._checkmark.hidden = !this.hasCheckbox;
+			if (this.hasChildren && this.expanded) {
+				if (!this._revealing) {
+					this._group.removeAttribute("hidden");
+					this._group.inert = false;
+				}
+			} else if (this.hasChildren && AuTreeNode.supportsUntilFound) {
+				this._group.setAttribute("hidden", "until-found");
+				this._group.inert = false;
+			} else {
+				this._group.hidden = true;
+				this._group.inert = true;
+			}
+			if (this._data.lang) this.setAttribute("lang", String(this._data.lang));
+			else this.removeAttribute("lang");
+		}
+		setExpanded(value) {
+			const next = !!value && this.hasChildren;
+			if (next === this.expanded) {
+				this.syncPresentation();
+				return;
+			}
+			const tree = this._tree;
+			const active = tree?.findActiveNode().activeNode;
+			this._expanded = next;
+			this.syncPresentation();
+			if (tree) {
+				tree.updateNodeRegistry(active || tree._activeNode);
+				if (active && !tree._nodeRegistry.includes(active)) tree.focusNode(tree._activeNode);
+			}
+			this.dispatchEvent(new CustomEvent("au-tree-node-expand", {
+				bubbles: true,
+				composed: true
+			}));
+		}
+		expandAllChildren() {
+			this.setExpanded(true);
+			for (const child of this.childNodesList) child.setExpanded(true);
+		}
+		setChecked(value, indeterminate = false) {
+			this._checked = !!value;
+			this._indeterminate = !!indeterminate;
+			this.syncPresentation();
+		}
+		setChildrenChecked(value) {
+			for (const child of this.childNodesList) {
+				if (child.disabled) continue;
+				child.setChecked(value);
+				child.setChildrenChecked(value);
+			}
+		}
+		updateStateFromChildren() {
+			const children = this.childNodesList.filter((child) => !child.disabled);
+			if (!children.length) return;
+			const all = children.every((child) => child.checked && !child.indeterminate);
+			const none = children.every((child) => !child.checked && !child.indeterminate);
+			this.setChecked(all, !all && !none);
+		}
+		toggleCheck(value = null) {
+			if (!this.hasCheckbox || this.disabled) {
+				this.syncPresentation();
+				return;
+			}
+			const tree = this._tree;
+			const before = tree?.getAllNodes().map((node) => [node.checked, node.indeterminate].join(":")).join(",");
+			const next = value == null ? !this.checked : !!value;
+			this.setChecked(next);
+			this.setChildrenChecked(next);
+			let parent = this.parentTreeNode;
+			while (parent) {
+				parent.updateStateFromChildren();
+				parent = parent.parentTreeNode;
+			}
+			const after = tree?.getAllNodes().map((node) => [node.checked, node.indeterminate].join(":")).join(",");
+			if (tree && before === after) return;
+			this.dispatchEvent(new CustomEvent("au-tree-node-check-change", {
+				bubbles: true,
+				composed: true,
+				detail: {
+					checked: this.checked,
+					node: this
+				}
+			}));
+		}
+	};
+	if (typeof customElements !== "undefined") {
+		if (!customElements.get("au-tree-node")) customElements.define("au-tree-node", AuTreeNode);
+		if (!customElements.get("au-tree")) customElements.define("au-tree", AuTree);
+	}
 })();

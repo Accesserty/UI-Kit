@@ -1,6 +1,8 @@
 // Checks repository-owned demo assets and the component/test inventory.
 import assert from 'node:assert/strict';
 import './css-docs-contract.mjs';
+import './toolchain-contract.mjs';
+import './build-output-contract.mjs';
 import {readdir, readFile} from 'node:fs/promises';
 import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';

@@ -1,4 +1,4 @@
-/*! Accesserty UI Kit v3.0.0 */
+/*! Accesserty UI Kit v3.0.1 */
 import { injectDeclarativeShadow } from './accesserty-ui-kit-ssr.js';
 
 // Nitro plugin added by the Nuxt module: inserts declarative shadow roots into

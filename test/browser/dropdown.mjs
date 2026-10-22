@@ -101,7 +101,9 @@ try {
     const output=await mkdtemp(join(tmpdir(),'dropdown-check-'));
     await page.evaluate(()=>dd.open(1));await page.waitForFunction(secondFocused);
     await page.screenshot({path:join(output,'dropdown.png')});
-    await page.route('https://**',route=>route.abort());
+    // Chrome does not reliably intercept remote subresources of file:// pages.
+    // The local demo must work without waiting for its optional Google font.
+    await page.context().setOffline(true);
     await page.goto(pathToFileURL(join(root,'demo/dropdown.html')).href);
     assert.equal(await page.evaluate(()=>{
       const ids=[...document.querySelectorAll('[id]')].map(el=>el.id);

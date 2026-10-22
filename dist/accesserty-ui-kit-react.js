@@ -1,5 +1,5 @@
 'use client';
-/*! Accesserty UI Kit v3.0.0 */
+/*! Accesserty UI Kit v3.0.1 */
 import { useRef, useCallback, useEffect, createElement } from 'react';
 
 // React integration: components with React's usual form props for the seven

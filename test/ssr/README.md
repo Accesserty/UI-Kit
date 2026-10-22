@@ -1,10 +1,10 @@
 # Component SSR integration fixtures
 
-Run from this directory with a Node version supported by both frameworks
-and an installed Google Chrome:
+Use the repository's Node version (`nvm use` at the repository root), npm 11
+and an installed Google Chrome. Run from this directory:
 
 ```sh
-npm install
+npm ci
 npm test
 ```
 

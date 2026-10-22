@@ -779,7 +779,8 @@ they do not establish full framework navigation or screen-reader behavior.
 
 ## Accordion state and accessible structure
 
-Plain HTML can load the source or either bundle using an ordinary deferred script:
+Plain HTML can load either bundle or `components/accordion.js` (readable or
+minified) using an ordinary deferred script; the source file is an ES module:
 
 ```html
 <script src="./accesserty-ui-kit.js" defer></script>
@@ -847,9 +848,14 @@ transitions. Verify custom themes and application-level accessibility separately
 
 ## Development
 
-Requires **Node.js 22 or higher** (the version CI runs).
+Development and CI use the Node.js version in [`.nvmrc`](.nvmrc) and npm 11.
+These are build/test requirements; using the browser bundles does not require Node.js.
 
 ```bash
+# Select the repository's Node version (with nvm)
+nvm install
+nvm use
+
 # Install dependencies
 npm ci
 

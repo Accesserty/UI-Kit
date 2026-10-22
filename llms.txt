@@ -1,6 +1,6 @@
 # Accesserty UI Kit
 
-> A framework-agnostic library of 15 accessibility-first Web Components with zero runtime dependencies and WCAG 2.2 AA as a design target. Automated and targeted browser checks are not complete conformance or screen-reader verification. Supports plain HTML and configured Vue, React, Nuxt and Next integrations via a single JS file; SSR registration remains client-only.
+> A framework-agnostic library of 15 accessibility-first Web Components with zero runtime dependencies and WCAG 2.2 AA as a design target. Automated and targeted browser checks are not complete conformance or screen-reader verification. Supports plain HTML (one bundle or one file per component) and configured Vue, React, Nuxt and Next integrations. Element definition is browser-only; servers render hosts, attributes and initial values, and accordion, tabs and breadcrumbs can also receive server-rendered declarative Shadow DOM.
 
 ## Key Links
 
@@ -21,6 +21,7 @@
 - `demo/` — Human-readable documentation with live examples and CSS variable tables
 - `test/` — Browser-based unit tests using @web/test-runner and @open-wc/testing
 - `dist/` — Build output: `accesserty-ui-kit.js` and `.min.js` (all components), `components/*.js` and `components/*.min.js` (one self-contained classic script per component, readable and minified), `.d.ts` declarations (`accesserty-ui-kit.d.ts` types every element and event detail), plus ES modules `accesserty-ui-kit-vue.js`, `-nuxt.js` (with its plugin files), `-react.js` and `-ssr.js`
+- `docs/ARCHITECTURE.md` — Technical architecture deep-dive
 
 ## Components
 
@@ -30,7 +31,7 @@ Attributes (au-accordion): exclusive, data-text-exclusive-hint
 Attributes (accordion-item): open, heading-level (1–6; default 3), no-region
 Properties: open (boolean getter/setter), exclusive (on au-accordion)
 Events: au-toggle (detail: { open })
-Events describe actual connected state changes, including programmatic updates and sibling closures; same-value writes do not repeat events. Exclusive mode affects direct item children only and normalizes initial/inserted state to the first open item. Nested groups are independent. Native heading buttons support Enter/Space and normal Tab navigation; collapsing focused content returns focus to its header. Heading/sub slots must be non-interactive. Panel visibility is immediate and inert when closed. Plain deferred scripts and pre-definition Boolean properties work; framework registration remains client-only.
+Events describe actual connected state changes, including programmatic updates and sibling closures; same-value writes do not repeat events. Exclusive mode affects direct item children only and normalizes initial/inserted state to the first open item. Nested groups are independent. Native heading buttons support Enter/Space and normal Tab navigation; collapsing focused content returns focus to its header. Heading/sub slots must be non-interactive. Panel visibility is immediate. Collapsed panels use hidden="until-found" where supported (find-in-page and fragment links open the item and emit au-toggle); elsewhere they are hidden and inert. Plain deferred scripts (bundle or components/accordion.js) and pre-definition Boolean properties work. Element definition is browser-only; the SSR injector can server-render the declarative shadow root (open/collapsed state included).
 Form-associated: No
 CSS variables: 15+ (--au-accordion-heading-*, --au-accordion-content-*)
 
@@ -38,7 +39,7 @@ CSS variables: 15+ (--au-accordion-heading-*, --au-accordion-content-*)
 Tag: `<au-breadcrumbs>`
 Attributes: items (JSON array), separator, aria-label, aria-labelledby, label, data-link-title-prefix, data-link-title-template (`{text}`, `{index}`)
 Properties: items (getter/setter), separator (getter/setter)
-Pre-registration items/separator assignments are replayed through the accessors. Items accepts an array, JSON string or single item object; rendering requires client registration. SSR integrations serialize the items attribute and register client-side; internal links are not server-rendered. Links use native navigation, not framework router events. Translation retains link focus; a removed/revoked focused link returns focus to the navigation landmark.
+Pre-registration items/separator assignments are replayed through the accessors. Items accepts an array, JSON string or single item object. SSR integrations serialize the items attribute; without the declarative Shadow DOM injector the internal links render only after client registration. With the injector the server renders the nav, list and links (relative and HTTP(S) URLs only), so links work without JavaScript; the component adopts them and re-validates URLs in the browser. Links use native navigation, not framework router events. Translation retains link focus; a removed/revoked focused link returns focus to the navigation landmark.
 Events: none
 Form-associated: No
 CSS variables: 8 (--au-breadcrumbs-*)
@@ -143,10 +144,12 @@ CSS variables: 17 (--au-switch-gap, --au-switch-padding-*, --au-switch-container
 
 ### au-tabs
 Tag: `<au-tabs>`
-Children: elements with role="tabpanel" (auto-detected via slot)
-Localization attributes: data-text-tab (`{index}` fallback tab label), data-text-badge-label-prefix
+Children: elements with `slot="panel"` and class `au-tab-panel` (per panel: label, label-lang, data-badge); the component sets role="tabpanel"
+Attributes: selected-index, aria-label, aria-labelledby
+Localization attributes: data-text-tab (`{index}` fallback tab label), data-text-tab-lang, data-text-badge-label-prefix
 Properties: selectedIndex (getter/setter)
 Events: au-tab-change (detail: { index, label })
+SSR: the declarative Shadow DOM injector renders the tab list with the `selected-index` tab selected and only its panel shown; the component adopts that root in the browser
 Form-associated: No
 CSS variables: 26 (--au-tabs-*, --au-tabpanels-*, --au-tab-panel-*, --au-tab-badge-*)
 
@@ -174,17 +177,18 @@ CSS variables: 30+ (--au-tree-*, --au-tree-node-*, --au-tree-node-checkbox-*, --
 
 - Runtime: Vanilla Custom Elements v1, Shadow DOM (open), ElementInternals API
 - CSS: Custom Properties, Cascade Layers, CSS Nesting, oklch color space
-- Build: Vite 6 + rollup-plugin-terser
-- Testing: @web/test-runner 0.18, @open-wc/testing 4, Chromium
-- Node.js: 20+ required for development
+- Build: Vite 8/Rolldown (full bundles) + Rollup scripts for the integrations and `dist/components/`, minified with @rollup/plugin-terser
+- Testing: @web/test-runner 1, @open-wc/testing 5, browser and isolated framework fixtures
+- Development: Node.js from `.nvmrc`, npm 11; browser bundles do not require Node.js
 
 ## Design Decisions
 
-- No framework dependency — components must work from a `<script>` tag alone
+- No framework dependency — components must work from a `<script>` tag alone (the full bundle or a `dist/components/` file; source files are ES modules that import `src/core/` and `src/views/`)
 - Shadow DOM mode is always `open` (accessible to testing and DevTools)
 - CSS variables control all visual properties; no inline styles
 - Accordion panel visibility is immediate; reduced motion disables header/icon transitions
 - Form controls extend `AuFormElement`: `formAssociated` + ElementInternals for native form participation (no hidden inputs)
 - Events always use `{ bubbles: true, composed: true }` to cross Shadow DOM boundaries
 - Shadow-root ids come from `uid()` in `src/core/id.js` (`crypto.getRandomValues()`)
-- `customElements.define()` is guarded with `typeof customElements !== 'undefined'` for SSR safety
+- `customElements.define()` is guarded with `typeof customElements !== 'undefined'` and `customElements.get()`, so loading a file twice or several overlapping files defines each element once; the class declarations still need a DOM, so component files are not importable in Node
+- Declarative Shadow DOM for au-accordion, au-tabs and au-breadcrumbs only: `src/views/` renders the same markup on the server (`src/ssr/inject.js`) and in the browser, and `src/core/declarative.js` adopts a server-rendered root. On by default in the Nuxt module (`declarativeShadowDom: false` turns it off); Next.js only via `withDeclarativeShadow` on a custom server
