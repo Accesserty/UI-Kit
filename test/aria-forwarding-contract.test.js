@@ -51,3 +51,36 @@ describe('ARIA forwarding without element references', () => {
     }));
   }
 });
+
+// Safari+VoiceOver calls an untouched required control "invalid data" unless
+// it is explicitly marked otherwise, so every form control defaults its inner
+// controls to aria-invalid="false" and follows the host once the host sets it.
+describe('aria-invalid forwarding', () => {
+  const controls = {
+    'au-input': el => [el.input],
+    'au-textarea': el => [el.textarea],
+    'au-checkbox': el => [el.inputElement],
+    'au-switch': el => [el.shadowRoot.querySelector('input')],
+    'au-radio-group': el => [el._container, ...el.shadowRoot.querySelectorAll('input[type=radio]')],
+  };
+  for (const [tag, targets] of Object.entries(controls)) {
+    it(`${tag} defaults to not invalid and follows the host`, async () => {
+      const el = document.createElement(tag);
+      el.setAttribute('required', '');
+      if (tag === 'au-radio-group') el.innerHTML = '<au-radio value="a">A</au-radio><au-radio value="b">B</au-radio>';
+      const wrapper = await fixture(html`<form></form>`);
+      wrapper.append(el);
+      await nextFrame();
+      const states = () => targets(el).map(t => t.getAttribute('aria-invalid'));
+      expect(targets(el).length).to.be.greaterThan(0);
+      expect(states().every(v => v === 'false')).to.be.true;
+      el.setAttribute('aria-invalid', 'true');
+      await nextFrame();
+      expect(states().every(v => v === 'true')).to.be.true;
+      el.removeAttribute('aria-invalid');
+      await nextFrame();
+      expect(states().every(v => v === 'false')).to.be.true;
+      expect(el.checkValidity()).to.be.false;
+    });
+  }
+});

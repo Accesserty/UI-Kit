@@ -1,6 +1,6 @@
 import { uid } from '../core/id.js';
 import { upgradeProperties } from '../core/upgrade.js';
-import { forwardAria } from '../core/aria.js';
+import { forwardAria, forwardInvalid } from '../core/aria.js';
 import { AuFormElement } from '../core/form-element.js';
 class AuCheckbox extends AuFormElement {
 
@@ -200,8 +200,7 @@ class AuCheckbox extends AuFormElement {
           this.syncAccessibleLabel();
           break;
         case 'aria-invalid':
-          if (newValue === null) input.removeAttribute(name);
-          else input.setAttribute(name, newValue);
+          forwardInvalid(this, input);
           break;
       }
       this.updateFormValue();
@@ -248,6 +247,7 @@ class AuCheckbox extends AuFormElement {
       this._initialCheckedSet = true;
     }
     this.inputElement.disabled = this.disabled || Boolean(this._formDisabled);
+    forwardInvalid(this, this.inputElement);
     this.updateFormValue();
     this._observeLabels();
   }

@@ -1,4 +1,4 @@
-/*! Accesserty UI Kit v3.0.1 */
+/*! Accesserty UI Kit v3.0.2 */
 (function () {
   'use strict';
 
@@ -37,6 +37,17 @@
   // - explicit: the name to use as aria-label, if any
   // - hasOwnLabel: the component shows its own label, so a <label for> is not needed
   // - mirrorPrefix: id prefix for the description mirror
+  // Safari+VoiceOver announces an untouched required control as "invalid data"
+  // from the moment the page loads, because WebKit maps native constraint
+  // validity to the invalid state. Unless the host sets aria-invalid, mark the
+  // inner controls as not invalid; the application sets aria-invalid="true"
+  // when it shows an error. A failed native submit still announces the
+  // browser's validation message.
+  function forwardInvalid(host, ...targets) {
+    const value = host.getAttribute('aria-invalid') ?? 'false';
+    for (const target of targets) target?.setAttribute('aria-invalid', value);
+  }
+
   function forwardAria(host, target, { explicit, hasOwnLabel, mirrorPrefix }) {
     let labels = idRefs(host, 'aria-labelledby');
     if (!labels.length && !explicit && !hasOwnLabel && host.isConnected) labels = [...(host.internals.labels || [])];
@@ -414,8 +425,8 @@
       else container.removeAttribute('aria-required');
       if (this.disabled || this._formDisabled) container.setAttribute('aria-disabled', 'true');
       else container.removeAttribute('aria-disabled');
-      if (this.hasAttribute('aria-invalid')) container.setAttribute('aria-invalid', this.getAttribute('aria-invalid'));
-      else container.removeAttribute('aria-invalid');
+      // The radios are required too, so they get the same state as the group.
+      forwardInvalid(this, container, ...[...this._entries.values()].map(entry => entry.input));
     }
 
     get value() { return this._entries.get(this._selectedSource)?.input.value ?? null; }

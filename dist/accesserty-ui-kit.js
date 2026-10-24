@@ -1,4 +1,4 @@
-/*! Accesserty UI Kit v3.0.1 */
+/*! Accesserty UI Kit v3.0.2 */
 (function() {
 	// src/core/declarative.js
 	/**
@@ -1265,6 +1265,10 @@
 		const root = host.getRootNode();
 		return (host.getAttribute(attribute) || "").trim().split(/\s+/).filter(Boolean).map((id) => root.getElementById?.(id)).filter((element) => element && element !== host);
 	}
+	function forwardInvalid(host, ...targets) {
+		const value = host.getAttribute("aria-invalid") ?? "false";
+		for (const target of targets) target?.setAttribute("aria-invalid", value);
+	}
 	function forwardAria(host, target, { explicit, hasOwnLabel, mirrorPrefix }) {
 		let labels = idRefs(host, "aria-labelledby");
 		if (!labels.length && !explicit && !hasOwnLabel && host.isConnected) labels = [...host.internals.labels || []];
@@ -1550,8 +1554,7 @@
 					case "aria-describedby":
 						this.syncAccessibleLabel();
 						break;
-					case "aria-invalid": if (newValue === null) input.removeAttribute(name);
-					else input.setAttribute(name, newValue);
+					case "aria-invalid": forwardInvalid(this, input);
 				}
 				this.updateFormValue();
 			}
@@ -1623,6 +1626,7 @@
 				this._initialCheckedSet = true;
 			}
 			this.inputElement.disabled = this.disabled || Boolean(this._formDisabled);
+			forwardInvalid(this, this.inputElement);
 			this.updateFormValue();
 			this._observeLabels();
 		}
@@ -3112,6 +3116,7 @@
 				"aria-labelledby",
 				"aria-describedby"
 			].includes(name)) this._syncAccessibleReferences();
+			else if (name === "aria-invalid") forwardInvalid(this, this.input);
 			else if (this.input) {
 				if (newValue === null) {
 					this.input.removeAttribute(name);
@@ -3144,6 +3149,7 @@
 				this._initialValueSet = true;
 			}
 			this.internals.setFormValue(this.input.value);
+			forwardInvalid(this, this.input);
 			this._syncValidity();
 			this._updateClearButton();
 			this._updateColorCode();
@@ -4218,8 +4224,7 @@
 			else container.removeAttribute("aria-required");
 			if (this.disabled || this._formDisabled) container.setAttribute("aria-disabled", "true");
 			else container.removeAttribute("aria-disabled");
-			if (this.hasAttribute("aria-invalid")) container.setAttribute("aria-invalid", this.getAttribute("aria-invalid"));
-			else container.removeAttribute("aria-invalid");
+			forwardInvalid(this, container, ...[...this._entries.values()].map((entry) => entry.input));
 		}
 		get value() {
 			return this._entries.get(this._selectedSource)?.input.value ?? null;
@@ -4946,6 +4951,9 @@
 				case "aria-describedby":
 					this.syncAccessibleLabel();
 					break;
+				case "aria-invalid":
+					forwardInvalid(this, input);
+					break;
 				default: if (newValue === null) input.removeAttribute(name);
 				else input.setAttribute(name, newValue);
 			}
@@ -5021,6 +5029,7 @@
 			const offText = this.shadowRoot.querySelector(".off-text");
 			const onText = this.shadowRoot.querySelector(".on-text");
 			input.setAttribute("aria-checked", input.checked.toString());
+			forwardInvalid(this, input);
 			if (this.hasAttribute("off")) offText.textContent = this.getAttribute("off");
 			else offText.textContent = "";
 			if (this.hasAttribute("on")) onText.textContent = this.getAttribute("on");
@@ -5615,6 +5624,7 @@
 				this.textarea.id = this._id;
 				this.labelEl.htmlFor = this._id;
 			} else if (name === "value") this.value = newValue ?? "";
+			else if (name === "aria-invalid") forwardInvalid(this, this.textarea);
 			else if (![
 				"aria-label",
 				"aria-labelledby",
@@ -5639,6 +5649,7 @@
 				this._initialValueSet = true;
 			}
 			this.internals.setFormValue(this.textarea.value);
+			forwardInvalid(this, this.textarea);
 			this._syncControlState();
 			this._observeExternalReferences();
 		}

@@ -1,4 +1,4 @@
-/*! Accesserty UI Kit v3.0.1 */
+/*! Accesserty UI Kit v3.0.2 */
 import { defineNuxtPlugin } from '#app';
 import './accesserty-ui-kit.js';
 

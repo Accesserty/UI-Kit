@@ -1,6 +1,6 @@
 import { uid } from '../core/id.js';
 import { upgradeProperties } from '../core/upgrade.js';
-import { forwardAria } from '../core/aria.js';
+import { forwardAria, forwardInvalid } from '../core/aria.js';
 import { AuFormElement } from '../core/form-element.js';
 class AuTextarea extends AuFormElement {
 
@@ -148,6 +148,8 @@ class AuTextarea extends AuFormElement {
       this.labelEl.htmlFor = this._id;
     } else if (name === 'value') {
       this.value = newValue ?? '';
+    } else if (name === 'aria-invalid') {
+      forwardInvalid(this, this.textarea);
     } else if (!['aria-label', 'aria-labelledby', 'aria-describedby'].includes(name)) {
       if (newValue === null) {
         this.textarea.removeAttribute(name);
@@ -166,6 +168,7 @@ class AuTextarea extends AuFormElement {
       this._initialValueSet = true;
     }
     this.internals.setFormValue(this.textarea.value);
+    forwardInvalid(this, this.textarea);
     this._syncControlState();
     this._observeExternalReferences();
   }

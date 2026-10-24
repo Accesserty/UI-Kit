@@ -29,6 +29,7 @@
 Tag: `<au-accordion>`, `<au-accordion-item>`
 Attributes (au-accordion): exclusive, data-text-exclusive-hint
 Attributes (accordion-item): open, heading-level (1–6; default 3), no-region
+Slots (accordion-item): heading (the question/title, inside the header button), sub (secondary text in the button), icon (decorative, aria-hidden), content (the panel). There is no default slot: a child without one of these slot names is not shown, and nothing warns about it. Example: `<au-accordion-item><span slot="heading">Question</span><div slot="content"><p>Answer</p></div></au-accordion-item>`
 Properties: open (boolean getter/setter), exclusive (on au-accordion)
 Events: au-toggle (detail: { open })
 Events describe actual connected state changes, including programmatic updates and sibling closures; same-value writes do not repeat events. Exclusive mode affects direct item children only and normalizes initial/inserted state to the first open item. Nested groups are independent. Native heading buttons support Enter/Space and normal Tab navigation; collapsing focused content returns focus to its header. Heading/sub slots must be non-interactive. Panel visibility is immediate. Collapsed panels use hidden="until-found" where supported (find-in-page and fragment links open the item and emit au-toggle); elsewhere they are hidden and inert. Plain deferred scripts (bundle or components/accordion.js) and pre-definition Boolean properties work. Element definition is browser-only; the SSR injector can server-render the declarative shadow root (open/collapsed state included).
@@ -69,7 +70,7 @@ CSS variables: 16 (--au-carousel-gap, --au-carousel-dot-*, --au-carousel-button-
 
 ### au-checkbox
 Tag: `<au-checkbox>`
-Attributes: name, value, checked, disabled, required, label, aria-label, aria-labelledby
+Attributes: name, value, checked, disabled, required, label, aria-label, aria-labelledby, aria-describedby, aria-invalid
 Properties: checked (getter/setter), disabled (getter/setter)
 Events: change (detail: boolean), focus, blur
 Form-associated: Yes (setFormValue: value when checked, null when unchecked)
@@ -99,7 +100,7 @@ CSS variables: 20+ (--au-file-upload-label-*, --au-file-upload-area-*, --au-file
 
 ### au-input
 Tag: `<au-input>`
-Attributes: type, name, value, placeholder, required, disabled, readonly, label, aria-label, aria-labelledby, min, max, step, pattern, autocomplete, inputmode, maxlength, minlength, list, data-size (small|large), data-layout (vertical), data-clear, data-clear-label, id
+Attributes: type, name, value, placeholder, required, disabled, readonly, label, aria-label, aria-labelledby, min, max, step, pattern, autocomplete, inputmode, maxlength, minlength, list, data-size (small|large), data-layout (vertical), data-clear, data-clear-label, id, aria-describedby, aria-invalid
 Properties: value (getter/setter), disabled, required, readonly (all getter/setter), validity, validationMessage, willValidate, valueAsNumber and valueAsDate (as on a native input), setCustomValidity() and form (all seven form components)
 Methods: focus(), clear(), suggest(val), checkValidity(), reportValidity()
 Slots: prefix, affix
@@ -118,9 +119,10 @@ CSS variables: inherits --au-btn-* from button styles
 
 ### au-radio-group
 Tags: `<au-radio-group>`, `<au-radio>` (slotted children)
-Attributes (au-radio-group): disabled, direction (vertical), aria-label, aria-labelledby, label
+Attributes (au-radio-group): disabled, required, direction (vertical), aria-label, aria-labelledby, aria-describedby, aria-invalid, label
+`required` sets aria-required on the group and makes the group invalid until an option is selected; aria-describedby and aria-invalid are forwarded to the group, so an error message can be attached as described in "Form validation and error messages".
 Attributes (au-radio): value, checked, disabled, label
-Properties: value (getter — currently selected), disabled (getter/setter)
+Properties: value (getter — currently selected), disabled (getter/setter), required (getter/setter)
 Events: change (detail: { value })
 Form-associated: Yes (au-radio-group)
 CSS variables: 12 (--au-radio-content-gap, --au-radio-input-*, --au-radio-label-*)
@@ -155,7 +157,7 @@ CSS variables: 26 (--au-tabs-*, --au-tabpanels-*, --au-tab-panel-*, --au-tab-bad
 
 ### au-textarea
 Tag: `<au-textarea>`
-Attributes: value, placeholder, name, rows, cols, disabled, readonly, required, maxlength, minlength, label, aria-label, aria-labelledby, id
+Attributes: value, placeholder, name, rows, cols, disabled, readonly, required, maxlength, minlength, label, aria-label, aria-labelledby, aria-describedby, aria-invalid, id
 Properties: value (getter/setter), disabled, readonly (getter/setter), validity, validationMessage, willValidate
 Methods: checkValidity(), reportValidity()
 Events: input, change (bubbles, composed)
@@ -172,6 +174,31 @@ State: leaf checked and branch expanded fields are reapplied on data assignment;
 Events: one change.detail.checkedNodes array for an actual check operation; data/locale updates are silent and do not mutate input objects. Assign data as a DOM property, not JSON markup.
 Form-associated: No
 CSS variables: 30+ (--au-tree-*, --au-tree-node-*, --au-tree-node-checkbox-*, --au-tree-node-toggle-*)
+
+## Form validation and error messages
+
+au-input, au-textarea, au-checkbox and au-radio-group do not draw error text themselves. To show an error next to a field, as `demo/form.html` does:
+
+1. Put the error text in an element in the page, next to the field, and reference it from the component: `<au-input label="Email" required aria-describedby="email-error"></au-input><p id="email-error"></p>`.
+2. When validation fails, write the message into that element and set `aria-invalid="true"` on the component; clear both when the value is valid. The component forwards aria-describedby and aria-invalid to its inner control, so screen readers announce the field as invalid together with the message. au-input and au-textarea pick up later changes to the referenced element's text automatically.
+3. On submit, move focus to the first invalid field (`element.focus()`) or to an error summary.
+
+`setCustomValidity()` with `reportValidity()` only shows the browser's own validation bubble for one field at a time; it does not set aria-invalid or show inline text. Use it for native constraint behavior (blocking submission), not as the visible error message. au-file-upload is the exception: it validates type, size and count itself and shows inline errors.
+
+## Accessibility presentation of form controls
+
+What each form control exposes to assistive technology (checked in Chrome's accessibility tree and with Safari+VoiceOver). The visible control lives in the component's shadow root; the host element is not the control.
+
+| Component | Role | Accessible name from | Forwarded from the host | `focus()` goes to |
+|---|---|---|---|---|
+| au-input | textbox (the inner `<input>`; type-specific, e.g. email field) | `label`, else `aria-label` / `aria-labelledby` on the host, else a `<label for>` pointing at the host | `required` (exposed as required), `aria-describedby` (description), `aria-invalid` | the inner input |
+| au-textarea | textbox, multi-line (the inner `<textarea>`) | same as au-input | same as au-input | the inner textarea |
+| au-checkbox | checkbox | the element's text, or `label` | `aria-describedby`, `aria-invalid`; `required` affects validity only (ARIA has no required state for checkboxes) | the inner checkbox |
+| au-switch | switch | the element's text, or `label` | `aria-describedby`, `aria-invalid` | the inner input |
+| au-radio-group | radiogroup; each au-radio is a radio named by its text or `label` | `label`, `aria-label` or `aria-labelledby` on au-radio-group | `required` (on the group), `aria-describedby` (on the group), `aria-invalid` (on the group and every radio) | the radio in the tab order (the selected one, else the first enabled one) |
+
+- `aria-invalid` (since 3.0.2): when the host has no `aria-invalid`, the inner controls get `aria-invalid="false"`. Without it, Safari+VoiceOver announces every empty required field as "invalid data" as soon as the page loads, because WebKit maps native validity to the invalid state. Set `aria-invalid="true"` on the host when you show an error and remove it when the error is fixed. A failed browser-validated submit still announces the browser's validation message.
+- Known limitation: the host keeps the `aria-describedby` and `aria-invalid` attributes you set, and a form-associated host reports its validity, so the host is also exposed as a generic element with the same description and invalid state. Safari+VoiceOver reads the description twice for au-textarea and au-checkbox (once on the control, once on the surrounding group).
 
 ## Technical Stack
 

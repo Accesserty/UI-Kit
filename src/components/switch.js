@@ -1,6 +1,6 @@
 import { uid } from '../core/id.js';
 import { upgradeProperties } from '../core/upgrade.js';
-import { forwardAria } from '../core/aria.js';
+import { forwardAria, forwardInvalid } from '../core/aria.js';
 import { AuFormElement } from '../core/form-element.js';
 class AuSwitch extends AuFormElement {
 
@@ -228,6 +228,9 @@ class AuSwitch extends AuFormElement {
       case 'aria-describedby':
         this.syncAccessibleLabel();
         break;
+      case 'aria-invalid':
+        forwardInvalid(this, input);
+        break;
       default:
         if (newValue === null) {
           input.removeAttribute(name);
@@ -283,6 +286,7 @@ class AuSwitch extends AuFormElement {
     const onText = this.shadowRoot.querySelector('.on-text');
 
     input.setAttribute('aria-checked', input.checked.toString());
+    forwardInvalid(this, input);
 
     if (this.hasAttribute('off')) {
       offText.textContent = this.getAttribute('off');

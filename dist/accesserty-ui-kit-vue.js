@@ -1,4 +1,4 @@
-/*! Accesserty UI Kit v3.0.1 */
+/*! Accesserty UI Kit v3.0.2 */
 import { defineComponent, ref, watch, h } from 'vue';
 
 // Vue 3 integration: Vue components registered under the custom-element tag

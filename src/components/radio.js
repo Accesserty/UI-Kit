@@ -1,6 +1,6 @@
 import { uid } from '../core/id.js';
 import { upgradeProperties } from '../core/upgrade.js';
-import { forwardAria } from '../core/aria.js';
+import { forwardAria, forwardInvalid } from '../core/aria.js';
 import { AuFormElement } from '../core/form-element.js';
 class AuRadioGroup extends AuFormElement {
 
@@ -299,8 +299,8 @@ class AuRadioGroup extends AuFormElement {
     else container.removeAttribute('aria-required');
     if (this.disabled || this._formDisabled) container.setAttribute('aria-disabled', 'true');
     else container.removeAttribute('aria-disabled');
-    if (this.hasAttribute('aria-invalid')) container.setAttribute('aria-invalid', this.getAttribute('aria-invalid'));
-    else container.removeAttribute('aria-invalid');
+    // The radios are required too, so they get the same state as the group.
+    forwardInvalid(this, container, ...[...this._entries.values()].map(entry => entry.input));
   }
 
   get value() { return this._entries.get(this._selectedSource)?.input.value ?? null; }

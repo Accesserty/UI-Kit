@@ -92,6 +92,7 @@ jobs:
       - run: npm run test:visibility
       - run: npm run test:demo-safety
       - run: npm run test:form-flow
+      - run: npm run test:form-registration
       - run: npm run test:dropdown:chrome
       - run: node test/browser/tree.mjs chrome
       - run: node test/browser/accordion.mjs chrome

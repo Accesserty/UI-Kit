@@ -1,6 +1,6 @@
 import { uid } from '../core/id.js';
 import { upgradeProperties } from '../core/upgrade.js';
-import { forwardAria } from '../core/aria.js';
+import { forwardAria, forwardInvalid } from '../core/aria.js';
 import { AuFormElement } from '../core/form-element.js';
 class AuInput extends AuFormElement {
 
@@ -288,6 +288,8 @@ class AuInput extends AuFormElement {
       this.labelEl.htmlFor = this._id;
     } else if (['aria-label','aria-labelledby','aria-describedby'].includes(name)) {
       this._syncAccessibleReferences();
+    } else if (name === 'aria-invalid') {
+      forwardInvalid(this, this.input);
     } else if (this.input) {
       if (newValue === null) {
         this.input.removeAttribute(name);
@@ -316,6 +318,7 @@ class AuInput extends AuFormElement {
       this._initialValueSet = true;
     }
     this.internals.setFormValue(this.input.value);
+    forwardInvalid(this, this.input);
     this._syncValidity();
     this._updateClearButton();
     this._updateColorCode();

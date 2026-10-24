@@ -15,6 +15,17 @@ export function idRefs(host, attribute) {
 // - explicit: the name to use as aria-label, if any
 // - hasOwnLabel: the component shows its own label, so a <label for> is not needed
 // - mirrorPrefix: id prefix for the description mirror
+// Safari+VoiceOver announces an untouched required control as "invalid data"
+// from the moment the page loads, because WebKit maps native constraint
+// validity to the invalid state. Unless the host sets aria-invalid, mark the
+// inner controls as not invalid; the application sets aria-invalid="true"
+// when it shows an error. A failed native submit still announces the
+// browser's validation message.
+export function forwardInvalid(host, ...targets) {
+  const value = host.getAttribute('aria-invalid') ?? 'false';
+  for (const target of targets) target?.setAttribute('aria-invalid', value);
+}
+
 export function forwardAria(host, target, { explicit, hasOwnLabel, mirrorPrefix }) {
   let labels = idRefs(host, 'aria-labelledby');
   if (!labels.length && !explicit && !hasOwnLabel && host.isConnected) labels = [...(host.internals.labels || [])];
