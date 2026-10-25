@@ -22,16 +22,15 @@
 		<section>
 			<h2>How to use</h2>
 			<ol>
-				<li>Copy file (dist/components/tree.js or tree.min.js, or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
+        <li>Copy <code>dist/components/tree.js</code> or its minified file for this component only. Use a full bundle from <code>dist/</code> if you need all components.</li>
 				<li>
-					Add the JavaScript file to HTML using the
+          Load the copied file with a
 					<code>&lt;script src=&quot;&quot; defer&gt;</code> tag
 				</li>
 				<li>Use the <code>&lt;au-tree&gt;</code> tag</li>
 			</ol>
 			<p>
-				Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and
-				filenames are correct to avoid loading errors.
+        Set the script's <code>src</code> to the copied file's location. Assign the tree's records to its <code>data</code> property; do not write nodes as child elements.
 			</p>
 		</section>
 

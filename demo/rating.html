@@ -20,8 +20,8 @@
       <h2>How to use</h2>
       <h3>HTML</h3>
       <ol>
-        <li>Copy file (dist/components/rating.js or rating.min.js, or accesserty-ui-kit.js)</li>
-        <li>Add the JavaScript file to HTML using the <code>&lt;script src="" defer&gt;</code> tag</li>
+        <li>Copy <code>dist/components/rating.js</code> or its minified file for this component only. Use a full bundle from <code>dist/</code> if you need all components.</li>
+        <li>Load the copied file with a <code>&lt;script src="" defer&gt;</code> tag. Set <code>src</code> to the file's location.</li>
         <li>Use the <code>&lt;au-rating&gt;</code> tag</li>
       </ol>
     </section>
@@ -156,12 +156,12 @@
 rating.value = 3.5;    // set partial star
 console.log(rating.value); // 3.5
 rating.readonly = true;</code></pre>
-      <p>Left/Right follow visual direction in RTL; Up/Down keep decrement/increment behavior.
-        Partial stars fill from the inline start edge. Integer values synchronize the selected radio, star fill, score text and form value.
-        Fractional values keep partial stars and the exact score description, without selecting a
-        rounded integer. User interaction chooses integer values. Reset restores the value captured
-        when the element first connects, bounded by the current max; property updates and reset
-        do not emit change. Label updates preserve existing option nodes and focus.</p>
+      <p>User interaction selects whole-number values. Integer values keep the selected radio, star fill, score text and form value in sync.
+        Fractional values show partial stars and the exact score description; they do not select a rounded integer radio.</p>
+      <p>Left/Right follow visual direction in RTL. Up/Down still decrease/increase the value.
+        Partial stars fill from the inline start edge. Label updates preserve the existing option nodes and focus.</p>
+      <p>Reset restores the value from the element's first connection, limited by the current <code>max</code>.
+        Property updates and reset do not emit <code>change</code>.</p>
       <p><code>element.focus({ preventScroll: true })</code> focuses the current enabled
         radio without selecting it. Disabled and readonly ratings ignore focus requests.
         Host <code>aria-invalid</code> is mirrored to the radiogroup. Use

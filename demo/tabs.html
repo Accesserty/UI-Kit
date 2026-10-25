@@ -164,11 +164,12 @@ document.querySelector('au-tabs').addEventListener('au-tab-change', (e) => {
         consumer tabindex overrides it. Empty groups use the named tab list as a focus fallback after removal.</p>
       <p>Only use this automatic-activation pattern when panel content is already available without a noticeable delay.
         This component does not implement vertical tabs, delayed/manual activation, or closable-tab commands.</p>
-      <p>Bind <code>selected-index</code> (or the selectedIndex property after registration) and update your model from
-        <code>au-tab-change.detail.index</code>. With server rendering (see the README), the tab buttons are rendered on
-        the server as a declarative shadow root and only the selected panel shows before the script runs; switching
-        tabs needs JavaScript. The Next/Nuxt fixtures verify server-produced hosts and light-DOM panels, hydration
-        identity, reactive labels and keyboard interaction.</p>
+      <p>Bind <code>selected-index</code>, or set the <code>selectedIndex</code> property after registration.
+        Update your model from <code>au-tab-change.detail.index</code>.</p>
+      <p>With the kit's declarative Shadow DOM injector, the server renders the tab buttons and shows only the selected panel before JavaScript runs.
+        Switching tabs still needs JavaScript. Without the injector, the browser creates the tab buttons.
+        See Server rendering in the README for setup and framework limits.</p>
+      <p>The Next/Nuxt fixtures check server-produced hosts and light-DOM panels, retained nodes during hydration, reactive labels and keyboard interaction.</p>
       <p>Tab-to-panel relations use native element references. Older engines without that API retain named panels,
         but lack that relation. Panel names use plain aria-label text because a light-DOM panel cannot reference
         a button inside a descendant shadow root. This boundary needs assistive-technology verification.</p>

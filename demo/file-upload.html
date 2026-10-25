@@ -30,7 +30,7 @@
 
     <section>
       <h2>Custom Style</h2>
-      <p>Using <code>::part</code> style delete button(or css variables)</p>
+      <p>Style the remove button with the exposed CSS Part or CSS variables, as in this example.</p>
       <au-file-upload class="custom-file-upload" label="Upload Files" multiple required max-files="3" max-size-mb="2"
         max-total-size-mb="2" accept=".txt, .jpg,.png,application/pdf" msg-drop-text="Drag & drop files here"
         msg-remove-text="Delete" msg-required="You must upload at least one document."
@@ -146,19 +146,19 @@
   msg-count-error="{fileName} 無法新增，最多只能上傳 {maxFiles} 個檔案"
   msg-total-size-error="檔案總大小不可超過 {maxTotalSize}MB"&gt;
 &lt;/au-file-upload&gt;</code></pre>
-      <p>Provide a named native <code>&lt;button type="button" slot="trigger"&gt;</code>
-        to customize keyboard file selection, or omit the slot to use the default button.
-        Public <code>focus(options)</code> focuses the visible trigger without opening
-        the picker, and is ignored while effectively disabled.
-        Host <code>aria-describedby</code> connects external text to the component's
-        groups and default button, in addition to internal upload instructions.
-        If you supply a custom trigger, set its own <code>aria-describedby</code>
-        to your error/hint IDs; the component does not overwrite consumer ARIA.
-        After the last focused remove button is removed, focus returns to an available
-        trigger, or the visible trigger region if no usable trigger exists. A disabled
-        component or ancestor fieldset prevents selection, dropping and removal without
-        losing the selected files. Form validation focuses a visible region and displays
-        the required message beside the picker.</p>
+      <h3>Choose the trigger</h3>
+      <p>Provide a named native <code>&lt;button type="button" slot="trigger"&gt;</code>, or leave the slot empty to use the default button.</p>
+      <p><code>focus(options)</code> focuses the visible trigger without opening the picker. Disabled controls ignore this request.
+        Removing the last focused remove button returns focus to a usable trigger, or to the visible trigger region.</p>
+      <h3>Connect hints and errors</h3>
+      <p>Set <code>aria-describedby</code> on the host to add external descriptions to the component's groups and default button.
+        These descriptions supplement the internal upload instructions.</p>
+      <p>For a custom trigger, set its own <code>aria-describedby</code> to your hint and error IDs.
+        The component does not change ARIA attributes on your trigger.</p>
+      <p>Required-field validation focuses a visible region and shows the message beside the picker.</p>
+      <h3>Disable without clearing files</h3>
+      <p>A disabled component or ancestor <code>&lt;fieldset&gt;</code> blocks selection, dropping and removal.
+        The form omits its files from submission, but the component keeps them for when it is enabled again.</p>
     </section>
     <section>
       <h2>CSS Variables</h2>
@@ -425,12 +425,11 @@ fu.value = []; // clear files programmatically</code></pre>
     </section>
     <section>
       <h2>Events</h2>
-      <p>A named component contributes one real <code>File</code> entry per selected file to
-        <code>new FormData(form)</code>, under the component's current <code>name</code>.
-        Empty or unnamed controls contribute no entries. Reset clears the submitted files.
-        For native uploads use <code>enctype="multipart/form-data"</code>; when sending
-        FormData with fetch, let the browser set the multipart Content-Type boundary.
-        The component does not upload anything itself; enforce file-type and size checks on the server.</p>
+      <p>Read selected files with <code>new FormData(form)</code>. Each file is a real <code>File</code> entry under the component's current <code>name</code>.
+        Empty, unnamed or disabled controls contribute no entries. Form reset clears the selection.</p>
+      <p>For native form uploads, set <code>enctype="multipart/form-data"</code>.
+        When sending FormData with fetch, let the browser set the multipart Content-Type boundary.</p>
+      <p>The component does not upload files. Your application sends them, and your server must validate file types and sizes.</p>
       <div class="table-scroll" role="region" tabindex="0" aria-label="Events dispatched by &lt;au-file-upload&gt;:">
       <table>
         <caption>Events dispatched by <code>&lt;au-file-upload&gt;</code>:</caption>

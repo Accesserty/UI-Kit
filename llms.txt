@@ -1,6 +1,16 @@
 # Accesserty UI Kit
 
-> A framework-agnostic library of 15 accessibility-first Web Components with zero runtime dependencies and WCAG 2.2 AA as a design target. Automated and targeted browser checks are not complete conformance or screen-reader verification. Supports plain HTML (one bundle or one file per component) and configured Vue, React, Nuxt and Next integrations. Element definition is browser-only; servers render hosts, attributes and initial values, and accordion, tabs and breadcrumbs can also receive server-rendered declarative Shadow DOM.
+> 15 Web Components with reusable semantics, keyboard interaction and focus
+> handling. Component JavaScript has no runtime package dependencies. Plain HTML
+> can load one full bundle or selected standalone component files. Vue/Nuxt and
+> React 19/Next.js have integration modules and targeted fixtures.
+
+WCAG 2.2 AA is the design target, not an automatic conformance guarantee. Tests
+do not establish complete screen-reader or application compatibility.
+
+Component classes load only in the browser. Servers can render hosts, attributes
+and initial values. Only Accordion (including its items), Tabs and Breadcrumbs
+can also receive server-rendered Shadow DOM through the injector.
 
 ## Key Links
 
@@ -8,15 +18,20 @@
 - Component demos: demo/index.html
 - Full API reference: demo/*.html (one file per component)
 - Interactive playground: demo/playground.html
+- Setup and framework integration: README.md
+- Data, events and forms: docs/USAGE.md
+- Upgrade from 2.x: UPGRADING.md
+- Contributor setup and checks: CONTRIBUTING.md
+- Current references and dated records: docs/README.md
 
 ## Project Structure
 
-- `src/components/` — Source for all 15 custom elements (ES modules, one file per component)
+- `src/components/` — 15 component source files registering 18 tags (compound components include child tags). Most import shared modules; use distribution files for classic script tags.
 - `src/views/` — Shadow DOM markup and styles for au-accordion, au-tabs and au-breadcrumbs, shared by the browser and server rendering
 - `src/core/` — Code the components share: `declarative.js` (adopts a server-rendered declarative shadow root or builds one), `form-element.js` (`AuFormElement`, the base class of the 7 form controls), `aria.js` (forwards the host's name and description to the inner control), `upgrade.js` (properties set before definition), `id.js` (`uid()` for shadow-root ids)
 - `src/ssr/inject.js` — Inserts declarative shadow roots into server-rendered HTML (whole strings or streams)
 - `src/integrations/` — Vue (v-model), Nuxt module, React (value/checked + onChange) integrations
-- `src/css/` — Design system CSS (au-style.css imports the variable files unlayered and components.css into the `accesserty` cascade layer)
+- `src/css/` — Optional repository stylesheet. au-style.css imports token files unlayered and components.css into the `accesserty` layer. Copy the whole folder; it is not in the package allow-list or exported as an npm subpath.
 - `src/accesserty-ui-kit.js` — Bundle entry point (imports all components)
 - `demo/` — Human-readable documentation with live examples and CSS variable tables
 - `test/` — Browser-based unit tests using @web/test-runner and @open-wc/testing
@@ -26,168 +41,314 @@
 ## Components
 
 ### au-accordion
-Tag: `<au-accordion>`, `<au-accordion-item>`
-Attributes (au-accordion): exclusive, data-text-exclusive-hint
-Attributes (accordion-item): open, heading-level (1–6; default 3), no-region
-Slots (accordion-item): heading (the question/title, inside the header button), sub (secondary text in the button), icon (decorative, aria-hidden), content (the panel). There is no default slot: a child without one of these slot names is not shown, and nothing warns about it. Example: `<au-accordion-item><span slot="heading">Question</span><div slot="content"><p>Answer</p></div></au-accordion-item>`
-Properties: open (boolean getter/setter), exclusive (on au-accordion)
-Events: au-toggle (detail: { open })
-Events describe actual connected state changes, including programmatic updates and sibling closures; same-value writes do not repeat events. Exclusive mode affects direct item children only and normalizes initial/inserted state to the first open item. Nested groups are independent. Native heading buttons support Enter/Space and normal Tab navigation; collapsing focused content returns focus to its header. Heading/sub slots must be non-interactive. Panel visibility is immediate. Collapsed panels use hidden="until-found" where supported (find-in-page and fragment links open the item and emit au-toggle); elsewhere they are hidden and inert. Plain deferred scripts (bundle or components/accordion.js) and pre-definition Boolean properties work. Element definition is browser-only; the SSR injector can server-render the declarative shadow root (open/collapsed state included).
-Form-associated: No
-CSS variables: 15+ (--au-accordion-heading-*, --au-accordion-content-*)
+
+- **Tag:** `<au-accordion>`, `<au-accordion-item>`
+- **Attributes (au-accordion):** exclusive, data-text-exclusive-hint
+- **Attributes (accordion-item):** open, heading-level (1–6; default 3), no-region
+- **Slots (accordion-item):** heading (the question/title, inside the header button), sub
+  (secondary text in the button), icon (decorative, aria-hidden), content (the panel). There is no
+  default slot: a child without one of these slot names is not shown, and nothing warns about it.
+  Example:
+  `<au-accordion-item><span slot="heading">Question</span><div slot="content"><p>Answer</p></div></au-accordion-item>`
+- **Properties:** open (boolean getter/setter), exclusive (on au-accordion)
+- **Events:** au-toggle (detail: { open })
+
+Events describe actual connected state changes, including programmatic updates and sibling
+closures; same-value writes do not repeat events. Exclusive mode affects direct item children only
+and normalizes initial/inserted state to the first open item. Nested groups are independent.
+Native heading buttons support Enter/Space and normal Tab navigation; collapsing focused content
+returns focus to its header. Heading/sub slots must be non-interactive. Panel visibility is
+immediate. Collapsed panels use hidden="until-found" where supported (find-in-page and fragment
+links open the item and emit au-toggle); elsewhere they are hidden and inert. Plain deferred
+scripts (bundle or components/accordion.js) and pre-definition Boolean properties work. Element
+definition is browser-only; the SSR injector can server-render the declarative shadow root
+(open/collapsed state included).
+
+- **Form-associated:** No
+- **CSS variables:** 15+ (--au-accordion-heading-*, --au-accordion-content-*)
 
 ### au-breadcrumbs
-Tag: `<au-breadcrumbs>`
-Attributes: items (JSON array), separator, aria-label, aria-labelledby, label, data-link-title-prefix, data-link-title-template (`{text}`, `{index}`)
-Properties: items (getter/setter), separator (getter/setter)
-Pre-registration items/separator assignments are replayed through the accessors. Items accepts an array, JSON string or single item object. SSR integrations serialize the items attribute; without the declarative Shadow DOM injector the internal links render only after client registration. With the injector the server renders the nav, list and links (relative and HTTP(S) URLs only), so links work without JavaScript; the component adopts them and re-validates URLs in the browser. Links use native navigation, not framework router events. Translation retains link focus; a removed/revoked focused link returns focus to the navigation landmark.
-Events: none
-Form-associated: No
-CSS variables: 8 (--au-breadcrumbs-*)
+
+- **Tag:** `<au-breadcrumbs>`
+- **Attributes:** items (JSON array), separator, aria-label, aria-labelledby, label,
+  data-link-title-prefix, data-link-title-template (`{text}`, `{index}`)
+- **Properties:** items (getter/setter), separator (getter/setter)
+
+Pre-registration items/separator assignments are replayed through the accessors. Items accepts an
+array, JSON string or single item object. SSR integrations serialize the items attribute; without
+the declarative Shadow DOM injector the internal links render only after client registration. With
+the injector the server renders the nav, list and links (relative and HTTP(S) URLs only), so links
+work without JavaScript; the component adopts them and re-validates URLs in the browser. Links use
+native navigation, not framework router events. Translation retains link focus; a removed/revoked
+focused link returns focus to the navigation landmark.
+
+- **Events:** none
+- **Form-associated:** No
+- **CSS variables:** 8 (--au-breadcrumbs-*)
 
 ### au-card
-Tag: `<au-card>`
-Slots: heading, media, content, footer
-Only named slots are projected, in that order; no default slot. The card adds no role, tabindex, automatic heading semantics or custom events. Native child controls retain forms, reset and event behavior. render() is idempotent and retains the shell/slots/focus. Default block/min-inline-size/wrapping styles respect hidden; consumers own media sizes, content semantics, themes and focus styling.
-CSS Parts: au-card-container, heading, media, content, footer
-Parts refer to the container and slot elements; style assigned content through consumer selectors. Real Next/Nuxt fixtures retain server host/content nodes and native event/form behavior, with client-only registration. These are not screen-reader results.
-Form-associated: No
-CSS variables: 0 (styled via ::part())
+
+- **Tag:** `<au-card>`
+- **Slots:** heading, media, content, footer
+
+Only named slots are projected, in that order; no default slot. The card adds no role, tabindex,
+automatic heading semantics or custom events. Native child controls retain forms, reset and event
+behavior. render() is idempotent and retains the shell/slots/focus. Default
+block/min-inline-size/wrapping styles respect hidden; consumers own media sizes, content
+semantics, themes and focus styling.
+
+- **CSS Parts:** au-card-container, heading, media, content, footer
+
+Parts refer to the container and slot elements; style assigned content through consumer selectors.
+Real Next/Nuxt fixtures retain server host/content nodes and native event/form behavior, with
+client-only registration. These are not screen-reader results.
+
+- **Form-associated:** No
+- **CSS variables:** 0 (styled via ::part())
 
 ### au-carousel
-Tag: `<au-carousel>`
-Attributes: aria-label, aria-labelledby, data-text-roledescription, data-live-template, data-item-fallback, data-dot-template, data-text-prev, data-text-next, data-text-pagination, data-text-instructions, data-icon-prev, data-icon-next; per slide (direct child): data-title
-Localization templates: data-dot-template, data-live-template, data-item-fallback support `{title}`, `{current}`, `{total}`
-Content model: each direct child element is one slide (author-defined native HTML); one pagination button per slide, named + positioned; responsive slides-per-view via @container
-Properties: current (getter/setter)
-current is a zero-based DOM property, not an attribute; numeric strings/fractions normalize to a bounded integer, invalid/non-finite inputs become 0, empty is -1. Pre-definition property assignment is supported when slides exist at upgrade. Stable slide element identity preserves the selected slide and dot focus across translation/reordering; new nodes are new identities.
-Methods: slideTo(index), refresh() (re-read slide titles after a runtime/locale change; also automatic via MutationObserver)
-Events: au-slide-change (detail: { index, total, title })
-Changed navigation/current writes and settled scrolling emit; refresh/translation/reordering are silent. Boundary arrows remain focusable aria-disabled controls and do not repeat events. Scrolling uses the track start edge in LTR/RTL without scrolling outer containers. Named wrapper references external labels across Shadow DOM; fallback naming is plain text. Forced-colors outlines and a non-color current-dot ring remain visible; dots wrap at narrow widths. Off-screen slides remain readable/tabbable; there is no autoplay or tabpanel model.
-Form-associated: No
-SSR: extends HTMLElement — defined in the browser only (the kit's Nuxt module and React defineElements() do this); not importable in Node
-CSS variables: 16 (--au-carousel-gap, --au-carousel-dot-*, --au-carousel-button-*, --au-carousel-controls-gap)
+
+- **Tag:** `<au-carousel>`
+- **Attributes:** aria-label, aria-labelledby, data-text-roledescription, data-live-template,
+  data-item-fallback, data-dot-template, data-text-prev, data-text-next, data-text-pagination,
+  data-text-instructions, data-icon-prev, data-icon-next; per slide (direct child): data-title
+- **Localization templates:** data-dot-template, data-live-template, data-item-fallback support
+  `{title}`, `{current}`, `{total}`
+- **Content model:** each direct child element is one slide (author-defined native HTML); one
+  pagination button per slide, named + positioned; responsive slides-per-view via @container
+- **Properties:** current (getter/setter)
+
+current is a zero-based DOM property, not an attribute; numeric strings/fractions normalize to a
+bounded integer, invalid/non-finite inputs become 0, empty is -1. Pre-definition property
+assignment is supported when slides exist at upgrade. Stable slide element identity preserves the
+selected slide and dot focus across translation/reordering; new nodes are new identities.
+
+- **Methods:** slideTo(index), refresh() (re-read slide titles after a runtime/locale change;
+  also automatic via MutationObserver)
+- **Events:** au-slide-change (detail: { index, total, title })
+
+Changed navigation/current writes and settled scrolling emit; refresh/translation/reordering are
+silent. Boundary arrows remain focusable aria-disabled controls and do not repeat events.
+Scrolling uses the track start edge in LTR/RTL without scrolling outer containers. Named wrapper
+references external labels across Shadow DOM; fallback naming is plain text. Forced-colors
+outlines and a non-color current-dot ring remain visible; dots wrap at narrow widths. Off-screen
+slides remain readable/tabbable; there is no autoplay or tabpanel model.
+
+- **Form-associated:** No
+- **SSR:** extends HTMLElement — defined in the browser only (the kit's Nuxt module and React
+  defineElements() do this); not importable in Node
+- **CSS variables:** 16 (--au-carousel-gap, --au-carousel-dot-*, --au-carousel-button-*,
+  --au-carousel-controls-gap)
 
 ### au-checkbox
-Tag: `<au-checkbox>`
-Attributes: name, value, checked, disabled, required, label, aria-label, aria-labelledby, aria-describedby, aria-invalid
-Properties: checked (getter/setter), disabled (getter/setter)
-Events: change (detail: boolean), focus, blur
-Form-associated: Yes (setFormValue: value when checked, null when unchecked)
-CSS variables: 14+ (--au-checkbox-*)
+
+- **Tag:** `<au-checkbox>`
+- **Attributes:** name, value, checked, disabled, required, label, aria-label, aria-labelledby,
+  aria-describedby, aria-invalid
+- **Properties:** checked (getter/setter), disabled (getter/setter)
+- **Events:** change (detail: boolean), focus, blur
+- **Form-associated:** Yes (setFormValue: value when checked, null when unchecked)
+- **CSS variables:** 14+ (--au-checkbox-*)
 
 ### au-dropdown
-Tags: `<au-dropdown>`, `<au-dropdown-item>`
-Attributes (au-dropdown): data-text-trigger
-Attributes (dropdown-item): value
-Properties: isOpen (getter/setter on au-dropdown)
-Events: au-select (detail: { value }) on au-dropdown-item
-Activation: one au-select event per click/Enter/Space, including after reconnection; translated text/value updates are silent and retain focus.
-Keyboard: open(index) focuses immediately; arrows/Home/End navigate owned items across containing shadow roots; Escape restores trigger focus and Tab leaves using browser keyboard preferences.
-Form-associated: No
-CSS variables: 11 (--au-dropdown-menu-*, --au-dropdown-item-*, --au-dropdown-focus-shadow-*)
+
+- **Tags:** `<au-dropdown>`, `<au-dropdown-item>`
+- **Attributes (au-dropdown):** data-text-trigger
+- **Attributes (dropdown-item):** value
+- **Properties:** isOpen (getter/setter on au-dropdown)
+- **Events:** au-select (detail: { value }) on au-dropdown-item
+- **Activation:** one au-select event per click/Enter/Space, including after reconnection;
+  translated text/value updates are silent and retain focus.
+- **Keyboard:** open(index) focuses immediately; arrows/Home/End navigate owned items across
+  containing shadow roots; Escape restores trigger focus and Tab leaves using browser keyboard
+  preferences.
+- **Form-associated:** No
+- **CSS variables:** 11 (--au-dropdown-menu-*, --au-dropdown-item-*,
+  --au-dropdown-focus-shadow-*)
 
 ### au-file-upload
-Tag: `<au-file-upload>`
-Attributes: accept, multiple, name, disabled, required, label, max-files, max-size-mb, max-total-size-mb, msg-drop-text, msg-remove-text, msg-remove-file-label, msg-added, msg-removed, msg-required, msg-type-error, msg-size-error, msg-count-error, msg-total-size-error (file-upload uses the msg- prefix; other components use data-text-)
-Localization templates: msg-remove-file-label and msg-removed support `{fileName}`; msg-added supports `{count}`; msg-size-error supports `{fileName}` and `{maxSize}`; msg-count-error supports `{fileName}` and `{maxFiles}`; msg-total-size-error supports `{maxTotalSize}`
-Properties: value (getter/setter: File[])
-Methods: handleFiles(files), removeFile(file), checkValidity(), reportValidity()
-Events: change, au-remove-file (detail: File)
-Form-associated: Yes (ElementInternals FormData with actual File entries)
-Default trigger: native button named by label; a custom trigger should be a named button type=button. Disabled fields/fieldsets block picker/drop/removal and omit submission without losing selection. Validation focuses a visible region and shows inline errors. Drag/drop handling is scoped to the component. Without multiple, selection is capped at one; remove before replacement. Picker limits default to 5 files, 5MB each and 20MB total; invalid limits use defaults and zero is valid. Extensions/MIME matching is case-insensitive; same name/size duplicates are ignored. The controlled value setter copies File entries, bypasses picker limits, and emits no change. Removal emits au-remove-file then change once; reset is silent. Translation retains remove-button identity. Pre-registration value assignments survive deferred loading. Client-only registration is required for SSR; File values cannot be serialized as an HTML attribute.
-CSS variables: 20+ (--au-file-upload-label-*, --au-file-upload-area-*, --au-file-upload-delete-*, --au-file-upload-file-list-*, --au-file-upload-trigger-focus-outline-*)
+
+- **Tag:** `<au-file-upload>`
+- **Attributes:** accept, multiple, name, disabled, required, label, max-files, max-size-mb,
+  max-total-size-mb, msg-drop-text, msg-remove-text, msg-remove-file-label, msg-added,
+  msg-removed, msg-required, msg-type-error, msg-size-error, msg-count-error, msg-total-size-error
+  (file-upload uses the msg- prefix; other components use data-text-)
+- **Localization templates:** msg-remove-file-label and msg-removed support `{fileName}`;
+  msg-added supports `{count}`; msg-size-error supports `{fileName}` and `{maxSize}`;
+  msg-count-error supports `{fileName}` and `{maxFiles}`; msg-total-size-error supports
+  `{maxTotalSize}`
+- **Properties:** value (getter/setter: File[])
+- **Methods:** handleFiles(files), removeFile(file), checkValidity(), reportValidity()
+- **Events:** change, au-remove-file (detail: File)
+- **Form-associated:** Yes (ElementInternals FormData with actual File entries)
+- **Default trigger:** native button named by label; a custom trigger should be a named button
+  type=button. Disabled fields/fieldsets block picker/drop/removal and omit submission without
+  losing selection. Validation focuses a visible region and shows inline errors. Drag/drop
+  handling is scoped to the component. Without multiple, selection is capped at one; remove before
+  replacement. Picker limits default to 5 files, 5MB each and 20MB total; invalid limits use
+  defaults and zero is valid. Extensions/MIME matching is case-insensitive; same name/size
+  duplicates are ignored. The controlled value setter copies File entries, bypasses picker limits,
+  and emits no change. Removal emits au-remove-file then change once; reset is silent. Translation
+  retains remove-button identity. Pre-registration value assignments survive deferred loading.
+  Client-only registration is required for SSR; File values cannot be serialized as an HTML
+  attribute.
+- **CSS variables:** 20+ (--au-file-upload-label-*, --au-file-upload-area-*,
+  --au-file-upload-delete-*, --au-file-upload-file-list-*,
+  --au-file-upload-trigger-focus-outline-*)
 
 ### au-input
-Tag: `<au-input>`
-Attributes: type, name, value, placeholder, required, disabled, readonly, label, aria-label, aria-labelledby, min, max, step, pattern, autocomplete, inputmode, maxlength, minlength, list, data-size (small|large), data-layout (vertical), data-clear, data-clear-label, id, aria-describedby, aria-invalid
-Properties: value (getter/setter), disabled, required, readonly (all getter/setter), validity, validationMessage, willValidate, valueAsNumber and valueAsDate (as on a native input), setCustomValidity() and form (all seven form components)
-Methods: focus(), clear(), suggest(val), checkValidity(), reportValidity()
-Slots: prefix, affix
-Events: input, change (bubbles, composed)
-Form-associated: Yes
-CSS variables: 22 (--au-input-wrapper-bg, --au-input-label-*, --au-input-padding-*, --au-input-text-*, --au-input-border-*, --au-input-bg, --au-input-focus-shadow-*, --au-input-invalid-shadow-*, --au-input-clear-*, --au-input-small-*, --au-input-large-*, --au-input-container-*)
+
+- **Tag:** `<au-input>`
+- **Attributes:** type, name, value, placeholder, required, disabled, readonly, label,
+  aria-label, aria-labelledby, min, max, step, pattern, autocomplete, inputmode, maxlength,
+  minlength, list, data-size (small|large), data-layout (vertical), data-clear, data-clear-label,
+  id, aria-describedby, aria-invalid
+- **Properties:** value (getter/setter), disabled, required, readonly (all getter/setter),
+  validity, validationMessage, willValidate, valueAsNumber and valueAsDate (as on a native input),
+  setCustomValidity() and form (all seven form components)
+- **Methods:** focus(), clear(), suggest(val), checkValidity(), reportValidity()
+- **Slots:** prefix, affix
+- **Events:** input, change (bubbles, composed)
+- **Form-associated:** Yes
+- **CSS variables:** 22 (--au-input-wrapper-bg, --au-input-label-*, --au-input-padding-*,
+  --au-input-text-*, --au-input-border-*, --au-input-bg, --au-input-focus-shadow-*,
+  --au-input-invalid-shadow-*, --au-input-clear-*, --au-input-small-*, --au-input-large-*,
+  --au-input-container-*)
 
 ### au-pagination
-Tag: `<au-pagination>`
-Attributes: data-total, data-current-page, data-pager-count, data-page-size, data-page-size-options, data-layout, data-text-* (localization)
-Localization attributes: data-text-total-pages-prefix, data-text-page, data-text-total-items-suffix, data-text-per, data-text-first, data-text-prev, data-text-next, data-text-last, data-text-go, data-text-goto, data-text-pagination-label, data-text-page-size, data-text-page-announcement (`{page}`)
-Properties: pageSizeOptions (getter/setter), layout (getter/setter), totalPages (getter), pagers (getter)
-Events: au-page-change (detail: page number), au-page-size-change (detail: size)
-Form-associated: No
-CSS variables: inherits --au-btn-* from button styles
+
+- **Tag:** `<au-pagination>`
+- **Attributes:** data-total, data-current-page, data-pager-count, data-page-size,
+  data-page-size-options, data-layout, data-text-* (localization)
+- **Localization attributes:** data-text-total-pages-prefix, data-text-page,
+  data-text-total-items-suffix, data-text-per, data-text-first, data-text-prev, data-text-next,
+  data-text-last, data-text-go, data-text-goto, data-text-pagination-label, data-text-page-size,
+  data-text-page-announcement (`{page}`)
+- **Properties:** pageSizeOptions (getter/setter), layout (getter/setter), totalPages (getter),
+  pagers (getter)
+- **Events:** au-page-change (detail: page number), au-page-size-change (detail: size)
+- **Form-associated:** No
+- **CSS variables:** inherits --au-btn-* from button styles
 
 ### au-radio-group
-Tags: `<au-radio-group>`, `<au-radio>` (slotted children)
-Attributes (au-radio-group): disabled, required, direction (vertical), aria-label, aria-labelledby, aria-describedby, aria-invalid, label
-`required` sets aria-required on the group and makes the group invalid until an option is selected; aria-describedby and aria-invalid are forwarded to the group, so an error message can be attached as described in "Form validation and error messages".
-Attributes (au-radio): value, checked, disabled, label
-Properties: value (getter — currently selected), disabled (getter/setter), required (getter/setter)
-Events: change (detail: { value })
-Form-associated: Yes (au-radio-group)
-CSS variables: 12 (--au-radio-content-gap, --au-radio-input-*, --au-radio-label-*)
+
+- **Tags:** `<au-radio-group>`, `<au-radio>` (slotted children)
+- **Attributes (au-radio-group):** disabled, required, direction (vertical), aria-label,
+  aria-labelledby, aria-describedby, aria-invalid, label
+
+`required` sets aria-required on the group and makes the group invalid until an option is
+selected; aria-describedby and aria-invalid are forwarded to the group, so an error message can be
+attached as described in "Form validation and error messages".
+
+- **Attributes (au-radio):** value, checked, disabled, label
+- **Properties:** value (getter/setter — currently selected), name, disabled, required
+  (getter/setter)
+- **Events:** change (detail: { value })
+- **Form-associated:** Yes (au-radio-group)
+- **CSS variables:** 12 (--au-radio-content-gap, --au-radio-input-*, --au-radio-label-*)
 
 ### au-rating
-Tag: `<au-rating>`
-Attributes: value, max, labels (comma-separated), name, show-score, score-info, disabled, readonly, aria-label, data-text-rating, data-text-star (`{value}`, `{max}`), data-text-score (`{value}`, `{max}`, `{scoreInfo}`)
-Properties: value, max, labels, name, showScore, scoreInfo, disabled, readonly (all getter/setter)
-Events: change (detail: { value: number })
-Form-associated: Yes
-CSS variables: 12 (--au-rating-gap, --au-rating-star-*, --au-rating-focus-*, --au-rating-label-*, --au-rating-score-*)
+
+- **Tag:** `<au-rating>`
+- **Attributes:** value, max, labels (comma-separated), name, show-score, score-info, disabled,
+  readonly, aria-label, data-text-rating, data-text-star (`{value}`, `{max}`), data-text-score
+  (`{value}`, `{max}`, `{scoreInfo}`)
+- **Properties:** value, max, labels, name, showScore, scoreInfo, disabled, readonly (all
+  getter/setter)
+- **Events:** change (detail: { value: number })
+- **Form-associated:** Yes
+- **CSS variables:** 12 (--au-rating-gap, --au-rating-star-*, --au-rating-focus-*,
+  --au-rating-label-*, --au-rating-score-*)
 
 ### au-switch
-Tag: `<au-switch>`
-Attributes: name, value, checked, disabled, label, aria-label, aria-labelledby, on, off
-Slots: default (label text). `label` provides fallback label text when no slotted label is supplied.
-Properties: checked (getter/setter), disabled (getter/setter)
-Events: change (detail: boolean — checked state)
-Form-associated: Yes (setFormValue: value when checked, null when unchecked)
-CSS variables: 17 (--au-switch-gap, --au-switch-padding-*, --au-switch-container-gap, --au-switch-input-*, --au-switch-inner-*, --au-switch-focus-shadow-*)
+
+- **Tag:** `<au-switch>`
+- **Attributes:** name, value, checked, disabled, label, aria-label, aria-labelledby, on, off
+- **Slots:** default (label text). `label` provides fallback label text when no slotted label is
+  supplied.
+- **Properties:** checked (getter/setter), disabled (getter/setter)
+- **Events:** change (detail: boolean — checked state)
+- **Form-associated:** Yes (setFormValue: value when checked, null when unchecked)
+- **CSS variables:** 17 (--au-switch-gap, --au-switch-padding-*, --au-switch-container-gap,
+  --au-switch-input-*, --au-switch-inner-*, --au-switch-focus-shadow-*)
 
 ### au-tabs
-Tag: `<au-tabs>`
-Children: elements with `slot="panel"` and class `au-tab-panel` (per panel: label, label-lang, data-badge); the component sets role="tabpanel"
-Attributes: selected-index, aria-label, aria-labelledby
-Localization attributes: data-text-tab (`{index}` fallback tab label), data-text-tab-lang, data-text-badge-label-prefix
-Properties: selectedIndex (getter/setter)
-Events: au-tab-change (detail: { index, label })
-SSR: the declarative Shadow DOM injector renders the tab list with the `selected-index` tab selected and only its panel shown; the component adopts that root in the browser
-Form-associated: No
-CSS variables: 26 (--au-tabs-*, --au-tabpanels-*, --au-tab-panel-*, --au-tab-badge-*)
+
+- **Tag:** `<au-tabs>`
+- **Children:** elements with `slot="panel"` and class `au-tab-panel` (per panel: label,
+  label-lang, data-badge); the component sets role="tabpanel"
+- **Attributes:** selected-index, aria-label, aria-labelledby
+- **Localization attributes:** data-text-tab (`{index}` fallback tab label), data-text-tab-lang,
+  data-text-badge-label-prefix
+- **Properties:** selectedIndex (getter/setter)
+- **Events:** au-tab-change (detail: { index, label })
+- **SSR:** the declarative Shadow DOM injector renders the tab list with the `selected-index` tab
+  selected and only its panel shown; the component adopts that root in the browser
+- **Form-associated:** No
+- **CSS variables:** 26 (--au-tabs-*, --au-tabpanels-*, --au-tab-panel-*, --au-tab-badge-*)
 
 ### au-textarea
-Tag: `<au-textarea>`
-Attributes: value, placeholder, name, rows, cols, disabled, readonly, required, maxlength, minlength, label, aria-label, aria-labelledby, aria-describedby, aria-invalid, id
-Properties: value (getter/setter), disabled, readonly (getter/setter), validity, validationMessage, willValidate
-Methods: checkValidity(), reportValidity()
-Events: input, change (bubbles, composed)
-Form-associated: Yes
-CSS variables: 15 (--au-textarea-label-*, --au-textarea-container-*, --au-textarea-padding-*, --au-textarea-text-*, --au-textarea-border-*, --au-textarea-bg, --au-textarea-focus-shadow-*, --au-textarea-invalid-shadow-*, --au-textarea-readonly-*)
+
+- **Tag:** `<au-textarea>`
+- **Attributes:** value, placeholder, name, rows, cols, disabled, readonly, required, maxlength,
+  minlength, label, aria-label, aria-labelledby, aria-describedby, aria-invalid, id
+- **Properties:** value (getter/setter), disabled, readonly (getter/setter), validity,
+  validationMessage, willValidate
+- **Methods:** checkValidity(), reportValidity()
+- **Events:** input, change (bubbles, composed)
+- **Form-associated:** Yes
+- **CSS variables:** 15 (--au-textarea-label-*, --au-textarea-container-*,
+  --au-textarea-padding-*, --au-textarea-text-*, --au-textarea-border-*, --au-textarea-bg,
+  --au-textarea-focus-shadow-*, --au-textarea-invalid-shadow-*, --au-textarea-readonly-*)
 
 ### au-tree
-Tags: `<au-tree>`, `<au-tree-node>` (auto-created from data)
-Attributes (au-tree): show-checkbox, aria-label, aria-labelledby, data-text-node, data-text-toggle (`{label}`)
-Properties (au-tree): data (getter/setter — JS object tree), toggleLabel (getter/setter), fallbackNodeLabel (getter/setter), toggleLabelTemplate (getter/setter)
-Events: change (on au-tree, when checkbox state changes)
-Data: use sibling-unique id values to retain nodes, focus and state across object replacement; otherwise identity uses the original objects. Labels are plain text. Optional lang sets node language.
-State: leaf checked and branch expanded fields are reapplied on data assignment; omitted fields retain local state. Disabled branches block checkbox actions/cascades but allow navigation and expansion. Parent checks aggregate enabled children.
-Events: one change.detail.checkedNodes array for an actual check operation; data/locale updates are silent and do not mutate input objects. Assign data as a DOM property, not JSON markup.
-Form-associated: No
-CSS variables: 30+ (--au-tree-*, --au-tree-node-*, --au-tree-node-checkbox-*, --au-tree-node-toggle-*)
+
+- **Tags:** `<au-tree>`, `<au-tree-node>` (auto-created from data)
+- **Attributes (au-tree):** show-checkbox, aria-label, aria-labelledby, data-text-node,
+  data-text-toggle (`{label}`)
+- **Properties (au-tree):** data (getter/setter — JS object tree), toggleLabel (getter/setter),
+  fallbackNodeLabel (getter/setter), toggleLabelTemplate (getter/setter)
+- **Events:** change (on au-tree, when checkbox state changes)
+- **Data:** use sibling-unique id values to retain nodes, focus and state across object
+  replacement; otherwise identity uses the original objects. Labels are plain text. Optional lang
+  sets node language.
+- **State:** leaf checked and branch expanded fields are reapplied on data assignment; omitted
+  fields retain local state. Disabled branches block checkbox actions/cascades but allow
+  navigation and expansion. Parent checks aggregate enabled children.
+- **Events:** one change.detail.checkedNodes array for an actual check operation; data/locale
+  updates are silent and do not mutate input objects. Assign data as a DOM property, not JSON
+  markup.
+- **Form-associated:** No
+- **CSS variables:** 30+ (--au-tree-*, --au-tree-node-*, --au-tree-node-checkbox-*,
+  --au-tree-node-toggle-*)
 
 ## Form validation and error messages
 
-au-input, au-textarea, au-checkbox and au-radio-group do not draw error text themselves. To show an error next to a field, as `demo/form.html` does:
+au-input, au-textarea, au-checkbox and au-radio-group do not draw error text themselves. To show
+an error next to a field, as `demo/form.html` does:
 
-1. Put the error text in an element in the page, next to the field, and reference it from the component: `<au-input label="Email" required aria-describedby="email-error"></au-input><p id="email-error"></p>`.
-2. When validation fails, write the message into that element and set `aria-invalid="true"` on the component; clear both when the value is valid. The component forwards aria-describedby and aria-invalid to its inner control, so screen readers announce the field as invalid together with the message. au-input and au-textarea pick up later changes to the referenced element's text automatically.
-3. On submit, move focus to the first invalid field (`element.focus()`) or to an error summary.
+1. Put an error-text element next to the field. Reference it with
+   `aria-describedby`, for example:
+   `<au-input label="Email" required aria-describedby="email-error"></au-input><p id="email-error"></p>`.
+2. When validation fails, fill that element and set host `aria-invalid="true"`.
+   Clear the message and invalid state when the error is resolved. The component
+   forwards the description and invalid state to its control. Input and Textarea
+   also follow later changes to the referenced text. Actual speech depends on
+   the browser and assistive technology.
+3. On submit, focus the first invalid field with `element.focus()`, or focus an
+   error summary with links to the fields.
 
-`setCustomValidity()` with `reportValidity()` only shows the browser's own validation bubble for one field at a time; it does not set aria-invalid or show inline text. Use it for native constraint behavior (blocking submission), not as the visible error message. au-file-upload is the exception: it validates type, size and count itself and shows inline errors.
+`setCustomValidity()` with `reportValidity()` only shows the browser's own validation bubble for
+one field at a time; it does not set aria-invalid or show inline text. Use it for native
+constraint behavior (blocking submission), not as the visible error message. au-file-upload is the
+exception: it validates type, size and count itself and shows inline errors.
 
 ## Accessibility presentation of form controls
 
-What each form control exposes to assistive technology (checked in Chrome's accessibility tree and with Safari+VoiceOver). The visible control lives in the component's shadow root; the host element is not the control.
+The visible control lives in the shadow root, not on the host. The table records
+the naming, description and focus contracts. Chrome accessibility-tree checks and
+the documented Safari+VoiceOver application-form check cover selected behavior,
+not every table entry in every integration. Known speech limits follow the table.
 
 | Component | Role | Accessible name from | Forwarded from the host | `focus()` goes to |
 |---|---|---|---|---|
@@ -212,10 +373,10 @@ What each form control exposes to assistive technology (checked in Chrome's acce
 
 - No framework dependency — components must work from a `<script>` tag alone (the full bundle or a `dist/components/` file; source files are ES modules that import `src/core/` and `src/views/`)
 - Shadow DOM mode is always `open` (accessible to testing and DevTools)
-- CSS variables control all visual properties; no inline styles
+- Use documented CSS variables and exposed parts for appearance. Card uses parts and consumer selectors instead of component-specific variables.
 - Accordion panel visibility is immediate; reduced motion disables header/icon transitions
 - Form controls extend `AuFormElement`: `formAssociated` + ElementInternals for native form participation (no hidden inputs)
-- Events always use `{ bubbles: true, composed: true }` to cross Shadow DOM boundaries
-- Shadow-root ids come from `uid()` in `src/core/id.js` (`crypto.getRandomValues()`)
+- Public `au-*` events bubble and are composed so listeners can receive them across Shadow DOM boundaries. Form components retain their native-named `input` and `change` events.
+- Components that need generated IDs use `uid()` in `src/core/id.js` (`crypto.getRandomValues()`). Shared server/browser views use fixed IDs scoped to each shadow root.
 - `customElements.define()` is guarded with `typeof customElements !== 'undefined'` and `customElements.get()`, so loading a file twice or several overlapping files defines each element once; the class declarations still need a DOM, so component files are not importable in Node
 - Declarative Shadow DOM for au-accordion, au-tabs and au-breadcrumbs only: `src/views/` renders the same markup on the server (`src/ssr/inject.js`) and in the browser, and `src/core/declarative.js` adopts a server-rendered root. On by default in the Nuxt module (`declarativeShadowDom: false` turns it off); Next.js only via `withDeclarativeShadow` on a custom server

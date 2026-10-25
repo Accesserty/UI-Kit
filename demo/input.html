@@ -25,7 +25,8 @@
     </section>
 
     <section>
-      <h2>Prefix, Affix (Slot) and API</h2>
+      <h2>Add content before or after the input</h2>
+      <p>Use the <code>prefix</code> and <code>affix</code> slots. This example also calls <code>suggest()</code> and <code>clear()</code> from buttons.</p>
 
       <au-input id="myInput" label="Enter Date">
         <span slot="prefix">Type a Date</span>
@@ -39,11 +40,10 @@
     <section>
       <h2>Clearable</h2>
       <p>
-        using attibute <code>&lt;data-clear&gt;</code> contorll and <code>&lt;data-clear-label&gt;</code> setting text.
+        Add <code>data-clear</code> to show a clear button. Set its accessible name with <code>data-clear-label</code>.
       </p>
       <p>
-        For input fields with `type="search"`, the clear button is not needed as browsers typically provide a native
-        clear button for search inputs.
+        For <code>type="search"</code>, check whether the browser already supplies a clear control before adding another one.
       </p>
       <au-input label="data-clear" data-clear data-clear-label="Clear it now!"></au-input>
       <au-input label="type=search" type="search"></au-input>
@@ -59,12 +59,11 @@
       <p id="account-label">Account name</p>
       <p id="account-help">Use the name shown on your account.</p>
       <au-input name="account" aria-labelledby="account-label" aria-describedby="account-help"></au-input>
-      <p>Label and description IDs resolve in the containing document or shadow root.
-        Native element references track late or replaced labels and descriptions without rebuilding
-        the input. When no explicit or internal label is provided, native labels associated with
-        the host can supply its name. Older engines use plain text; provide an explicit
-        <code>aria-label</code> for rich labels on those engines. Set <code>aria-invalid</code>
-        and reference visible error text with <code>aria-describedby</code> when your application validates a field.</p>
+      <p>Put referenced labels and descriptions in the same document or containing shadow root as the host.
+        Native element references follow inserted, replaced or edited text without rebuilding the input.
+        When no explicit or internal label is supplied, a native label associated with the host can provide its name.</p>
+      <p>Older engines use plain-text fallbacks. Supply an explicit localized <code>aria-label</code> for rich labels on those engines.</p>
+      <p>When your application validates a field, set <code>aria-invalid</code> and connect visible error text with <code>aria-describedby</code>.</p>
     </section>
 
     <section>
@@ -118,7 +117,7 @@
 
     <section>
       <h2>Custom Style</h2>
-      <p>Using <code>::part</code> style clear button</p>
+      <p>Use <code>::part(clear)</code> to style the clear button, as in the example below.</p>
       <au-input id="myInput2" label="Enter Date" class="custom-input" data-clear data-clear-label="Clear it now!">
         <span slot="prefix">Type a Date</span>
         <div slot="affix">

@@ -22,9 +22,9 @@
     <section>
       <h2>How to use</h2>
       <ol>
-        <li>Copy file (dist/components/dropdown.js or dropdown.min.js, or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
+        <li>Copy <code>dist/components/dropdown.js</code> or its minified file for this component only. Use a full bundle from <code>dist/</code> if you need all components.</li>
         <li>
-          Add the JavaScript file to HTML using the
+          Load the copied file with a
           <code>&lt;script src=&quot;&quot; defer&gt;</code> tag
         </li>
         <li>Use the <code>&lt;au-dropdown&gt;</code> and <code>&lt;au-dropdown-item&gt;</code> tags</li>
@@ -309,8 +309,7 @@ dd.isOpen = false; // closes the menu</code></pre>
 
     <section>
       <h2>Event listeners</h2>
-      <p>The <code>&lt;au-dropdown&gt;</code> component dispatches an <code>au-select</code> event when an item is
-        clicked.</p>
+      <p>Listen for <code>au-select</code> on <code>&lt;au-dropdown&gt;</code>. An activated item emits the event, which bubbles to the dropdown. Read the selected value from <code>event.detail.value</code>.</p>
       <code style="display: block; white-space: pre-wrap; background: #f4f4f4; padding: 1rem; border-radius: 4px;">
   document.querySelector('au-dropdown').addEventListener('au-select', (e) => {
     console.log('Selected value:', e.detail.value);
@@ -319,10 +318,10 @@ dd.isOpen = false; // closes the menu</code></pre>
       <p>Each activation emits one bubbling, composed <code>au-select</code> event
         with the item's current <code>value</code>, including after reconnecting
         the same item. Updating item text or value does not select it.</p>
-      <p>Enter, Space and the arrow keys on the trigger open the menu and focus
-        an item. Up/Down, Home and End move between items. Escape returns to the
-        trigger; Tab leaves the menu using the browser's keyboard navigation
-        settings. Translating existing text preserves the focused item.</p>
+      <p>On the trigger, Enter, Space and Down open the menu at the first item; Up opens it at the last item.
+        In the menu, Up/Down, Home and End move between items. Escape closes the menu and returns focus to the trigger.
+        Tab leaves using the browser's keyboard navigation settings, without forcing focus back to the trigger.
+        Translating existing text preserves the focused item.</p>
       <p>Use text in the trigger slot and either an action label or a native link
         per item. Consumers handle actions through <code>au-select</code>; links
         retain their own destinations. Custom colors need separate contrast checks.
@@ -334,9 +333,8 @@ dd.isOpen = false; // closes the menu</code></pre>
     </section>
 
     <section>
-      <h2>Conclusion</h2>
-      <p>The <code>AuDropdown</code> component ensures that users can interact with menus using standard keyboard
-        patterns (Arrows, Enter, Space, Escape) while providing clear semantic hints to assistive technologies.</p>
+      <h2>Before using this menu</h2>
+      <p>Check the menu's name, keyboard path and actions in your application. Component semantics and browser tests do not establish screen-reader behavior for your page.</p>
     </section>
   </main>
 

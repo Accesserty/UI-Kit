@@ -59,19 +59,15 @@
   <main>
   <h1>Accesserty UI Kit — Carousel</h1>
   <p>
-    <code>&lt;au-carousel&gt;</code> is a Web Component. You provide the
-    <strong>slide blocks</strong> as native HTML children (each may contain links
-    or buttons); the component supplies a <strong>real button per block</strong>
-    for pagination — named by the block's title — a responsive
-    <em>slides-per-view</em> driven by <code>@container</code>, prev/next buttons,
-    a polite live region and roving keyboard focus. Tab order is
-    <strong>pagination → content → prev/next</strong>.
+    Put each slide directly inside <code>&lt;au-carousel&gt;</code> as an HTML element.
+    Slides can contain links or buttons. The component adds a named pagination button for each slide,
+    previous/next buttons, responsive sizing and a polite live region.
+    The dot group has one Tab stop. Tab order is <strong>pagination → content → prev/next</strong>.
   </p>
   <p class="note">
     Resize the window: slides-per-view steps 1 → 2 → 3 based on the carousel's own
-    width (<code>@container</code>, not the viewport). All slides stay readable and
-    reachable — a keyboard or screen-reader user can move through every block
-    freely; tabbing to an off-screen slide just scrolls it into view.
+    width (<code>@container</code>, not the viewport). Off-screen slides stay in the reading and Tab order.
+    Focusing an off-screen slide's control scrolls it into view. Check the reading and keyboard paths in your application.
   </p>
 
   <h2>Live example</h2>
@@ -193,9 +189,9 @@
 
   <h2>How to test the accessibility</h2>
   <ul>
-    <li><strong>Tab order (dots → content → arrows):</strong> <kbd>Tab</kbd> reaches the dot group first (one stop; <kbd>←</kbd>/<kbd>→</kbd>/<kbd>Home</kbd>/<kbd>End</kbd> move between dots and jump). Further <kbd>Tab</kbd>s go through each slide's link in order — including back with <kbd>Shift</kbd>+<kbd>Tab</kbd> — and the carousel scrolls to follow your focus. Then the prev/next buttons.</li>
+    <li><strong>Tab order (dots → content → arrows):</strong> <kbd>Tab</kbd> reaches the dot group first. Use <kbd>←</kbd>/<kbd>→</kbd>/<kbd>Home</kbd>/<kbd>End</kbd> to select a slide. Tab from a dot enters the current slide's first eligible native control. Continue through slide content to the previous/next buttons; use <kbd>Shift</kbd>+<kbd>Tab</kbd> to go back. The carousel scrolls to follow focus.</li>
     <li><strong>Reading order:</strong> slides remain ordinary content in DOM order; the component does not hide off-screen slides from assistive technologies or remove their tab stops. Verify reading/navigation with your screen reader; automated browser tests are not a screen-reader result.</li>
-    <li><strong>Named dots:</strong> each dot is labelled by its slide's title, so a screen reader announces e.g. "Forest light" — not "3".</li>
+    <li><strong>Named dots:</strong> inspect each dot's accessible name. A supplied title appears in the name, for example "Forest light, 3 of 6". Check the actual announcement with your screen reader.</li>
     <li><strong>Change feedback:</strong> changed navigation and settled scrolling update a polite live region ("Forest light, item 3 of 6"), except while a named dot is focused to avoid duplicate announcements. Title edits and reordering are silent.</li>
     <li><strong>Reach the end:</strong> controls reach the last slide at the track's start edge (right in RTL). Boundary arrows remain focusable with <code>aria-disabled="true"</code> and do nothing when activated again.</li>
     <li><strong>Responsive:</strong> narrow the window — slides-per-view steps 3 → 2 → 1 via <code>@container</code>.</li>

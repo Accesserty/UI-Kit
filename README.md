@@ -3,25 +3,53 @@
 ![License: MIT](https://badgen.net/badge/license/MIT/orange)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Accesserty/UI-Kit)
 
-A framework-agnostic library of **15 Web Components** designed to support accessible semantics, keyboard navigation and focus management. Names, content, themes and framework integration still require appropriate configuration and testing.
+A library of **15 Web Components** with reusable semantics, keyboard interaction
+and focus handling. Use them in plain HTML or through the Vue/Nuxt and React
+19/Next.js integrations. You still provide names, content and translations, and
+test the components in your application.
 
 Visit the [Accesserty UI Kit overview](https://accesserty.com/en/uikit/) for
 getting-started guidance, or try the [online Playground](https://accesserty.com/en/uikit/playground/)
 to explore component styles and copy examples. The API reference and local demos
 are available in [`demo/`](demo/index.html); framework setup is covered below.
 
-> **Philosophy:** Copy a single JS file, drop in a `<script>` tag, start using `<au-*>` elements. No build step, no npm install, no framework lock-in.
+For plain HTML, copy one JavaScript file and load it with a `<script>` tag.
+You do not need npm, a build step or a frontend framework.
+
+## Find what you need
+
+| Task | Read |
+|---|---|
+| Try a component in HTML | [Quick Start](#quick-start) |
+| Use Vue, Nuxt, React or Next.js | [Framework Integration](#framework-integration) |
+| Handle files, form values, reset or validation | [Usage reference](docs/USAGE.md#file-selection-and-native-forms) |
+| Configure Breadcrumbs, Tree, Card, Carousel or Accordion | [Usage reference](docs/USAGE.md) |
+| Translate labels and status messages | [Localization](#localization) |
+| Change styles | [Styling](#styling) |
+| Upgrade an existing project | [UPGRADING.md](UPGRADING.md) |
+| Change or test the kit itself | [CONTRIBUTING.md](CONTRIBUTING.md) and [Architecture](docs/ARCHITECTURE.md) |
+
+The [documentation index](docs/README.md) separates current references from dated
+design, release and evaluation records.
 
 
 ## Features
 
-- **Designed with WCAG 2.2 AA as the target** — reusable semantics, keyboard support and focus behavior, with component tests and targeted integration checks
-- **Zero runtime dependencies** — one self-contained JS file
-- **Framework-agnostic** — works in plain HTML, Vue, React, Nuxt, Next or any other stack that renders custom elements
-- **Form-integrated** — form-associated components participate in native `<form>` submission and validation via the ElementInternals API
-- **Server rendering** — Nuxt and Next.js render the tags and initial values; accordion, tabs and breadcrumbs also render their Shadow DOM on the server, so they look right before the script runs (see [Server rendering](#server-rendering))
-- **Framework-native forms** — `v-model` in Vue and Nuxt, `value`/`checked` with `onChange` in React and Next.js
-- **Fully themeable** — every visual detail is a CSS Custom Property
+- **Accessibility behavior:** WCAG 2.2 AA is the design target. Component tests
+  and targeted browser checks cover semantics, keyboard use and focus handling.
+- **No runtime package dependencies:** load the full bundle or self-contained
+  files for the components you need.
+- **Framework integrations:** Vue/Nuxt and React 19/Next.js have integration
+  modules and test fixtures. Other custom-element consumers need their own checks.
+- **Native forms:** seven components submit values and participate in validation
+  through `ElementInternals`.
+- **Form bindings:** use `v-model` in Vue/Nuxt, or `value`/`checked` and `onChange`
+  in React/Next.js.
+- **Server rendering:** servers render tags and initial values. Accordion, Tabs
+  and Breadcrumbs can also receive server-rendered Shadow DOM. See
+  [Server rendering](#server-rendering) for the setup and limits.
+- **CSS customization:** use documented custom properties and exposed parts.
+  Components include base styles; they are not unstyled components.
 
 > **On accessibility claims:** automated tests and targeted browser checks do not establish complete WCAG conformance or screen-reader compatibility. Verify your content, structure, headings, themes and interactions in the assembled application, including with assistive technologies.
 
@@ -70,33 +98,18 @@ Download [`dist/accesserty-ui-kit.min.js`](dist/accesserty-ui-kit.min.js) and in
 </html>
 ```
 
-That's all you need: every component already includes its own styles, so the page
-looks right without any CSS. When you want to change how things look, see
-[Styling](#styling).
+Save the page next to the downloaded file and open it in a browser. You should
+see an email field and a checkbox. Their styles are included in the script.
+To change those styles, see [Styling](#styling).
 
-Both bundles register components by side effect and isolate their internal
-variables in a function scope. They support classic scripts and browser module
-imports without exporting classes or claiming server-safe imports.
+The same script works when you open the HTML directly from disk. Both full
+bundles register elements when loaded, keep internal variables out of the global
+scope and export no classes. Classic scripts and browser module side-effect
+imports are supported. Do not import these browser bundles in Node.js.
 
-For local HTML opened directly from disk, use the ordinary script tag above.
-Breadcrumbs support relative local destinations such as `./index.html`; a leading
-`/` points to the filesystem root, not the folder containing the HTML. The last
-breadcrumb is the current page and is intentionally not a link. See the
-[standalone breadcrumb demo](demo/breadcrumbs.html) for a complete copyable example.
-
-Breadcrumbs also accept `element.items = [{ text: 'Home', url: './index.html' },
-{ text: 'Current page' }]`. Assignments to `items` and `separator` before the
-deferred script registers the element are retained and use the public setters
-after registration. Rendering and navigation still require JavaScript.
-
-For SSR, serialize breadcrumb items into the HTML attribute: React
-`items={JSON.stringify(items)}`, Nuxt `:items.attr="JSON.stringify(items)"`.
-With [server rendering](#server-rendering), the server also renders the
-navigation links, so they work before the script runs; otherwise the server
-supplies the host, data and icon slots and the links appear when the script
-registers the element. The [SSR fixtures](test/ssr/README.md) test these bindings,
-translation focus and native fragment navigation; framework router interception
-is not provided or verified.
+For local file links, use relative paths such as `./index.html`, not `/index.html`
+(the filesystem root). See [Breadcrumbs in local HTML and SSR](docs/USAGE.md#breadcrumbs-in-local-html-and-ssr)
+for data bindings and navigation limits.
 
 The bundle registers every component. To ship only some of them, copy single
 files from [`dist/components/`](dist/components/). Each file works on its own,
@@ -107,13 +120,14 @@ also in local HTML opened from disk:
 <script src="components/checkbox.js" defer></script>
 ```
 
-Each component also comes minified, used the same way:
-`components/input.min.js`. Pick either; they behave identically.
+Use `components/input.min.js` for the minified file. The readable and minified
+files have the same behavior.
 
 `accordion.js` registers both `au-accordion` and `au-accordion-item`;
 `dropdown.js` and `tree.js` likewise register their item elements. Loading a
-file twice, or next to the full bundle, is harmless: each element is defined
-once.
+file twice, or next to the full bundle, defines each element only once. Source
+files in `src/components/` are not the standalone distribution files: they may
+import shared modules. Use `dist/components/` for classic script tags.
 
 ### File selection and native forms
 
@@ -126,37 +140,15 @@ once.
 </form>
 ```
 
-The default picker is a native button. A custom `trigger` slot should contain a
-named `<button type="button">`. Files enter `new FormData(form)` under `name`;
-the component does not send network requests. Disabled fields/fieldsets prevent
-selection/removal and omit submission while preserving files. Required validation
-uses a visible focus target and inline message. Without `multiple`, remove the
-existing file before selecting a replacement. Picker/drop restrictions are not
-server validation. Replace `/upload` with your own server endpoint; the local
-demo only checks the selected files and does not upload them.
+Replace `/upload` with your own server endpoint. The component selects files;
+it does not send network requests. The form submits them under `attachments`.
+Keep `enctype="multipart/form-data"` for a native file upload and validate files
+again on the server. The [local demo](demo/file-upload.html) does not upload files.
 
-Read `element.value` for a copied `File[]`; use `change` to update your framework
-model. Assigning `value` is silent and bypasses picker restrictions; use
-`handleFiles(files)` to apply them. Native reset silently clears the component;
-synchronize an external model in the form's reset handler. SSR registration is
-client-only: send host attributes and optional trigger/hint content from the server,
-not File values in HTML. See [the live demo](demo/file-upload.html) and
-[framework fixtures](test/ssr/README.md).
-
-All form components (`au-input`, `au-textarea`, `au-checkbox`, `au-switch`,
-`au-radio-group`, `au-rating`, `au-file-upload`) take part in forms like native
-fields: they submit under `name`, follow `reset` and disabled fieldsets, block
-submission while invalid, and offer `checkValidity()`, `reportValidity()`,
-`validity`, `validationMessage`, `setCustomValidity()` and `form`. A custom
-message works on top of the component's own checks, such as `required`:
-
-```js
-const email = document.querySelector('au-input[name="email"]');
-email.setCustomValidity('This address is already registered.'); // blocks submission
-email.setCustomValidity('');                                      // back to the field's own checks
-```
-
-Pressing Enter in an `au-input` does not submit the form.
+Read [File selection and native forms](docs/USAGE.md#file-selection-and-native-forms)
+for selection limits, `File[]` values, events, disabled fields, validation and
+reset. The same reference covers the validity API shared by all seven form
+components. Pressing Enter in `au-input` does not submit the form.
 
 ## Framework Integration
 
@@ -175,9 +167,9 @@ import App from './App.vue'
 createApp(App).use(AccessertyVue).mount('#app')
 ```
 
-Tell the Vue compiler which tags are custom elements. Use the kit's
-`isCustomElement`, not `tag => tag.startsWith('au-')`: the form components below
-are Vue components so that `v-model` works.
+Configure the Vue compiler with the kit's `isCustomElement`. Do not use
+`tag => tag.startsWith('au-')`: that would bypass the seven form wrappers and
+prevent their `v-model` integration from working.
 
 ```js
 // vite.config.js
@@ -208,8 +200,7 @@ Then bind form components with `v-model`, as with native fields:
 | `au-rating` | number |
 | `au-file-upload` | array of `File`; set it to `[]` to clear the selection |
 
-These follow the rules of Vue's `v-model` on native inputs, so a group of
-checkboxes can share one array:
+Checkboxes can share an array, as with Vue's native `v-model`:
 
 ```vue
 <au-checkbox label="Search" value="search" v-model="sources"></au-checkbox>
@@ -221,14 +212,15 @@ Typed radio values come from `<au-radio>` elements written directly inside the
 group (a `v-for` there is fine); options rendered by a child component of your
 own report their string value.
 
-Other attributes, classes and listeners pass through to the element, and your
-own `@input` or `@change` still runs. A template ref gives access to the
-element's properties and methods (`nameField.value.focus()`); use
-`nameField.value.$el` where an API needs the DOM node itself. The other `au-*`
-elements are used as before, with ordinary attribute and event bindings, and
-explicit `:value` / `@input` bindings keep working. TypeScript declarations
-(`accesserty-ui-kit-vue.d.ts`) sit next to the file and type `v-model` in
-templates through Vue's `GlobalComponents`.
+Attributes, classes, listeners and slots pass through to the element. Your own
+`@input` and `@change` listeners still run. A template ref forwards element
+properties and methods: use `nameField.value.focus()` to focus the field, or
+`nameField.value.$el` when an API needs its DOM node.
+
+For non-form `au-*` elements, use ordinary attribute, property and event bindings.
+Existing explicit `:value` / `@input` bindings on form components also work.
+The adjacent `accesserty-ui-kit-vue.d.ts` types `v-model` through Vue's
+`GlobalComponents`.
 
 ### React and Next.js
 
@@ -264,9 +256,9 @@ export default function Signup() {
 | `AuRating` | `value` | `defaultValue` | `Number(e.target.value)` |
 | `AuFileUpload` | — | — | `e.target.value` (array of `File`) |
 
-`e.target` behaves like the native field: `AuCheckbox` and `AuSwitch` expose
-their `value` (`'on'` unless set), so checked boxes can be collected into an
-array, and `AuInput` has `valueAsNumber` and `valueAsDate`:
+`e.target` is the custom element. `AuCheckbox` and `AuSwitch` expose their
+`value` (`'on'` unless set), so you can collect checked values into an array.
+`AuInput` also exposes `valueAsNumber` and `valueAsDate`:
 
 ```jsx
 <AuCheckbox label="Search" value="search" checked={sources.includes('search')}
@@ -274,13 +266,15 @@ array, and `AuInput` has `valueAsNumber` and `valueAsDate`:
 <AuInput label="Quantity" type="number" value={String(qty)} onChange={e => setQty(e.target.valueAsNumber)} />
 ```
 
-As with native inputs, a controlled value wins: if `onChange` does not update
-the state, the field returns to it. One difference: when the field returns to the
-state value, the caret moves to the end of `AuInput` / `AuTextarea`, where a
-native React input keeps it in place. `ref` points at the element itself. Other
-props, `className` and children pass through. Call `defineElements()` once, for
-example in a client component of the root layout. The integration file starts
-with `'use client'`, so Next.js server components can render these components.
+A controlled value wins. If `onChange` does not update state, the wrapper
+restores the prop value on the next animation frame. Unlike a native React
+input, this moves the caret to the end of `AuInput` or `AuTextarea`.
+
+`ref` points at the element itself. Other props, `className` and children pass
+through. Call `defineElements()` once from a client effect, for example in a root
+layout's client component. The integration file starts with `'use client'`, so
+Next.js server components can render its exports without defining elements on
+the server.
 
 Other `au-*` elements are used directly as JSX tags: React 19 sets matching
 properties and attaches `on` + event-name props as listeners, for example
@@ -293,9 +287,10 @@ tag, including event details such as `e.detail.open`.
 
 ### Other frameworks
 
-The components are standard custom elements, so any framework that renders them
-can use the kit. Only Vue/Nuxt and React/Next integrations are tested; the
-Angular fixtures were removed in 2.0.6.
+The kit uses standard custom elements. Only Vue/Nuxt and React 19/Next.js have
+tested integrations. Other stacks need their own checks for compilation,
+properties, events, forms and hydration; rendering the tags alone does not
+establish compatibility.
 
 ### Nuxt
 
@@ -313,26 +308,28 @@ The module configures the Vue compiler, registers the `v-model` components for
 server and client rendering, and defines the elements in the browser. Use the
 components directly, including `v-model` on the form components listed under
 [Vue 3](#vue-3); no `<ClientOnly>` wrapper is needed. The server renders the
-element tags and their initial values; each component builds its internals when
-the script runs in the browser.
+element tags and their initial values. By default it also inserts declarative
+shadow roots for Accordion, Tabs and Breadcrumbs. Other components build their
+internals in the browser. See [Server rendering](#server-rendering).
 
 ### Server rendering
 
-Frameworks render the `<au-*>` tags and their attributes on the server. Three
-components can also render their Shadow DOM there, as declarative shadow roots:
-`au-accordion`, `au-tabs` and `au-breadcrumbs`. The page then shows the final
-layout before the script runs (collapsed panels, the selected tab, working
-breadcrumb links) instead of the raw light-DOM content, and the components take
-over that markup instead of rebuilding it.
+Frameworks render the `<au-*>` tags, attributes and initial values on the server.
+The kit's injector can also insert declarative shadow roots for `au-accordion`
+(including its items), `au-tabs` and `au-breadcrumbs`. The browser adopts these
+roots instead of rebuilding them. Other components, including the form controls,
+build their internals in the browser.
+
+No component class or browser bundle is safe to import in Node.js. Use the
+server-side integration modules instead.
 
 | Without JavaScript | `au-accordion` | `au-tabs` | `au-breadcrumbs` |
 |---|---|---|---|
 | Looks like the final component | yes | yes | yes |
-| Works | find-in-page and links open collapsed items | only the selected panel is shown | links navigate |
+| Works | find-in-page and links open collapsed items where `until-found` is supported | only the selected panel is shown | links navigate |
 
-The roots are inserted into the finished HTML, after the framework has rendered:
-never write `<template shadowrootmode>` in a Vue or React template, which breaks
-hydration. The other components keep building their Shadow DOM in the browser.
+Insert roots into finished HTML after framework rendering. Do not write
+`<template shadowrootmode>` inside a Vue or React template: that breaks hydration.
 
 **Nuxt** — the module above does it for you. Turn it off with
 `modules: [['./vendor/accesserty/accesserty-ui-kit-nuxt.js', { declarativeShadowDom: false }]]`.
@@ -351,8 +348,10 @@ await app.prepare()
 createServer(withDeclarativeShadow(app.getRequestHandler())).listen(3000)
 ```
 
-`withDeclarativeShadow` streams the HTML through the transform and leaves the
-response uncompressed, so compress after it (in a reverse proxy, for example).
+`withDeclarativeShadow` transforms `text/html` responses, removes their
+`content-length`, and handles text split across streamed chunks. It removes the
+request's `accept-encoding` so the transform receives uncompressed HTML. Apply
+compression afterwards, for example in a reverse proxy.
 Next.js documents that a custom server cannot be deployed on Vercel or combined
 with `output: 'standalone'`; there, the components still work and render in the
 browser as before.
@@ -361,59 +360,25 @@ browser as before.
 `injectDeclarativeShadow(html)` from `accesserty-ui-kit-ssr.js`, or use
 `createInjector()` (`push(chunk)` / `flush()`) for streamed responses.
 
+The injector handles well-formed server-renderer HTML; it does not repair
+unbalanced markup. Repeated injection leaves existing declarative roots alone.
+
 HTML added with `innerHTML`, `v-html` or `dangerouslySetInnerHTML` does not turn
 declarative templates into shadow roots; the components then build their own and
 remove the unused template.
 
 ### Tree data in plain HTML and frameworks
 
-`au-tree` receives an array through its JavaScript `data` property, not a JSON
-attribute. A normal script tag works without a framework or build tool:
-
-```html
-<script src="./accesserty-ui-kit.min.js" defer></script>
-<au-tree id="files" aria-label="Project files" show-checkbox></au-tree>
-<script>
-  const tree = document.getElementById('files');
-  tree.data = [{ id: 'project', label: 'Project', children: [
-    { id: 'readme', label: 'README.md' },
-    { id: 'locked', label: 'Locked file', disabled: true }
-  ] }];
-  tree.addEventListener('change', event => {
-    console.log(event.detail.checkedNodes);
-  });
-</script>
-```
-
-Data assigned before element registration is retained. Use sibling-unique string
-or numeric `id` values when replacing records during translations or reactive
-updates; they preserve node identity, focus, expansion and checkbox state. Without
-IDs, retention requires the same object references. Labels are text, not HTML.
-Optional `lang` sets the node language. `checked` on leaf records and `expanded`
-on branches explicitly control those states on each data assignment; omit them
-to retain local interaction state. Branch checks derive from enabled children.
-
-`disabled` prevents checkbox changes in that branch, including ancestor cascades;
-disabled branches remain navigable and expandable. Parent tri-state calculation
-excludes disabled child branches. The component does not mutate input objects or
-submit native form values. Use `change.detail.checkedNodes` to update application
-state; data and text updates do not emit user change events.
-
-Collapsed branches use `hidden="until-found"` where the browser supports it, so
-find-in-page can match a collapsed node label and expand every ancestor branch
-without moving focus; collapsed nodes stay out of the Tab order, arrow-key order
-and accessibility tree. Elsewhere collapsed branches are `hidden` and `inert`.
-Node labels live in Shadow DOM, which Safari's text-fragment links (`#:~:text=`)
-do not search; Chrome's do.
-
-Vue/Nuxt use `:data.prop="treeData"` and `@change`. In React/Next, assign
-`ref.current.data` after client-side registration and again when data changes.
-The concrete Next/Nuxt examples in `test/ssr/` verify host hydration and client-rendered
-tree nodes; they do not server-render the tree's shadow content.
+Tree takes data through a JavaScript property, not a JSON attribute. Read the
+[Tree usage reference](docs/USAGE.md#tree-data-in-plain-html-and-frameworks) for
+plain HTML, reactive updates, state retention and framework bindings.
 
 ## Localization
 
-Accesserty UI Kit components are framework-agnostic Web Components. Pass translated text through attributes, slots, or JavaScript properties from your application i18n layer.
+Your application supplies translations through attributes, slots or JavaScript
+properties. The kit does not have a locale registry and does not translate
+consumer content. Configure generated labels and announcements as well as visible
+text. For example:
 
 ```html
 <au-file-upload
@@ -489,10 +454,15 @@ Accesserty UI Kit components are framework-agnostic Web Components. Pass transla
 <au-switch label="接收通知" on="開啟" off="關閉"></au-switch>
 ```
 
-Text attributes use the `data-text-` prefix, except on `au-file-upload`, whose
-text attributes use `msg-` (for example `msg-drop-text`).
+Many text attributes use `data-text-`. File Upload uses `msg-` for messages,
+and components also have names such as `label`, `data-clear-label` and
+`data-dot-template`. Use the attribute names in each demo; there is no single
+prefix for every text setting.
 
-For framework use, bind these attributes to your normal i18n strings, such as `:label="t('upload.label')"`, `data-text-page-announcement={t('pagination.announcement')}`, or `[attr.data-text-toggle]="treeToggleLabel"`.
+In a framework, bind these attributes to your i18n strings. Examples are
+`:label="t('upload.label')"` in Vue/Nuxt and
+`data-text-page-announcement={t('pagination.announcement')}` in React/Next.js.
+Keep template tokens such as `{count}` and `{fileName}` in translated messages.
 
 
 ## Styling
@@ -509,9 +479,9 @@ to change how something looks, and pick the step that matches your goal:
 
 ### Step 1: Change a component
 
-Every component has settings you can change with CSS custom properties. Their
-names start with `--au-`. Give one a value and the component uses it instead of
-its default.
+Most components expose CSS custom properties whose names start with `--au-`.
+Set a value to replace its fallback. Card instead exposes parts for layout and
+uses your own selectors for assigned content.
 
 Set them on `:root` to change every instance on the page, or on a container to
 change only the components inside it:
@@ -551,7 +521,9 @@ does not work. Then link it alongside the script:
 <script src="accesserty-ui-kit.min.js" defer></script>
 ```
 
-The stylesheet is optional and does not replace the script.
+The stylesheet is optional and does not replace the script. It is repository
+source, not part of the package allow-list or an exported npm subpath. Do not
+assume an npm import can resolve it; copy or host the folder intentionally.
 
 The native control rules sit in a cascade layer named `accesserty`, so your own
 unlayered CSS always overrides them, whatever its specificity. If your project
@@ -576,8 +548,8 @@ place, use **tokens**. Two kinds of variables are involved:
   [`tokens-variables.css`](src/css/tokens-variables.css). Components never read
   tokens directly.
 
-That means **changing a token on its own changes nothing on screen.** You choose
-which components use a token by connecting it to their variables:
+Changing a palette token alone does not change a Web Component unless you have
+connected it to a variable that component reads. For example:
 
 ```css
 :root {
@@ -601,9 +573,11 @@ Now change `--color-primary-500` once, and every component you connected follows
 stylesheet, define the same tokens in your own CSS; the connections work the same
 way.
 
-**Check contrast whenever you change a colour.** Text needs at least 4.5:1
-against its background; focus outlines and control borders need at least 3:1
-(WCAG 2.2). Several components draw their focus outline *inside* the element,
+**Check contrast whenever you change a colour.** WCAG AA requires at least 4.5:1
+for normal text and 3:1 for large text. Check 3:1 contrast for visual information
+needed to identify controls and their states, including focus indicators.
+These requirements have exceptions; the numbers alone do not establish
+conformance. Several components draw their focus outline *inside* the element,
 on top of its background, so a darker or more saturated background also needs a
 new focus colour — for example `--au-accordion-heading-focus-shadow-color`.
 Check the hover and active backgrounds too, not only the resting state.
@@ -625,8 +599,6 @@ and `--au-summary-focus-outline-color` / `--au-summary-focus-outline-width` when
 the application theme needs it; forced-colors uses a system Highlight outline.
 Custom themes and clipping containers still require focus visibility checks.
 
-The design system CSS (`src/css/au-style.css`) uses CSS Cascade Layers and includes:
-
 `--color-pure-black` and `--color-pure-white` are literal black and white.
 The native Popover overrides `--au-popover-bg`, `--au-popover-text-color` and
 `--au-popover-border-color` accept **OKLCH channels**, e.g. `0.994 0 0`, because
@@ -645,10 +617,10 @@ component themes still need their own contrast, focus, and motion review.
 
 ### Reserving space before registration
 
-Until the script registers a component, its host is an empty inline element with
-no height. When registration happens after first paint (a deferred or slow
-bundle), the fields that appear push the content below them down: a layout shift.
-Reserve each registered height while the element is `:not(:defined)`:
+Before registration, a custom element has no component styles or generated
+controls. An otherwise empty host may reserve no height. If controls appear
+after first paint, they can push later content down. Reserve space with
+`:not(:defined)` while the script loads:
 
 <!-- reserve-css: test/browser/reserve-contract.mjs checks these values -->
 ```css
@@ -721,111 +693,20 @@ nothing in the same measurement.
 
 ## Card content and native behavior
 
-`au-card` is a layout primitive with four named slots, projected in heading,
-media, content, footer order. It has no default slot: unassigned content is not
-projected. Give your source content a logical order as well, before scripts load.
-
-```html
-<script src="./accesserty-ui-kit.js" defer></script>
-<au-card>
-  <h2 slot="heading">Reading guide</h2>
-  <p slot="content">Practical steps for reviewing a page.</p>
-  <a slot="footer" href="./guide.html">Read the review guide</a>
-</au-card>
-```
-
-The heading slot does not create a heading, and the card is not automatically a
-button, landmark or form control. Supply native headings, meaningful links,
-labels, media alternatives and action-button types. Native child controls retain
-form submission, reset and event behavior. The card adds no host Tab stop or
-custom events. Repeated `render()` calls keep its existing shell and slot nodes.
-
-Basic styles make the card shrinkable, wrap long text and respect `hidden`.
-Use `::part(au-card-container)` for the layout; the four other parts target the
-slot elements, not their assigned content. Style actual light-DOM content using
-your own selectors. Images, embedded widgets, themes and visual reordering need
-application-level checks; CSS reordering is not a reading-order guarantee.
-
-No special framework state adapter is needed for Card: use the framework's
-normal content and native event bindings, with client-only component registration
-in SSR applications. Real Next/Nuxt fixtures preserve the host/content
-nodes, translated heading focus and native form values. Internal slots are built
-on the client; this is not server-rendered Shadow DOM or screen-reader verification.
+Card projects four named slots and adds no interactive behavior. Read
+[Card content and native behavior](docs/USAGE.md#card-content-and-native-behavior)
+for slot order, native forms, styling and framework limits.
 
 ## Carousel integration
 
-Load a normal deferred script and provide direct element children as slides.
-Name the carousel with `aria-label` or an external `aria-labelledby`; localize
-`data-text-roledescription` when needed. The continuous scroll layout leaves all
-slides in DOM reading order and does not autoplay or implement tabpanels.
-
-`current` is a zero-based DOM property, not an HTML attribute. Finite numeric
-strings are accepted, fractions truncate and invalid/non-finite inputs become 0;
-the result clamps to range (-1 when empty). Keep stable keyed slide elements to
-retain selection and dot focus across translations/reordering. A new slide node
-is a new identity. `refresh()` updates immediately; title edits also auto-refresh.
-
-Navigation/current changes and settled scrolling emit `au-slide-change.detail`
-with `{index,total,title}`. Structural refresh and translation are silent.
-Boundary arrows remain focusable with `aria-disabled` and ignore repeated
-activation. Tab from a dot enters the current slide's first eligible native
-control; nested shadow widgets need their own focus entry. RTL movement uses
-the track's right edge. Forced colors and reduced motion have explicit styles.
-
-Next assigns `ref.current.current` after client registration; Nuxt uses
-`:current.prop="index"` / `@au-slide-change`. Copy `event.detail.index` into the model. The real SSR fixtures
-retain server-produced host/slide nodes but create controls only in the browser;
-they do not establish full framework navigation or screen-reader behavior.
+Read [Carousel integration](docs/USAGE.md#carousel-integration) for slide identity,
+the `current` property, events, keyboard behavior and framework bindings.
 
 ## Accordion state and accessible structure
 
-Plain HTML can load either bundle or `components/accordion.js` (readable or
-minified) using an ordinary deferred script; the source file is an ES module:
-
-```html
-<script src="./accesserty-ui-kit.js" defer></script>
-<au-accordion exclusive data-text-exclusive-hint="One answer at a time.">
-  <au-accordion-item heading-level="2">
-    <span slot="heading">How do I get started?</span>
-    <span slot="icon">▼</span>
-    <div slot="content"><p>Read the getting-started guide.</p></div>
-  </au-accordion-item>
-</au-accordion>
-```
-
-Use non-interactive heading/subtitle content: these slots are inside the native
-button. The icon is decorative. `heading-level` accepts 1–6 (default 3); choose
-the level appropriate to the surrounding page. `no-region` removes the panel's
-landmark role when many expanded panels would create too many landmarks.
-
-Exclusive mode owns direct item children only; nested accordions are independent.
-On initialization, insertion or enabling exclusive mode, the first open direct
-item is retained. Opening another item closes its siblings. Zero open items is
-allowed. `open` and `exclusive` are Boolean properties/attributes; `open="false"`
-still means open. Pre-registration property assignments are supported.
-
-Every actual connected `open` attribute change emits `au-toggle.detail.open`,
-including programmatic updates and sibling closures. Reassigning the same state
-does not emit another event. A group-level listener should filter the originating
-item when it contains nested groups; read the item's current `open` for final
-state after synchronous handlers. Native Enter/Space and Tab/Shift+Tab operate
-the buttons and visible content. Collapsing focused content returns focus to its
-header without stealing external focus. Translation retains the button and slots.
-
-Collapsed panels use `hidden="until-found"` where the browser supports it
-(detected through `onbeforematch`). Find-in-page, text-fragment links and `#id`
-links that match collapsed slotted content open that item and any enclosing
-items, emitting the usual `au-toggle` and closing siblings in exclusive mode. Until then the content stays
-out of the Tab order and accessibility tree. Browsers without support keep
-collapsed panels `hidden` and `inert`, so their find-in-page skips them.
-
-The real Next/Nuxt fixtures verify host and slotted-content hydration,
-reactive open state, events, keyboard interaction and a fragment link that opens a
-collapsed item. React binds Boolean `open` and `onau-toggle`; Vue and Nuxt bind
-`:open="isOpen"` / `@au-toggle`. Synchronize the Boolean model from
-`event.detail.open`; an item's initial `open` state emits no event. With
-[server rendering](#server-rendering) the accordion is already collapsed or open
-before the script runs. These are not a full screen-reader/conformance result.
+Read [Accordion state and accessible structure](docs/USAGE.md#accordion-state-and-accessible-structure)
+for named slots, heading levels, exclusive groups, state events, focus and
+find-in-page behavior.
 
 ## Browser Support
 
@@ -869,7 +750,9 @@ npx web-test-runner test/input.test.js --node-resolve
 npm run build
 ```
 
-Tests run in a real Chromium browser via `@web/test-runner`. No mocking — components are tested as they behave in production.
+Tests run in a real Chromium browser through `@web/test-runner`. They exercise
+the components in controlled fixtures; they do not prove every production
+integration or assistive-technology behavior.
 
 `npm test --prefix test/ssr` builds Next.js, Nuxt and Vue fixtures and checks
 server rendering, hydration, the Vue and React integrations, declarative shadow

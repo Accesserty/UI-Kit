@@ -20,16 +20,15 @@
     <section>
       <h2>How to use</h2>
       <ol>
-        <li>Copy file (dist/components/breadcrumbs.js or breadcrumbs.min.js, or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
+        <li>Copy <code>dist/components/breadcrumbs.js</code> or its minified file for this component only. Use a full bundle from <code>dist/</code> if you need all components.</li>
         <li>
-          Add the JavaScript file to HTML using the
+          Load the copied file with a
           <code>&lt;script src=&quot;&quot; defer&gt;</code> tag
         </li>
         <li>Use the <code>&lt;au-breadcrumbs&gt;</code> tag</li>
       </ol>
       <p>
-        Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and
-        filenames are correct to avoid loading errors. No framework, npm or local server is required:
+        Set the script's <code>src</code> to the copied file's location. No framework, npm or local server is required:
         opening this HTML file directly supports local relative links such as <code>./index.html</code>.
         Use <code>./</code> or <code>../</code> paths for local pages; a leading <code>/</code> points
         to the filesystem root locally, or the website root when served over HTTP(S).</p>
@@ -184,7 +183,7 @@
     </section>
     <section>
       <h2>aria-label</h2>
-      <p>Recommend to add <code>aria-label</code></p>
+      <p>Give the breadcrumb navigation a name with <code>aria-label</code>, or reference visible text with <code>aria-labelledby</code>.</p>
       <au-breadcrumbs aria-label="This is main navigator." items='[
             { 
               "text":"Home",
@@ -198,7 +197,7 @@
               "text":"Breadcrumbs"
             }
           ]'></au-breadcrumbs>
-      <p>open devtool you can see <code>&lt;nav aria-label="This is main navigator."&gt;</code></p>
+      <p>Inspect the component's Shadow DOM in developer tools to see <code>&lt;nav aria-label="This is main navigator."&gt;</code>.</p>
     </section>
     <section>
       <h2>aria-labelledby</h2>
@@ -242,10 +241,8 @@
     </section>
     <section>
       <h2>Custom Style</h2>
-      <p>Set a classname and change CSS Variables.</p>
-      <p>If you want to add an icon in front of an item, you can use slot="icon-{count}". For example, for the second
-        one,
-        use `slot="icon-2"`.</p>
+      <p>Add a class to the host and set the CSS variables for that class.</p>
+      <p>To put an icon before an item, use <code>slot="icon-{count}"</code>. Positions start at 1: the second item uses <code>slot="icon-2"</code>.</p>
       <au-breadcrumbs id="aaa" class="custom-breadcrumbs" aria-label="Test navigator." separator=">" items='[
           { 
             "text":"Home",
@@ -331,17 +328,16 @@
       </div>
     </section>
     <section>
-      <h2>Conclusion</h2>
-      <p>This is a simple Web Component with basic functionalities. It includes:</p>
+      <h2>Behavior summary</h2>
+      <p>The component renders a breadcrumb trail from <code>items</code>:</p>
       <ul>
-        <li>Inheritance of id, class, and aria-label.</li>
-        <li>Addition of a separator to change the linking symbol and items for data handling.</li>
-        <li>Each item can prepend a slot to change its icon.</li>
+        <li>The inner navigation receives the host's <code>id</code>, <code>class</code> and navigation label.</li>
+        <li><code>separator</code> sets the symbol between items.</li>
+        <li>Named slots add icons before individual items.</li>
         <li>Indicates the current page with <code>aria-current="page"</code> and renders it as plain text.</li>
-        <li> Uses CSS Variables to adjust the main appearance.</li>
+        <li>CSS variables control the component's appearance.</li>
       </ul>
-      <p>For developers, creating an accessible breadcrumbs web component is not difficult, and its application can be
-        very convenient, making it a worthwhile feature to develop or use.</p>
+      <p>Check link destinations, navigation names and custom theme contrast in your application.</p>
     </section>
   </main>
 </body>

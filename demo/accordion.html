@@ -22,16 +22,15 @@
     <section>
       <h2>How to use</h2>
       <ol>
-        <li>Copy file (dist/components/accordion.js or accordion.min.js, or accesserty-ui-kit.js or accesserty-ui-kit.min.js)</li>
+        <li>Copy <code>dist/components/accordion.js</code> or its minified file for this component only. Use a full bundle from <code>dist/</code> if you need all components.</li>
         <li>
-          Add the JavaScript file to HTML using the
+          Load the copied file with a
           <code>&lt;script src=&quot;&quot; defer&gt;</code> tag
         </li>
-        <li>Use the <code>&lt;au-accordion&gt;</code> <code>&lt;au-accordion-item&gt;</code>tag</li>
+        <li>Place <code>&lt;au-accordion-item&gt;</code> elements directly inside <code>&lt;au-accordion&gt;</code>.</li>
       </ol>
       <p>
-        Ensure to replace 'your-path' with the actual path to your JavaScript file. Also, make sure the path and
-        filenames are correct to avoid loading errors.
+        Set the script's <code>src</code> to the copied file's location. Use the built files, not an individual source file, with a classic script tag.
       </p>
     </section>
 
@@ -216,9 +215,9 @@
         </au-accordion>
       </div>
       <h2>Custom Style</h2>
-      <h3>If you want to select first-child and last-child</h3>
-      <p>Set external CSS and use <code>::part</code> style `button` and `region`</p>
-      <p>Because We can't select `.au-accordion-item` in &lt;au-accordion&gt;.(Both are shadow dom)</p>
+      <h3>Style the first and last items</h3>
+      <p>Select the <code>au-accordion-item</code> hosts with <code>:first-child</code> and <code>:last-child</code>.</p>
+      <p>Use <code>::part(button)</code> and <code>::part(region)</code> to style their internal header and panel. Ordinary page selectors cannot reach inside an item's Shadow DOM.</p>
       <code style="display: block; white-space: pre-wrap;">
         /* demo.css */
         au-accordion-item {
@@ -552,15 +551,13 @@ document.querySelector('au-accordion-item').addEventListener('au-toggle', (e) =&
 
     <section>
       <h2>FAQ</h2>
-      <h3>How about HTML tag &lt;details&gt;</h3>
-      <p>&lt;details&gt; is a good choice, and we highly recommend using native HTML directly. If you opt to use
-        &lt;details&gt;:</p>
+      <h3>Can I use native &lt;details&gt; instead?</h3>
+      <p>Use native <code>&lt;details&gt;</code> when it meets your needs. The examples below use the shared stylesheet without a custom element.</p>
       <ul>
-        <li>You can change the icon using `list-style-image`.</li>
-        <li>When there is not enough width, the start of the second line of text will be below the icon.</li>
-        <li>Some browsers or screen readers might not yet support &lt;details&gt;.</li>
-        <li>If your title requires additional supplementary information, you will need to customize &lt;summary&gt;
-          yourself.</li>
+        <li>Use <code>list-style-image</code> to change the marker.</li>
+        <li>Check how long summary text wraps beside the marker.</li>
+        <li>Test the disclosure with your supported browsers and assistive technologies.</li>
+        <li>Add any supplementary title content inside <code>&lt;summary&gt;</code> and check its layout yourself.</li>
       </ul>
       <div role="group" aria-labelledby="group-label-demo">
         <span id="group-label-demo" hidden>Product description</span>
@@ -718,12 +715,12 @@ document.querySelector('au-accordion-item').addEventListener('au-toggle', (e) =&
         respect reduced-motion preferences. Focus outlines remain visible in forced-colors mode.
       </p>
       <p>
-        With server rendering, the accordion's Shadow DOM is inserted into the page as a declarative shadow root,
-        so it is already collapsed or open before the script runs and the component takes that markup over
-        (see Server rendering in the README). Otherwise the server renders the host and slotted content and the
-        internal controls are created in the browser. Consumer content,
-        themes and real screen-reader interaction still require verification; using this component does not guarantee WCAG conformance.
+        With the kit's declarative Shadow DOM injector, the server inserts the accordion's internal markup.
+        Items appear open or collapsed before JavaScript runs. The component then adopts that markup.
+        Without the injector, the server renders only the host and slotted content; the browser creates the internal controls.
+        See Server rendering in the README for setup and framework limits.
       </p>
+      <p>Test your content, theme and screen-reader interaction in your application. Using this component does not guarantee WCAG conformance.</p>
     </section>
   </main>
 </body>

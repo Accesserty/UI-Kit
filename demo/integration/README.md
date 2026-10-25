@@ -1,26 +1,32 @@
 # Framework integration — i18n with `<au-carousel>`
 
-The carousel's screen-reader text is driven entirely by HTML **attributes**
-(`data-text-*`, `data-dot-template`, `data-live-template`, `data-item-fallback`,
-plus each slide's `data-title`). To localize, bind those attributes to your i18n
-library's `t()`. Because they are plain `data-*` attributes (always strings),
-React and Vue write them without any prop/attribute ambiguity.
+Use these examples to change carousel labels when the application changes
+language. Your application supplies the translations; the component does not
+translate them.
 
-These example pages were verified live in a browser (toggle the locale — every
-screen-reader string updates, including dot names sourced from slide titles).
+Bind `data-text-*`, `data-dot-template`, `data-live-template` and
+`data-item-fallback` to your i18n library's `t()`. Bind each slide's `data-title`
+too. These `data-*` attributes hold strings in both React and Vue. Dot names can
+also come from slide headings, so translate those when you use them as titles.
 
-| File | Framework | Verified |
+## Choose an example
+
+| File | Framework | What to try |
 |---|---|---|
 | `react.html` | React 19 | en ⇄ zh switch updates prev/next, pagination label, hint, and dot names |
 | `vue.html` | Vue 3 | same, with `isCustomElement` configured |
+| `nuxt-ssr-output.html` | Handwritten SSR-style HTML | Localized attributes are read when the browser defines the component |
 
-The Vue and Nuxt pages predate the kit's Vue integration; the setup sections
-below describe the current way.
-| `nuxt-ssr-output.html` | Nuxt (SSR) | server-rendered zh attributes consumed on client upgrade |
+The Vue page demonstrates direct custom-element bindings, not the kit's Vue
+form wrappers. The Nuxt page does not run a Nuxt server or test hydration.
+Use the setup below for the current integration modules. See
+[`test/ssr/README.md`](../../test/ssr/README.md) for executable framework fixtures.
+These examples are not part of the root `npm test` command and do not establish
+actual screen-reader announcements.
 
 ## React
 
-`data-*` attributes are written as HTML attributes, so binding just works:
+Bind translated strings to the carousel's `data-*` attributes:
 
 ```jsx
 <au-carousel
@@ -36,8 +42,9 @@ below describe the current way.
 </au-carousel>
 ```
 
-- Events: React 19 supports `onau-slide-change={…}`. On React 18, attach with a
-  `ref` + `addEventListener('au-slide-change', …)`.
+- React 19 supports `onau-slide-change={…}`. Earlier React versions need a
+  `ref` and `addEventListener('au-slide-change', …)` for this event; these
+  examples do not verify those versions or the kit's integration on them.
 
 ## Vue 3
 
@@ -58,10 +65,9 @@ components are Vue components, so that `v-model` works on them.
 
 ## Nuxt (SSR)
 
-The kit's components `extend HTMLElement`, which does not exist in Node, so the
-component bundle cannot run on the server. The kit's Nuxt module handles that:
-it defines the elements in the browser only, registers the `v-model`
-components, and configures the Vue compiler.
+Do not import the component bundle on the server: its classes extend
+`HTMLElement`, which is not available in Node. Copy the whole `dist/` folder
+to `vendor/accesserty/` and enable the Nuxt module:
 
 ```ts
 // nuxt.config.ts — dist/ copied to vendor/accesserty/
@@ -70,26 +76,29 @@ export default defineNuxtConfig({
 })
 ```
 
-What happens at runtime:
+The module configures the Vue compiler, installs the `v-model` wrappers and
+defines the custom elements in the browser. For the carousel:
 
-- The server renders the `<au-carousel data-text-prev="上一張" …>` tag **and the
-  slide content** (they are ordinary template output) into the HTML. So the
-  localized values and your slides are in the SSR payload and are SEO-visible.
-- The pagination dots / prev-next buttons live in the component's shadow DOM and
-  appear only after the client upgrades the element. Until the JS loads there is
-  a brief moment showing just the slides — inherent to any web component + SSR.
-- On upgrade, the component reads the already-present localized attributes, so
-  the controls come up in the correct language (verified in
-  `nuxt-ssr-output.html`).
+1. The server renders the `<au-carousel>` host, localized attributes and slide
+   content as HTML.
+2. Before JavaScript runs, only the slide content is present. The carousel's
+   pagination dots and previous/next buttons do not exist yet.
+3. The browser defines the component. It reads the existing attributes and
+   creates its controls in that language.
+
+This client-rendered interior is specific to the carousel and other components
+without server-rendered internals. The Nuxt module inserts declarative shadow
+roots for accordion, tabs and breadcrumbs by default. It does not do so for
+the carousel.
 
 ## Switching locale at runtime
 
-- Changing a **host** i18n attribute (`data-text-*`, `data-dot-template`, …) is
-  observed and refreshes automatically.
-- Changing only a **slide's `data-title` or heading text** is also picked up: the
-  component watches its light-DOM children with a `MutationObserver` and rebuilds
-  the dots. If you ever mutate titles in a way the observer can't see, call the
-  public **`el.refresh()`** method to force a re-read.
+- Change a host text attribute to update the corresponding control text.
+- Changes to a slide's `data-title` or heading text update its dot name after
+  a 100ms debounce. Existing slide elements keep their dot nodes and focus.
+- Call `el.refresh()` when you need the component to reread the slides
+  immediately. Keep the same slide elements during translation if you want
+  to preserve selection identity.
 
 ## Running these examples
 

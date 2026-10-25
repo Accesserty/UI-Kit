@@ -1,13 +1,17 @@
 # Contributing to Accesserty UI Kit
 
-Thank you for your interest! This project's goal is not only accessibility — it is "Design for All."
+Use this guide to change the kit, run its tests and submit a pull request.
+For application setup, start with the [README](README.md#quick-start).
 
-This document explains how to set up your development environment, create new components, write tests, and submit pull requests.
+The kit follows HTML-first design. Propose a new component only when it avoids
+repeated accessibility mistakes that native HTML does not already handle well.
+Component-level behavior does not make a complete application conform to WCAG.
 
 
 ## Prerequisites
 
-- **Node.js from [`.nvmrc`](.nvmrc) and npm 11** — components are tested in a real Chromium instance via `@web/test-runner`
+- **Node.js from [`.nvmrc`](.nvmrc) and npm 11** for development and tests
+- **A Chromium browser** for `@web/test-runner`
 - **Git**
 
 ```bash
@@ -36,9 +40,11 @@ npm test
 npm run build
 ```
 
-The demo pages load `dist/accesserty-ui-kit.js`, so they open directly from disk
-and show what consumers get. While editing `src/`, run `npm run dev` to rebuild
-the bundle on every change, then reload the demo.
+Open a page in `demo/` to inspect the built component. Demos load
+`dist/accesserty-ui-kit.js`, not the source, and can open directly from disk.
+While editing `src/`, run `npm run dev` and reload the demo after each rebuild.
+That watch command rebuilds the Vite full bundles; run `npm run build` to also
+update standalone components, integrations and declarations.
 
 
 ## Development Workflow
@@ -53,17 +59,27 @@ npm test
 npx web-test-runner test/input.test.js --node-resolve
 ```
 
-Tests run in a real Chromium browser. Always use `npm test` before submitting a PR — the complete suite must pass.
+Run the complete suite before submitting a PR. Tests use real Chromium fixtures;
+they do not establish behavior in every browser, framework or assistive technology.
 
 ### Integration tests
 
-Install `test/ssr` dependencies (`npm ci --prefix test/ssr`) and Google Chrome
-before running Playwright-based checks. Build fresh bundles with `npm run build`
-before testing consumers. `npm run test:docs` also checks the audited CSS defaults
-in demo tables and Playground; it is not a complete CSS parser or theme audit.
-`npm run test:reserve` checks that the README's `:not(:defined)` reservation CSS
-still reserves each component's registered height; update the README values when
-a component's default size changes.
+Build current source before testing consumers: `npm run build`. Playwright-based
+checks need Google Chrome and the separate dependencies in `test/ssr`:
+`npm ci --prefix test/ssr`. Install only in these development environments, not in
+a plain-HTML consumer project.
+
+| Check | What it covers |
+|---|---|
+| `npm run test:docs` | Local demo asset references, source/test inventory, selected CSS defaults and build/toolchain contracts |
+| `npm run test:reserve` | README `:not(:defined)` CSS against registered component heights |
+| `npm run test:ssr-stream` | Streaming server-wrapper behavior |
+| `npm test --prefix test/ssr` | Targeted framework rendering, hydration, bindings and types |
+
+Update the README reservation values when a default size changes. The CSS
+documentation checks cover selected defaults; they are not a full CSS parser or
+theme audit. See the [SSR test guide](test/ssr/README.md) for fixture setup and
+individual checks.
 
 Use `npm run test:css -- chrome`, `npm run test:controls -- chrome`, and
 `npm run test:pagination -- chrome` for Chrome-only runs. The component scripts in
@@ -81,11 +97,10 @@ in `test/ssr` (set `UI_KIT_WEBDRIVER_MODULE` to use a different copy):
   listed as "passed on retry", because focus checks fail if the window loses
   focus while the Mac is in use.
 
-A full check builds fresh bundles first, then runs the documentation, Chrome
-integration, Firefox and SSR checks. SSR runs separately through
-`npm test --prefix test/ssr`; installing its dependencies does not run it.
-Passing these checks does not establish Safari behavior, actual screen-reader
-speech, or complete accessibility conformance.
+The CI job runs source tests, builds fresh bundles, then runs documentation,
+Chrome integration, Firefox and SSR checks. Installing the SSR dependencies does
+not run the SSR tests. Safari requires a separate macOS run. None of these checks
+proves screen-reader speech or complete accessibility conformance.
 
 ### Building
 
@@ -93,8 +108,10 @@ speech, or complete accessibility conformance.
 npm run build
 ```
 
-This produces `dist/accesserty-ui-kit.js` and `dist/accesserty-ui-kit.min.js`.
-**Do not include `dist/` changes in your pull request** — the maintainers rebuild on release.
+This produces the readable/minified full bundles, standalone component pairs,
+framework/SSR modules and type declarations in `dist/`.
+**Do not include `dist/` changes in your pull request** — maintainers rebuild on
+release. Keep the build available locally when testing demos and consumers.
 
 
 ## Adding a New Component
@@ -148,6 +165,11 @@ if (typeof customElements !== 'undefined' && !customElements.get('au-my-componen
 }
 ```
 
+This is a lifecycle skeleton, not an accessible widget implementation. Define
+the component's keyboard behavior, names, states, text settings and focus rules
+before filling it in. The registration guard prevents duplicate definitions;
+it does not make the top-level `HTMLElement` subclass safe to import in Node.js.
+
 ### Shared code in `src/core/`
 
 Use these instead of writing your own copy:
@@ -165,9 +187,11 @@ component files keep working on their own.
 
 ### Server rendering (display components only)
 
-Most components build their Shadow DOM in the browser, as above. A component
-whose content looks wrong before its script runs (accordion, tabs, breadcrumbs)
-can also render on the server as a declarative shadow root:
+Only Accordion (including its items), Tabs and Breadcrumbs currently have
+server-rendered shadow roots. All other components build their internals in the
+browser. If a proposed display component needs this support, follow the shared
+view/injector pattern and add tests; support does not follow from registration
+alone:
 
 1. Move its markup and styles to `src/views/my-component.js`: pure functions
    with no DOM access, escaping text with `escapeHTML`, and fixed ids (each
@@ -181,7 +205,10 @@ can also render on the server as a declarative shadow root:
 4. Add a fixture to `test/browser/declarative.mjs` (adopted and built roots
    must match) and cases to `test/ssr-inject.test.js`.
 
-Form components stay browser-only: without JavaScript they could not submit.
+Form-control internals stay browser-only: without JavaScript they cannot submit
+their component values. Servers may still render hosts, initial attributes and
+consumer content. See [Architecture](docs/ARCHITECTURE.md#declarative-shadow-dom)
+for parsing and hydration boundaries.
 
 ### 2. Add to the bundle entry
 
@@ -249,9 +276,14 @@ describe('AuMyComponent', () => {
 Load the bundle with `<script src="../dist/accesserty-ui-kit.js" defer></script>`
 and add a link in `demo/index.html`.
 
-### 5. Add to playground
+<a id="5-add-to-playground"></a>
 
-Add a new config entry in `demo/playground-engine.js` following the existing `COMPONENT_CONFIGS` pattern.
+### 5. Review playground coverage
+
+If the component has Playground controls, add a config entry in
+`demo/playground-engine.js` following `COMPONENT_CONFIGS`. The local Playground
+does not configure every component: Card and Carousel are not entries there.
+Keep its preview, copyable example and CSS settings consistent with the demo.
 
 
 ## CSS Variable Naming Convention
@@ -274,14 +306,21 @@ Every CSS variable used in a component's `style.textContent` must appear in the 
 
 ## Accessibility Requirements
 
-All components must meet **WCAG 2.2 AA**. Before submitting:
+WCAG 2.2 AA is the design target. Before submitting, check the applicable
+component behavior and document remaining integration or manual-test limits:
 
 - Keyboard navigation works without a mouse
 - All interactive elements have visible focus indicators (`focus-visible`)
 - ARIA roles, states, and properties are correct
 - Form-associated components integrate with native form validation
-- Errors and state changes are announced via `aria-live` where appropriate
+- Errors and state changes are announced when needed; avoid duplicate live
+  announcements when moving focus already communicates the result
 - Color contrast meets 4.5:1 for normal text, 3:1 for large text
+
+Also check focus and non-text contrast, reduced motion, narrow layouts and text
+updates without losing focus. Automated checks alone do not establish complete
+WCAG conformance. Report assistive-technology checks separately, with the actual
+browser and screen reader used.
 
 
 ## Pull Request Process

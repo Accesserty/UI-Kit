@@ -1,8 +1,14 @@
 # Upgrading to 3.0
 
-3.0 adds framework-native form bindings and server rendering of Shadow DOM. The
-component tags, attributes and properties stay the same; component events now
-start with `au-`. Check the breaking changes below before you upgrade.
+Use this guide when moving from 2.x to 3.x. The component tags, attributes and
+properties stay the same. Rename the affected custom-event listeners and update
+copied component files before testing your application.
+
+3.x also provides framework form bindings and optional server-rendered Shadow
+DOM for Accordion, Tabs and Breadcrumbs. Those integrations do not make component
+classes safe to import in Node.js.
+
+Start with [Steps](#steps). The sections below explain each change.
 
 ## Breaking changes
 
@@ -12,7 +18,8 @@ start with `au-`. Check the breaking changes below before you upgrade.
 cascade layer named `accesserty` instead of `components`. The old name merged
 with other libraries' layers of the same name, such as Tailwind CSS v4's.
 
-If you declared a layer order that mentions the kit, rename it:
+If your layer order included the kit's old `components` layer, add `accesserty`
+at the intended position. Keep `components` if another library still uses it:
 
 ```css
 /* before */
@@ -23,9 +30,9 @@ If you declared a layer order that mentions the kit, rename it:
 
 ### Component events start with `au-`
 
-Every custom event now carries the kit's prefix, like `au-toggle` already did.
-Rename your listeners; the old names are no longer sent. Native `change` and
-`input` on form components keep their names.
+Rename the listeners in this table. The old names are no longer dispatched.
+`au-toggle` keeps its name. Form components keep native-named `change` and
+`input`; Tree keeps `change` with `detail.checkedNodes`.
 
 | Component | Before | After |
 |---|---|---|
@@ -40,19 +47,22 @@ In React, `ontab-change` becomes `onau-tab-change`; in Vue, `@tab-change` become
 
 ### Single component files move to `dist/components/`
 
-The files in `src/components/` now import shared code from `src/core/` (and,
-for accordion, tabs and breadcrumbs, the markup they share with server rendering
-from `src/views/`), so a single source file no longer works as a classic
-`<script src>`. If you copied single component files from `src/`, copy them from
-`dist/components/` instead: every component has a self-contained file there,
-used the same way, plus a minified copy (`tabs.min.js`).
+Use `dist/components/` for standalone scripts, not `src/components/`. Component
+source files may import `src/core/`; Accordion, Tabs and Breadcrumbs also share
+markup through `src/views/`. A classic `<script src>` cannot resolve those
+module imports.
+
+Each component has a self-contained readable file and a minified file in
+`dist/components/`, such as `tabs.js` and `tabs.min.js`. Load either with the same
+script tag you used for the old standalone file. Compound component files also
+register their child elements.
 
 ### No `au-toggle` for an accordion item's initial state
 
-An `au-accordion-item` that already has `open` when its script loads no longer
-emits `au-toggle` during the upgrade; nothing changed. Real changes still emit
-it. If you relied on that event to learn the initial state, read `item.open`
-instead.
+An `au-accordion-item` with `open` already set does not emit `au-toggle` when the
+script registers it. Read `item.open` for the initial state. Later connected
+state changes, including programmatic changes and exclusive-mode sibling
+closures, still emit the event. Writing the same state again emits nothing.
 
 ### Fixed ids inside some shadow roots
 
@@ -70,16 +80,17 @@ matters if your code read those internal ids.
   array or `Set`, `true-value` / `false-value` work, `type="number"` inputs
   give numbers, and `<au-radio :value="2">` gives `2`.
 - **`au-input` has `valueAsNumber` and `valueAsDate`,** as a native input does.
-- **Form controls have `setCustomValidity()` and `form`,** as native controls do:
-  a custom message ("This address is already registered.") blocks submission
-  and shows in the browser's validation message, alongside the component's own
-  checks such as `required`.
+- **Form controls expose `setCustomValidity()` and `form`.** A nonempty custom
+  message blocks submission without removing checks such as `required`. An empty
+  message removes the custom error. This API does not create inline error text
+  or set host `aria-invalid`; supply those in the application.
 - **React and Next.js:** `AuInput`, `AuCheckbox`… with `value` / `checked`,
   `defaultValue` / `defaultChecked`, `onChange` and refs to the element. See
   [React and Next.js](README.md#react-and-nextjs).
-- **Server rendering:** `au-accordion`, `au-tabs` and `au-breadcrumbs` render
-  their Shadow DOM on the server and look final before the script runs. On by
-  default in the Nuxt module; one wrapper for a self-hosted Next.js server. See
+- **Server rendering:** the injector renders Shadow DOM for `au-accordion`
+  (including its items), `au-tabs` and `au-breadcrumbs`. It is on by default in
+  the Nuxt module. Next.js requires a self-hosted custom server. Other components
+  still build their internals in the browser. See
   [Server rendering](README.md#server-rendering).
 - **TypeScript:** declaration files in `dist/`: `accesserty-ui-kit.d.ts` types
   every element (`document.querySelector('au-tabs')`), the React file adds
@@ -88,17 +99,17 @@ matters if your code read those internal ids.
 
 ## Changed look
 
-- **Disabled state:** every component and native button now dims to the same
-  opacity, 0.6, which keeps dark text at about 5:1 on white. It was 0.35–0.65
-  before, and `au-input` did not change at all when disabled. Each component
-  has a `--au-…-disabled-opacity` variable (`--au-btn-disabled-opacity` for
-  native buttons and pagination); the demo pages list them.
+- **Disabled state:** controls with disabled-state styling use opacity 0.6 by
+  default. Previously values varied from 0.35–0.65, and `au-input` did not dim.
+  Use the documented `--au-…-disabled-opacity` variables to override the value;
+  native buttons and pagination use `--au-btn-disabled-opacity`. Check contrast
+  in your theme rather than assuming one opacity produces a fixed contrast ratio.
 
 ## Steps
 
-1. Replace your copy of the kit with the whole new `dist/` folder: the
-   integration files import each other and the component bundle by relative
-   path.
+1. Replace copied distribution files. Framework users need the whole `dist/`
+   folder: integration modules import sibling files by relative path. Plain HTML
+   can keep using one full bundle or selected `dist/components/` files.
 2. If you use `au-style.css`, copy the new `src/css/` folder and rename any
    `components` layer reference to `accesserty`.
 3. **Vue:** replace `isCustomElement: tag => tag.startsWith('au-')` with the
@@ -111,5 +122,9 @@ matters if your code read those internal ids.
    and call `defineElements()` once in a client effect. For server rendering of
    accordion, tabs and breadcrumbs, run a custom server with
    `withDeclarativeShadow` (not available on Vercel).
-6. **Angular:** no longer tested or documented since 2.0.6. The components are
-   standard custom elements and keep working with `CUSTOM_ELEMENTS_SCHEMA`.
+6. **Other frameworks:** no integration is tested beyond Vue/Nuxt and React
+   19/Next.js. Standard custom-element support does not establish compatibility
+   with a particular compiler, form system or hydration flow.
+7. Test event listeners, submitted values, reset, keyboard use and focus in your
+   application. Review copied CSS and translations too. Repository test results
+   do not establish your application's accessibility conformance.

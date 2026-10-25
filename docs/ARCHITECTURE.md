@@ -1,12 +1,14 @@
 # Architecture
 
-This document explains the technical architecture of Accesserty UI Kit — how components are structured, how CSS is organized, and how the build and test infrastructure works.
+Use this reference when changing component internals, shared code, server
+rendering or the build. For consumer setup, read the [README](../README.md).
+For data, events and forms, read the [usage reference](USAGE.md).
 
 
 ## Overview
 
 Accesserty UI Kit consists of 15 standalone Web Components and 18 registered
-custom-element tags (compound components add child tags). Each component:
+custom-element tags. Compound components register child tags too. Each component:
 
 - Is implemented as one vanilla JavaScript ES module in `src/components/` that
   may import shared code from `src/core/` (and, for accordion, tabs and
@@ -14,12 +16,14 @@ custom-element tags (compound components add child tags). Each component:
 - Ships both inside the full bundles and as its own self-contained classic
   script in `dist/components/`
 - Uses Shadow DOM for style encapsulation
-- Exposes all visual properties as CSS Custom Properties
+- Exposes documented CSS custom properties or parts for customization; Card
+  uses parts and consumer selectors rather than its own CSS variables
 - Is defined in the browser only: component files and the browser bundles are
   not importable in Node.js. Servers render the hosts, attributes and initial
   values; `au-accordion`, `au-tabs` and `au-breadcrumbs` can additionally
   receive a server-rendered declarative shadow root
-- Has no dependency on other components (except accordion-item → accordion, dropdown-item → dropdown, tree-node → tree)
+- Has no runtime package dependency. Compound elements coordinate with their
+  parent or child elements; see [Compound Components](#compound-components).
 
 
 ## Component Architecture
@@ -44,11 +48,13 @@ src/
   css/                   global stylesheet
 ```
 
-Each component file contains one class definition (two for the compound
-accordion, dropdown and tree) and a guarded `customElements.define()` call for
-each element. Because of the imports, a source file is an ES module: it cannot
-be loaded on its own as a classic `<script src>` and does not load from a
-`file://` page. Use a bundle or a `dist/components/` file there.
+Each component file defines one class, or two for Accordion, Dropdown and Tree.
+Registration uses a guarded `customElements.define()` call for each tag.
+
+Most source files import shared modules and must load as ES modules over HTTP,
+not classic scripts or modules from `file://`. Card and Tree currently import
+nothing, but consumers should still use the distribution files. Full bundles and
+`dist/components/` files support ordinary script tags, including local HTML.
 
 ### Class Structure
 
@@ -79,14 +85,15 @@ AuComponent extends HTMLElement
 ```
 
 Form components extend `AuFormElement` (`src/core/form-element.js`) instead of
-`HTMLElement` directly. Shadow-root ids come from `uid()` in `src/core/id.js`.
+`HTMLElement` directly. Components that need generated IDs use `uid()` from
+`src/core/id.js`. Shared server/browser views use fixed IDs within each root.
 
 ### Shadow DOM Strategy
 
-All components use `attachShadow({ mode: 'open' })`. Open mode is required because:
-- Tests need to query the shadow root: `el.shadowRoot.querySelector(...)`
-- DevTools accessibility tree can inspect open shadow roots
-- Framework adapters (React, Vue) may need to traverse into the shadow root
+Components create open shadow roots, or adopt open declarative roots. Open roots
+let tests and maintainers inspect nodes through `element.shadowRoot`. Framework
+form adapters use public element properties and methods rather than requiring
+consumer code to traverse internal controls.
 
 Components build their shadow tree in the browser, from static markup or DOM
 methods; consumer-supplied text is not interpolated as HTML. `au-accordion`,
@@ -167,11 +174,21 @@ All seven extend `AuFormElement` (`src/core/form-element.js`).
 5. `internals.setValidity(flags, message, anchor)` mirrors the native `input.validity`;
    a custom message from `setCustomValidity()` sits on top of the component's own flags
 
-This means `new FormData(form)` works correctly without hidden `<input>` elements, and native browser validation (`required`, `pattern`, etc.) is respected.
+The browser collects values through `new FormData(form)` without hidden proxy
+inputs. Each component supplies its own value and applicable validity flags;
+`formAssociated` alone does not implement those contracts.
+
+A custom error survives reset. Clearing `setCustomValidity('')` removes that
+error but leaves the component's own checks in place. This API controls native
+validation; applications still provide inline error text and host `aria-invalid`
+where needed. See [form validation](USAGE.md#validate-the-other-form-components).
 
 ### Form Reset
 
-`formResetCallback()` is called by the browser when the parent `<form>` is reset. Components must restore their initial value (captured in `connectedCallback` or constructor).
+The browser calls `formResetCallback()` when the associated form resets.
+Components restore their captured initial value or checked state; File Upload
+clears its files. Reset does not emit ordinary user-change events. Applications
+that store separate models must synchronize them in the form's reset handler.
 
 For `au-input`, form reset also rebuilds the `<input>` element to clear `:user-invalid` CSS state — a browser quirk where removing the value attribute doesn't clear `:user-invalid` on the existing element.
 
@@ -187,12 +204,15 @@ src/css/au-style.css
   └── @import components.css layer(accesserty) (native HTML element styles)
 ```
 
-The native control rules are placed in the `accesserty` cascade layer (named
-`components` before 3.0.0; renamed so it no longer merges with other libraries'
-`components` layers). The base
-and semantic custom-property definitions are unlayered so they remain available
-as ordinary inherited tokens; consumers can override them with their own
-application styles. Component Shadow DOM styles remain separate from this file.
+Native-control rules use the `accesserty` cascade layer. Unlayered application
+rules override those normal declarations. Palette and semantic tokens remain
+unlayered inherited custom properties. Components' Shadow DOM styles are
+separate from this stylesheet.
+
+The stylesheet is optional repository source. The package allow-list contains
+`dist` and `README.md`, and no CSS subpath is exported. Consumers must copy or
+host the whole `src/css/` folder so relative imports resolve. Loading the browser
+bundle does not load this global stylesheet.
 
 ### Component Styles
 
@@ -215,7 +235,9 @@ style.textContent = `
 `;
 ```
 
-This works because Shadow DOM provides full encapsulation — nested rules in shadow styles cannot leak out.
+Rules target nodes inside the shadow root rather than unrelated page elements.
+Inherited properties, custom properties and exposed parts still let consumers
+affect appearance. Shadow DOM is not a substitute for testing the assembled page.
 
 ### CSS Custom Property Naming
 
@@ -228,11 +250,18 @@ Pattern: `--au-[component]-[part]-[property]-[state]`
 | `property` | `bg`, `text-color`, `border-width`, `border-radius`, `padding-vertical` |
 | `state` | `hover`, `active`, `focus`, `checked`, `selected`, `disabled` |
 
-Every CSS variable in a component's `style.textContent` has a fallback value: `var(--au-input-bg, oklch(0.994 0 0))`. This means components render correctly even with no custom properties set.
+Component settings use fallback values, for example
+`var(--au-input-bg, oklch(0.994 0 0))`, so custom themes are optional. Keep
+documented names and defaults aligned with the component or shared view.
 
 ### Color System
 
-All color values use `oklch()` — a perceptually uniform color space that produces better-looking gradients and is more predictable for accessibility contrast calculations than hex or hsl.
+Default colors commonly use `oklch()`. The notation does not guarantee contrast:
+check the actual foreground/background combination, including focus, hover and
+active states. Most component variables accept complete CSS colors. The three
+native Popover overrides `--au-popover-bg`, `--au-popover-text-color` and
+`--au-popover-border-color` instead accept OKLCH channels such as `0.994 0 0`,
+because the stylesheet wraps them in `oklch(...)`.
 
 ```css
 oklch(0.1398 0 0)   /* near-black text */
@@ -268,7 +297,7 @@ from `file://` pages. A component file registers every element of its source
 Node-importable. The integration modules are ES modules that import `vue` /
 `react` / `#app` (and `node:*` built-ins on the server side) from the consumer
 project and the bundle or SSR module next to
-them by relative path, so consumers copy the whole `dist/` folder. The optional
+them by relative path, so framework consumers copy the whole `dist/` folder. The optional
 global stylesheet lives at
 `src/css/au-style.css`; it imports its sibling files by relative path, so the
 whole `src/css/` folder is copied together.
@@ -289,7 +318,9 @@ npm test
               └── nextFrame() — await one requestAnimationFrame cycle
 ```
 
-Tests are true integration tests: components run in a real browser with real Shadow DOM, real `FormData`, and real ARIA. Nothing is mocked.
+Component tests exercise real browser DOM, Shadow DOM and FormData in controlled
+fixtures. Fixtures can simulate selected conditions; a passing run is not proof
+of every production integration or assistive-technology interaction.
 
 `npm run test:docs` checks that every demo HTML file resolves its local script
 and stylesheet references and that each of the 15 component source files has a
@@ -307,8 +338,9 @@ breadcrumbs with and without server-rendered roots, and
 `test/browser/standalone.mjs` loads every `dist/components/` file as a classic
 script. These are targeted browser checks, not screen-reader results.
 
-Angular fixtures (`test/angular-aot/`, `test/ssr/angular/`) were removed in 2.0.6;
-Next and Nuxt are the tested framework integrations.
+Vue/Nuxt and React 19/Next.js have framework fixtures. No other framework's
+compiler, form handling or hydration is established by these checks. See
+[the SSR test guide](../test/ssr/README.md) for the fixture inventory and limits.
 
 ### Test File Pattern
 
@@ -330,15 +362,23 @@ and `ssr-inject.test.js` imports the injector from `src/ssr/`.
 
 ### CSS Nesting
 
-Used throughout all component `style.textContent` blocks. Nesting scopes rules within their parent selector without class proliferation.
+Component styles use native CSS nesting. Browser support is feature-dependent;
+the configured browser runners establish specific scenarios, not a universal
+minimum engine version for the whole kit.
 
-**Support:** Chrome 112+, Firefox 117+, Safari 17.2+
+Feature-reference versions are Chrome 112+, Firefox 117+ and Safari 17.2+.
+These are not a complete kit support baseline or a record of tested versions.
 
 ### `:user-invalid`
 
-Applied to `<input>` and `<textarea>` inside shadow DOM to show validation errors only after the user has interacted with the field.
+Used on internal input and textarea controls to style user-invalid states. This
+CSS state is distinct from application error text and host `aria-invalid`.
+Input reset rebuilds its internal input to clear that state. Test custom themes,
+error announcements and reset behavior separately in the target browsers.
 
-**Support:** Chrome 119+, Firefox 88+, Safari 16.5+
+Feature-reference versions for `:user-invalid` are Chrome 119+, Firefox 88+ and
+Safari 16.5+. Supporting this selector does not establish support for all other
+component APIs and CSS.
 
 ### Popover and inline fallback — Dropdown
 
