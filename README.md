@@ -28,6 +28,7 @@ You do not need npm, a build step or a frontend framework.
 | Change styles | [Styling](#styling) |
 | Upgrade an existing project | [UPGRADING.md](UPGRADING.md) |
 | Change or test the kit itself | [CONTRIBUTING.md](CONTRIBUTING.md) and [Architecture](docs/ARCHITECTURE.md) |
+| Run manual accessibility checks or inspect dated observations | [Accessibility testing records](docs/accessibility/README.md) |
 
 The [documentation index](docs/README.md) separates current references from dated
 design, release and evaluation records.

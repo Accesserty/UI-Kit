@@ -322,6 +322,12 @@ updates without losing focus. Automated checks alone do not establish complete
 WCAG conformance. Report assistive-technology checks separately, with the actual
 browser and screen reader used.
 
+Use the [manual test procedures and record template](docs/accessibility/README.md)
+for repeatable checks. Store dated observations with their environment, source
+revision, tested bundle hash and actual results. Keep agent-operated UI,
+automated assertions and real screen-reader output identified separately; an
+accessibility tree is not evidence of speech.
+
 
 ## Pull Request Process
 

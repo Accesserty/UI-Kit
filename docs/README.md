@@ -14,6 +14,7 @@ to use a component.
 | Change the implementation or add a component | [Contribution guide](../CONTRIBUTING.md) and [architecture](ARCHITECTURE.md) |
 | Run or inspect framework examples | [Integration examples](../demo/integration/README.md) |
 | Check what the framework tests cover | [SSR test fixtures](../test/ssr/README.md) |
+| Run manual accessibility checks or inspect dated observations | [Accessibility testing records](accessibility/README.md) |
 
 Use the guides from the same release as your copied files. A guide on `main` can
 describe behavior that is not in an older downloaded bundle.
