@@ -105,6 +105,12 @@ matters if your code read those internal ids.
   native buttons and pagination use `--au-btn-disabled-opacity`. Check contrast
   in your theme rather than assuming one opacity produces a fixed contrast ratio.
 
+- **Radio group label (3.0.3, visible change):** `au-radio-group`'s `label` is now drawn as a
+  visible group label, like `au-input`'s, and names the group. Before 3.0.3 it was
+  only an accessible name, so sighted users saw no group name. If you added your
+  own visible label next to a `label` attribute, remove one of them, or switch to
+  `aria-labelledby` pointing at yours. `aria-label` alone still draws nothing.
+
 ## Steps
 
 1. Replace copied distribution files. Framework users need the whole `dist/`

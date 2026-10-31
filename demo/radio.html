@@ -48,11 +48,11 @@
         </tr>
         <tr>
           <td>label</td>
-          <td>Fallback accessible name for <code>&lt;au-radio-group&gt;</code>. Also supported on child radio items as visible option text.</td>
+          <td>On <code>&lt;au-radio-group&gt;</code>: the visible group label, drawn above the options, which also names the group (since 3.0.3). On child radio items: the visible option text.</td>
         </tr>
         <tr>
           <td>aria-label</td>
-          <td>Accessible name for the radio group.</td>
+          <td>Accessible name for the radio group without a visible label. Takes precedence over <code>label</code> as the name.</td>
         </tr>
         <tr>
           <td>aria-labelledby</td>
@@ -217,7 +217,7 @@ group.disabled = true;</code></pre>
         <code>value</code> and <code>onChange</code>. Without a framework, set <code>value</code> and handle
         <code>change.detail.value</code>. The Next/Nuxt fixtures verify host SSR and hydration,
         not server-rendered shadow controls or operation without JavaScript.</p>
-      <p>Provide a visible group name and meaningful option text. Native element-reference labeling is used where supported;
+      <p>Provide a visible group name and meaningful option text: set <code>label</code>, or point <code>aria-labelledby</code> at your own visible label (as the native form example above does), not both. Native element-reference labeling is used where supported;
         older engines use a plain-text fallback, so rich labels may need an explicit localized aria-label.
         Test your own themes, error flow and assistive technologies; the component is not a WCAG conformance guarantee.</p>
     </section>
@@ -310,6 +310,9 @@ group.disabled = true;</code></pre>
           <td>disable label color</td>
           <td>oklch(0.537 0 0)</td>
         </tr>
+        <tr><td>--au-radio-group-label-text-color</td><td>Group label text color</td><td>oklch(0.1398 0 0)</td></tr>
+        <tr><td>--au-radio-group-label-text-size</td><td>Group label text size</td><td>1rem</td></tr>
+        <tr><td>--au-radio-group-label-padding-vertical</td><td>Space above and below the group label</td><td>0.625rem</td></tr>
         <tr><td>--au-radio-disabled-opacity</td><td>Opacity of the disabled state (text stays at least 4.5:1 on white)</td><td>0.6</td></tr>
       </table>
       </div>

@@ -1,4 +1,4 @@
-/*! Accesserty UI Kit v3.0.2 */
+/*! Accesserty UI Kit v3.0.3 */
 (function () {
   'use strict';
 
@@ -138,6 +138,16 @@
       style.textContent = `
       :host([hidden]:not([hidden="until-found" i])) { display: none; }
       :host { display: block; min-width: 0; }
+      /* The visible group label, like the label au-input draws from \`label\`. */
+      .au-radio-group-label {
+        display: block;
+        margin: 0;
+        padding: var(--au-radio-group-label-padding-vertical, 0.625rem) 0;
+        color: var(--au-radio-group-label-text-color, oklch(0.1398 0 0));
+        font-size: var(--au-radio-group-label-text-size, 1rem);
+        word-break: break-word;
+      }
+      .au-radio-group-label[hidden] { display: none; }
       .au-radio-group {
         min-width: 0;
         display: flex;
@@ -244,14 +254,22 @@
       const slot = document.createElement('slot');
       slot.style.display = 'none';
 
+      // \`label\` draws this visible group label and names the group by it, in the
+      // same shadow root, so the reference works in every engine.
+      const groupLabel = document.createElement('div');
+      groupLabel.className = 'au-radio-group-label';
+      groupLabel.id = uid('radio-group-label-');
+      groupLabel.hidden = true;
+
       container.tabIndex = -1;
       this._container = container;
+      this._groupLabel = groupLabel;
       this._slot = slot;
       this._entries = new Map();
       this._value = null;
       this._selectionSet = false;
       slot.addEventListener('slotchange', () => this.renderRadios());
-      this.shadowRoot.append(style, container, slot);
+      this.shadowRoot.append(style, groupLabel, container, slot);
     }
 
     connectedCallback() {
@@ -419,7 +437,17 @@
 
     updateGroupAttributes() {
       const container = this._container;
-      forwardAria(this, container, { explicit: this.getAttribute('aria-label') || this.getAttribute('label'), hasOwnLabel: false, mirrorPrefix: 'radio-description-' });
+      const labelText = (this.getAttribute('label') || '').trim();
+      this._groupLabel.textContent = labelText;
+      this._groupLabel.hidden = !labelText;
+      // Name precedence: aria-labelledby, then aria-label, then the visible label.
+      // Decided by what actually names the group: a dangling aria-labelledby or an
+      // empty aria-label must not leave a labelled group without a name.
+      const explicit = this.getAttribute('aria-label') || null;
+      forwardAria(this, container, { explicit, hasOwnLabel: Boolean(labelText), mirrorPrefix: 'radio-description-' });
+      if (labelText && !explicit && !idRefs(this, 'aria-labelledby').length) {
+        container.setAttribute('aria-labelledby', this._groupLabel.id);
+      }
       container.classList.toggle('au-radio-group--vertical', this.getAttribute('direction') === 'vertical');
       if (this.required) container.setAttribute('aria-required', 'true');
       else container.removeAttribute('aria-required');

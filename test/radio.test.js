@@ -158,27 +158,88 @@ describe('AuRadioGroup', () => {
     expect(group.getAttribute('aria-label')).to.equal('Options');
   });
 
-  it('uses label as fallback aria-label and updates group labeling attributes', async () => {
+  it('draws label as a visible group label and names the group by it', async () => {
     const el = await fixture(html`
       <au-radio-group label="付款方式">
         <div value="card">Card</div>
+        <div value="cash">Cash</div>
       </au-radio-group>
     `);
     await nextFrame();
 
     const group = el.shadowRoot.querySelector('.au-radio-group');
-    expect(group.getAttribute('aria-label')).to.equal('付款方式');
+    const visible = el.shadowRoot.querySelector('.au-radio-group-label');
+    expect(visible.hidden).to.be.false;
+    expect(visible.textContent).to.equal('付款方式');
+    expect(visible.getBoundingClientRect().height).to.be.greaterThan(0);
+    expect(visible.compareDocumentPosition(group) & Node.DOCUMENT_POSITION_FOLLOWING).to.be.ok;
+    expect(group.getAttribute('aria-labelledby')).to.equal(visible.id);
+    expect(group.hasAttribute('aria-label')).to.be.false;
 
+    // An author aria-label still wins as the name; the label stays visible.
     el.setAttribute('aria-label', 'Payment method');
     await nextFrame();
     expect(group.getAttribute('aria-label')).to.equal('Payment method');
+    // Element reflection may leave an empty aria-labelledby, which names nothing.
+    expect(group.getAttribute('aria-labelledby') || '').to.equal('');
+    expect(visible.hidden).to.be.false;
 
+    // So does an author aria-labelledby that resolves.
+    const external = document.createElement('span');
+    external.id = 'payment-label';
+    external.textContent = 'Payment';
+    el.before(external);
     el.removeAttribute('aria-label');
-    el.removeAttribute('label');
     el.setAttribute('aria-labelledby', 'payment-label');
     await nextFrame();
     expect(group.hasAttribute('aria-label')).to.be.false;
-    expect(group.ariaLabelledByElements).to.deep.equal([]);
+    expect(group.getAttribute('aria-labelledby')).to.not.equal(visible.id);
+
+    // Without label nothing is drawn.
+    el.removeAttribute('aria-labelledby');
+    external.remove();
+    el.removeAttribute('label');
+    await nextFrame();
+    expect(visible.hidden).to.be.true;
+    expect(getComputedStyle(visible).display).to.equal('none');
+    expect(group.getAttribute('aria-labelledby') || '').to.equal('');
+  });
+
+  it('falls back to the visible label when the author name resolves to nothing', async () => {
+    const el = await fixture(html`<au-radio-group label="Meal" aria-labelledby="no-such-id"><div value="a">A</div><div value="b">B</div></au-radio-group>`);
+    await nextFrame();
+    const group = el.shadowRoot.querySelector('.au-radio-group');
+    const visible = el.shadowRoot.querySelector('.au-radio-group-label');
+    expect(group.getAttribute('aria-labelledby')).to.equal(visible.id);
+
+    el.removeAttribute('aria-labelledby');
+    el.setAttribute('aria-label', '');
+    await nextFrame();
+    expect(group.getAttribute('aria-labelledby')).to.equal(visible.id);
+    expect(group.hasAttribute('aria-label')).to.be.false;
+  });
+
+  it('treats a whitespace-only label as no label', async () => {
+    const el = await fixture(html`<au-radio-group label="   " aria-label="Options"><div value="a">A</div><div value="b">B</div></au-radio-group>`);
+    await nextFrame();
+    expect(el.shadowRoot.querySelector('.au-radio-group-label').hidden).to.be.true;
+    expect(el.shadowRoot.querySelector('.au-radio-group').getAttribute('aria-label')).to.equal('Options');
+  });
+
+  it('names a labelled group once, by its label, even with an external <label for>', async () => {
+    const wrapper = await fixture(html`<div><label for="rg-ext">Outside</label><au-radio-group id="rg-ext" label="Inside"><div value="a">A</div><div value="b">B</div></au-radio-group></div>`);
+    await nextFrame();
+    const el = wrapper.querySelector('au-radio-group');
+    const group = el.shadowRoot.querySelector('.au-radio-group');
+    expect(group.getAttribute('aria-labelledby')).to.equal(el.shadowRoot.querySelector('.au-radio-group-label').id);
+    expect(group.hasAttribute('aria-label')).to.be.false;
+  });
+
+  it('draws no visible label for aria-label alone', async () => {
+    const el = await fixture(html`<au-radio-group aria-label="Options"><div value="a">A</div><div value="b">B</div></au-radio-group>`);
+    await nextFrame();
+    expect(el.shadowRoot.querySelector('.au-radio-group-label').hidden).to.be.true;
+    expect(el.shadowRoot.querySelector('.au-radio-group').getAttribute('aria-label')).to.equal('Options');
   });
 
   it('uses child label attributes as localized radio option text', async () => {

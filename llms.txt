@@ -236,6 +236,12 @@ slides remain readable/tabbable; there is no autoplay or tabpanel model.
 - **Attributes (au-radio-group):** disabled, required, direction (vertical), aria-label,
   aria-labelledby, aria-describedby, aria-invalid, label
 
+`label` draws a visible group label above the options and names the group by it (since 3.0.3;
+before, it was only an accessible name and nothing was shown). Use `aria-label` alone when the
+group needs a name but no visible label, or `aria-labelledby` to point at your own visible
+label; either one takes precedence over `label` as the name. Do not combine `label` with your
+own visible label text, or the label appears twice.
+
 `required` sets aria-required on the group and makes the group invalid until an option is
 selected; aria-describedby and aria-invalid are forwarded to the group, so an error message can be
 attached as described in "Form validation and error messages".
@@ -245,7 +251,9 @@ attached as described in "Form validation and error messages".
   (getter/setter)
 - **Events:** change (detail: { value })
 - **Form-associated:** Yes (au-radio-group)
-- **CSS variables:** 12 (--au-radio-content-gap, --au-radio-input-*, --au-radio-label-*)
+- **CSS variables:** 15 (--au-radio-content-gap, --au-radio-input-*, --au-radio-label-*,
+  --au-radio-group-label-text-color, --au-radio-group-label-text-size,
+  --au-radio-group-label-padding-vertical)
 
 ### au-rating
 
@@ -356,7 +364,7 @@ not every table entry in every integration. Known speech limits follow the table
 | au-textarea | textbox, multi-line (the inner `<textarea>`) | same as au-input | same as au-input | the inner textarea |
 | au-checkbox | checkbox | the element's text, or `label` | `aria-describedby`, `aria-invalid`; `required` affects validity only (ARIA has no required state for checkboxes) | the inner checkbox |
 | au-switch | switch | the element's text, or `label` | `aria-describedby`, `aria-invalid` | the inner input |
-| au-radio-group | radiogroup; each au-radio is a radio named by its text or `label` | `label`, `aria-label` or `aria-labelledby` on au-radio-group | `required` (on the group), `aria-describedby` (on the group), `aria-invalid` (on the group and every radio) | the radio in the tab order (the selected one, else the first enabled one) |
+| au-radio-group | radiogroup; each au-radio is a radio named by its text or `label` | `aria-labelledby`, else `aria-label`, else `label` on au-radio-group (`label` is also drawn as the visible group label since 3.0.3) | `required` (on the group), `aria-describedby` (on the group), `aria-invalid` (on the group and every radio) | the radio in the tab order (the selected one, else the first enabled one) |
 
 - `aria-invalid` (since 3.0.2): when the host has no `aria-invalid`, the inner controls get `aria-invalid="false"`. Without it, Safari+VoiceOver announces every empty required field as "invalid data" as soon as the page loads, because WebKit maps native validity to the invalid state. Set `aria-invalid="true"` on the host when you show an error and remove it when the error is fixed. A failed browser-validated submit still announces the browser's validation message.
 - Known limitation: the host keeps the `aria-describedby` and `aria-invalid` attributes you set, and a form-associated host reports its validity, so the host is also exposed as a generic element with the same description and invalid state. Safari+VoiceOver reads the description twice for au-textarea and au-checkbox (once on the control, once on the surrounding group).
