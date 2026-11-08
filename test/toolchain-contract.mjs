@@ -120,6 +120,8 @@ if (existsSync(new URL('.gitlab-ci.yml', root))) {
   pnpmOnly('GitLab', gitlab);
   assert.match(gitlab, /packageManager\.replace\(\/\^pnpm@\/, ''\)/, 'GitLab installs the pnpm that package.json pins');
   assert.match(gitlab, /files:\n\s+- pnpm-lock\.yaml\n\s+- test\/ssr\/pnpm-lock\.yaml\n/, 'GitLab caches on both pnpm lockfiles');
+  // The cached store sits in the project directory; git must not list it.
+  assert.ok((await text('.gitignore')).split('\n').includes('.pnpm-store/'), 'ignore the CI pnpm store');
 }
 const github = await text('.github/workflows/ci.yml');
 pnpmOnly('GitHub', github);
