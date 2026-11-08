@@ -19,9 +19,10 @@
   },
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@12.18.0",
   "engines": {
     "node": "26.12.1",
-    "npm": ">=11.20.0 <12"
+    "pnpm": "12.18.0"
   },
   "license": "MIT",
   "files": [
@@ -64,6 +65,7 @@
     "test:controls": "node test/browser/controls.mjs",
     "test:pagination": "node test/browser/pagination.mjs",
     "test:docs": "node test/docs-contract.mjs",
+    "test:install-policy": "node --test test/install-policy.mjs",
     "test:reserve": "node test/browser/reserve-contract.mjs",
     "test:visibility": "node test/browser/visibility.mjs",
     "test:demo-safety": "node test/browser/demo-safety.mjs",

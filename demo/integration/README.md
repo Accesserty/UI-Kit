@@ -21,7 +21,7 @@ The Vue page demonstrates direct custom-element bindings, not the kit's Vue
 form wrappers. The Nuxt page does not run a Nuxt server or test hydration.
 Use the setup below for the current integration modules. See
 [`test/ssr/README.md`](../../test/ssr/README.md) for executable framework fixtures.
-These examples are not part of the root `npm test` command and do not establish
+These examples are not part of the root `pnpm test` command and do not establish
 actual screen-reader announcements.
 
 ## React
@@ -110,5 +110,5 @@ python3 -m http.server 8080
 ```
 
 They load React/Vue from a CDN (esm.sh), so they need network access. The
-component itself is loaded from the local `dist/` build — run `npm run build`
+component itself is loaded from the local `dist/` build — run `pnpm run build`
 first if `dist/` is stale.

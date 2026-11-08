@@ -375,7 +375,7 @@ not every table entry in every integration. Known speech limits follow the table
 - CSS: Custom Properties, Cascade Layers, CSS Nesting, oklch color space
 - Build: Vite 8/Rolldown (full bundles) + Rollup scripts for the integrations and `dist/components/`, minified with @rollup/plugin-terser
 - Testing: @web/test-runner 1, @open-wc/testing 5, browser and isolated framework fixtures
-- Development: Node.js from `.nvmrc`, npm 11; browser bundles do not require Node.js
+- Development: Node.js from `.nvmrc`, pnpm from `packageManager` in package.json; browser bundles do not require Node.js
 
 ## Design Decisions
 

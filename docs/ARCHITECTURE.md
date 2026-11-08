@@ -276,7 +276,7 @@ oklch(0.5722 0.233 29)  /* error red */
 ## Build Pipeline
 
 ```
-npm run build
+pnpm run build
   ├── vite build
   │     ├── Input:  src/accesserty-ui-kit.js  (imports all 15 components)
   │     ├── Output: dist/accesserty-ui-kit.js      (IIFE, readable)
@@ -306,7 +306,7 @@ whole `src/css/` folder is copied together.
 ## Test Infrastructure
 
 ```
-npm test
+pnpm test
   └── @web/test-runner 1
         ├── Launches a real Chromium browser instance
         ├── Serves test files via a dev server
@@ -322,17 +322,17 @@ Component tests exercise real browser DOM, Shadow DOM and FormData in controlled
 fixtures. Fixtures can simulate selected conditions; a passing run is not proof
 of every production integration or assistive-technology interaction.
 
-`npm run test:docs` checks that every demo HTML file resolves its local script
+`pnpm run test:docs` checks that every demo HTML file resolves its local script
 and stylesheet references and that each of the 15 component source files has a
-matching unit-test file. `npm run test:controls -- firefox` (or chrome,
+matching unit-test file. `pnpm run test:controls firefox` (or chrome,
 safari; omit to run all three) exercises seven standalone control types across
 source/readable/minified scripts on file and HTTP pages. Firefox/Safari require
 UI_KIT_WEBDRIVER_MODULE. These runners do not capture screen-reader speech.
 
-`npm run test:pagination` covers the Pagination source, readable bundle and
+`pnpm run test:pagination` covers the Pagination source, readable bundle and
 minified bundle over both file and HTTP URLs in Chrome, Firefox and Safari.
 
-`test/ssr-inject.test.js` and `npm run test:ssr-stream` cover the declarative
+`test/ssr-inject.test.js` and `pnpm run test:ssr-stream` cover the declarative
 Shadow DOM injector. `test/browser/declarative.mjs` compares accordion, tabs and
 breadcrumbs with and without server-rendered roots, and
 `test/browser/standalone.mjs` loads every `dist/components/` file as a classic

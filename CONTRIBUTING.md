@@ -10,7 +10,10 @@ Component-level behavior does not make a complete application conform to WCAG.
 
 ## Prerequisites
 
-- **Node.js from [`.nvmrc`](.nvmrc) and npm 11** for development and tests
+- **Node.js from [`.nvmrc`](.nvmrc) and pnpm** for development and tests. Install
+  the exact pnpm version in `package.json` (`packageManager`), for example with
+  `npm install -g pnpm@<version>`; the repository does not use Corepack, and pnpm
+  refuses to run with a different version
 - **A Chromium browser** for `@web/test-runner`
 - **Git**
 
@@ -19,7 +22,7 @@ Component-level behavior does not make a complete application conform to WCAG.
 nvm install
 nvm use
 node --version
-npm --version
+pnpm --version
 ```
 
 
@@ -31,19 +34,19 @@ git clone https://github.com/YOUR_USERNAME/UI-Kit.git
 cd UI-Kit
 
 # 2. Install dependencies
-npm ci
+pnpm install --frozen-lockfile
 
 # 3. Run tests to confirm everything works
-npm test
+pnpm test
 
 # 4. Build dist files
-npm run build
+pnpm run build
 ```
 
 Open a page in `demo/` to inspect the built component. Demos load
 `dist/accesserty-ui-kit.js`, not the source, and can open directly from disk.
-While editing `src/`, run `npm run dev` and reload the demo after each rebuild.
-That watch command rebuilds the Vite full bundles; run `npm run build` to also
+While editing `src/`, run `pnpm run dev` and reload the demo after each rebuild.
+That watch command rebuilds the Vite full bundles; run `pnpm run build` to also
 update standalone components, integrations and declarations.
 
 
@@ -53,10 +56,10 @@ update standalone components, integrations and declarations.
 
 ```bash
 # Run the complete unit-test suite sequentially
-npm test
+pnpm test
 
 # Test a single component during development
-npx web-test-runner test/input.test.js --node-resolve
+pnpm exec web-test-runner test/input.test.js --node-resolve
 ```
 
 Run the complete suite before submitting a PR. Tests use real Chromium fixtures;
@@ -64,34 +67,35 @@ they do not establish behavior in every browser, framework or assistive technolo
 
 ### Integration tests
 
-Build current source before testing consumers: `npm run build`. Playwright-based
+Build current source before testing consumers: `pnpm run build`. Playwright-based
 checks need Google Chrome and the separate dependencies in `test/ssr`:
-`npm ci --prefix test/ssr`. Install only in these development environments, not in
+`pnpm --dir test/ssr install --frozen-lockfile`. Install only in these development environments, not in
 a plain-HTML consumer project.
 
 | Check | What it covers |
 |---|---|
-| `npm run test:docs` | Local demo asset references, source/test inventory, selected CSS defaults and build/toolchain contracts |
-| `npm run test:reserve` | README `:not(:defined)` CSS against registered component heights |
-| `npm run test:ssr-stream` | Streaming server-wrapper behavior |
-| `npm test --prefix test/ssr` | Targeted framework rendering, hydration, bindings and types |
+| `pnpm run test:docs` | Local demo asset references, source/test inventory, selected CSS defaults and build/toolchain contracts |
+| `pnpm run test:reserve` | README `:not(:defined)` CSS against registered component heights |
+| `pnpm run test:ssr-stream` | Streaming server-wrapper behavior |
+| `pnpm run test:install-policy` | The pnpm install policy in both projects, against a local synthetic registry |
+| `pnpm --dir test/ssr test` | Targeted framework rendering, hydration, bindings and types |
 
 Update the README reservation values when a default size changes. The CSS
 documentation checks cover selected defaults; they are not a full CSS parser or
 theme audit. See the [SSR test guide](test/ssr/README.md) for fixture setup and
 individual checks.
 
-Use `npm run test:css -- chrome`, `npm run test:controls -- chrome`, and
-`npm run test:pagination -- chrome` for Chrome-only runs. The component scripts in
+Use `pnpm run test:css chrome`, `pnpm run test:controls chrome`, and
+`pnpm run test:pagination chrome` for Chrome-only runs. The component scripts in
 `test/browser/` take the same argument, for example
 `node test/browser/carousel.mjs chrome`.
 
 Firefox and Safari run through WebDriver, using the `selenium-webdriver` installed
 in `test/ssr` (set `UI_KIT_WEBDRIVER_MODULE` to use a different copy):
 
-- `npm run test:firefox` runs every WebDriver check in headless Firefox. CI runs
+- `pnpm run test:firefox` runs every WebDriver check in headless Firefox. CI runs
   it; Selenium downloads the matching geckodriver on first use.
-- `npm run test:safari` runs the same checks in Safari, which needs macOS and
+- `pnpm run test:safari` runs the same checks in Safari, which needs macOS and
   opens visible windows. Enable it once with `safaridriver --enable` and, in
   Safari, Develop → Allow Remote Automation. A failed check is run once more and
   listed as "passed on retry", because focus checks fail if the window loses
@@ -105,7 +109,7 @@ proves screen-reader speech or complete accessibility conformance.
 ### Building
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 This produces the readable/minified full bundles, standalone component pairs,
@@ -217,7 +221,7 @@ for parsing and hydration boundaries.
 import './components/my-component.js';  // add this line
 ```
 
-`npm run build` also writes a self-contained `dist/components/my-component.js`
+`pnpm run build` also writes a self-contained `dist/components/my-component.js`
 (and `my-component.min.js`)
 for pages that load single components; every file in `src/components/` gets one
 automatically. `test/browser/standalone.mjs` checks that each of these files
@@ -338,7 +342,7 @@ accessibility tree is not evidence of speech.
 
 ### Checklist
 
-- [ ] The complete unit-test suite passes (`npm test`)
+- [ ] The complete unit-test suite passes (`pnpm test`)
 - [ ] New tests written for new behavior
 - [ ] Demo page updated (new component) or corrected (bug fix)
 - [ ] CSS variables table in demo matches the component source exactly
@@ -382,5 +386,5 @@ When opening an issue, use these labels:
 
 Tags follow `vX.X.X` semantic versioning.
 
-Before tagging a release, run `npm run test:safari` on a Mac; CI covers Chrome
+Before tagging a release, run `pnpm run test:safari` on a Mac; CI covers Chrome
 and Firefox but cannot run Safari.
