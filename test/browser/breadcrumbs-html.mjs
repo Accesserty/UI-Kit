@@ -1,4 +1,4 @@
-// npm install in test/ssr first. Rebuild dist before running. No framework is
+// pnpm install in test/ssr first. Rebuild dist before running. No framework is
 // loaded by the HTML fixtures. WebDriver is needed for installed Firefox/Safari.
 // node test/browser/breadcrumbs-html.mjs [chrome|firefox|safari]
 import assert from 'node:assert/strict';

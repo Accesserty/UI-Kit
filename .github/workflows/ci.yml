@@ -30,12 +30,16 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      # Installs Node from .nvmrc and the pnpm pinned in package.json
+      # (packageManager). v3.1.2, pinned by commit.
+      - uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e
         with:
           node-version-file: .nvmrc
-          cache: npm
+          install: false
+          cache: true
+          cache-dependency-path: pnpm-lock.yaml
       - name: Print environment
-        run: echo "arch=$(uname -m) node=$(node -v) npm=$(npm -v)"
+        run: echo "arch=$(uname -m) node=$(node -v) pnpm=$(pnpm -v)"
       - name: Resolve a browser
         # @web/test-runner launches Chrome through chrome-launcher, which honours
         # CHROME_PATH. Fail here with the reason rather than inside a test run.
@@ -49,11 +53,12 @@ jobs:
           done
           echo "No Chrome or Chromium on this runner; the unit tests need one." >&2
           exit 1
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
-      - run: npm run test:docs
-      - run: npm run test:ssr-stream
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: pnpm run build
+      - run: pnpm run test:docs
+      - run: pnpm run test:install-policy
+      - run: pnpm run test:ssr-stream
 
   integration:
     name: Browsers and SSR
@@ -61,39 +66,43 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      # Installs Node from .nvmrc and the pnpm pinned in package.json
+      # (packageManager). v3.1.2, pinned by commit.
+      # The cache key accepts one lockfile; the store is content-addressed and
+      # verified, so a stale key only costs downloads, never a wrong package.
+      - uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e
         with:
           node-version-file: .nvmrc
-          cache: npm
-          cache-dependency-path: |
-            package-lock.json
-            test/ssr/package-lock.json
+          install: false
+          cache: true
+          cache-dependency-path: test/ssr/pnpm-lock.yaml
       - name: Print environment
-        run: echo "arch=$(uname -m) node=$(node -v) npm=$(npm -v)"
+        run: echo "arch=$(uname -m) node=$(node -v) pnpm=$(pnpm -v)"
       - name: Install CJK fonts
         # Demos and fixtures contain Chinese text; without these fonts the
         # layout and size assertions measure fallback glyphs.
         run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk > /dev/null
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
       # Consumers always test a fresh build, so this precedes every check below.
-      - run: npm run build
-      - run: npm ci --prefix test/ssr
+      - run: pnpm run build
+      - run: pnpm --dir test/ssr install --frozen-lockfile
       - name: Install Chrome for Playwright
         # The browser suites request channel 'chrome'; Playwright installs the
         # branded build that channel resolves to.
-        run: npm --prefix test/ssr exec -- playwright install --with-deps chrome
+        run: pnpm --dir test/ssr exec playwright install --with-deps chrome
       - name: Print browser versions
         run: |
-          echo "playwright: $(npm --prefix test/ssr exec -- playwright --version)"
-      - run: npm run test:css -- chrome
-      - run: npm run test:reserve
-      - run: npm run test:controls -- chrome
-      - run: npm run test:pagination -- chrome
-      - run: npm run test:visibility
-      - run: npm run test:demo-safety
-      - run: npm run test:form-flow
-      - run: npm run test:form-registration
-      - run: npm run test:dropdown:chrome
+          echo "playwright: $(pnpm --dir test/ssr exec playwright --version)"
+      # pnpm passes a literal "--" on to the script, so arguments follow directly.
+      - run: pnpm run test:css chrome
+      - run: pnpm run test:reserve
+      - run: pnpm run test:controls chrome
+      - run: pnpm run test:pagination chrome
+      - run: pnpm run test:visibility
+      - run: pnpm run test:demo-safety
+      - run: pnpm run test:form-flow
+      - run: pnpm run test:form-registration
+      - run: pnpm run test:dropdown:chrome
       - run: node test/browser/tree.mjs chrome
       - run: node test/browser/accordion.mjs chrome
       - run: node test/browser/declarative.mjs chrome
@@ -103,4 +112,4 @@ jobs:
       - run: node test/browser/file-upload.mjs chrome
       - run: node test/browser/standalone.mjs chrome
       - name: SSR across Next and Nuxt
-        run: npm test --prefix test/ssr
+        run: pnpm --dir test/ssr test

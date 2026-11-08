@@ -13,7 +13,7 @@ const browser=process.argv[2];
 if(!['firefox','safari'].includes(browser)){console.error('Usage: node test/browser/webdriver-suite.mjs firefox|safari');process.exit(2);}
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const driverModule=process.env.UI_KIT_WEBDRIVER_MODULE||fileURLToPath(new URL('../ssr/node_modules/selenium-webdriver/index.js',import.meta.url));
-if(!existsSync(driverModule)){console.error(`selenium-webdriver not found at ${driverModule}. Run: npm ci --prefix test/ssr`);process.exit(2);}
+if(!existsSync(driverModule)){console.error(`selenium-webdriver not found at ${driverModule}. Run: pnpm --dir test/ssr install --frozen-lockfile`);process.exit(2);}
 const suites=['css-contract','controls','pagination','dropdown','tree','accordion','declarative','breadcrumbs-html','card','carousel','file-upload','standalone','form-registration'];
 const retries=browser==='safari'?1:0;
 const run=name=>new Promise(resolve=>{

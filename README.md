@@ -730,7 +730,8 @@ transitions. Verify custom themes and application-level accessibility separately
 
 ## Development
 
-Development and CI use the Node.js version in [`.nvmrc`](.nvmrc) and npm 11.
+Development and CI use the Node.js version in [`.nvmrc`](.nvmrc) and the pnpm
+version in `package.json` (`packageManager`).
 These are build/test requirements; using the browser bundles does not require Node.js.
 
 ```bash
@@ -738,32 +739,35 @@ These are build/test requirements; using the browser bundles does not require No
 nvm install
 nvm use
 
+# Check that pnpm matches packageManager in package.json
+pnpm --version
+
 # Install dependencies
-npm ci
+pnpm install --frozen-lockfile
 
 # Run all component tests
-npm test
+pnpm test
 
 # Test a single component
-npx web-test-runner test/input.test.js --node-resolve
+pnpm exec web-test-runner test/input.test.js --node-resolve
 
 # Build dist files
-npm run build
+pnpm run build
 ```
 
 Tests run in a real Chromium browser through `@web/test-runner`. They exercise
 the components in controlled fixtures; they do not prove every production
 integration or assistive-technology behavior.
 
-`npm test --prefix test/ssr` builds Next.js, Nuxt and Vue fixtures and checks
+`pnpm --dir test/ssr test` builds Next.js, Nuxt and Vue fixtures and checks
 server rendering, hydration, the Vue and React integrations, declarative shadow
-roots and the TypeScript declarations (run `npm run build` first).
+roots and the TypeScript declarations (run `pnpm run build` first).
 `node test/browser/declarative.mjs chrome` compares adopted and browser-built
-shadow roots; `npm run test:ssr-stream` checks the streaming server wrapper.
+shadow roots; `pnpm run test:ssr-stream` checks the streaming server wrapper.
 
-`npm run test:css` checks the shared stylesheet's token, Popover and select-direction
-contracts in installed Chrome, Firefox and Safari. `npm run test:firefox` and
-`npm run test:safari` run all WebDriver browser checks in one browser; see
+`pnpm run test:css` checks the shared stylesheet's token, Popover and select-direction
+contracts in installed Chrome, Firefox and Safari. `pnpm run test:firefox` and
+`pnpm run test:safari` run all WebDriver browser checks in one browser; see
 [CONTRIBUTING.md](CONTRIBUTING.md#integration-tests) for setup.
 
 

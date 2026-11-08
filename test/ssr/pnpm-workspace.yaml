@@ -1,0 +1,20 @@
+# The SSR fixtures are their own pnpm project, kept apart from the kit the way a
+# consumer project is. This file also stops pnpm from joining the root project.
+packages:
+  - '.'
+# Install policy shared with the root pnpm-workspace.yaml; test/toolchain-contract.mjs
+# keeps the two in step and test/install-policy.mjs exercises it.
+engineStrict: true
+pmOnFail: error
+verifyDepsBeforeRun: error
+minimumReleaseAge: 1440
+minimumReleaseAgeStrict: true
+minimumReleaseAgeIgnoreMissingTime: false
+blockExoticSubdeps: true
+trustPolicy: no-downgrade
+trustLockfile: false
+strictDepBuilds: true
+# The Next, Nuxt and Vite builds run without either install script.
+allowBuilds:
+  esbuild: false
+  fsevents: false

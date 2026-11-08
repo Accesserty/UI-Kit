@@ -2,16 +2,17 @@
 
 ## Run the suite
 
-Use the repository's Node version (`nvm use` at the repository root), npm 11
-and an installed Google Chrome. Build the kit with `npm run build` at the
-repository root first. Then run from `test/ssr/`:
+Use the repository's Node version (`nvm use` at the repository root), the pnpm
+version in `package.json` (`packageManager`) and an installed Google Chrome.
+Build the kit with `pnpm run build` at the repository root first. Then run from `test/ssr/`:
 
 ```sh
-npm ci
-npm test
+pnpm install --frozen-lockfile
+pnpm test
 ```
 
-Dependencies are isolated from the component library. Ports 41791–41794 must
+Dependencies are isolated from the component library: this directory is its own
+pnpm project, with its own `pnpm-workspace.yaml` and `pnpm-lock.yaml`. Ports 41791–41794 must
 be free. The runner builds the fixtures, tests them in Chrome, then stops only
 the servers it started. Browser errors fail the checks.
 

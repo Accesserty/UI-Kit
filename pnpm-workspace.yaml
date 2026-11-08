@@ -1,0 +1,31 @@
+# The kit is a standalone pnpm project. test/ssr is a second, independent
+# project with its own pnpm-workspace.yaml and lockfile; do not list it here.
+packages:
+  - '.'
+# Install policy shared with test/ssr/pnpm-workspace.yaml; test/toolchain-contract.mjs
+# keeps the two in step and test/install-policy.mjs exercises it.
+engineStrict: true
+pmOnFail: error
+verifyDepsBeforeRun: error
+minimumReleaseAge: 1440
+minimumReleaseAgeStrict: true
+minimumReleaseAgeIgnoreMissingTime: false
+blockExoticSubdeps: true
+trustPolicy: no-downgrade
+trustLockfile: false
+strictDepBuilds: true
+# Neither install script is needed to build or test the kit.
+allowBuilds:
+  esbuild: false
+  fsevents: false
+# npm never installed the optional vue/react peers; keep them out of the build.
+autoInstallPeers: false
+# Exact versions only, each re-checked whenever it changes. Both lost the
+# provenance their earlier releases carried; integrity matches the registry.
+# chromium-bidi: from @web/test-runner-chrome via puppeteer-core.
+# chokidar: from @web/dev-server-core and @web/test-runner-core; without the
+# exception pnpm silently falls back to 4.0.1.
+trustPolicyExclude:
+  - chromium-bidi@157.0.8090-0
+  - chokidar@4.0.3
+trustPolicyExcludePrune: true
