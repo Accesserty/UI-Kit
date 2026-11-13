@@ -18,6 +18,9 @@ strictDepBuilds: true
 allowBuilds:
   esbuild: false
   fsevents: false
+# Packages may ship instructions for AI agents ("skills"); none is installed.
+skills:
+  dirs: []
 # npm never installed the optional vue/react peers; keep them out of the build.
 autoInstallPeers: false
 # Exact versions only, each re-checked whenever it changes. Both lost the

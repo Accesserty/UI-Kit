@@ -62,6 +62,7 @@ const policy = {
   trustLockfile: ['false'],
   strictDepBuilds: ['true'],
   allowBuilds: ['', 'esbuild: false', 'fsevents: false'],
+  skills: ['', 'dirs: []'],
 };
 const rootOnly = {autoInstallPeers: ['false'], trustPolicyExcludePrune: ['true']};
 

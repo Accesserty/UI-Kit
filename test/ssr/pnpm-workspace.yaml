@@ -18,3 +18,6 @@ strictDepBuilds: true
 allowBuilds:
   esbuild: false
   fsevents: false
+# Packages may ship instructions for AI agents ("skills"); none is installed.
+skills:
+  dirs: []
