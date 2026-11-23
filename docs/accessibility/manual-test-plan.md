@@ -8,7 +8,7 @@ procedures, not results. Use the [record template](record-template.md).
 ## Preparation
 
 1. Build the revision under test with the repository's Node version and
-   `npm run build`. Record the bundle SHA-256 and any local source changes.
+   `pnpm run build`. Record the bundle SHA-256 and any local source changes.
 2. Serve the repository locally, for example
    `python3 -m http.server 41803 --bind 127.0.0.1` from its root. Demo links below
    are relative to this document; the same pages can be opened through that server.
