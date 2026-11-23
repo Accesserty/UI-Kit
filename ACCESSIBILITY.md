@@ -28,8 +28,8 @@ Tell us when a component, demo or document is hard or impossible to use. You do
 not need to tell us about any disability, and screenshots or recordings are
 optional.
 
-- **GitHub:** [open an issue](https://github.com/Accesserty/UI-Kit/issues/new).
-  If you can, add the `accessibility` label.
+- **GitHub:** use the [accessibility barrier form](https://github.com/Accesserty/UI-Kit/issues/new?template=accessibility-barrier.yml).
+  It adds the `accessibility` label for you.
 - **Without GitHub:** email service@accesserty.com or use the
   [contact form](https://accesserty.com/en/contact/).
 

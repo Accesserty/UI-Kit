@@ -1,0 +1,22 @@
+name: Component or feature proposal
+description: Suggest a new component, option or improvement.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The kit is HTML first: it adds a component only when it avoids repeated accessibility mistakes that native HTML does not already prevent.
+  - type: textarea
+    id: need
+    attributes:
+      label: What do you need to build?
+      description: The interface or task, and who uses it.
+    validations:
+      required: true
+  - type: textarea
+    id: native
+    attributes:
+      label: Why is native HTML not enough?
+      description: For example, the native element is missing a keyboard pattern, state or form behavior you need.
+    validations:
+      required: false

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report an accessibility barrier without GitHub
+    url: https://accesserty.com/en/contact/
+    about: Use the contact form or email service@accesserty.com. We copy the report to an issue without your name or contact details.
+  - name: Report a security vulnerability privately
+    url: https://github.com/Accesserty/UI-Kit/blob/main/SECURITY.md
+    about: Do not open a public issue for a vulnerability. Follow the security policy instead.

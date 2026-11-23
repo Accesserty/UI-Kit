@@ -1,0 +1,45 @@
+name: Accessibility barrier
+description: A component, demo or document is hard or impossible to use.
+labels: ["accessibility"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for telling us. You do not need to tell us about any disability.
+        Screenshots and recordings are optional. Fill in what you can; only the first field is required.
+        Read the [accessibility statement](https://github.com/Accesserty/UI-Kit/blob/main/ACCESSIBILITY.md) for tested environments and known limitations.
+  - type: textarea
+    id: barrier
+    attributes:
+      label: What happened?
+      description: What you tried to do, and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: component
+    attributes:
+      label: Component or page
+      description: For example au-tabs, the file upload demo, or a section of the README.
+    validations:
+      required: false
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The keys or actions you used, or a small code example.
+    validations:
+      required: false
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, operating system, and any assistive technology or setting, such as a screen reader, zoom, voice control or a high-contrast theme.
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: UI Kit version
+      description: From package.json, the release you downloaded, or the bundle's first line.
+    validations:
+      required: false

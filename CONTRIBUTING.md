@@ -352,7 +352,7 @@ accessibility tree is not evidence of speech.
 
 ### Target branch
 
-Always PR to the `dev` branch, not `main`.
+Open pull requests against `main`.
 
 ### Commit convention
 

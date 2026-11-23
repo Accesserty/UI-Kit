@@ -1,0 +1,49 @@
+name: Bug report
+description: Something does not work as documented.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If the problem stops someone from using a component with a keyboard, a screen reader or another access method, use the **Accessibility barrier** form instead.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: What you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: A small HTML or framework example is the fastest way for us to find the cause.
+      render: html
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: UI Kit version
+    validations:
+      required: false
+  - type: dropdown
+    id: loading
+    attributes:
+      label: How do you load the kit?
+      options:
+        - Plain HTML (full bundle)
+        - Plain HTML (dist/components files)
+        - Vue
+        - Nuxt
+        - React
+        - Next.js
+        - Other
+    validations:
+      required: false
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and operating system
+    validations:
+      required: false
