@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         Thank you for telling us. You do not need to tell us about any disability.
-        Screenshots and recordings are optional. Fill in what you can; only the first field is required.
+        Screenshots and recordings are optional. Fill in what you can; besides a title, only "What happened?" is required.
         Read the [accessibility statement](https://github.com/Accesserty/UI-Kit/blob/main/ACCESSIBILITY.md) for tested environments and known limitations.
   - type: textarea
     id: barrier
