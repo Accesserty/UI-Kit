@@ -25,6 +25,46 @@ const LATER = '2020-02-01T00:00:00.000Z';
 const trustedPublisher = {name: 'GitHub Actions', email: 'npm-oidc-no-reply@github.com', trustedPublisher: {id: 'github', oidcConfigId: 'probe'}};
 const provenance = (base, version) => ({url: `${base}/-/npm/v1/attestations/${name}@${version}`, provenance: {predicateType: 'https://slsa.dev/provenance/v1'}});
 
+function runProcess(command, args, {cwd, env, children = new Map(), timeoutMs = 20000} = {}) {
+  const child = spawn(command, args, {cwd, env, stdio: ['ignore', 'pipe', 'pipe']});
+  const completed = new Promise((resolve, reject) => {
+    let output = '';
+    let timedOut = false;
+    let spawnError;
+    child.stdout.on('data', chunk => { output += chunk; });
+    child.stderr.on('data', chunk => { output += chunk; });
+    const timer = setTimeout(() => {
+      timedOut = true;
+      child.kill('SIGKILL');
+    }, timeoutMs);
+    // A spawn error is followed by close; keep the child tracked until then.
+    child.once('error', error => { spawnError = error; clearTimeout(timer); });
+    child.once('close', (code, signal) => {
+      clearTimeout(timer);
+      children.delete(child);
+      if (spawnError) reject(spawnError);
+      else resolve({code, signal, timedOut, output});
+    });
+  });
+  children.set(child, completed);
+  return completed;
+}
+
+async function stopChildren(children) {
+  const pending = [...children.values()];
+  for (const child of children.keys()) child.kill('SIGKILL');
+  await Promise.allSettled(pending);
+}
+
+function assertPolicyRejection(result, expected) {
+  const {code, signal, timedOut, output} = result;
+  const details = `code=${code}, signal=${signal}, timedOut=${timedOut}\n${output}`;
+  assert.equal(timedOut, false, `Policy process timed out: ${details}`);
+  assert.equal(signal, null, `Policy process was terminated: ${details}`);
+  assert.ok(Number.isInteger(code) && code > 0, `Expected a normal nonzero exit: ${details}`);
+  assert.match(output, expected);
+}
+
 function tarball(root, label, manifest) {
   const dir = join(root, label, 'package');
   mkdirSync(dir, {recursive: true});
@@ -34,7 +74,7 @@ function tarball(root, label, manifest) {
 }
 
 // versions: [{version, time, trusted, script, exotic}]
-async function fixture({policy = rootPolicy, versions, wanted}, exercise) {
+async function fixture({policy = rootPolicy, versions, wanted, port = 0}, exercise) {
   const root = mkdtempSync(join(tmpdir(), 'ui-kit-install-policy-'));
   const marker = join(root, 'install-script-ran');
   const project = join(root, 'project');
@@ -65,9 +105,9 @@ async function fixture({policy = rootPolicy, versions, wanted}, exercise) {
       res.writeHead(404); res.end('Not a fixture endpoint');
     }
   });
-  const children = new Set();
+  const children = new Map();
   try {
-    server.listen(0, '127.0.0.1');
+    server.listen(port, '127.0.0.1');
     await once(server, 'listening');
     base = `http://127.0.0.1:${server.address().port}`;
     for (const entry of versions) {
@@ -81,22 +121,15 @@ async function fixture({policy = rootPolicy, versions, wanted}, exercise) {
     writeFileSync(join(project, '.npmrc'), `registry=${base}/\n`);
     writeFileSync(join(project, 'pnpm-workspace.yaml'), policy);
     writeFileSync(join(project, 'package.json'), JSON.stringify({name: 'policy-fixture', private: true, dependencies: {[name]: wanted}}));
-    const run = (args = ['install', '--no-frozen-lockfile']) => new Promise((resolve, reject) => {
+    const run = (args = ['install', '--no-frozen-lockfile']) => {
       const env = Object.fromEntries(['PATH', 'TMPDIR', 'TMP', 'TEMP', 'LANG'].filter(key => process.env[key]).map(key => [key, process.env[key]]));
-      const child = spawn(binary, [...args, '--store-dir', join(root, 'store'), '--reporter', 'append-only'],
-        {cwd: project, env: {...env, CI: 'true', PNPM_CONFIG_UPDATE_NOTIFIER: 'false'}, stdio: ['ignore', 'pipe', 'pipe']});
-      children.add(child);
-      let output = '';
-      child.stdout.on('data', chunk => { output += chunk; });
-      child.stderr.on('data', chunk => { output += chunk; });
-      const timer = setTimeout(() => child.kill('SIGKILL'), 20000);
-      child.once('error', error => { clearTimeout(timer); children.delete(child); reject(error); });
-      child.once('close', (code, signal) => { clearTimeout(timer); children.delete(child); resolve({code, signal, output}); });
-    });
+      return runProcess(binary, [...args, '--store-dir', join(root, 'store'), '--cache-dir', join(root, 'cache'), '--reporter', 'append-only'],
+        {cwd: project, env: {...env, HOME: root, XDG_CACHE_HOME: join(root, 'cache'), XDG_CONFIG_HOME: join(root, 'config'), CI: 'true', PNPM_CONFIG_UPDATE_NOTIFIER: 'false'}, children});
+    };
     const locked = () => readFileSync(join(project, 'pnpm-lock.yaml'), 'utf8').match(new RegExp(`^  ${name}@([^:]+):`, 'm'))?.[1];
-    await exercise({run, marker, project, requests, locked});
+    await exercise({run, marker, project, requests, locked, port: server.address().port});
   } finally {
-    for (const child of children) child.kill('SIGKILL');
+    await stopChildren(children);
     server.closeAllConnections();
     await new Promise(resolve => server.close(resolve));
     rmSync(root, {recursive: true, force: true});
@@ -105,6 +138,65 @@ async function fixture({policy = rootPolicy, versions, wanted}, exercise) {
 
 const exempt = (policy, entry) => policy.replace(/^trustPolicyExclude:\n/m, `trustPolicyExclude:\n  - ${entry}\n`);
 assert.match(rootPolicy, /^trustPolicyExclude:\n/m, 'The root policy lists its exact trust exceptions');
+
+// Metadata and tarballs must belong to this fixture, even after an OS port is
+// reused for another synthetic package with the same name and version.
+test('fixture caches stay isolated when a registry port is reused', {timeout: 50000}, async () => {
+  let reusedPort;
+  await fixture({versions: [{version: '1.0.0', time: OLD}], wanted: '1.0.0'}, async ({run, port}) => {
+    reusedPort = port;
+    const result = await run();
+    assert.equal(result.code, 0, result.output);
+  });
+  await fixture({versions: [{version: '1.0.0', time: OLD, script: true}], wanted: '1.0.0', port: reusedPort}, async ({run, marker}) => {
+    const result = await run();
+    assertPolicyRejection(result, /IGNORED_BUILDS|unreviewed|unapproved|not.*approv/i);
+    assert.equal(existsSync(marker), false, 'reused registry metadata must not bypass the script policy');
+  });
+});
+
+// Use real processes so a matching log line cannot hide a timeout or signal.
+const probeEnv = Object.fromEntries(['PATH', 'TMPDIR', 'TMP', 'TEMP', 'LANG']
+  .filter(key => process.env[key]).map(key => [key, process.env[key]]));
+
+test('a matching policy message followed by a hang is not a policy rejection', {timeout: 15000}, async () => {
+  const result = await runProcess(process.execPath, ['-e',
+    "console.log('NO_MATCHING_VERSION cooldown'); setInterval(() => {}, 1000)"],
+  {env: probeEnv, timeoutMs: 5000});
+  assert.match(result.output, /NO_MATCHING_VERSION/);
+  assert.equal(result.timedOut, true);
+  assert.equal(result.signal, 'SIGKILL');
+  assert.throws(() => assertPolicyRejection(result, /NO_MATCHING_VERSION/), /timed out/);
+});
+
+test('a matching policy message followed by a signal is not a policy rejection', {timeout: 15000}, async () => {
+  const result = await runProcess(process.execPath, ['-e',
+    "process.stdout.write('NO_MATCHING_VERSION cooldown\\n', () => process.kill(process.pid, 'SIGTERM'))"],
+  {env: probeEnv, timeoutMs: 10000});
+  assert.match(result.output, /NO_MATCHING_VERSION/);
+  assert.equal(result.timedOut, false);
+  assert.equal(result.signal, 'SIGTERM');
+  assert.throws(() => assertPolicyRejection(result, /NO_MATCHING_VERSION/), /was terminated/);
+});
+
+test('a matching policy message with a normal nonzero exit is a policy rejection', {timeout: 15000}, async () => {
+  const result = await runProcess(process.execPath, ['-e',
+    "console.log('NO_MATCHING_VERSION cooldown'); process.exitCode = 1"],
+  {env: probeEnv, timeoutMs: 10000});
+  assertPolicyRejection(result, /NO_MATCHING_VERSION/);
+});
+
+test('fixture cleanup waits for child processes to close', {timeout: 15000}, async () => {
+  const children = new Map();
+  const completed = runProcess(process.execPath, ['-e', 'setInterval(() => {}, 1000)'],
+    {env: probeEnv, children, timeoutMs: 10000});
+  assert.equal(children.size, 1);
+  await stopChildren(children);
+  assert.equal(children.size, 0, 'close must complete before fixture removal');
+  const result = await completed;
+  assert.equal(result.timedOut, false);
+  assert.equal(result.signal, 'SIGKILL');
+});
 
 for (const [label, policy] of [['root', rootPolicy], ['test/ssr', fixturePolicy]]) {
   test(`${label}: approved policy installs an old package and rejects a changed frozen manifest`, {timeout: 50000}, async () => {
@@ -119,16 +211,14 @@ for (const [label, policy] of [['root', rootPolicy], ['test/ssr', fixturePolicy]
       pkg.dependencies[name] = '2.0.0';
       writeFileSync(join(project, 'package.json'), JSON.stringify(pkg));
       const changed = await run(['install', '--frozen-lockfile']);
-      assert.notEqual(changed.code, 0, changed.output);
-      assert.match(changed.output, /OUTDATED_LOCKFILE|out.of.date|frozen.lockfile/i);
+      assertPolicyRejection(changed, /OUTDATED_LOCKFILE|out.of.date|frozen.lockfile/i);
     });
   });
 
   test(`${label}: an unreviewed dependency install script cannot execute`, {timeout: 25000}, async () => {
     await fixture({policy, versions: [{version: '1.0.0', time: OLD, script: true}], wanted: '1.0.0'}, async ({run, marker}) => {
       const result = await run();
-      assert.notEqual(result.code, 0, result.output);
-      assert.match(result.output, /IGNORED_BUILDS|unreviewed|unapproved|not.*approv/i);
+      assertPolicyRejection(result, /IGNORED_BUILDS|unreviewed|unapproved|not.*approv/i);
       assert.equal(existsSync(marker), false, 'postinstall must not write its marker');
     });
   });
@@ -136,8 +226,7 @@ for (const [label, policy] of [['root', rootPolicy], ['test/ssr', fixturePolicy]
   test(`${label}: the strict one-day cooldown refuses a just-published package`, {timeout: 25000}, async () => {
     await fixture({policy, versions: [{version: '1.0.0', time: new Date().toISOString()}], wanted: '1.0.0'}, async ({run, project}) => {
       const result = await run();
-      assert.notEqual(result.code, 0, result.output);
-      assert.match(result.output, /release.age|published|cooldown|NO_MATCHING_VERSION/i);
+      assertPolicyRejection(result, /release.age|published|cooldown|NO_MATCHING_VERSION/i);
       // pnpm 12 may start downloading the tarball before the age check ends
       // (about 2 in 10 runs on 12.16.1 and 12.18.0), so assert the outcome
       // that matters: the package is never installed.
@@ -148,8 +237,7 @@ for (const [label, policy] of [['root', rootPolicy], ['test/ssr', fixturePolicy]
   test(`${label}: a registry dependency cannot introduce an external tarball dependency`, {timeout: 25000}, async () => {
     await fixture({policy, versions: [{version: '1.0.0', time: OLD, exotic: true}], wanted: '1.0.0'}, async ({run}) => {
       const result = await run();
-      assert.notEqual(result.code, 0, result.output);
-      assert.match(result.output, /EXOTIC|exotic|non.registry|untrusted/i);
+      assertPolicyRejection(result, /EXOTIC|exotic|non.registry|untrusted/i);
     });
   });
 
@@ -157,8 +245,7 @@ for (const [label, policy] of [['root', rootPolicy], ['test/ssr', fixturePolicy]
     const versions = [{version: '1.0.0', time: OLD, trusted: true}, {version: '1.0.1', time: LATER}];
     await fixture({policy, versions, wanted: '1.0.1'}, async ({run, project}) => {
       const result = await run();
-      assert.notEqual(result.code, 0, result.output);
-      assert.match(result.output, /TRUST_DOWNGRADE|trust downgrade/i);
+      assertPolicyRejection(result, /TRUST_DOWNGRADE|trust downgrade/i);
       assert.equal(existsSync(join(project, 'node_modules', name)), false, 'downgraded package must not be installed');
     });
   });
@@ -186,7 +273,6 @@ test('root: an exact exception admits only the listed version', {timeout: 50000}
   });
   await fixture({policy, versions, wanted: '1.0.2'}, async ({run}) => {
     const other = await run();
-    assert.notEqual(other.code, 0, other.output);
-    assert.match(other.output, /TRUST_DOWNGRADE|trust downgrade/i);
+    assertPolicyRejection(other, /TRUST_DOWNGRADE|trust downgrade/i);
   });
 });
